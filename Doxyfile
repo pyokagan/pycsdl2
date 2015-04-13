@@ -1,0 +1,12 @@
+# Project information
+PROJECT_NAME = "pycsdl2"
+PROJECT_NUMBER = 0.0.0
+PROJECT_BRIEF = "CPython binding for the Simple DirectMedia Layer"
+
+# Docs output directory
+OUTPUT_DIRECTORY = apidocs
+
+# Source files
+INPUT = src include
+INPUT_ENCODING = UTF-8
+INCLUDE_PATH = include
