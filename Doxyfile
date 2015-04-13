@@ -15,3 +15,6 @@ INCLUDE_PATH = include
 EXTRACT_ALL = NO
 WARNINGS = YES
 WARN_IF_UNDOCUMENTED = YES
+
+# Make doxygen less noisy
+QUIET = YES
