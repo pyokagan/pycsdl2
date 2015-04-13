@@ -25,6 +25,21 @@ def pkg_config(packages, cflags=False, libs=False):
     return subprocess.check_output(args, universal_newlines=True)
 
 
+def sdl2_config(cflags=False, libs=False):
+    """Runs sdl2-config and returns its output
+
+    :param cflags bool: Include compile flags
+    :param libs bool: Include link flags
+    :return: output of sdl2-config
+    """
+    args = ['sdl2-config']
+    if cflags:
+        args.append('--cflags')
+    if libs:
+        args.append('--libs')
+    return subprocess.check_output(args, universal_newlines=True)
+
+
 def get_csdl2_base_ext(platform):
     """Returns csdl2 Extension that is not linked to SDL2
 
