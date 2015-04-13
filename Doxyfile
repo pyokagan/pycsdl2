@@ -10,3 +10,8 @@ OUTPUT_DIRECTORY = apidocs
 INPUT = src include
 INPUT_ENCODING = UTF-8
 INCLUDE_PATH = include
+
+# Ensure that we are warned about undocumented members
+EXTRACT_ALL = NO
+WARNINGS = YES
+WARN_IF_UNDOCUMENTED = YES
