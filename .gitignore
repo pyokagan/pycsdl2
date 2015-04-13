@@ -2,3 +2,8 @@
 *.o
 *.so
 *.pyd
+
+# Outputs from distutils
+/MANIFEST
+/build/
+/dist/
