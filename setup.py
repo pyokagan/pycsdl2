@@ -1,9 +1,28 @@
 """setup file for pycsdl2"""
+import subprocess
 from os.path import join
 from glob import glob
 import distutils.util
 from distutils.core import setup
 from distutils.extension import Extension
+
+
+def pkg_config(packages, cflags=False, libs=False):
+    """Runs pkg-config and returns its output
+
+    :param packages: list of package names
+    :type packages: list of str
+    :param cflags bool: Include compile flags
+    :param libs bool: Include link flags
+    :return: output of pkg-config
+    """
+    args = ['pkg-config']
+    if cflags:
+        args.append('--cflags')
+    if libs:
+        args.append('--libs')
+    args.extend(packages)
+    return subprocess.check_output(args, universal_newlines=True)
 
 
 def get_csdl2_base_ext(platform):
