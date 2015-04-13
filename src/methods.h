@@ -20,38 +20,22 @@
  *        distribution.
  */
 /**
- * \file csdl2.c
- * \brief csdl2 extension source code.
+ * \file methods.h
+ * \brief csdl2 list of module methods.
  */
+#ifndef _PYCSDL2_METHODS_H_
+#define _PYCSDL2_METHODS_H_
 #include <Python.h>
 #include "../include/pycsdl2.h"
-#include "methods.h"
 
 /**
- * \brief csdl2 module definition.
+ * \brief csdl2 methods definitions.
  *
- * \sa PyInit_csdl2()
+ * \sa PyCSDL2_Module
  */
-static PyModuleDef PyCSDL2_Module = {
-    PyModuleDef_HEAD_INIT,
-    /* m_name */ "csdl2",
-    /* m_doc */ "Simple DirectMedia Layer",
-    /* m_size */ -1,
-    /* m_methods */ PyCSDL2_Methods,
-    /* m_reload */ NULL,
-    /* m_traverse */ NULL,
-    /* m_clear */ NULL,
-    /* m_free */ NULL
+static PyMethodDef PyCSDL2_Methods[] = {
+    /* End */
+    {0}
 };
 
-/**
- * \brief csdl2 module init entry point.
- */
-PyMODINIT_FUNC
-PyInit_csdl2(void)
-{
-    PyObject *m = PyModule_Create(&PyCSDL2_Module);
-
-    if (!m) { return NULL; }
-    return m;
-}
+#endif /* _PYCSDL2_METHODS_H_ */
