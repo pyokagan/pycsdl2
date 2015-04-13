@@ -7,3 +7,6 @@
 /MANIFEST
 /build/
 /dist/
+
+# Outputs from doxygen
+/apidocs/
