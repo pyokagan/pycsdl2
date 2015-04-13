@@ -1,4 +1,5 @@
 """setup file for pycsdl2"""
+import os
 import shlex
 import subprocess
 from os.path import join
@@ -146,13 +147,45 @@ def get_csdl2_base_ext(platform):
     return ext, headers
 
 
+def get_csdl2_system_ext(platform):
+    """Returns csdl2 Extension dynamically-linked to system SDL2.
+
+    Requires either pkg-config or sdl2-config to be present in $PATH.
+
+    :param platform str: Platform string
+    :return: 2-tuple ``(Extension, headers)``
+    """
+    PYCSDL2_LIB = os.getenv('PYCSDL2_LIB', 'system')
+    ext, headers = get_csdl2_base_ext(platform)
+    if PYCSDL2_LIB == 'system':
+        try:
+            cflags = sdl2_config(cflags=True)
+            ldflags = sdl2_config(libs=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            cflags = pkg_config(['sdl2'], cflags=True)
+            ldflags = pkg_config(['sdl2'], libs=True)
+    elif PYCSDL2_LIB == 'sdl2-config':
+        cflags = sdl2_config(cflags=True)
+        ldflags = sdl2_config(libs=True)
+    elif PYCSDL2_LIB == 'pkg-config':
+        cflags = pkg_config(['sdl2'], cflags=True)
+        ldflags = pkg_config(['sdl2'], libs=True)
+    else:
+        raise ValueError('Unknown PYCSDL2_LIB value {0!r}'.format(PYCSDL2_LIB))
+    cflags = parse_cflags(cflags)
+    ldflags = parse_libs(ldflags)
+    update_ext(ext, **cflags)
+    update_ext(ext, **ldflags)
+    return ext, headers
+
+
 def get_csdl2_ext(platform):
     """Returns csdl2 Extension appropriate for `platform`.
 
     :param platform str: Platform string
     :return: 2-tuple ``(Extension, headers)``
     """
-    return get_csdl2_base_ext(platform)
+    return get_csdl2_system_ext(platform)
 
 
 extension, headers = get_csdl2_ext(distutils.util.get_platform())
