@@ -3,3 +3,4 @@ include LICENSE
 graft include
 graft src
 include Doxyfile
+graft deps
