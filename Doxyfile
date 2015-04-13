@@ -1,6 +1,6 @@
 # Project information
 PROJECT_NAME = "pycsdl2"
-PROJECT_NUMBER = 0.0.0
+PROJECT_NUMBER = 2.0.0a1
 PROJECT_BRIEF = "CPython binding for the Simple DirectMedia Layer"
 
 # Docs output directory
