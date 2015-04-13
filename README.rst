@@ -51,4 +51,9 @@ The HTML documentation will be written to the ``apidocs/html`` directory.
 
 License
 =======
-`pycsdl2` source code is licensed under the `zlib` license.
+Unless otherwise stated, `pycsdl2` source code is licensed under the `zlib`
+license.
+
+`pycsdl2` source code contains an unmodified copy of the
+`Simple DirectMedia Layer` (SDL) version 2.0.0 source code. The source code is
+licensed under the `zlib` license.
