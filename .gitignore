@@ -1,0 +1,4 @@
+# Outputs from compiling the CPython extension
+*.o
+*.so
+*.pyd
