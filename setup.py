@@ -80,6 +80,21 @@ def parse_cflags(flags):
     return parse_flags(flags, flag_map, 'extra_compile_args')
 
 
+def parse_libs(flags):
+    """Parse link flags
+
+    :param flags str: str of flags and their arguments.
+    :return: dict
+    """
+    flag_map = {
+        '-L': ('library_dirs', lambda x: x),
+        '-l': ('libraries', lambda x: x),
+        '-Wl,-rpath,': ('runtime_library_dirs', lambda x: x),
+        '-R': ('runtime_library_dirs', lambda x: x)
+    }
+    return parse_flags(flags, flag_map, 'extra_link_args')
+
+
 def get_csdl2_base_ext(platform):
     """Returns csdl2 Extension that is not linked to SDL2
 
