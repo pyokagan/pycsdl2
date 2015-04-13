@@ -6,8 +6,8 @@ from distutils.core import setup
 from distutils.extension import Extension
 
 
-def get_csdl2_ext(platform):
-    """Returns csdl2 Extension appropriate for `platform`.
+def get_csdl2_base_ext(platform):
+    """Returns csdl2 Extension that is not linked to SDL2
 
     :param platform str: Platform string
     :return: 2-tuple ``(Extension, headers)``
@@ -16,6 +16,15 @@ def get_csdl2_ext(platform):
                     sources=[join('src', 'csdl2.c')])
     headers = glob(join('include', '*.h'))
     return ext, headers
+
+
+def get_csdl2_ext(platform):
+    """Returns csdl2 Extension appropriate for `platform`.
+
+    :param platform str: Platform string
+    :return: 2-tuple ``(Extension, headers)``
+    """
+    return get_csdl2_base_ext(platform)
 
 
 extension, headers = get_csdl2_ext(distutils.util.get_platform())
