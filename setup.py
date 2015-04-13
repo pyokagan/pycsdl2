@@ -95,6 +95,45 @@ def parse_libs(flags):
     return parse_flags(flags, flag_map, 'extra_link_args')
 
 
+def update_ext(ext, sources=None, include_dirs=None, define_macros=None,
+               undef_macros=None, library_dirs=None, libraries=None,
+               runtime_library_dirs=None, extra_objects=None,
+               extra_compile_args=None, extra_link_args=None,
+               export_symbols=None, swig_opts=None, depends=None,
+               language=None, optional=None):
+    """Updates Extension `ext`"""
+    if sources:
+        ext.sources.extend(sources)
+    if include_dirs:
+        ext.include_dirs.extend(include_dirs)
+    if define_macros:
+        ext.define_macros.extend(define_macros)
+    if undef_macros:
+        ext.undef_macros.extend(undef_macros)
+    if library_dirs:
+        ext.library_dirs.extend(library_dirs)
+    if libraries:
+        ext.libraries.extend(libraries)
+    if runtime_library_dirs:
+        ext.runtime_library_dirs.extend(runtime_library_dirs)
+    if extra_objects:
+        ext.extra_objects.extend(extra_objects)
+    if extra_compile_args:
+        ext.extra_compile_args.extend(extra_compile_args)
+    if extra_link_args:
+        ext.extra_link_args.extend(extra_link_args)
+    if export_symbols:
+        ext.export_symbols.extend(export_symbols)
+    if swig_opts:
+        ext.swig_opts.extend(swig_opts)
+    if depends:
+        ext.depends.extend(depends)
+    if language is not None:
+        ext.language = language
+    if optional is not None:
+        ext.optional = optional
+
+
 def get_csdl2_base_ext(platform):
     """Returns csdl2 Extension that is not linked to SDL2
 
