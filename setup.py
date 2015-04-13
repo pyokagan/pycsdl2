@@ -1,4 +1,5 @@
 """setup file for pycsdl2"""
+import shlex
 import subprocess
 from os.path import join
 from glob import glob
@@ -38,6 +39,30 @@ def sdl2_config(cflags=False, libs=False):
     if libs:
         args.append('--libs')
     return subprocess.check_output(args, universal_newlines=True)
+
+
+def parse_flags(flags, flag_map, extra_flags_key):
+    """Parses flags from str `flags`.
+
+    :param flags str: str of flags and their arguments
+    :param flag_map dict: Map flags (as str) to a 2-tuple, the first is the
+                          output dict key and the second is a callable
+                          that takes a single argument, which is the entire
+                          argument excluding the flag, and return the value to
+                          append to the list.
+    :param extra_flags_key str: Output dict key to use if flag is not present
+                                in `flag_map`.
+    :return: dict
+    """
+    out = {}
+    for arg in shlex.split(flags):
+        for flag, (k, f) in flag_map.items():
+            if arg.startswith(flag):
+                out.setdefault(k, []).append(f(arg[len(flag):]))
+                break
+        else:
+            out.setdefault(extra_flags_key, []).append(arg)
+    return out
 
 
 def get_csdl2_base_ext(platform):
