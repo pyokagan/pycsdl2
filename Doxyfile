@@ -1,0 +1,41 @@
+# Project information
+PROJECT_NAME = "pycsdl2"
+PROJECT_NUMBER = 0.0.0
+PROJECT_BRIEF = "CPython binding for the Simple DirectMedia Layer"
+
+# Docs output directory
+OUTPUT_DIRECTORY = apidocs
+
+# Source files
+INPUT = src include
+INPUT_ENCODING = UTF-8
+INCLUDE_PATH = include
+
+# Ensure that we are warned about undocumented members
+EXTRACT_ALL = NO
+WARNINGS = YES
+WARN_IF_UNDOCUMENTED = YES
+
+# Make doxygen less noisy
+QUIET = YES
+
+# Extract private definitions
+EXTRACT_PRIVATE = YES
+EXTRACT_PACKAGE = YES
+EXTRACT_STATIC = YES
+EXTRACT_LOCAL_CLASSES = YES
+EXTRACT_LOCAL_METHODS = YES
+EXTRACT_ANON_NSPACES = YES
+
+# However, allow us to explicitly use \internal to hide private definitions
+INTERNAL_DOCS = NO
+
+# Allow users to easily refer to the source code by:
+# enabling the source browser
+SOURCE_BROWSER = YES
+# and include the body of functions, classes and enums directly in the
+# documentation
+INLINE_SOURCES = YES
+# Since the documentation is already available, hide the documentation comment
+# blocks from the generated source code fragments
+STRIP_CODE_COMMENTS = YES

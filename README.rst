@@ -38,6 +38,17 @@ If the build is successful, pycsdl2 can be installed with::
 
     python3 setup.py install
 
+Understanding the source code
+=============================
+The source code is documented with `Doxygen`_. If you have a working
+installation, simply run the following in the root of the source directory::
+
+    doxygen
+
+The HTML documentation will be written to the ``apidocs/html`` directory.
+
+.. _`Doxygen`: http://www.stack.nl/~dimitri/doxygen/
+
 License
 =======
 `pycsdl2` source code is licensed under the `zlib` license.
