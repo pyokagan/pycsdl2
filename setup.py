@@ -65,6 +65,21 @@ def parse_flags(flags, flag_map, extra_flags_key):
     return out
 
 
+def parse_cflags(flags):
+    """Parse compile flags
+
+    :param flags str: str of flags and their arguments.
+    :return: dict
+    """
+    flag_map = {
+        '-I': ('include_dirs', lambda x: x),
+        '-D': ('define_macros',
+               lambda x: (x.partition('=')[0], x.partition('=')[2] or None)),
+        '-U': ('undef_macros', lambda x: x)
+    }
+    return parse_flags(flags, flag_map, 'extra_compile_args')
+
+
 def get_csdl2_base_ext(platform):
     """Returns csdl2 Extension that is not linked to SDL2
 
