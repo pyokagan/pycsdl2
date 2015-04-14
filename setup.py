@@ -1,5 +1,6 @@
 """setup file for pycsdl2"""
 import os
+import re
 import shlex
 import subprocess
 from os.path import join
@@ -135,6 +136,15 @@ def update_ext(ext, sources=None, include_dirs=None, define_macros=None,
         ext.optional = optional
 
 
+def cstringify(x):
+    """Converts str `x` into a C string literal
+
+    :param x str: input string
+    :return: C string literal
+    """
+    return '"{0}"'.format(re.sub(r'[\\"]', r'\\\0', x))
+
+
 def get_csdl2_base_ext(platform):
     """Returns csdl2 Extension that is not linked to SDL2
 
@@ -176,6 +186,63 @@ def get_csdl2_system_ext(platform):
     ldflags = parse_libs(ldflags)
     update_ext(ext, **cflags)
     update_ext(ext, **ldflags)
+    # Define PYCSDL2_INCLUDE_DIRS
+    include_dirs = [cstringify(x) for x in cflags.get('include_dirs', [])]
+    include_dirs = ','.join(include_dirs)
+    if include_dirs:
+        ext.define_macros.append(('PYCSDL2_INCLUDE_DIRS',
+                                  include_dirs + ','))
+    # Define PYCSDL2_DEFINE_MACROS
+    define_macros = []
+    for k, v in cflags.get('define_macros', []):
+        define_macros.append(cstringify(k))
+        if v is None:
+            define_macros.append('NULL')
+        else:
+            define_macros.append(cstringify(v))
+    define_macros = ','.join(define_macros)
+    if define_macros:
+        ext.define_macros.append(('PYCSDL2_DEFINE_MACROS',
+                                  define_macros + ','))
+    # Define PYCSDL2_UNDEF_MACROS
+    undef_macros = [cstringify(x) for x in cflags.get('undef_macros', [])]
+    undef_macros = ','.join(undef_macros)
+    if undef_macros:
+        ext.define_macros.append(('PYCSDL2_UNDEF_MACROS',
+                                  undef_macros + ','))
+    # Define PYCSDL2_EXTRA_COMPILE_ARGS
+    extra_compile_args = [cstringify(x) for x in
+                          cflags.get('extra_compile_args', [])]
+    extra_compile_args = ','.join(extra_compile_args)
+    if extra_compile_args:
+        ext.define_macros.append(('PYCSDL2_EXTRA_COMPILE_ARGS',
+                                  extra_compile_args + ','))
+    # Define PYCSDL2_LIBRARY_DIRS
+    library_dirs = [cstringify(x) for x in ldflags.get('library_dirs', [])]
+    library_dirs = ','.join(library_dirs)
+    if library_dirs:
+        ext.define_macros.append(('PYCSDL2_LIBRARY_DIRS',
+                                  library_dirs + ','))
+    # Define PYCSDL2_LIBRARIES
+    libraries = [cstringify(x) for x in ldflags.get('libraries', [])]
+    libraries = ','.join(libraries)
+    if libraries:
+        ext.define_macros.append(('PYCSDL2_LIBRARIES',
+                                  libraries + ','))
+    # Define PYCSDL2_RUNTIME_LIBRARY_DIRS
+    runtime_library_dirs = [stringify(x) for x in
+                            ldflags.get('runtime_library_dirs', [])]
+    runtime_library_dirs = ','.join(runtime_library_dirs)
+    if runtime_library_dirs:
+        ext.define_macros.append(('PYCSDL2_RUNTIME_LIBRARY_DIRS',
+                                  runtime_library_dirs + ','))
+    # Define PYCSDL2_EXTRA_LINK_ARGS
+    extra_link_args = [stringify(x) for x in
+                       ldflags.get('extra_link_args', [])]
+    extra_link_args = ','.join(extra_link_args)
+    if extra_link_args:
+        ext.define_macros.append(('PYCSDL2_EXTRA_LINK_ARGS',
+                                  extra_link_args + ','))
     return ext, headers
 
 
