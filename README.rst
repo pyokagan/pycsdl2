@@ -9,6 +9,27 @@ such as automatic memory management, bounds checking and exceptions.
 
 .. _Pythonic: https://www.python.org/dev/peps/pep-0020/
 
+Documentation
+=============
+The Python API is documented with `Sphinx`_ in the ``docs/`` directory. If you
+have `GNU Make`_ and Sphinx installed, run the following in the ``docs/``
+directory to generate the HTML documentation in ``docs/build/html/``::
+
+    make html
+
+On Windows, ``make.bat`` can be used instead of GNU Make. Run the following in
+the ``docs/`` directory to generate the HTML documentation in
+``docs/build/html/``::
+
+    .\make.bat html
+
+The documentation can be generated in other formats as well. See the output of
+``make help`` or ``.\make.bat help`` for more details.
+
+.. _Sphinx: http://sphinx-doc.org/
+
+.. _`GNU Make`: https://www.gnu.org/software/make/
+
 Building
 ========
 Building the source code requires the CPython header files to be installed.

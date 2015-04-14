@@ -4,3 +4,6 @@ graft include
 graft src
 include Doxyfile
 graft deps
+graft docs/source
+include docs/Makefile
+include docs/make.bat
