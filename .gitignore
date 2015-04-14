@@ -10,3 +10,7 @@
 
 # Outputs from doxygen
 /apidocs/
+
+# CPython bytecode files
+*.py[co]
+__pycache__/
