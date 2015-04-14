@@ -1,7 +1,10 @@
 """test methods in src/distutils.h"""
 import distutils.util
 import os.path
+import subprocess
 import sys
+import tempfile
+import textwrap
 import unittest
 
 
@@ -77,6 +80,102 @@ class TestGetSystemSDL(unittest.TestCase):
         self.assertIs(type(ret['extra_link_args']), list)
         for x in ret['extra_link_args']:
             self.assertIs(type(x), str)
+
+
+class TestLinkSystemSDL(unittest.TestCase):
+    """Test building and importing an extension that links against system SDL
+
+    This ensures that the return value of PyCSDL2_GetSystemSDL() is correct.
+    """
+
+    src = textwrap.dedent('''
+    #include <Python.h>
+    #include <SDL.h>
+
+    static void log_output_func(void *userdata, int category,
+                                SDL_LogPriority priority, const char *message)
+    {
+        printf("%s", message);
+    }
+
+    static PyModuleDef PyCSDL2Test_Module = {
+        PyModuleDef_HEAD_INIT,
+        /* m_name */ "_csdl2test",
+        /* m_doc */  "",
+        /* m_size */ -1,
+        /* m_methods */ NULL,
+        /* m_reload */ NULL,
+        /* m_traverse */ NULL,
+        /* m_clear */ NULL,
+        /* m_free */ NULL
+    };
+
+    PyMODINIT_FUNC
+    PyInit__csdl2test(void)
+    {
+        PyObject *m = PyModule_Create(&PyCSDL2Test_Module);
+        if (m == NULL) { return NULL; }
+        SDL_LogSetOutputFunction(log_output_func, NULL);
+        SDL_Log("OK");
+        return m;
+    }
+    ''')
+
+    setup_src = textwrap.dedent('''
+    from distutils.core import setup
+    from distutils.extension import Extension
+
+    ext = Extension('_csdl2test', [{src_path!r}],
+                    include_dirs={include_dirs!r},
+                    define_macros={define_macros!r},
+                    undef_macros={undef_macros!r},
+                    extra_compile_args={extra_compile_args!r},
+                    library_dirs={library_dirs!r},
+                    libraries={libraries!r},
+                    runtime_library_dirs={runtime_library_dirs!r},
+                    extra_link_args={extra_link_args!r})
+    setup(name='_csdl2test', ext_modules=[ext])
+    ''')
+
+    test_src = textwrap.dedent('''
+    import sys
+    sys.path.insert(0, {tempdir!r})
+    import _csdl2test
+    ''')
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+
+    def tearDown(self):
+        self.dir.cleanup()
+
+    def test_extension(self):
+        """Info returned by PyCSDL2_GetSystemSDL() is valid.
+
+        It should be possible to use the information to compile and import an
+        extension that links against the system's SDL library.
+        """
+        src_path = os.path.join(self.dir.name, '_csdl2test.c')
+        cfg = PyCSDL2_GetSystemSDL()
+        if not cfg:
+            raise unittest.SkipTest('csdl2 not dynamically linked')
+        setup_src = self.setup_src.format(src_path=src_path, **cfg)
+        setup_path = os.path.join(self.dir.name, 'setup.py')
+        with open(src_path, 'w') as f:
+            f.write(self.src)
+        with open(setup_path, 'w') as f:
+            f.write(setup_src)
+        # Build the extension
+        subprocess.check_call([sys.executable, setup_path, 'build_ext',
+                               '--inplace'], cwd=self.dir.name,
+                               stdout=subprocess.DEVNULL)
+        test_src = self.test_src.format(tempdir=self.dir.name)
+        test_src_path = os.path.join(self.dir.name, 'test.py')
+        with open(test_src_path, 'w') as f:
+            f.write(test_src)
+        out = subprocess.check_output([sys.executable, test_src_path],
+                                      universal_newlines=True)
+        self.assertEqual(out, 'OK')
 
 
 if __name__ == '__main__':
