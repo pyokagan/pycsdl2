@@ -75,4 +75,71 @@ PyCSDL2_GetSystemSDLIncludeDirs(void)
     return list;
 }
 
+#ifndef PYCSDL2_DEFINE_MACROS
+/**
+ * \brief \c define_macros used to compile pycsdl2 to link with the system SDL2
+ *        library.
+ *
+ * A comma-separated list of C string literals that must end with a comma.
+ * Each 2 elements of the list are implicitly paired to form a python
+ * 2-tuple. The first element is the macro name as a C string literal, and the
+ * second element is an optional macro value as a C string literal. If the
+ * macro has no value, use the \c NULL pointer constant instead of a C string
+ * literal. This corresponds to the
+ * \c distutils.extension.Extension.define_macros attribute. If the list has no
+ * elements, leave this macro empty or do not define this macro.
+ */
+#define PYCSDL2_DEFINE_MACROS
+#endif /* PYCSDL2_DEFINE_MACROS */
+
+/**
+ * \brief Return PyListObject of PYCSDL2_DEFINE_MACROS.
+ *
+ * \return PyListObject of PYCSDL2_DEFINE_MACROS if defined, else an empty
+ *         PyListObject. Returns NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_GetSystemSDLDefineMacros(void)
+{
+    static const char *define_macros[] = {PYCSDL2_DEFINE_MACROS NULL, NULL,
+                                          NULL};
+    PyObject *list;
+    Py_ssize_t i, len;
+
+    /* Calculate len of define_macros */
+    for (len = 0; define_macros[len] != NULL; len += 2) {}
+    /* Create output list */
+    if (!(list = PyList_New(len / 2)))
+        return NULL;
+    /* Set items on list */
+    for (i = 0; define_macros[i] != NULL; i += 2) {
+        PyObject *tuple, *key, *value;
+
+        tuple = PyTuple_New(2);
+        if (tuple == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, i / 2, tuple);
+        key = PyUnicode_FromString(define_macros[i]);
+        if (key == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyTuple_SET_ITEM(tuple, 0, key);
+        if (define_macros[i+1] == NULL) {
+            Py_INCREF(Py_None);
+            value = Py_None;
+        } else {
+            value = PyUnicode_FromString(define_macros[i+1]);
+            if (value == NULL) {
+                Py_DECREF(list);
+                return NULL;
+            }
+        }
+        PyTuple_SET_ITEM(tuple, 1, value);
+    }
+    return list;
+}
+
 #endif /* _PYCSDL2_DISTUTILS_H_ */
