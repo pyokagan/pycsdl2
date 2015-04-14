@@ -1,4 +1,4 @@
-"""entry point to run all tests"""
+"""test methods in src/distutils.h"""
 import distutils.util
 import os.path
 import sys
@@ -10,5 +10,10 @@ if __name__ == '__main__':
                                           sys.version[0:3])
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, os.path.join(tests_dir, '..', 'build', plat_specifier))
-    from .test_distutils import *
+
+
+from csdl2 import *
+
+
+if __name__ == '__main__':
     unittest.main()
