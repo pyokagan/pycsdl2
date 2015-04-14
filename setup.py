@@ -192,6 +192,18 @@ def get_csdl2_system_ext(platform):
     if include_dirs:
         ext.define_macros.append(('PYCSDL2_INCLUDE_DIRS',
                                   include_dirs + ','))
+    # Define PYCSDL2_DEFINE_MACROS
+    define_macros = []
+    for k, v in cflags.get('define_macros', []):
+        define_macros.append(cstringify(k))
+        if v is None:
+            define_macros.append('NULL')
+        else:
+            define_macros.append(cstringify(v))
+    define_macros = ','.join(define_macros)
+    if define_macros:
+        ext.define_macros.append(('PYCSDL2_DEFINE_MACROS',
+                                  define_macros + ','))
     return ext, headers
 
 
