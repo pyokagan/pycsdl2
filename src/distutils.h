@@ -411,4 +411,116 @@ PyCSDL2_GetSystemSDLExtraLinkArgs(void)
     return list;
 }
 
+/**
+ * \brief Python method to return distutils extension configuration options for
+ *        linking against the system SDL2 library.
+ *
+ * \return PyDictObject with keys \c include_dirs , \c define_macros ,
+ *         \c undef_macros , \c extra_compile_args , \c library_dirs ,
+ *         \c libraries , \c runtime_library_dirs and \c extra_link_args
+ *         corresponding to the values of PYCSDL2_INCLUDE_DIRS,
+ *         PYCSDL2_DEFINE_MACROS, PYCSDL2_UNDEF_MACROS,
+ *         PYCSDL2_EXTRA_COMPILE_ARGS, PYCSDL2_LIBRARY_DIRS, PYCSDL2_LIBRARIES,
+ *         PYCSDL2_RUNTIME_LIBRARY_DIRS and PYCSDL2_EXTRA_LINK_ARGS. If the
+ *         aforementioned values are all empty, it is assumed that csdl2 was
+ *         statically linked and Py_None is returned. Returns NULL if an
+ *         exception occurred.
+ */
+static PyObject *
+PyCSDL2_GetSystemSDL(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    PyObject *dict, *include_dirs, *define_macros, *undef_macros;
+    PyObject *extra_compile_args, *library_dirs, *libraries;
+    PyObject *runtime_library_dirs, *extra_link_args;
+    Py_ssize_t pos = 0;
+    PyObject *key, *value;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    if (!(dict = PyDict_New()))
+        return NULL;
+
+    if (!(include_dirs = PyCSDL2_GetSystemSDLIncludeDirs()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "include_dirs", include_dirs)) {
+        Py_DECREF(include_dirs);
+        goto fail;
+    }
+    Py_DECREF(include_dirs);
+
+    if (!(define_macros = PyCSDL2_GetSystemSDLDefineMacros()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "define_macros", define_macros)) {
+        Py_DECREF(define_macros);
+        goto fail;
+    }
+    Py_DECREF(define_macros);
+
+    if (!(undef_macros = PyCSDL2_GetSystemSDLUndefMacros()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "undef_macros", undef_macros)) {
+        Py_DECREF(undef_macros);
+        goto fail;
+    }
+    Py_DECREF(undef_macros);
+
+    if (!(extra_compile_args = PyCSDL2_GetSystemSDLExtraCompileArgs()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "extra_compile_args", extra_compile_args)) {
+        Py_DECREF(extra_compile_args);
+        goto fail;
+    }
+    Py_DECREF(extra_compile_args);
+
+    if (!(library_dirs = PyCSDL2_GetSystemSDLLibraryDirs()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "library_dirs", library_dirs)) {
+        Py_DECREF(library_dirs);
+        goto fail;
+    }
+    Py_DECREF(library_dirs);
+
+    if (!(libraries = PyCSDL2_GetSystemSDLLibraries()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "libraries", libraries)) {
+        Py_DECREF(libraries);
+        goto fail;
+    }
+    Py_DECREF(libraries);
+
+    if (!(runtime_library_dirs = PyCSDL2_GetSystemSDLRuntimeLibraryDirs()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "runtime_library_dirs",
+                             runtime_library_dirs)) {
+        Py_DECREF(runtime_library_dirs);
+        goto fail;
+    }
+    Py_DECREF(runtime_library_dirs);
+
+    if (!(extra_link_args = PyCSDL2_GetSystemSDLExtraLinkArgs()))
+        goto fail;
+    if (PyDict_SetItemString(dict, "extra_link_args", extra_link_args)) {
+        Py_DECREF(extra_link_args);
+        goto fail;
+    }
+    Py_DECREF(extra_link_args);
+
+    /* Since at the minimum -lSDL2 is required, if all the lists are empty,
+     * this should mean that csdl2 was statically linked to the library. */
+
+    while (PyDict_Next(dict, &pos, &key, &value))
+        if (PyList_GET_SIZE(value))
+            return dict;
+
+    /* All lists are empty, return None */
+    Py_DECREF(dict);
+    Py_RETURN_NONE;
+
+fail:
+    Py_DECREF(dict);
+    return NULL;
+}
+
 #endif /* _PYCSDL2_DISTUTILS_H_ */
