@@ -155,9 +155,9 @@ def get_csdl2_system_ext(platform):
     :param platform str: Platform string
     :return: 2-tuple ``(Extension, headers)``
     """
-    PYCSDL2_LIB = os.getenv('PYCSDL2_LIB', 'system')
+    PYCSDL2_LIB = os.getenv('PYCSDL2_LIB', 'auto')
     ext, headers = get_csdl2_base_ext(platform)
-    if PYCSDL2_LIB == 'system':
+    if PYCSDL2_LIB in ('auto', 'system'):
         try:
             cflags = sdl2_config(cflags=True)
             ldflags = sdl2_config(libs=True)
@@ -290,10 +290,18 @@ def get_csdl2_ext(platform):
     :param platform str: Platform string
     :return: 2-tuple ``(Extension, headers)``
     """
-    try:
-        return get_csdl2_bundled_ext(platform)
-    except NotImplementedError:
+    PYCSDL2_LIB = os.getenv('PYCSDL2_LIB', 'auto')
+    if PYCSDL2_LIB == 'auto':
+        try:
+            return get_csdl2_bundled_ext(platform)
+        except NotImplementedError:
+            return get_csdl2_system_ext(platform)
+    elif PYCSDL2_LIB == 'bundled':
         return get_csdl2_system_ext(platform)
+    elif PYCSDL2_LIB in ('system', 'pkg-config', 'sdl2-config'):
+        return get_csdl2_system_ext(platform)
+    else:
+        raise ValueError('Unknown PYCSDL2_LIB value {0!r}'.format(PYCSDL2_LIB))
 
 
 extension, headers = get_csdl2_ext(distutils.util.get_platform())
