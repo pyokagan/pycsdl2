@@ -210,6 +210,13 @@ def get_csdl2_system_ext(platform):
     if undef_macros:
         ext.define_macros.append(('PYCSDL2_UNDEF_MACROS',
                                   undef_macros + ','))
+    # Define PYCSDL2_EXTRA_COMPILE_ARGS
+    extra_compile_args = [cstringify(x) for x in
+                          cflags.get('extra_compile_args', [])]
+    extra_compile_args = ','.join(extra_compile_args)
+    if extra_compile_args:
+        ext.define_macros.append(('PYCSDL2_EXTRA_COMPILE_ARGS',
+                                  extra_compile_args + ','))
     return ext, headers
 
 
