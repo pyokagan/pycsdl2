@@ -18,16 +18,28 @@ This may require the installation of a development package such as
 
 .. _`official Python distributions`: https://www.python.org/downloads/
 
-On Windows, the `Windows 7 SDK`_ must be installed.
+On Windows, the `Windows 7 SDK`_ and the `Standalone DirectX SDK`_ must be
+installed.
 
 .. _`Windows 7 SDK`:
    http://www.microsoft.com/en-sg/download/details.aspx?id=8279
+
+.. _`Standalone DirectX SDK`:
+   http://www.microsoft.com/en-sg/download/details.aspx?id=6812
 
 On Mac OS X, `XCode`_ must be installed.
 
 .. _`XCode`: https://guide.macports.org/chunked/installing.xcode.html
 
-On other platforms such as Linux, the system must have a C compiler installed.
+pycsdl2 will be statically linked with the bundled SDL2 source code on the
+above platforms.
+
+On other platforms such as Linux, the system must have a C compiler installed
+and the SDL2 library and header files installed. This may require the
+installation of a development package such as ``libsdl2-dev`` on Debian.
+Furthermore, a working installation of ``sdl2-config`` or ``pkg-config`` must
+be present in the executable search paths. pycsdl2 will be dynamically linked
+to the SDL2 library on these platforms.
 
 Once your system satisfies the above requirements, run the following in the
 root of the source directory::
