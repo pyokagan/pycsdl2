@@ -1,5 +1,6 @@
 """setup file for pycsdl2"""
 import os
+import re
 import shlex
 import subprocess
 from os.path import join
@@ -133,6 +134,15 @@ def update_ext(ext, sources=None, include_dirs=None, define_macros=None,
         ext.language = language
     if optional is not None:
         ext.optional = optional
+
+
+def cstringify(x):
+    """Converts str `x` into a C string literal
+
+    :param x str: input string
+    :return: C string literal
+    """
+    return '"{0}"'.format(re.sub(r'[\\"]', r'\\\0', x))
 
 
 def get_csdl2_base_ext(platform):
