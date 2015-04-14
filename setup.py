@@ -186,6 +186,12 @@ def get_csdl2_system_ext(platform):
     ldflags = parse_libs(ldflags)
     update_ext(ext, **cflags)
     update_ext(ext, **ldflags)
+    # Define PYCSDL2_INCLUDE_DIRS
+    include_dirs = [cstringify(x) for x in cflags.get('include_dirs', [])]
+    include_dirs = ','.join(include_dirs)
+    if include_dirs:
+        ext.define_macros.append(('PYCSDL2_INCLUDE_DIRS',
+                                  include_dirs + ','))
     return ext, headers
 
 
