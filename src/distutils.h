@@ -185,4 +185,50 @@ PyCSDL2_GetSystemSDLUndefMacros(void)
     return list;
 }
 
+#ifndef PYCSDL2_EXTRA_COMPILE_ARGS
+/**
+ * \def PYCSDL2_EXTRA_COMPILE_ARGS
+ * \brief \c extra_compile_args used to compile pycsdl2 to link with the system
+ *        SDL2 library.
+ *
+ * A comma-separated list of C string literals that must end with a comma. Each
+ * C string literal is an extra argument to provide when compiling source files
+ * that will link with the system SDL2 library. This corresponds to the
+ * \c distutils.extension.Extension.extra_compile_args attribute. If the list
+ * has no elements, do not define this macro.
+ */
+#define PYCSDL2_EXTRA_COMPILE_ARGS
+#endif /* PYCSDL2_EXTRA_COMPILE_ARGS */
+
+/**
+ * \brief Returns PyListObject of PYCSDL2_EXTRA_COMPILE_ARGS.
+ *
+ * \return PyListObject of PYCSDL2_EXTRA_COMPILE_ARGS if defined, else returns
+ *         an empty PyListObject. Returns NULL if an exception occured.
+ */
+static PyObject *
+PyCSDL2_GetSystemSDLExtraCompileArgs(void)
+{
+    static const char *extra_compile_args[] = {PYCSDL2_EXTRA_COMPILE_ARGS
+                                               NULL};
+    PyObject *list;
+    Py_ssize_t len, i;
+
+    /* Calculate len of extra_compile_args */
+    for (len = 0; extra_compile_args[len] != NULL; ++len) {}
+    /* Create output list */
+    if (!(list = PyList_New(len)))
+        return NULL;
+    /* Set items on list */
+    for (i = 0; extra_compile_args[i] != NULL; ++i) {
+        PyObject *str = PyUnicode_FromString(extra_compile_args[i]);
+        if (str == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, i, str);
+    }
+    return list;
+}
+
 #endif /* _PYCSDL2_DISTUTILS_H_ */
