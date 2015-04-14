@@ -179,13 +179,121 @@ def get_csdl2_system_ext(platform):
     return ext, headers
 
 
+def get_csdl2_bundled_ext(platform):
+    """Returns csdl2 Extension static-linked to bundled SDL2 source code.
+
+    :param platform str: Platform string
+    :return: 2-tuple ``(Extension, headers)``
+    """
+    ext, headers = get_csdl2_base_ext(platform)
+    ext.sources += glob(join('deps', 'SDL', 'src', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'core', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'atomic', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'audio', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'cpuinfo', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'dynapi', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'events', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'file', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'libm', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'stdlib', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'thread', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'timer', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'video', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'video', 'dummy', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'dummy', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'disk', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'joystick', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'haptic', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'power', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'render', '*.c'))
+    ext.sources += glob(join('deps', 'SDL', 'src', 'render', '*', '*.c'))
+    ext.include_dirs.append(join('deps', 'SDL', 'include'))
+    headers.extend(glob(join('deps', 'SDL', 'include', '*.h')))
+    if platform in ('win-amd64', 'win32'):
+        if 'DXSDK_DIR' not in os.environ:
+            raise RuntimeError('DXSDK_DIR environment variable not defined. '
+                               'Install the standalone DirectX SDK')
+        ext.include_dirs.append(join(os.environ['DXSDK_DIR'], 'Include'))
+        if platform == 'win32':
+            ext.library_dirs.append(join(os.environ['DXSDK_DIR'], 'Lib',
+                                         'x86'))
+        elif platform == 'win-amd64':
+            ext.library_dirs.append(join(os.environ['DXSDK_DIR'], 'Lib',
+                                         'x64'))
+        else:
+            raise NotImplementedError('Unsupported platform '
+                                      '{0}'.format(platform))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'core', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'video', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'winmm',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'directsound',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'xaudio2',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'joystick', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'haptic', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'power', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'filesystem', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'timer', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'loadso', 'windows',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'thread', 'windows',
+                                 '*.c'))
+        ext.sources.append(join('deps', 'SDL', 'src', 'thread', 'generic',
+                                'SDL_syscond.c'))
+        ext.libraries += ['user32', 'gdi32', 'winmm', 'imm32', 'ole32',
+                          'oleaut32', 'shell32', 'version', 'uuid', 'd3d9',
+                          'd3dx9', 'kernel32']
+    elif platform.startswith('macosx-'):
+        ext.define_macros += [('_THREAD_SAFE', None)]
+        ext.sources += glob(join('deps', 'SDL', 'src', 'file', 'cocoa', '*.m'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'audio', 'coreaudio',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'joystick', 'darwin',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'haptic', 'darwin',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'power', 'macosx',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'timer', 'unix',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'filesystem', 'cocoa',
+                                 '*.m'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'video', 'cocoa',
+                                 '*.m'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'thread', 'pthread',
+                                 '*.c'))
+        ext.sources += glob(join('deps', 'SDL', 'src', 'loadso', 'dlopen',
+                                 '*.c'))
+        ext.extra_link_args += ['-framework', 'Cocoa',
+                                '-framework', 'ForceFeedback',
+                                '-framework', 'Carbon',
+                                '-framework', 'CoreAudio',
+                                '-framework', 'AudioUnit',
+                                '-framework', 'OpenGL']
+    else:
+        raise NotImplementedError('Unsupported platform {0}'.format(platform))
+    return ext, headers
+
+
 def get_csdl2_ext(platform):
     """Returns csdl2 Extension appropriate for `platform`.
 
     :param platform str: Platform string
     :return: 2-tuple ``(Extension, headers)``
     """
-    return get_csdl2_system_ext(platform)
+    try:
+        return get_csdl2_bundled_ext(platform)
+    except NotImplementedError:
+        return get_csdl2_system_ext(platform)
 
 
 extension, headers = get_csdl2_ext(distutils.util.get_platform())
