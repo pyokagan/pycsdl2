@@ -229,6 +229,13 @@ def get_csdl2_system_ext(platform):
     if libraries:
         ext.define_macros.append(('PYCSDL2_LIBRARIES',
                                   libraries + ','))
+    # Define PYCSDL2_RUNTIME_LIBRARY_DIRS
+    runtime_library_dirs = [stringify(x) for x in
+                            ldflags.get('runtime_library_dirs', [])]
+    runtime_library_dirs = ','.join(runtime_library_dirs)
+    if runtime_library_dirs:
+        ext.define_macros.append(('PYCSDL2_RUNTIME_LIBRARY_DIRS',
+                                  runtime_library_dirs + ','))
     return ext, headers
 
 
