@@ -30,6 +30,17 @@ extern "C" {
 #endif
 #include <Python.h>
 
+/**
+ * \brief pycsdl2's C API
+ *
+ * This struct is used to hold pointers to functions and data that csdl2
+ * exposes to other extensions. csdl2 stores an instance of this struct in a
+ * PyCapsule object which can be accessed with PyCapsule_Import().
+ */
+typedef struct PyCSDL2_CAPI {
+    int x; /**< Dummy integer */
+} PyCSDL2_CAPI;
+
 #ifdef __cplusplus
 }
 #endif
