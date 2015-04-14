@@ -320,4 +320,50 @@ PyCSDL2_GetSystemSDLLibraries(void)
     return list;
 }
 
+#ifndef PYCSDL2_RUNTIME_LIBRARY_DIRS
+/**
+ * \def PYCSDL2_RUNTIME_LIBRARY_DIRS
+ * \brief \c runtime_library_dirs used to find the system SDL2 library (and its
+ *        dependencies)
+ *
+ * A comma-separated list of C string literals that must end with a comma. Each
+ * C string literal is a directory path that pycsdl2 uses to find the system
+ * SDL2 library. This corresponds to the
+ * \c distutils.extension.Extension.runtime_library_dirs attribute. If the list
+ * has no elements, do not define this macro.
+ */
+#define PYCSDL2_RUNTIME_LIBRARY_DIRS
+#endif /* PYCSDL2_RUNTIME_LIBRARY_DIRS */
+
+/**
+ * \brief Returns PyListObject of PYCSDL2_RUNTIME_LIBRARY_DIRS.
+ *
+ * \return PyListObject of PYCSDL2_RUNTIME_LIBRARY_DIRS if defined, else an
+ *         empty PyListObject. Returns NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_GetSystemSDLRuntimeLibraryDirs(void)
+{
+    static const char *runtime_lib_dirs[] = {PYCSDL2_RUNTIME_LIBRARY_DIRS
+                                             NULL};
+    PyObject *list;
+    Py_ssize_t len, i;
+
+    /* Calculate len of runtime_lib_dirs */
+    for (len = 0; runtime_lib_dirs[len] != NULL; ++len) {}
+    /* Create output list */
+    if (!(list = PyList_New(len)))
+        return NULL;
+    /* Set items on list */
+    for (i = 0; runtime_lib_dirs[i] != NULL; ++i) {
+        PyObject *str = PyUnicode_FromString(runtime_lib_dirs[i]);
+        if (str == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, i, str);
+    }
+    return list;
+}
+
 #endif /* _PYCSDL2_DISTUTILS_H_ */
