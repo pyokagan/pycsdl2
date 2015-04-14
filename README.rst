@@ -89,6 +89,19 @@ The above build behavior can be controlled with the environment variable
   link against the system's SDL2 library, and to only use ``sdl2-config`` or
   ``pkg-config`` respectively to retrieve the required compile and link flags.
 
+Unit tests
+==========
+Unit tests are implemented using the ``unittest`` standard library module. Once
+the pycsdl2 has been built with ``python3 setup.py build``, you can run all
+tests by running the following in the root of the source directory::
+
+    python3 -mtest
+
+You can also run an individual test suite by running the corresponding file in
+the ``test/`` directory::
+
+    python3 test/testfoo.py
+
 Understanding the source code
 =============================
 The source code is documented with `Doxygen`_. If you have a working
