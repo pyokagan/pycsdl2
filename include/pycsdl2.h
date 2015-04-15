@@ -2021,8 +2021,14 @@ typedef void (SDLCALL *SDL_GL_DeleteContext_pfn)(SDL_GLContext context);
  * \brief pycsdl2's C API
  *
  * This struct is used to hold pointers to functions and data that csdl2
- * exposes to other extensions. csdl2 stores an instance of this struct in a
- * PyCapsule object which can be accessed with PyCapsule_Import().
+ * exposes to other extensions. csdl2 exposes this struct through
+ * PyCSDL2_Import().
+ *
+ * Currently, function pointers to SDL functions are exposed in this struct.
+ * For example, to call \c SDL_Log() :
+ * \code
+ * PyCSDL2_Import()->_SDL_Log("Hello World!");
+ * \endcode
  */
 typedef struct PyCSDL2_CAPI {
 /* SDL_assert.h */
