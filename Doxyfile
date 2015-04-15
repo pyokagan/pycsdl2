@@ -42,3 +42,6 @@ STRIP_CODE_COMMENTS = YES
 
 # Predefined macros
 PREDEFINED = DOXYGEN=1
+
+# This is a C project
+OPTIMIZE_OUTPUT_FOR_C = YES
