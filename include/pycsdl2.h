@@ -3162,6 +3162,18 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
     return capi;
 }
 
+/**
+ * \brief Returns SDL function pointer exposed by csdl2's C API
+ *
+ * This is a convenience macro for returning the corresponding function pointer
+ * of the SDL function `name` from the PyCSDL2_CAPI struct returned by
+ * PyCSDL2_Import().
+ *
+ * \param name Name of SDL function
+ * \returns Function pointer to SDL function with name `name`.
+ */
+#define PYCSDL2_FUNC(name) (PyCSDL2_Import()->_ ## name)
+
 #endif /* PYCSDL2_MODULE */
 
 #ifdef __cplusplus
