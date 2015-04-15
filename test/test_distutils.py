@@ -236,6 +236,10 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
     src = textwrap.dedent('''
     #include <pycsdl2.h>
 
+    #ifdef TEST_DIFF_UNIT_SAME_POINTER
+    extern const PyCSDL2_CAPI *get_capi(void);
+    #endif
+
     static PyModuleDef PyCSDL2Test_Module = {
         PyModuleDef_HEAD_INIT,
         /* m_name */ "_csdl2test",
@@ -253,7 +257,7 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
     {
         PyObject *m = PyModule_Create(&PyCSDL2Test_Module);
         const PyCSDL2_CAPI *api;
-        #ifdef TEST_SAME_POINTER
+        #if defined(TEST_SAME_POINTER) || defined(TEST_DIFF_UNIT_SAME_POINTER)
         const PyCSDL2_CAPI *api2;
         #endif
         if (m == NULL) { return NULL; }
@@ -266,7 +270,24 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
             return NULL;
         }
         #endif
+        #ifdef TEST_DIFF_UNIT_SAME_POINTER
+        if (!(api2 = get_capi())) { Py_DECREF(m); return NULL; }
+        if (api != api2) {
+            PyErr_SetString(PyExc_AssertionError, "api != api2");
+            Py_DECREF(m);
+            return NULL;
+        }
+        #endif
         return m;
+    }
+    ''')
+
+    src2 = textwrap.dedent('''
+    #include <pycsdl2.h>
+
+    const PyCSDL2_CAPI *get_capi(void)
+    {
+        return PyCSDL2_Import();
     }
     ''')
 
@@ -275,6 +296,15 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
         ext = self.init_ext('_csdl2test', [])
         ext.define_macros.append(('TEST_SAME_POINTER', None))
         self.add_ext_src(ext, '_csdl2test.c', self.src)
+        self.build_exts([ext])
+        self.check_call_script('test.py', 'import _csdl2test')
+
+    def test_diff_unit_same_pointer(self):
+        "When called from different translation units, returns same ptr"
+        ext = self.init_ext('_csdl2test', [])
+        ext.define_macros.append(('TEST_DIFF_UNIT_SAME_POINTER', None))
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
+        self.add_ext_src(ext, 'src2.c', self.src2)
         self.build_exts([ext])
         self.check_call_script('test.py', 'import _csdl2test')
 
