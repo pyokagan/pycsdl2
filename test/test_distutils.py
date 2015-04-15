@@ -260,6 +260,9 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
         #if defined(TEST_SAME_POINTER) || defined(TEST_DIFF_UNIT_SAME_POINTER)
         const PyCSDL2_CAPI *api2;
         #endif
+        #ifdef TEST_VALID_MEM
+        PyCSDL2_CAPI *api2;
+        #endif
         if (m == NULL) { return NULL; }
         if (!(api = PyCSDL2_Import())) { Py_DECREF(m); return NULL; }
         #ifdef TEST_SAME_POINTER
@@ -277,6 +280,14 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
             Py_DECREF(m);
             return NULL;
         }
+        #endif
+        #ifdef TEST_VALID_MEM
+        if (!(api2 = PyMem_New(PyCSDL2_CAPI, 1))) {
+            Py_DECREF(m);
+            return NULL;
+        }
+        memcpy(api2, api, sizeof(PyCSDL2_CAPI));
+        PyMem_Del(api2);
         #endif
         return m;
     }
@@ -305,6 +316,14 @@ class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
         ext.define_macros.append(('TEST_DIFF_UNIT_SAME_POINTER', None))
         self.add_ext_src(ext, '_csdl2test.c', self.src)
         self.add_ext_src(ext, 'src2.c', self.src2)
+        self.build_exts([ext])
+        self.check_call_script('test.py', 'import _csdl2test')
+
+    def test_valid_mem(self):
+        "Returns valid memory"
+        ext = self.init_ext('_csdl2test', [])
+        ext.define_macros.append(('TEST_VALID_MEM', None))
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
         self.build_exts([ext])
         self.check_call_script('test.py', 'import _csdl2test')
 
