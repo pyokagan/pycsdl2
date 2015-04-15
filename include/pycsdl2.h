@@ -3174,6 +3174,43 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
  */
 #define PYCSDL2_FUNC(name) (PyCSDL2_Import()->_ ## name)
 
+/**
+ * \defgroup SDLAPI SDL API
+ * \brief csdl2 exposes the SDL API through PyCSDL2_CAPI
+ *
+ * csdl2 provides the function pointers of the SDL API functions in
+ * PyCSDL2_CAPI, which can be accessed through PyCSDL2_Import() or
+ * PYCSDL2_FUNC(). For example, to call \c SDL_Log():
+ *
+ * \code
+ * PyCSDL2_Import()->_SDL_Log("Hello World!");
+ * \endcode
+ *
+ * or
+ *
+ * \code
+ * PYCSDL2_FUNC(SDL_Log)("Hello World!");
+ * \endcode
+ *
+ * As such, extensions do not need to explicitly link to the SDL library.
+ * This is useful especially when csdl2 is statically linked to SDL, and
+ * there is no other way to access the SDL library.
+ *
+ * By default, pycsdl2.h will override all SDL API function calls, redirecting
+ * them to the function pointers in PyCSDL2_CAPI through PYCSDL2_FUNC(). As
+ * such, the above call to \c SDL_Log() can be replaced with:
+ *
+ * \code
+ * SDL_Log("Hello World!");
+ * \endcode
+ *
+ * To disable redirection, define the PYCSDL2_NO_REDIRECT macro.
+ *
+ * \see PyCSDL2_CAPI, PyCSDL2_Import(), PYCSDL2_FUNC()
+ *
+ * @{
+ */
+
 #ifndef PYCSDL2_NO_REDIRECT
 
 /* SDL_assert.h */
@@ -5370,6 +5407,8 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
     PYCSDL2_FUNC(SDL_GL_DeleteContext)(context)
 
 #endif /* PYCSDL2_NO_REDIRECT */
+/** @} */ /* \defgroup SDLAPI */
+
 #endif /* PYCSDL2_MODULE */
 
 #ifdef __cplusplus
