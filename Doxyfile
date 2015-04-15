@@ -18,3 +18,14 @@ WARN_IF_UNDOCUMENTED = YES
 
 # Make doxygen less noisy
 QUIET = YES
+
+# Extract private definitions
+EXTRACT_PRIVATE = YES
+EXTRACT_PACKAGE = YES
+EXTRACT_STATIC = YES
+EXTRACT_LOCAL_CLASSES = YES
+EXTRACT_LOCAL_METHODS = YES
+EXTRACT_ANON_NSPACES = YES
+
+# However, allow us to explicitly use \internal to hide private definitions
+INTERNAL_DOCS = NO
