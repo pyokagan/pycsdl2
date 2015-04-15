@@ -29,3 +29,13 @@ EXTRACT_ANON_NSPACES = YES
 
 # However, allow us to explicitly use \internal to hide private definitions
 INTERNAL_DOCS = NO
+
+# Allow users to easily refer to the source code by:
+# enabling the source browser
+SOURCE_BROWSER = YES
+# and include the body of functions, classes and enums directly in the
+# documentation
+INLINE_SOURCES = YES
+# Since the documentation is already available, hide the documentation comment
+# blocks from the generated source code fragments
+STRIP_CODE_COMMENTS = YES
