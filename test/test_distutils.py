@@ -1,4 +1,4 @@
-"""test methods in src/distutils.h"""
+"""test distutils-related functionality and methods in src/distutils.h"""
 import distutils.extension
 import distutils.util
 import os.path
@@ -227,6 +227,56 @@ class TestLinkSystemSDL(DistutilsBuildMixin, unittest.TestCase):
         self.build_exts([ext])
         out = self.check_output_script('test.py', 'import _csdl2test')
         self.assertEqual(out, 'OK')
+
+
+class TestPyCSDL2_Import(DistutilsBuildMixin, unittest.TestCase):
+    """Test building and running an extension that calls PyCSDL2_Import()
+    """
+
+    src = textwrap.dedent('''
+    #include <pycsdl2.h>
+
+    static PyModuleDef PyCSDL2Test_Module = {
+        PyModuleDef_HEAD_INIT,
+        /* m_name */ "_csdl2test",
+        /* m_doc */  "",
+        /* m_size */ -1,
+        /* m_methods */ NULL,
+        /* m_reload */ NULL,
+        /* m_traverse */ NULL,
+        /* m_clear */ NULL,
+        /* m_free */ NULL
+    };
+
+    PyMODINIT_FUNC
+    PyInit__csdl2test(void)
+    {
+        PyObject *m = PyModule_Create(&PyCSDL2Test_Module);
+        const PyCSDL2_CAPI *api;
+        #ifdef TEST_SAME_POINTER
+        const PyCSDL2_CAPI *api2;
+        #endif
+        if (m == NULL) { return NULL; }
+        if (!(api = PyCSDL2_Import())) { Py_DECREF(m); return NULL; }
+        #ifdef TEST_SAME_POINTER
+        if (!(api2 = PyCSDL2_Import())) { Py_DECREF(m); return NULL; }
+        if (api != api2) {
+            PyErr_SetString(PyExc_AssertionError, "api != api2");
+            Py_DECREF(m);
+            return NULL;
+        }
+        #endif
+        return m;
+    }
+    ''')
+
+    def test_same_pointer(self):
+        "When called multiple times, it should return the same ptr"
+        ext = self.init_ext('_csdl2test', [])
+        ext.define_macros.append(('TEST_SAME_POINTER', None))
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
+        self.build_exts([ext])
+        self.check_call_script('test.py', 'import _csdl2test')
 
 
 if __name__ == '__main__':
