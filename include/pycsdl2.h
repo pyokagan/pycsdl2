@@ -3174,6 +3174,8 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
  */
 #define PYCSDL2_FUNC(name) (PyCSDL2_Import()->_ ## name)
 
+#ifndef PYCSDL2_NO_REDIRECT
+
 /* SDL_assert.h */
 
 /** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReportAssertion) */
@@ -5367,6 +5369,7 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 #define SDL_GL_DeleteContext(context) \
     PYCSDL2_FUNC(SDL_GL_DeleteContext)(context)
 
+#endif /* PYCSDL2_NO_REDIRECT */
 #endif /* PYCSDL2_MODULE */
 
 #ifdef __cplusplus
