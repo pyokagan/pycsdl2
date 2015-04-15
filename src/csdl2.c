@@ -24,7 +24,9 @@
  * \brief csdl2 extension source code.
  */
 #include <Python.h>
+#define PYCSDL2_MODULE
 #include "../include/pycsdl2.h"
+#include "capi.h"
 #include "methods.h"
 
 /**
@@ -53,5 +55,10 @@ PyInit_csdl2(void)
     PyObject *m = PyModule_Create(&PyCSDL2_Module);
 
     if (!m) { return NULL; }
+    if (!PyCSDL2_initcapi(m)) { goto fail; }
     return m;
+
+fail:
+    Py_DECREF(m);
+    return NULL;
 }

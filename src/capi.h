@@ -19,46 +19,40 @@
  *     3. This notice may not be removed or altered from any source
  *        distribution.
  */
-#ifndef _PYCSDL2_H_
-#define _PYCSDL2_H_
 /**
- * \file pycsdl2.h
- * \brief pycsdl2 public API header
- */
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <Python.h>
-
-/**
- * \brief pycsdl2's C API
+ * \file capi.h
+ * \brief csdl2's C API
  *
- * This struct is used to hold pointers to functions and data that csdl2
- * exposes to other extensions. csdl2 stores an instance of this struct in a
- * PyCapsule object which can be accessed with PyCapsule_Import().
+ * This file implements functionality to expose csdl2's C API to other
+ * extensions so that these extensions can use csdl2's functionality.
  */
-typedef struct PyCSDL2_CAPI {
-    int x; /**< Dummy integer */
-} PyCSDL2_CAPI;
-
-#ifndef PYCSDL2_MODULE
+#ifndef _PYCSDL2_CAPI_H_
+#define _PYCSDL2_CAPI_H_
+#include <Python.h>
+#include "../include/pycsdl2.h"
 
 /**
- * \brief Imports csdl2 and returns its PyCSDL2_CAPI.
- * \returns const pointer to PyCSDL2_CAPI, or NULL when an exception occurred.
+ * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
+ *
+ * Initialize csdl2's PyCSDL2_CAPI PyCapsule object and adds it to the module m
+ * with the name "_C_API". The PyCSDL2_CAPI can thus be retrieved with:
+ * \code
+ * (PyCSDL2_CAPI*) PyCapsule_Import("csdl2._C_API", 0);
+ * \endcode
+ *
+ * \param m the csdl2 module object
+ * \returns 1 on success, 0 on failure
  */
-static const PyCSDL2_CAPI *PyCSDL2_Import(void)
+static int
+PyCSDL2_initcapi(PyObject *m)
 {
-    static const PyCSDL2_CAPI *capi;
-
-    if (!capi)
-        capi = (const PyCSDL2_CAPI*) PyCapsule_Import("csdl2._C_API", 0);
-    return capi;
+    static const PyCSDL2_CAPI api = {
+        0
+    };
+    PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
+    if (!capsule) { return 0; }
+    if (PyModule_AddObject(m, "_C_API", capsule)) { return 0; }
+    return 1;
 }
 
-#endif /* PYCSDL2_MODULE */
-
-#ifdef __cplusplus
-}
-#endif
-#endif /* _PYCSDL2_H_ */
+#endif /* _PYCSDL2_CAPI_H_ */
