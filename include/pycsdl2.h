@@ -41,6 +41,8 @@ typedef struct PyCSDL2_CAPI {
     int x; /**< Dummy integer */
 } PyCSDL2_CAPI;
 
+#ifndef PYCSDL2_MODULE
+
 /**
  * \brief Imports csdl2 and returns its PyCSDL2_CAPI.
  * \returns const pointer to PyCSDL2_CAPI, or NULL when an exception occurred.
@@ -53,6 +55,8 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
         capi = (const PyCSDL2_CAPI*) PyCapsule_Import("csdl2._C_API", 0);
     return capi;
 }
+
+#endif /* PYCSDL2_MODULE */
 
 #ifdef __cplusplus
 }

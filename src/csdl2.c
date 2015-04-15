@@ -24,6 +24,7 @@
  * \brief csdl2 extension source code.
  */
 #include <Python.h>
+#define PYCSDL2_MODULE
 #include "../include/pycsdl2.h"
 #include "capi.h"
 #include "methods.h"
