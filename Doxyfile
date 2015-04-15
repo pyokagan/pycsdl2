@@ -39,3 +39,6 @@ INLINE_SOURCES = YES
 # Since the documentation is already available, hide the documentation comment
 # blocks from the generated source code fragments
 STRIP_CODE_COMMENTS = YES
+
+# Predefined macros
+PREDEFINED = DOXYGEN=1
