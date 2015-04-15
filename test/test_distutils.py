@@ -434,6 +434,23 @@ class TestSDLFuncRedirect(DistutilsBuildMixin, unittest.TestCase):
         out = self.check_output_script('test.py', 'import _csdl2test')
         self.assertEqual(out, 'OK')
 
+    def test_SDL_Log_no_redirect(self):
+        """When PYCSDL2_NO_REDIRECT is defined, SDL_Log() should fail
+
+        Because SDL_Log() is not overridden anymore so there should be a linker
+        error during compilation or when trying to import the extension.
+        """
+        ext = self.init_ext('_csdl2test', [])
+        ext.define_macros.append(('PYCSDL2_NO_REDIRECT', None))
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
+        try:
+            self.build_exts([ext])
+            self.check_call_script('test.py', 'import _csdl2test',
+                                   stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            return
+        self.fail('subprocess.CalledProcessError not raised')
+
 
 if __name__ == '__main__':
     unittest.main()
