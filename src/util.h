@@ -51,9 +51,11 @@
 #if SIZEOF_SHORT == 4
 /* A short int must be at least 16 bits long */
 #define Sint32_UNIT "h"
+#define Uint32_UNIT "H"
 #elif SIZEOF_INT == 4
 /* An int must be at least 16 bits long */
 #define Sint32_UNIT "i"
+#define Uint32_UNIT "I"
 #elif SIZEOF_LONG == 4 || defined(DOXYGEN)
 /* A long int must be at least 32 bits long */
 /**
@@ -61,6 +63,11 @@
  *        Sint32
  */
 #define Sint32_UNIT "l"
+/**
+ * \brief Python format unit for C unsigned integer type with same size as
+ *        Uint32
+ */
+#define Uint32_UNIT "k"
 #else
 #error Could not find C integer type with 4 bytes width
 #endif
