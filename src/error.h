@@ -32,6 +32,34 @@
 #include "../include/pycsdl2.h"
 
 /**
+ * \brief Check if msg is a SDL invalid param error.
+ *
+ * When SDL encounters an invalid argument, it calls SDL_InvalidParamError()
+ * which sets the error string "Parameter '%s' is invalid". Return true if a
+ * error message msg matches this format.
+ *
+ * \param msg The error message, as returned from SDL_GetError()
+ * \returns 1 if the error message matches "Parameter '%s' is invalid", else
+ *          returns 0.
+ */
+static int
+PyCSDL2_IsInvalidParamError(const char *msg)
+{
+    size_t len = strlen(msg);
+
+    /* Fail if msg is less than the minimum possible string len */
+    if (len < strlen("Parameter '' is invalid"))
+        return 0;
+    /* Fail if prefix "Parameter '"  does not match */
+    if (memcmp(msg, "Parameter '", strlen("Parameter '")))
+        return 0;
+    /* Fail if suffix "' is invalid" does not match */
+    if (strcmp(msg + len - strlen("' is invalid"), "' is invalid"))
+        return 0;
+    return 1;
+}
+
+/**
  * \brief Raises exception with contents of SDL_GetError()
  *
  * Raises the appropriate exception with the contents of SDL_GetError() based
@@ -56,6 +84,8 @@ PyCSDL2_RaiseSDLError(void)
         PyErr_SetString(PyExc_OSError, msg);
     else if (!strcmp(msg, "Error seeking in datastream"))
         PyErr_SetString(PyExc_OSError, msg);
+    else if (PyCSDL2_IsInvalidParamError(msg))
+        PyErr_SetString(PyExc_ValueError, msg);
     else
         PyErr_SetString(PyExc_RuntimeError, msg);
     return NULL;
