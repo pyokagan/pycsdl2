@@ -50,6 +50,8 @@ PyCSDL2_RaiseSDLError(void)
 
     if (!strcmp(msg, "Out of memory"))
         PyErr_NoMemory();
+    else if (!strcmp(msg, "Error reading from datastream"))
+        PyErr_SetString(PyExc_OSError, msg);
     else
         PyErr_SetString(PyExc_RuntimeError, msg);
     return NULL;
