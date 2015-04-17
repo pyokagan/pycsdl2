@@ -138,14 +138,15 @@ class DistutilsBuildMixin:
         f.write("setup(name='csdl2test', "
                 "ext_modules=[{0}])".format(', '.join(mods)))
 
-    def build_exts(self, exts):
+    def build_exts(self, exts, **kwargs):
         """Builds the distutils.extension.Extension in `exts`."""
         setup_path = os.path.join(self.__dir.name, 'setup.py')
         with open(setup_path, 'w') as f:
             self.__write_setup(f, exts)
         subprocess.check_call([sys.executable, setup_path, 'build_ext',
                                '--inplace'], cwd=self.__dir.name,
-                              stdout=subprocess.DEVNULL)
+                              stdout=subprocess.DEVNULL,
+                              **kwargs)
 
     def __write_script(self, f, contents):
         # Propagate our sys.path to the script
@@ -444,7 +445,7 @@ class TestSDLFuncRedirect(DistutilsBuildMixin, unittest.TestCase):
         ext.define_macros.append(('PYCSDL2_NO_REDIRECT', None))
         self.add_ext_src(ext, '_csdl2test.c', self.src)
         try:
-            self.build_exts([ext])
+            self.build_exts([ext], stderr=subprocess.DEVNULL)
             self.check_call_script('test.py', 'import _csdl2test',
                                    stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
