@@ -29,6 +29,7 @@
 #include "../include/pycsdl2.h"
 #include "distutils.h"
 #include "error.h"
+#include "init.h"
 
 /**
  * \brief csdl2 methods definitions.
@@ -50,6 +51,30 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "attributes of the same name in distutils.extension.Extension which\n"
      "were used to link csdl2 against the system's SDL2 library. Returns\n"
      "None if csdl2 was statically linked to SDL2."},
+
+    /* init.h */
+
+    {"SDL_Init",
+     (PyCFunction) PyCSDL2_Init,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_Init(flags: int) -> None\n"
+     "\n"
+     "Initializes the subsystems specified by `flags`, which is one or more\n"
+     "of the following constants OR'ed together:\n"
+     "\n"
+     "* SDL_INIT_TIMER\n"
+     "* SDL_INIT_AUDIO\n"
+     "* SDL_INIT_VIDEO (implies SDL_INIT_EVENTS)\n"
+     "* SDL_INIT_JOYSTICK (implies SDL_INIT_EVENTS)\n"
+     "* SDL_INIT_HAPTIC\n"
+     "* SDL_INIT_GAMECONTROLLER (implies SDL_INIT_JOYSTICK)\n"
+     "* SDL_INIT_EVENTS\n"
+     "\n"
+     "Alternatively, pass SDL_INIT_EVERYTHING to initialize all subsystems.\n"
+     "\n"
+     "Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup\n"
+     "signal handlers for some commonly ignored fatal signals like SIGSEGV.\n"
+    },
 
     /* End */
     {0}
