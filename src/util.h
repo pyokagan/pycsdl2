@@ -28,4 +28,29 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 
+/*!
+ * \brief struct for defining constants.
+ *
+ * This allows constants to be listed in an array and added to the module
+ * with the following code:
+ *
+ * \code
+ * static const PyCSDL2_Constant constants[] = {
+ *     {"CONSTANT1", 1},
+ *     {"CONSTANT2", 2},
+ *     {0}
+ * };
+ * const PyCSDL2_Constant *c;
+ * for (c = constants; c->name != NULL; ++c) {
+ *     if (PyModule_AddIntConstant(module, c->name, c->value) != 0) {
+ *         return 0;
+ *     }
+ * }
+ * \endcode
+ */
+typedef struct {
+    const char *name; /*!< name of constant */
+    long value;       /*!< value of constant */
+} PyCSDL2_Constant;
+
 #endif /* _PYCSDL2_UTIL_H_ */
