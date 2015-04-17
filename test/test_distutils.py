@@ -138,14 +138,15 @@ class DistutilsBuildMixin:
         f.write("setup(name='csdl2test', "
                 "ext_modules=[{0}])".format(', '.join(mods)))
 
-    def build_exts(self, exts):
+    def build_exts(self, exts, **kwargs):
         """Builds the distutils.extension.Extension in `exts`."""
         setup_path = os.path.join(self.__dir.name, 'setup.py')
         with open(setup_path, 'w') as f:
             self.__write_setup(f, exts)
         subprocess.check_call([sys.executable, setup_path, 'build_ext',
                                '--inplace'], cwd=self.__dir.name,
-                              stdout=subprocess.DEVNULL)
+                              stdout=subprocess.DEVNULL,
+                              **kwargs)
 
     def __write_script(self, f, contents):
         # Propagate our sys.path to the script
@@ -380,6 +381,76 @@ class TestSDLCAPI(DistutilsBuildMixin, unittest.TestCase):
         self.build_exts([ext])
         out = self.check_output_script('test.py', 'import _csdl2test')
         self.assertEqual(out, 'OK')
+
+
+class TestSDLFuncRedirect(DistutilsBuildMixin, unittest.TestCase):
+    """Test SDL function redirection
+
+    Unfortunately, since the SDL API is so big, it would be unfeasible to test
+    every single function. It's also a bit unnecessary, as SDL has its own test
+    suite. We just do some simple testing to ensure that the SDL function
+    pointers are being assigned properly.
+    """
+
+    src = textwrap.dedent('''
+    #include <pycsdl2.h>
+
+    static void log_output_func(void *userdata, int category,
+                                SDL_LogPriority priority, const char *message)
+    {
+        printf("%s", message);
+    }
+
+    static PyModuleDef PyCSDL2Test_Module = {
+        PyModuleDef_HEAD_INIT,
+        /* m_name */ "_csdl2test",
+        /* m_doc */  "",
+        /* m_size */ -1,
+        /* m_methods */ NULL,
+        /* m_reload */ NULL,
+        /* m_traverse */ NULL,
+        /* m_clear */ NULL,
+        /* m_free */ NULL
+    };
+
+    PyMODINIT_FUNC
+    PyInit__csdl2test(void)
+    {
+        PyObject *m;
+        const PyCSDL2_CAPI *capi;
+
+        if (!(m = PyModule_Create(&PyCSDL2Test_Module))) { return NULL; }
+        if (!(capi = PyCSDL2_Import())) { Py_DECREF(m); return NULL; }
+        SDL_LogSetOutputFunction(log_output_func, NULL);
+        SDL_Log("OK");
+        return m;
+    }
+    ''')
+
+    def test_SDL_Log(self):
+        """Just calling SDL_Log() should work"""
+        ext = self.init_ext('_csdl2test', [])
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
+        self.build_exts([ext])
+        out = self.check_output_script('test.py', 'import _csdl2test')
+        self.assertEqual(out, 'OK')
+
+    def test_SDL_Log_no_redirect(self):
+        """When PYCSDL2_NO_REDIRECT is defined, SDL_Log() should fail
+
+        Because SDL_Log() is not overridden anymore so there should be a linker
+        error during compilation or when trying to import the extension.
+        """
+        ext = self.init_ext('_csdl2test', [])
+        ext.define_macros.append(('PYCSDL2_NO_REDIRECT', None))
+        self.add_ext_src(ext, '_csdl2test.c', self.src)
+        try:
+            self.build_exts([ext], stderr=subprocess.DEVNULL)
+            self.check_call_script('test.py', 'import _csdl2test',
+                                   stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            return
+        self.fail('subprocess.CalledProcessError not raised')
 
 
 if __name__ == '__main__':

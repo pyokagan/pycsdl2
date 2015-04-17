@@ -3162,6 +3162,2253 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
     return capi;
 }
 
+/**
+ * \brief Returns SDL function pointer exposed by csdl2's C API
+ *
+ * This is a convenience macro for returning the corresponding function pointer
+ * of the SDL function `name` from the PyCSDL2_CAPI struct returned by
+ * PyCSDL2_Import().
+ *
+ * \param name Name of SDL function
+ * \returns Function pointer to SDL function with name `name`.
+ */
+#define PYCSDL2_FUNC(name) (PyCSDL2_Import()->_ ## name)
+
+/**
+ * \defgroup SDLAPI SDL API
+ * \brief csdl2 exposes the SDL API through PyCSDL2_CAPI
+ *
+ * csdl2 provides the function pointers of the SDL API functions in
+ * PyCSDL2_CAPI, which can be accessed through PyCSDL2_Import() or
+ * PYCSDL2_FUNC(). For example, to call \c SDL_Log():
+ *
+ * \code
+ * PyCSDL2_Import()->_SDL_Log("Hello World!");
+ * \endcode
+ *
+ * or
+ *
+ * \code
+ * PYCSDL2_FUNC(SDL_Log)("Hello World!");
+ * \endcode
+ *
+ * As such, extensions do not need to explicitly link to the SDL library.
+ * This is useful especially when csdl2 is statically linked to SDL, and
+ * there is no other way to access the SDL library.
+ *
+ * By default, pycsdl2.h will override all SDL API function calls, redirecting
+ * them to the function pointers in PyCSDL2_CAPI through PYCSDL2_FUNC(). As
+ * such, the above call to \c SDL_Log() can be replaced with:
+ *
+ * \code
+ * SDL_Log("Hello World!");
+ * \endcode
+ *
+ * To disable redirection, define the PYCSDL2_NO_REDIRECT macro.
+ *
+ * \see PyCSDL2_CAPI, PyCSDL2_Import(), PYCSDL2_FUNC()
+ *
+ * @{
+ */
+
+#ifndef PYCSDL2_NO_REDIRECT
+
+/* SDL_assert.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReportAssertion) */
+#define SDL_ReportAssertion(data, func, file, line) \
+    PYCSDL2_FUNC(SDL_ReportAssertion)(data, func, file, line)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetAssertionHandler) */
+#define SDL_SetAssertionHandler(handler, userdata) \
+    PYCSDL2_FUNC(SDL_SetAssertionHandler)(handler, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetAssertionReport) */
+#define SDL_GetAssertionReport() \
+    PYCSDL2_FUNC(SDL_GetAssertionReport)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ResetAssertionReport) */
+#define SDL_ResetAssertionReport() \
+    PYCSDL2_FUNC(SDL_ResetAssertionReport)()
+
+/* SDL_atomic.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AtomicTryLock) */
+#define SDL_AtomicTryLock(lock) \
+    (PYCSDL2_FUNC(SDL_AtomicTryLock)(lock))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AtomicLock) */
+#define SDL_AtomicLock(lock) \
+    (PYCSDL2_FUNC(SDL_AtomicLock)(lock))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AtomicUnlock) */
+#define SDL_AtomicUnlock(lock) \
+    (PYCSDL2_FUNC(SDL_AtomicUnlock)(lock))
+
+#ifndef SDL_MemoryBarrierRelease
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MemoryBarrierRelease) */
+#define SDL_MemoryBarrierRelease() \
+    (PYCSDL2_FUNC(SDL_MemoryBarrierRelease)())
+#endif
+
+#ifndef SDL_MemoryBarrierAcquire
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MemoryBarrierAcquire) */
+#define SDL_MemoryBarrierAcquire() \
+    (PYCSDL2_FUNC(SDL_MemoryBarrierAcquire)())
+#endif
+
+#if !defined(SDL_AtomicCAS) || DOXYGEN
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AtomicCAS) */
+#define SDL_AtomicCAS(a, oldval, newval) \
+    (PYCSDL2_FUNC(SDL_AtomicCAS)(a, oldval, newval))
+#endif
+
+#if !defined(SDL_AtomicCASPtr) || DOXYGEN
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AtomicCASPtr) */
+#define SDL_AtomicCASPtr(a, oldval, newval) \
+    (PYCSDL2_FUNC(SDL_AtomicCASPtr)(a, oldval, newval))
+#endif
+
+/* SDL_audio.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumAudioDrivers) */
+#define SDL_GetNumAudioDrivers() \
+    PYCSDL2_FUNC(SDL_GetNumAudioDrivers)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetAudioDriver) */
+#define SDL_GetAudioDriver(index) \
+    PYCSDL2_FUNC(SDL_GetAudioDriver)(index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AudioInit) */
+#define SDL_AudioInit(driver_name) \
+    PYCSDL2_FUNC(SDL_AudioInit)(driver_name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AudioQuit) */
+#define SDL_AudioQuit() \
+    PYCSDL2_FUNC(SDL_AudioQuit)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCurrentAudioDriver) */
+#define SDL_GetCurrentAudioDriver() \
+    PYCSDL2_FUNC(SDL_GetCurrentAudioDriver)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_OpenAudio) */
+#define SDL_OpenAudio(desired, obtained) \
+    PYCSDL2_FUNC(SDL_OpenAudio)(desired, obtained)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumAudioDevices) */
+#define SDL_GetNumAudioDevices(iscapture) \
+    PYCSDL2_FUNC(SDL_GetNumAudioDevices)(iscapture)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetAudioDeviceName) */
+#define SDL_GetAudioDeviceName(index, iscapture) \
+    PYCSDL2_FUNC(SDL_GetAudioDeviceName)(index, iscapture)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_OpenAudioDevice) */
+#define SDL_OpenAudioDevice(device, iscapture, desired, obtained, allowed_changes) \
+    PYCSDL2_FUNC(SDL_OpenAudioDevice)(device, iscapture, desired, obtained, allowed_changes)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetAudioStatus) */
+#define SDL_GetAudioStatus() \
+    PYCSDL2_FUNC(SDL_GetAudioStatus)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetAudioDeviceStatus) */
+#define SDL_GetAudioDeviceStatus(dev) \
+    PYCSDL2_FUNC(SDL_GetAudioDeviceStatus)(dev)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PauseAudio) */
+#define SDL_PauseAudio(pause_on) \
+    PYCSDL2_FUNC(SDL_PauseAudio)(pause_on)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PauseAudioDevice) */
+#define SDL_PauseAudioDevice(dev, pause_on) \
+    PYCSDL2_FUNC(SDL_PauseAudioDevice)(dev, pause_on)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LoadWAV_RW) */
+#define SDL_LoadWAV_RW(src, freesrc, spec, audio_buf, audio_len) \
+    PYCSDL2_FUNC(SDL_LoadWAV_RW)(src, freesrc, spec, audio_buf, audio_len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeWAV) */
+#define SDL_FreeWAV(audio_buf) \
+    PYCSDL2_FUNC(SDL_FreeWAV)(audio_buf)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_BuildAudioCVT) */
+#define SDL_BuildAudioCVT(cvt, src_format, src_channels, src_rate, dst_format, dst_channels, dst_rate) \
+    PYCSDL2_FUNC(SDL_BuildAudioCVT)(cvt, src_format, src_channels, src_rate, dst_format, dst_channels, dst_rate)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ConvertAudio) */
+#define SDL_ConvertAudio(cvt) \
+    PYCSDL2_FUNC(SDL_ConvertAudio)(cvt)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MixAudio) */
+#define SDL_MixAudio(dst, src, format, len, volume) \
+    PYCSDL2_FUNC(SDL_MixAudio)(dst, src, format, len, volume)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MixAudioFormat) */
+#define SDL_MixAudioFormat(dst, src, format, len, volume) \
+    PYCSDL2_FUNC(SDL_MixAudioFormat)(dst, src, format, len, volume)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LockAudio) */
+#define SDL_LockAudio() \
+    PYCSDL2_FUNC(SDL_LockAudio)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LockAudioDevice) */
+#define SDL_LockAudioDevice(dev) \
+    PYCSDL2_FUNC(SDL_LockAudioDevice)(dev)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnlockAudio) */
+#define SDL_UnlockAudio() \
+    PYCSDL2_FUNC(SDL_UnlockAudio)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnlockAudioDevice) */
+#define SDL_UnlockAudioDevice(dev) \
+    PYCSDL2_FUNC(SDL_UnlockAudioDevice)(dev)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CloseAudio) */
+#define SDL_CloseAudio() \
+    PYCSDL2_FUNC(SDL_CloseAudio)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CloseAudioDevice) */
+#define SDL_CloseAudioDevice(dev) \
+    PYCSDL2_FUNC(SDL_CloseAudioDevice)(dev)
+
+/* SDL_clipboard.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetClipboardText) */
+#define SDL_SetClipboardText(text) \
+    PYCSDL2_FUNC(SDL_SetClipboardText)(text)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetClipboardText) */
+#define SDL_GetClipboardText() \
+    PYCSDL2_FUNC(SDL_GetClipboardText)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasClipboardText) */
+#define SDL_HasClipboardText() \
+    PYCSDL2_FUNC(SDL_HasClipboardText)()
+
+/* SDL_cpuinfo.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCPUCount) */
+#define SDL_GetCPUCount() \
+    PYCSDL2_FUNC(SDL_GetCPUCount)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCPUCacheLineSize) */
+#define SDL_GetCPUCacheLineSize() \
+    PYCSDL2_FUNC(SDL_GetCPUCacheLineSize)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasRDTSC) */
+#define SDL_HasRDTSC() \
+    PYCSDL2_FUNC(SDL_HasRDTSC)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasAltiVec) */
+#define SDL_HasAltiVec() \
+    PYCSDL2_FUNC(SDL_HasAltiVec)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasMMX) */
+#define SDL_HasMMX() \
+    PYCSDL2_FUNC(SDL_HasMMX)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Has3DNow) */
+#define SDL_Has3DNow() \
+    PYCSDL2_FUNC(SDL_Has3DNow)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasSSE) */
+#define SDL_HasSSE() \
+    PYCSDL2_FUNC(SDL_HasSSE)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasSSE2) */
+#define SDL_HasSSE2() \
+    PYCSDL2_FUNC(SDL_HasSSE2)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasSSE3) */
+#define SDL_HasSSE3() \
+    PYCSDL2_FUNC(SDL_HasSSE3)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasSSE41) */
+#define SDL_HasSSE41() \
+    PYCSDL2_FUNC(SDL_HasSSE41)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasSSE42) */
+#define SDL_HasSSE42() \
+    PYCSDL2_FUNC(SDL_HasSSE42)()
+
+/* SDL_error.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetError) */
+#define SDL_SetError(...) \
+    PYCSDL2_FUNC(SDL_SetError)(__VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetError) */
+#define SDL_GetError() \
+    PYCSDL2_FUNC(SDL_GetError)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ClearError) */
+#define SDL_ClearError() \
+    PYCSDL2_FUNC(SDL_ClearError)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Error) */
+#define SDL_Error(code) \
+    PYCSDL2_FUNC(SDL_Error)(code)
+
+/* SDL_events.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PumpEvents) */
+#define SDL_PumpEvents() \
+    PYCSDL2_FUNC(SDL_PumpEvents)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PeepEvents) */
+#define SDL_PeepEvents(events, numevents, action, minType, maxType) \
+    PYCSDL2_FUNC(SDL_PeepEvents)(events, numevents, action, minType, maxType)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasEvent) */
+#define SDL_HasEvent(type) \
+    PYCSDL2_FUNC(SDL_HasEvent)(type)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasEvents) */
+#define SDL_HasEvents(minType, maxType) \
+    PYCSDL2_FUNC(SDL_HasEvents)(minType, maxType)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FlushEvent) */
+#define SDL_FlushEvent(type) \
+    PYCSDL2_FUNC(SDL_FlushEvent)(type)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FlushEvents) */
+#define SDL_FlushEvents(minType, maxType) \
+    PYCSDL2_FUNC(SDL_FlushEvents)(minType, maxType)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PollEvent) */
+#define SDL_PollEvent(event) \
+    PYCSDL2_FUNC(SDL_PollEvent)(event)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WaitEvent) */
+#define SDL_WaitEvent(event) \
+    PYCSDL2_FUNC(SDL_WaitEvent)(event)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WaitEventTimeout) */
+#define SDL_WaitEventTimeout(event, timeout) \
+    PYCSDL2_FUNC(SDL_WaitEventTimeout)(event, timeout)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PushEvent) */
+#define SDL_PushEvent(event) \
+    PYCSDL2_FUNC(SDL_PushEvent)(event)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetEventFilter) */
+#define SDL_SetEventFilter(filter, userdata) \
+    PYCSDL2_FUNC(SDL_SetEventFilter)(filter, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetEventFilter) */
+#define SDL_GetEventFilter(filter, userdata) \
+    PYCSDL2_FUNC(SDL_GetEventFilter)(filter, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AddEventWatch) */
+#define SDL_AddEventWatch(filter, userdata) \
+    PYCSDL2_FUNC(SDL_AddEventWatch)(filter, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DelEventWatch) */
+#define SDL_DelEventWatch(filter, userdata) \
+    PYCSDL2_FUNC(SDL_DelEventWatch)(filter, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FilterEvents) */
+#define SDL_FilterEvents(filter, userdata) \
+    PYCSDL2_FUNC(SDL_FilterEvents)(filter, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_EventState) */
+#define SDL_EventState(type, state) \
+    PYCSDL2_FUNC(SDL_EventState)(type, state)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RegisterEvents) */
+#define SDL_RegisterEvents(numevents) \
+    PYCSDL2_FUNC(SDL_RegisterEvents)(numevents)
+
+/* SDL_gamecontroller.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerAddMapping) */
+#define SDL_GameControllerAddMapping(mappingString) \
+    PYCSDL2_FUNC(SDL_GameControllerAddMapping)(mappingString)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerMappingForGUID) */
+#define SDL_GameControllerMappingForGUID(guid) \
+    PYCSDL2_FUNC(SDL_GameControllerMappingForGUID)(guid)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerMapping) */
+#define SDL_GameControllerMapping(gamecontroller) \
+    PYCSDL2_FUNC(SDL_GameControllerMapping)(gamecontroller)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IsGameController) */
+#define SDL_IsGameController(joystick_index) \
+    PYCSDL2_FUNC(SDL_IsGameController)(joystick_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerNameForIndex) */
+#define SDL_GameControllerNameForIndex(joystick_index) \
+    PYCSDL2_FUNC(SDL_GameControllerNameForIndex)(joystick_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerOpen) */
+#define SDL_GameControllerOpen(joystick_index) \
+    PYCSDL2_FUNC(SDL_GameControllerOpen)(joystick_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerName) */
+#define SDL_GameControllerName(gamecontroller) \
+    PYCSDL2_FUNC(SDL_GameControllerName)(gamecontroller)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetAttached) */
+#define SDL_GameControllerGetAttached(gamecontroller) \
+    PYCSDL2_FUNC(SDL_GameControllerGetAttached)(gamecontroller)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetJoystick) */
+#define SDL_GameControllerGetJoystick(gamecontroller) \
+    PYCSDL2_FUNC(SDL_GameControllerGetJoystick)(gamecontroller)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerEventState) */
+#define SDL_GameControllerEventState(state) \
+    PYCSDL2_FUNC(SDL_GameControllerEventState)(state)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerUpdate) */
+#define SDL_GameControllerUpdate() \
+    PYCSDL2_FUNC(SDL_GameControllerUpdate)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetAxisFromString)
+ * */
+#define SDL_GameControllerGetAxisFromString(pchString) \
+    PYCSDL2_FUNC(SDL_GameControllerGetAxisFromString)(pchString)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetStringForAxis)
+ * */
+#define SDL_GameControllerGetStringForAxis(axis) \
+    PYCSDL2_FUNC(SDL_GameControllerGetStringForAxis)(axis)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetBindForAxis) */
+#define SDL_GameControllerGetBindForAxis(gamecontroller, axis) \
+    PYCSDL2_FUNC(SDL_GameControllerGetBindForAxis)(gamecontroller, axis)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetAxis) */
+#define SDL_GameControllerGetAxis(gamecontroller, axis) \
+    PYCSDL2_FUNC(SDL_GameControllerGetAxis)(gamecontroller, axis)
+
+/** \brief Redirects calls to
+ * PYCSDL2_FUNC(SDL_GameControllerGetButtonFromString) */
+#define SDL_GameControllerGetButtonFromString(pchString) \
+    PYCSDL2_FUNC(SDL_GameControllerGetButtonFromString)(pchString)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetStringForButton)
+ * */
+#define SDL_GameControllerGetStringForButton(button) \
+    PYCSDL2_FUNC(SDL_GameControllerGetStringForButton)(button)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerButtonBind) */
+#define SDL_GameControllerButtonBind(gamecontroller, button) \
+    PYCSDL2_FUNC(SDL_GameControllerButtonBind)(gamecontroller, button)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerGetButton) */
+#define SDL_GameControllerGetButton(gamecontroller, button) \
+    PYCSDL2_FUNC(SDL_GameControllerGetButton)(gamecontroller, button)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GameControllerClose) */
+#define SDL_GameControllerClose(gamecontroller) \
+    PYCSDL2_FUNC(SDL_GameControllerClose)(gamecontroller)
+
+/* SDL_gesture.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RecordGesture) */
+#define SDL_RecordGesture(touchID) \
+    PYCSDL2_FUNC(SDL_RecordGesture)(touchID)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SaveAllDollarTemplates) */
+#define SDL_SaveAllDollarTemplates(dst) \
+    PYCSDL2_FUNC(SDL_SaveAllDollarTemplates)(dst)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SaveDollarTemplate) */
+#define SDL_SaveDollarTemplate(gestureId, dst) \
+    PYCSDL2_FUNC(SDL_SaveDollarTemplate)(gestureId, dst)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LoadDollarTemplates) */
+#define SDL_LoadDollarTemplates(touchID, src) \
+    PYCSDL2_FUNC(SDL_LoadDollarTemplates)(touchID, src)
+
+/* SDL */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Init) */
+#define SDL_Init(flags) \
+    PYCSDL2_FUNC(SDL_Init)(flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_InitSubSystem) */
+#define SDL_InitSubSystem(flags) \
+    PYCSDL2_FUNC(SDL_InitSubSystem)(flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_QuitSubSystem) */
+#define SDL_QuitSubSystem(flags) \
+    PYCSDL2_FUNC(SDL_QuitSubSystem)(flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WasInit) */
+#define SDL_WasInit(flags) \
+    PYCSDL2_FUNC(SDL_WasInit)(flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Quit) */
+#define SDL_Quit() \
+    PYCSDL2_FUNC(SDL_Quit)()
+
+/* SDL_haptic.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_NumHaptics) */
+#define SDL_NumHaptics() \
+    PYCSDL2_FUNC(SDL_NumHaptics)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticName) */
+#define SDL_HapticName(device_index) \
+    PYCSDL2_FUNC(SDL_HapticName)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticOpen) */
+#define SDL_HapticOpen(device_index) \
+    PYCSDL2_FUNC(SDL_HapticOpen)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticOpened) */
+#define SDL_HapticOpened(device_index) \
+    PYCSDL2_FUNC(SDL_HapticOpened)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticIndex) */
+#define SDL_HapticIndex(haptic) \
+    PYCSDL2_FUNC(SDL_HapticIndex)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MouseIsHaptic) */
+#define SDL_MouseIsHaptic() \
+    PYCSDL2_FUNC(SDL_MouseIsHaptic)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticOpenFromMouse) */
+#define SDL_HapticOpenFromMouse() \
+    PYCSDL2_FUNC(SDL_HapticOpenFromMouse)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickIsHaptic) */
+#define SDL_JoystickIsHaptic(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickIsHaptic)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticOpenFromJoystick) */
+#define SDL_HapticOpenFromJoystick(joystick) \
+    PYCSDL2_FUNC(SDL_HapticOpenFromJoystick)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticClose) */
+#define SDL_HapticClose(haptic) \
+    PYCSDL2_FUNC(SDL_HapticClose)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticNumEffects) */
+#define SDL_HapticNumEffects(haptic) \
+    PYCSDL2_FUNC(SDL_HapticNumEffects)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticNumEffectsPlaying) */
+#define SDL_HapticNumEffectsPlaying(haptic) \
+    PYCSDL2_FUNC(SDL_HapticNumEffectsPlaying)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticQuery) */
+#define SDL_HapticQuery(haptic) \
+    PYCSDL2_FUNC(SDL_HapticQuery)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticNumAxes) */
+#define SDL_HapticNumAxes(haptic) \
+    PYCSDL2_FUNC(SDL_HapticNumAxes)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticEffectSupported) */
+#define SDL_HapticEffectSupported(haptic, effect) \
+    PYCSDL2_FUNC(SDL_HapticEffectSupported)(haptic, effect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticNewEffect) */
+#define SDL_HapticNewEffect(haptic, effect) \
+    PYCSDL2_FUNC(SDL_HapticNewEffect)(haptic, effect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticUpdateEffect) */
+#define SDL_HapticUpdateEffect(haptic, effect, data) \
+    PYCSDL2_FUNC(SDL_HapticUpdateEffect)(haptic, effect, data)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticRunEffect) */
+#define SDL_HapticRunEffect(haptic, effect, iterations) \
+    PYCSDL2_FUNC(SDL_HapticRunEffect)(haptic, effect, iterations)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticStopEffect) */
+#define SDL_HapticStopEffect(haptic, effect) \
+    PYCSDL2_FUNC(SDL_HapticStopEffect)(haptic, effect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticDestroyEffect) */
+#define SDL_HapticDestroyEffect(haptic, effect) \
+    PYCSDL2_FUNC(SDL_HapticDestroyEffect)(haptic, effect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticGetEffectStatus) */
+#define SDL_HapticGetEffectStatus(haptic, effect) \
+    PYCSDL2_FUNC(SDL_HapticGetEffectStatus)(haptic, effect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticSetGain) */
+#define SDL_HapticSetGain(haptic, gain) \
+    PYCSDL2_FUNC(SDL_HapticSetGain)(haptic, gain)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticSetAutocenter) */
+#define SDL_HapticSetAutocenter(haptic, autocenter) \
+    PYCSDL2_FUNC(SDL_HapticSetAutocenter)(haptic, autocenter)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticPause) */
+#define SDL_HapticPause(haptic) \
+    PYCSDL2_FUNC(SDL_HapticPause)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticUnpause) */
+#define SDL_HapticUnpause(haptic) \
+    PYCSDL2_FUNC(SDL_HapticUnpause)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticStopAll) */
+#define SDL_HapticStopAll(haptic) \
+    PYCSDL2_FUNC(SDL_HapticStopAll)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticRumbleSupported) */
+#define SDL_HapticRumbleSupported(haptic) \
+    PYCSDL2_FUNC(SDL_HapticRumbleSupported)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticRumbleInit) */
+#define SDL_HapticRumbleInit(haptic) \
+    PYCSDL2_FUNC(SDL_HapticRumbleInit)(haptic)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticRumblePlay) */
+#define SDL_HapticRumblePlay(haptic, strength, length) \
+    PYCSDL2_FUNC(SDL_HapticRumblePlay)(haptic, strength, length)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HapticRumbleStop) */
+#define SDL_HapticRumbleStop(haptic) \
+    PYCSDL2_FUNC(SDL_HapticRumbleStop)(haptic)
+
+/* SDL_hints.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetHintWithPriority) */
+#define SDL_SetHintWithPriority(name, value, priority) \
+    PYCSDL2_FUNC(SDL_SetHintWithPriority)(name, value, priority)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetHint) */
+#define SDL_SetHint(name, value) \
+    PYCSDL2_FUNC(SDL_SetHint)(name, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetHint) */
+#define SDL_GetHint(name) \
+    PYCSDL2_FUNC(SDL_GetHint)(name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AddHintCallback) */
+#define SDL_AddHintCallback(name, callback, userdata) \
+    PYCSDL2_FUNC(SDL_AddHintCallback)(name, callback, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DelHintCallback) */
+#define SDL_DelHintCallback(name, callback, userdata) \
+    PYCSDL2_FUNC(SDL_DelHintCallback)(name, callback, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ClearHints) */
+#define SDL_ClearHints() \
+    PYCSDL2_FUNC(SDL_ClearHints)()
+
+/* SDL_joystick.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_NumJoysticks) */
+#define SDL_NumJoysticks() \
+    PYCSDL2_FUNC(SDL_NumJoysticks)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickNameForIndex) */
+#define SDL_JoystickNameForIndex(device_index) \
+    PYCSDL2_FUNC(SDL_JoystickNameForIndex)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickOpen) */
+#define SDL_JoystickOpen(device_index) \
+    PYCSDL2_FUNC(SDL_JoystickOpen)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickName) */
+#define SDL_JoystickName(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickName)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetDeviceGUID) */
+#define SDL_JoystickGetDeviceGUID(device_index) \
+    PYCSDL2_FUNC(SDL_JoystickGetDeviceGUID)(device_index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetGUID) */
+#define SDL_JoystickGetGUID(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickGetGUID)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetGUIDString) */
+#define SDL_JoystickGetGUIDString(guid, pszGUID, cbGUID) \
+    PYCSDL2_FUNC(SDL_JoystickGetGUIDString)(guid, pszGUID, cbGUID)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetGUIDFromString) */
+#define SDL_JoystickGetGUIDFromString(pchGUID) \
+    PYCSDL2_FUNC(SDL_JoystickGetGUIDFromString)(pchGUID)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetAttached) */
+#define SDL_JoystickGetAttached(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickGetAttached)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickInstanceID) */
+#define SDL_JoystickInstanceID(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickInstanceID)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickNumAxes) */
+#define SDL_JoystickNumAxes(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickNumAxes)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickNumBalls) */
+#define SDL_JoystickNumBalls(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickNumBalls)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickNumHats) */
+#define SDL_JoystickNumHats(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickNumHats)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickNumButtons) */
+#define SDL_JoystickNumButtons(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickNumButtons)(joystick)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickUpdate) */
+#define SDL_JoystickUpdate() \
+    PYCSDL2_FUNC(SDL_JoystickUpdate)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickEventState) */
+#define SDL_JoystickEventState(state) \
+    PYCSDL2_FUNC(SDL_JoystickEventState)(state)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetAxis) */
+#define SDL_JoystickGetAxis(joystick, axis) \
+    PYCSDL2_FUNC(SDL_JoystickGetAxis)(joystick, axis)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetHat) */
+#define SDL_JoystickGetHat(joystick, hat) \
+    PYCSDL2_FUNC(SDL_JoystickGetHat)(joystick, hat)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetBall) */
+#define SDL_JoystickGetBall(joystick, ball, dx, dy) \
+    PYCSDL2_FUNC(SDL_JoystickGetBall)(joystick, ball, dx, dy)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickGetButton) */
+#define SDL_JoystickGetButton(joystick, button) \
+    PYCSDL2_FUNC(SDL_JoystickGetButton)(joystick, button)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_JoystickClose) */
+#define SDL_JoystickClose(joystick) \
+    PYCSDL2_FUNC(SDL_JoystickClose)(joystick)
+
+/* SDL_keyboard.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetKeyboardFocus) */
+#define SDL_GetKeyboardFocus() \
+    PYCSDL2_FUNC(SDL_GetKeyboardFocus)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetKeyboardState) */
+#define SDL_GetKeyboardState(numkeys) \
+    PYCSDL2_FUNC(SDL_GetKeyboardState)(numkeys)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetModState) */
+#define SDL_GetModState() \
+    PYCSDL2_FUNC(SDL_GetModState)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetModState) */
+#define SDL_SetModState(modstate) \
+    PYCSDL2_FUNC(SDL_SetModState)(modstate)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetKeyFromScancode) */
+#define SDL_GetKeyFromScancode(scancode) \
+    PYCSDL2_FUNC(SDL_GetKeyFromScancode)(scancode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetScancodeFromKey) */
+#define SDL_GetScancodeFromKey(key) \
+    PYCSDL2_FUNC(SDL_GetScancodeFromKey)(key)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetScancodeName) */
+#define SDL_GetScancodeName(scancode) \
+    PYCSDL2_FUNC(SDL_GetScancodeName)(scancode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetScancodeFromName) */
+#define SDL_GetScancodeFromName(name) \
+    PYCSDL2_FUNC(SDL_GetScancodeFromName)(name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetKeyName) */
+#define SDL_GetKeyName(key) \
+    PYCSDL2_FUNC(SDL_GetKeyName)(key)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetKeyFromName) */
+#define SDL_GetKeyFromName(name) \
+    PYCSDL2_FUNC(SDL_GetKeyFromName)(name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_StartTextInput) */
+#define SDL_StartTextInput() \
+    PYCSDL2_FUNC(SDL_StartTextInput)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IsTextInputActive) */
+#define SDL_IsTextInputActive() \
+    PYCSDL2_FUNC(SDL_IsTextInputActive)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_StopTextInput) */
+#define SDL_StopTextInput() \
+    PYCSDL2_FUNC(SDL_StopTextInput)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetTextInputRect) */
+#define SDL_SetTextInputRect(rect) \
+    PYCSDL2_FUNC(SDL_SetTextInputRect)(rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasScreenKeyboardSupport) */
+#define SDL_HasScreenKeyboardSupport() \
+    PYCSDL2_FUNC(SDL_HasScreenKeyboardSupport)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IsScreenKeyboardShown) */
+#define SDL_IsScreenKeyboardShown(window) \
+    PYCSDL2_FUNC(SDL_IsScreenKeyboardShown)(window)
+
+/* SDL_loadso.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LoadObject) */
+#define SDL_LoadObject(sofile) \
+    PYCSDL2_FUNC(SDL_LoadObject)(sofile)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LoadFunction) */
+#define SDL_LoadFunction(handle, name) \
+    PYCSDL2_FUNC(SDL_LoadFunction)(handle, name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnloadObject) */
+#define SDL_UnloadObject(handle) \
+    PYCSDL2_FUNC(SDL_UnloadObject)(handle)
+
+/* SDL_log.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogSetAllPriority) */
+#define SDL_LogSetAllPriority(priority) \
+    PYCSDL2_FUNC(SDL_LogSetAllPriority)(priority)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogSetPriority) */
+#define SDL_LogSetPriority(category, priority) \
+    PYCSDL2_FUNC(SDL_LogSetPriority)(category, priority)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogResetPriorities) */
+#define SDL_LogResetPriorities() \
+    PYCSDL2_FUNC(SDL_LogResetPriorities)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Log) */
+#define SDL_Log(...) \
+    PYCSDL2_FUNC(SDL_Log)(__VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogVerbose) */
+#define SDL_LogVerbose(category, ...) \
+    PYCSDL2_FUNC(SDL_LogVerbose)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogDebug) */
+#define SDL_LogDebug(category, ...) \
+    PYCSDL2_FUNC(SDL_LogDebug)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogInfo) */
+#define SDL_LogInfo(category, ...) \
+    PYCSDL2_FUNC(SDL_LogInfo)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogWarn) */
+#define SDL_LogWarn(category, ...) \
+    PYCSDL2_FUNC(SDL_LogWarn)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogError) */
+#define SDL_LogError(category, ...) \
+    PYCSDL2_FUNC(SDL_LogError)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogCritical) */
+#define SDL_LogCritical(category, ...) \
+    PYCSDL2_FUNC(SDL_LogCritical)(category, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogMessage) */
+#define SDL_LogMessage(category, priority, ...) \
+    PYCSDL2_FUNC(SDL_LogMessage)(category, priority, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogMessageV) */
+#define SDL_LogMessageV(category, priority, fmt, ap) \
+    PYCSDL2_FUNC(SDL_LogMessageV)(category, priority, fmt, ap)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogGetOutputFunction) */
+#define SDL_LogGetOutputFunction(callback, userdata) \
+    PYCSDL2_FUNC(SDL_LogGetOutputFunction)(callback, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LogSetOutputFunction) */
+#define SDL_LogSetOutputFunction(callback, userdata) \
+    PYCSDL2_FUNC(SDL_LogSetOutputFunction)(callback, userdata)
+
+/* SDL_main.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetMainReady) */
+#define SDL_SetMainReady() \
+    PYCSDL2_FUNC(SDL_SetMainReady)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RegisterApp) */
+#define SDL_RegisterApp(name, style, hInst) \
+    PYCSDL2_FUNC(SDL_RegisterApp)(name, style, hInst)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnregisterApp) */
+#define SDL_UnregisterApp() \
+    PYCSDL2_FUNC(SDL_UnregisterApp)()
+
+/* SDL_messagebox.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ShowMessageBox) */
+#define SDL_ShowMessageBox(messageboxdata, buttonid) \
+    PYCSDL2_FUNC(SDL_ShowMessageBox)(messageboxdata, buttonid)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ShowSimpleMessageBox) */
+#define SDL_ShowSimpleMessageBox(flags, title, message, window) \
+    PYCSDL2_FUNC(SDL_ShowSimpleMessageBox)(flags, title, message, window)
+
+/* SDL_mouse.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetMouseFocus) */
+#define SDL_GetMouseFocus() \
+    PYCSDL2_FUNC(SDL_GetMouseFocus)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetMouseState) */
+#define SDL_GetMouseState(x, y) \
+    PYCSDL2_FUNC(SDL_GetMouseState)(x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRelativeMouseState) */
+#define SDL_GetRelativeMouseState(x, y) \
+    PYCSDL2_FUNC(SDL_GetRelativeMouseState)(x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WarpMouseInWindow) */
+#define SDL_WarpMouseInWindow(window, x, y) \
+    PYCSDL2_FUNC(SDL_WarpMouseInWindow)(window, x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetRelativeMouseMode) */
+#define SDL_SetRelativeMouseMode(enabled) \
+    PYCSDL2_FUNC(SDL_SetRelativeMouseMode)(enabled)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRelativeMouseMode) */
+#define SDL_GetRelativeMouseMode() \
+    PYCSDL2_FUNC(SDL_GetRelativeMouseMode)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateCursor) */
+#define SDL_CreateCursor(data, mask, w, h, hot_x, hot_y) \
+    PYCSDL2_FUNC(SDL_CreateCursor)(data, mask, w, h, hot_x, hot_y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateColorCursor) */
+#define SDL_CreateColorCursor(surface, hot_x, hot_y) \
+    PYCSDL2_FUNC(SDL_CreateColorCursor)(surface, hot_x, hot_y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateSystemCursor) */
+#define SDL_CreateSystemCursor(id) \
+    PYCSDL2_FUNC(SDL_CreateSystemCursor)(id)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetCursor) */
+#define SDL_SetCursor(cursor) \
+    PYCSDL2_FUNC(SDL_SetCursor)(cursor)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCursor) */
+#define SDL_GetCursor() \
+    PYCSDL2_FUNC(SDL_GetCursor)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetDefaultCursor) */
+#define SDL_GetDefaultCursor() \
+    PYCSDL2_FUNC(SDL_GetDefaultCursor)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeCursor) */
+#define SDL_FreeCursor(cursor) \
+    PYCSDL2_FUNC(SDL_FreeCursor)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ShowCursor) */
+#define SDL_ShowCursor(toggle) \
+    PYCSDL2_FUNC(SDL_ShowCursor)(toggle)
+
+/* SDL_mutex.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateMutex) */
+#define SDL_CreateMutex() \
+    PYCSDL2_FUNC(SDL_CreateMutex)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LockMutex) */
+#define SDL_LockMutex(mutex) \
+    PYCSDL2_FUNC(SDL_LockMutex)(mutex)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_TryLockMutex) */
+#define SDL_TryLockMutex(mutex) \
+    PYCSDL2_FUNC(SDL_TryLockMutex)(mutex)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnlockMutex) */
+#define SDL_UnlockMutex(mutex) \
+    PYCSDL2_FUNC(SDL_UnlockMutex)(mutex)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DestroyMutex) */
+#define SDL_DestroyMutex(mutex) \
+    PYCSDL2_FUNC(SDL_DestroyMutex)(mutex)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateSemaphore) */
+#define SDL_CreateSemaphore(initial_value) \
+    PYCSDL2_FUNC(SDL_CreateSemaphore)(initial_value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DestroySemaphore) */
+#define SDL_DestroySemaphore(sem) \
+    PYCSDL2_FUNC(SDL_DestroySemaphore)(sem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SemWait) */
+#define SDL_SemWait(sem) \
+    PYCSDL2_FUNC(SDL_SemWait)(sem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SemTryWait) */
+#define SDL_SemTryWait(sem) \
+    PYCSDL2_FUNC(SDL_SemTryWait)(sem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SemWaitTimeout) */
+#define SDL_SemWaitTimeout(sem, ms) \
+    PYCSDL2_FUNC(SDL_SemWaitTimeout)(sem, ms)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SemPost) */
+#define SDL_SemPost(sem) \
+    PYCSDL2_FUNC(SDL_SemPost)(sem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SemValue) */
+#define SDL_SemValue(sem) \
+    PYCSDL2_FUNC(SDL_SemValue)(sem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateCond) */
+#define SDL_CreateCond() \
+    PYCSDL2_FUNC(SDL_CreateCond)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DestroyCond) */
+#define SDL_DestroyCond(cond) \
+    PYCSDL2_FUNC(SDL_DestroyCond)(cond)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CondSignal) */
+#define SDL_CondSignal(cond) \
+    PYCSDL2_FUNC(SDL_CondSignal)(cond)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CondBroadcast) */
+#define SDL_CondBroadcast(cond) \
+    PYCSDL2_FUNC(SDL_CondBroadcast)(cond)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CondWait) */
+#define SDL_CondWait(cond, mutex) \
+    PYCSDL2_FUNC(SDL_CondWait)(cond, mutex)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CondWaitTimeout) */
+#define SDL_CondWaitTimeout(cond, mutex, ms) \
+    PYCSDL2_FUNC(SDL_CondWaitTimeout)(cond, mutex, ms)
+
+/* SDL_pixels.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetPixelFormatName) */
+#define SDL_GetPixelFormatName(format) \
+    PYCSDL2_FUNC(SDL_GetPixelFormatName)(format)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_PixelFormatEnumToMasks) */
+#define SDL_PixelFormatEnumToMasks(format, bpp, Rmask, Gmask, Bmask, Amask) \
+    PYCSDL2_FUNC(SDL_PixelFormatEnumToMasks)(format, bpp, Rmask, Gmask, Bmask,\
+                                             Amask)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MasksToPixelFormatEnum) */
+#define SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask) \
+    PYCSDL2_FUNC(SDL_MasksToPixelFormatEnum)(bpp, Rmask, Gmask, Bmask, Amask)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AllocFormat) */
+#define SDL_AllocFormat(pixel_format) \
+    PYCSDL2_FUNC(SDL_AllocFormat)(pixel_format)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeFormat) */
+#define SDL_FreeFormat(format) \
+    PYCSDL2_FUNC(SDL_FreeFormat)(format)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AllocPalette) */
+#define SDL_AllocPalette(ncolors) \
+    PYCSDL2_FUNC(SDL_AllocPalette)(ncolors)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetPixelFormatPalette) */
+#define SDL_SetPixelFormatPalette(format, palette) \
+    PYCSDL2_FUNC(SDL_SetPixelFormatPalette)(format, palette)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetPaletteColors) */
+#define SDL_SetPaletteColors(palette, colors, firstcolor, ncolors) \
+    PYCSDL2_FUNC(SDL_SetPaletteColors)(palette, colors, firstcolor, ncolors)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreePalette) */
+#define SDL_FreePalette(palette) \
+    PYCSDL2_FUNC(SDL_FreePalette)(palette)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MapRGB) */
+#define SDL_MapRGB(format, r, g, b) \
+    PYCSDL2_FUNC(SDL_MapRGB)(format, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MapRGBA) */
+#define SDL_MapRGBA(format, r, g, b, a) \
+    PYCSDL2_FUNC(SDL_MapRGBA)(format, r, g, b, a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRGB) */
+#define SDL_GetRGB(pixel, format, r, g, b) \
+    PYCSDL2_FUNC(SDL_GetRGB)(pixel, format, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRGBA) */
+#define SDL_GetRGBA(pixel, format, r, g, b, a) \
+    PYCSDL2_FUNC(SDL_GetRGBA)(pixel, format, r, g, b, a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CalculateGammaRamp) */
+#define SDL_CalculateGammaRamp(gamma, ramp) \
+    PYCSDL2_FUNC(SDL_CalculateGammaRamp)(gamma, ramp)
+
+/* SDL_platform.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetPlatform) */
+#define SDL_GetPlatform() \
+    PYCSDL2_FUNC(SDL_GetPlatform)()
+
+/* SDL_power.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetPowerInfo) */
+#define SDL_GetPowerInfo(secs, pct) \
+    PYCSDL2_FUNC(SDL_GetPowerInfo)(secs, pct)
+
+/* SDL_rect.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HasIntersection) */
+#define SDL_HasIntersection(A, B) \
+    PYCSDL2_FUNC(SDL_HasIntersection)(A, B)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IntersectRect) */
+#define SDL_IntersectRect(A, B, result) \
+    PYCSDL2_FUNC(SDL_IntersectRect)(A, B, result)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnionRect) */
+#define SDL_UnionRect(A, B, result) \
+    PYCSDL2_FUNC(SDL_UnionRect)(A, B, result)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_EnclosePoints) */
+#define SDL_EnclosePoints(points, count, clip, result) \
+    PYCSDL2_FUNC(SDL_EnclosePoints)(points, count, clip, result)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IntersectRectAndLine) */
+#define SDL_IntersectRectAndLine(rect, X1, Y1, X2, Y2) \
+    PYCSDL2_FUNC(SDL_IntersectRectAndLine)(rect, X1, Y1, X2, Y2)
+
+/* SDL_render.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumRenderDrivers) */
+#define SDL_GetNumRenderDrivers() \
+    PYCSDL2_FUNC(SDL_GetNumRenderDrivers)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRenderDriverInfo) */
+#define SDL_GetRenderDriverInfo(index, info) \
+    PYCSDL2_FUNC(SDL_GetRenderDriverInfo)(index, info)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateWindowAndRenderer) */
+#define SDL_CreateWindowAndRenderer(width, height, window_flags, window, \
+                                    renderer) \
+    PYCSDL2_FUNC(SDL_CreateWindowAndRenderer)(width, height, window_flags, \
+                                              window, renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateRenderer) */
+#define SDL_CreateRenderer(window, index, flags) \
+    PYCSDL2_FUNC(SDL_CreateRenderer)(window, index, flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateSoftwareRenderer) */
+#define SDL_CreateSoftwareRenderer(surface) \
+    PYCSDL2_FUNC(SDL_CreateSoftwareRenderer)(surface)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRenderer) */
+#define SDL_GetRenderer(window) \
+    PYCSDL2_FUNC(SDL_GetRenderer)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRendererInfo) */
+#define SDL_GetRendererInfo(renderer, info) \
+    PYCSDL2_FUNC(SDL_GetRendererInfo)(renderer, info)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRendererOutputSize) */
+#define SDL_GetRendererOutputSize(renderer, w, h) \
+    PYCSDL2_FUNC(SDL_GetRendererOutputSize)(renderer, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateTexture) */
+#define SDL_CreateTexture(renderer, format, access, w, h) \
+    PYCSDL2_FUNC(SDL_CreateTexture)(renderer, format, access, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateTextureFromSurface) */
+#define SDL_CreateTextureFromSurface(renderer, surface) \
+    PYCSDL2_FUNC(SDL_CreateTextureFromSurface)(renderer, surface)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_QueryTexture) */
+#define SDL_QueryTexture(texture, format, access, w, h) \
+    PYCSDL2_FUNC(SDL_QueryTexture)(texture, format, access, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetTextureColorMod) */
+#define SDL_SetTextureColorMod(texture, r, g, b) \
+    PYCSDL2_FUNC(SDL_SetTextureColorMod)(texture, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTextureColorMod) */
+#define SDL_GetTextureColorMod(texture, r, g, b) \
+    PYCSDL2_FUNC(SDL_GetTextureColorMod)(texture, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetTextureAlphaMod) */
+#define SDL_SetTextureAlphaMod(texture, alpha) \
+    PYCSDL2_FUNC(SDL_SetTextureAlphaMod)(texture, alpha)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTextureAlphaMod) */
+#define SDL_GetTextureAlphaMod(texture, alpha) \
+    PYCSDL2_FUNC(SDL_GetTextureAlphaMod)(texture, alpha)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetTextureBlendMode) */
+#define SDL_SetTextureBlendMode(texture, blendMode) \
+    PYCSDL2_FUNC(SDL_SetTextureBlendMode)(texture, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTextureBlendMode) */
+#define SDL_GetTextureBlendMode(texture, blendMode) \
+    PYCSDL2_FUNC(SDL_GetTextureBlendMode)(texture, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UpdateTexture) */
+#define SDL_UpdateTexture(texture, rect, pixels, pitch) \
+    PYCSDL2_FUNC(SDL_UpdateTexture)(texture, rect, pixels, pitch)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LockTexture) */
+#define SDL_LockTexture(texture, rect, pixels, pitch) \
+    PYCSDL2_FUNC(SDL_LockTexture)(texture, rect, pixels, pitch)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnlockTexture) */
+#define SDL_UnlockTexture(texture) \
+    PYCSDL2_FUNC(SDL_UnlockTexture)(texture)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderTargetSupported) */
+#define SDL_RenderTargetSupported(renderer) \
+    PYCSDL2_FUNC(SDL_RenderTargetSupported)(renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetRenderTarget) */
+#define SDL_SetRenderTarget(renderer, texture) \
+    PYCSDL2_FUNC(SDL_SetRenderTarget)(renderer, texture)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRenderTarget) */
+#define SDL_GetRenderTarget(renderer) \
+    PYCSDL2_FUNC(SDL_GetRenderTarget)(renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderSetLogicalSize) */
+#define SDL_RenderSetLogicalSize(renderer, w, h) \
+    PYCSDL2_FUNC(SDL_RenderSetLogicalSize)(renderer, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderGetLogicalSize) */
+#define SDL_RenderGetLogicalSize(renderer, w, h) \
+    PYCSDL2_FUNC(SDL_RenderGetLogicalSize)(renderer, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderSetViewport) */
+#define SDL_RenderSetViewport(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderSetViewport)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderGetViewport) */
+#define SDL_RenderGetViewport(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderGetViewport)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderSetClipRect) */
+#define SDL_RenderSetClipRect(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderSetClipRect)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderGetClipRect) */
+#define SDL_RenderGetClipRect(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderGetClipRect)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderSetScale) */
+#define SDL_RenderSetScale(renderer, scaleX, scaleY) \
+    PYCSDL2_FUNC(SDL_RenderSetScale)(renderer, scaleX, scaleY)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderGetScale) */
+#define SDL_RenderGetScale(renderer, scaleX, scaleY) \
+    PYCSDL2_FUNC(SDL_RenderGetScale)(renderer, scaleX, scaleY)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetRenderDrawColor) */
+#define SDL_SetRenderDrawColor(renderer, r, g, b, a) \
+    PYCSDL2_FUNC(SDL_SetRenderDrawColor)(renderer, r, g, b, a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRenderDrawColor) */
+#define SDL_GetRenderDrawColor(renderer, r, g, b, a) \
+    PYCSDL2_FUNC(SDL_GetRenderDrawColor)(renderer, r, g, b, a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetRenderDrawBlendMode) */
+#define SDL_SetRenderDrawBlendMode(renderer, blendMode) \
+    PYCSDL2_FUNC(SDL_SetRenderDrawBlendMode)(renderer, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRenderDrawBlendMode) */
+#define SDL_GetRenderDrawBlendMode(renderer, blendMode) \
+    PYCSDL2_FUNC(SDL_GetRenderDrawBlendMode)(renderer, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderClear) */
+#define SDL_RenderClear(renderer) \
+    PYCSDL2_FUNC(SDL_RenderClear)(renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawPoint) */
+#define SDL_RenderDrawPoint(renderer, x, y) \
+    PYCSDL2_FUNC(SDL_RenderDrawPoint)(renderer, x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawPoints) */
+#define SDL_RenderDrawPoints(renderer, points, count) \
+    PYCSDL2_FUNC(SDL_RenderDrawPoints)(renderer, points, count)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawLine) */
+#define SDL_RenderDrawLine(renderer, x1, y1, x2, y2) \
+    PYCSDL2_FUNC(SDL_RenderDrawLine)(renderer, x1, y1, x2, y2)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawLines) */
+#define SDL_RenderDrawLines(renderer, points, count) \
+    PYCSDL2_FUNC(SDL_RenderDrawLines)(renderer, points, count)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawRect) */
+#define SDL_RenderDrawRect(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderDrawRect)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderDrawRects) */
+#define SDL_RenderDrawRects(renderer, rects, count) \
+    PYCSDL2_FUNC(SDL_RenderDrawRects)(renderer, rects, count)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderFillRect) */
+#define SDL_RenderFillRect(renderer, rect) \
+    PYCSDL2_FUNC(SDL_RenderFillRect)(renderer, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderFillRects) */
+#define SDL_RenderFillRects(renderer, rects, count) \
+    PYCSDL2_FUNC(SDL_RenderFillRects)(renderer, rects, count)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderCopy) */
+#define SDL_RenderCopy(renderer, texture, srcrect, dstrect) \
+    PYCSDL2_FUNC(SDL_RenderCopy)(renderer, texture, srcrect, dstrect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderCopyEx) */
+#define SDL_RenderCopyEx(renderer, texture, srcrect, dstrect, angle, center, \
+                         flip) \
+    PYCSDL2_FUNC(SDL_RenderCopyEx)(renderer, texture, srcrect, dstrect, angle,\
+                                   center, flip)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderReadPixels) */
+#define SDL_RenderReadPixels(renderer, rect, format, pixels, pitch) \
+    PYCSDL2_FUNC(SDL_RenderReadPixels)(renderer, rect, format, pixels, pitch)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RenderPresent) */
+#define SDL_RenderPresent(renderer) \
+    PYCSDL2_FUNC(SDL_RenderPresent)(renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DestroyRenderer) */
+#define SDL_DestroyRenderer(renderer) \
+    PYCSDL2_FUNC(SDL_DestroyRenderer)(renderer)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_BindTexture) */
+#define SDL_GL_BindTexture(texture, texw, texh) \
+    PYCSDL2_FUNC(SDL_GL_BindTexture)(texture, texw, texh)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_UnbindTexture) */
+#define SDL_GL_UnbindTexture(texture) \
+    PYCSDL2_FUNC(SDL_GL_UnbindTexture)(texture)
+
+/* SDL_rwops.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RWFromFile) */
+#define SDL_RWFromFile(file, mode) \
+    PYCSDL2_FUNC(SDL_RWFromFile)(file, mode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RWFromFP) */
+#define SDL_RWFromFP(fp, autoclose) \
+    PYCSDL2_FUNC(SDL_RWFromFP)(fp, autoclose)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RWFromMem) */
+#define SDL_RWFromMem(mem, size) \
+    PYCSDL2_FUNC(SDL_RWFromMem)(mem, size)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RWFromConstMem) */
+#define SDL_RWFromConstMem(mem, size) \
+    PYCSDL2_FUNC(SDL_RWFromConstMem)(mem, size)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AllocRW) */
+#define SDL_AllocRW() \
+    PYCSDL2_FUNC(SDL_AllocRW)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeRW) */
+#define SDL_FreeRW(area) \
+    PYCSDL2_FUNC(SDL_FreeRW)(area)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadU8) */
+#define SDL_ReadU8(src) \
+    PYCSDL2_FUNC(SDL_ReadU8)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadLE16) */
+#define SDL_ReadLE16(src) \
+    PYCSDL2_FUNC(SDL_ReadLE16)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadBE16) */
+#define SDL_ReadBE16(src) \
+    PYCSDL2_FUNC(SDL_ReadBE16)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadLE32) */
+#define SDL_ReadLE32(src) \
+    PYCSDL2_FUNC(SDL_ReadLE32)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadBE32) */
+#define SDL_ReadBE32(src) \
+    PYCSDL2_FUNC(SDL_ReadBE32)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadLE64) */
+#define SDL_ReadLE64(src) \
+    PYCSDL2_FUNC(SDL_ReadLE64)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ReadBE64) */
+#define SDL_ReadBE64(src) \
+    PYCSDL2_FUNC(SDL_ReadBE64)(src)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteU8) */
+#define SDL_WriteU8(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteU8)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteLE16) */
+#define SDL_WriteLE16(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteLE16)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteBE16) */
+#define SDL_WriteBE16(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteBE16)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteLE32) */
+#define SDL_WriteLE32(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteLE32)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteBE32) */
+#define SDL_WriteBE32(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteBE32)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteLE64) */
+#define SDL_WriteLE64(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteLE64)(dst, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WriteBE64) */
+#define SDL_WriteBE64(dst, value) \
+    PYCSDL2_FUNC(SDL_WriteBE64)(dst, value)
+
+/* SDL_shape.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateShapedWindow) */
+#define SDL_CreateShapedWindow(title, x, y, w, h, flags) \
+    PYCSDL2_FUNC(SDL_CreateShapedWindow)(title, x, y, w, h, flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IsShapedWindow) */
+#define SDL_IsShapedWindow(window) \
+    PYCSDL2_FUNC(SDL_IsShapedWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowShape) */
+#define SDL_SetWindowShape(window, shape, shape_mode) \
+    PYCSDL2_FUNC(SDL_SetWindowShape)(window, shape, shape_mode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetShapedWindowMode) */
+#define SDL_GetShapedWindowMode(window, shape_mode) \
+    PYCSDL2_FUNC(SDL_GetShapedWindowMode)(window, shape_mode)
+
+/* SDL_stdinc.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_malloc) */
+#define SDL_malloc(size) \
+    PYCSDL2_FUNC(SDL_malloc)(size)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_calloc) */
+#define SDL_calloc(nmemb, size) \
+    PYCSDL2_FUNC(SDL_calloc)(nmemb, size)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_realloc) */
+#define SDL_realloc(mem, size) \
+    PYCSDL2_FUNC(SDL_realloc)(mem, size)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_free) */
+#define SDL_free(mem) \
+    PYCSDL2_FUNC(SDL_free)(mem)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_getenv) */
+#define SDL_getenv(name) \
+    PYCSDL2_FUNC(SDL_getenv)(name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_setenv) */
+#define SDL_setenv(name, value, overwrite) \
+    PYCSDL2_FUNC(SDL_setenv)(name, value, overwrite)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_qsort) */
+#define SDL_qsort(base, nmemb, size, compare) \
+    PYCSDL2_FUNC(SDL_qsort)(base, nmemb, size, compare)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_abs) */
+#define SDL_abs(x) \
+    PYCSDL2_FUNC(SDL_abs)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_isdigit) */
+#define SDL_isdigit(x) \
+    PYCSDL2_FUNC(SDL_isdigit)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_isspace) */
+#define SDL_isspace(x) \
+    PYCSDL2_FUNC(SDL_isspace)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_toupper) */
+#define SDL_toupper(x) \
+    PYCSDL2_FUNC(SDL_toupper)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_tolower) */
+#define SDL_tolower(x) \
+    PYCSDL2_FUNC(SDL_tolower)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_memset) */
+#define SDL_memset(dst, c, len) \
+    PYCSDL2_FUNC(SDL_memset)(dst, c, len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_memcpy) */
+#define SDL_memcpy(dst, src, len) \
+    PYCSDL2_FUNC(SDL_memcpy)(dst, src, len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_memmove) */
+#define SDL_memmove(dst, src, len) \
+    PYCSDL2_FUNC(SDL_memmove)(dst, src, len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_memcmp) */
+#define SDL_memcmp(s1, s2, len) \
+    PYCSDL2_FUNC(SDL_memcmp)(s1, s2, len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_wcslen) */
+#define SDL_wcslen(wstr) \
+    PYCSDL2_FUNC(SDL_wcslen)(wstr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_wcslcpy) */
+#define SDL_wcslcpy(dst, src, maxlen) \
+    PYCSDL2_FUNC(SDL_wcslcpy)(dst, src, maxlen)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strlen) */
+#define SDL_strlen(str) \
+    PYCSDL2_FUNC(SDL_strlen)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strlcpy) */
+#define SDL_strlcpy(dst, src, maxlen) \
+    PYCSDL2_FUNC(SDL_strlcpy)(dst, src, maxlen)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_utf8strlcpy) */
+#define SDL_utf8strlcpy(dst, src, dst_bytes) \
+    PYCSDL2_FUNC(SDL_utf8strlcpy)(dst, src, dst_bytes)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strlcat) */
+#define SDL_strlcat(dst, src, maxlen) \
+    PYCSDL2_FUNC(SDL_strlcat)(dst, src, maxlen)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strdup) */
+#define SDL_strdup(str) \
+    PYCSDL2_FUNC(SDL_strdup)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strrev) */
+#define SDL_strrev(str) \
+    PYCSDL2_FUNC(SDL_strrev)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strupr) */
+#define SDL_strupr(str) \
+    PYCSDL2_FUNC(SDL_strupr)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strlwr) */
+#define SDL_strlwr(str) \
+    PYCSDL2_FUNC(SDL_strlwr)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strchr) */
+#define SDL_strchr(str, c) \
+    PYCSDL2_FUNC(SDL_strchr)(str, c)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strrchr) */
+#define SDL_strrchr(str, c) \
+    PYCSDL2_FUNC(SDL_strrchr)(str, c)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strstr) */
+#define SDL_strstr(haystack, needle) \
+    PYCSDL2_FUNC(SDL_strstr)(haystack, needle)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_itoa) */
+#define SDL_itoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_itoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_uitoa) */
+#define SDL_uitoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_uitoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ltoa) */
+#define SDL_ltoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_ltoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ultoa) */
+#define SDL_ultoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_ultoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_lltoa) */
+#define SDL_lltoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_lltoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ulltoa) */
+#define SDL_ulltoa(value, str, radix) \
+    PYCSDL2_FUNC(SDL_ulltoa)(value, str, radix)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_atoi) */
+#define SDL_atoi(str) \
+    PYCSDL2_FUNC(SDL_atoi)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_atof) */
+#define SDL_atof(str) \
+    PYCSDL2_FUNC(SDL_atof)(str)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strtol) */
+#define SDL_strtol(str, endp, base) \
+    PYCSDL2_FUNC(SDL_strtol)(str, endp, base)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strtoul) */
+#define SDL_strtoul(str, endp, base) \
+    PYCSDL2_FUNC(SDL_strtoul)(str, endp, base)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strtoll) */
+#define SDL_strtoll(str, endp, base) \
+    PYCSDL2_FUNC(SDL_strtoll)(str, endp, base)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strtoull) */
+#define SDL_strtoull(str, endp, base) \
+    PYCSDL2_FUNC(SDL_strtoull)(str, endp, base)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strtod) */
+#define SDL_strtod(str, endp) \
+    PYCSDL2_FUNC(SDL_strtod)(str, endp)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strcmp) */
+#define SDL_strcmp(str1, str2) \
+    PYCSDL2_FUNC(SDL_strcmp)(str1, str2)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strncmp) */
+#define SDL_strncmp(str1, str2, maxlen) \
+    PYCSDL2_FUNC(SDL_strncmp)(str1, str2, maxlen)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strcasecmp) */
+#define SDL_strcasecmp(str1, str2) \
+    PYCSDL2_FUNC(SDL_strcasecmp)(str1, str2)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_strncasecmp) */
+#define SDL_strncasecmp(str1, str2, len) \
+    PYCSDL2_FUNC(SDL_strncasecmp)(str1, str2, len)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_sscanf) */
+#define SDL_sscanf(text, ...) \
+    PYCSDL2_FUNC(SDL_sscanf)(text, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_snprintf) */
+#define SDL_snprintf(text, maxlen, ...) \
+    PYCSDL2_FUNC(SDL_snprintf)(text, maxlen, __VA_ARGS__)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_vsnprintf) */
+#define SDL_vsnprintf(text, maxlen, fmt, ap) \
+    PYCSDL2_FUNC(SDL_vsnprintf)(text, maxlen, fmt, ap)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_atan) */
+#define SDL_atan(x) \
+    PYCSDL2_FUNC(SDL_atan)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_atan2) */
+#define SDL_atan2(x, y) \
+    PYCSDL2_FUNC(SDL_atan2)(x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ceil) */
+#define SDL_ceil(x) \
+    PYCSDL2_FUNC(SDL_ceil)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_copysign) */
+#define SDL_copysign(x, y) \
+    PYCSDL2_FUNC(SDL_copysign)(x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_cos) */
+#define SDL_cos(x) \
+    PYCSDL2_FUNC(SDL_cos)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_cosf) */
+#define SDL_cosf(x) \
+    PYCSDL2_FUNC(SDL_cosf)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_fabs) */
+#define SDL_fabs(x) \
+    PYCSDL2_FUNC(SDL_fabs)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_floor) */
+#define SDL_floor(x) \
+    PYCSDL2_FUNC(SDL_floor)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_log) */
+#define SDL_log(x) \
+    PYCSDL2_FUNC(SDL_log)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_pow) */
+#define SDL_pow(x, y) \
+    PYCSDL2_FUNC(SDL_pow)(x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_scalbn) */
+#define SDL_scalbn(x, n) \
+    PYCSDL2_FUNC(SDL_scalbn)(x, n)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_sin) */
+#define SDL_sin(x) \
+    PYCSDL2_FUNC(SDL_sin)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_sinf) */
+#define SDL_sinf(x) \
+    PYCSDL2_FUNC(SDL_sinf)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_sqrt) */
+#define SDL_sqrt(x) \
+    PYCSDL2_FUNC(SDL_sqrt)(x)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iconv_open) */
+#define SDL_iconv_open(tocode, fromcode) \
+    PYCSDL2_FUNC(SDL_iconv_open)(tocode, fromcode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iconv_close) */
+#define SDL_iconv_close(cd) \
+    PYCSDL2_FUNC(SDL_iconv_close)(cd)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iconv) */
+#define SDL_iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft) \
+    PYCSDL2_FUNC(SDL_iconv)(cd, inbuf, inbytesleft, outbuf, outbytesleft)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iconv_string) */
+#define SDL_iconv_string(tocode, fromcode, inbuf, inbytesleft) \
+    PYCSDL2_FUNC(SDL_iconv_string)(tocode, fromcode, inbuf, inbytesleft)
+
+/* SDL_surface.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateRGBSurface) */
+#define SDL_CreateRGBSurface(flags, width, height, depth, Rmask, Gmask, Bmask,\
+                             Amask) \
+    PYCSDL2_FUNC(SDL_CreateRGBSurface)(flags, width, height, depth, Rmask, \
+                                       Gmask, Bmask, Amask)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateRGBSurfaceFrom) */
+#define SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, \
+                                 Gmask, Bmask, Amask) \
+    PYCSDL2_FUNC(SDL_CreateRGBSurfaceFrom)(pixels, width, height, depth, \
+                                           pitch, Rmask, Gmask, Amask)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeSurface) */
+#define SDL_FreeSurface(surface) \
+    PYCSDL2_FUNC(SDL_FreeSurface)(surface)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetSurfacePalette) */
+#define SDL_SetSurfacePalette(surface, palette) \
+    PYCSDL2_FUNC(SDL_SetSurfacePalette)(surface, palette)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LockSurface) */
+#define SDL_LockSurface(surface) \
+    PYCSDL2_FUNC(SDL_LockSurface)(surface)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UnlockSurface) */
+#define SDL_UnlockSurface(surface) \
+    PYCSDL2_FUNC(SDL_UnlockSurface)(surface)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LoadBMP_RW) */
+#define SDL_LoadBMP_RW(src, freesrc) \
+    PYCSDL2_FUNC(SDL_LoadBMP_RW)(src, freesrc)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SaveBMP_RW) */
+#define SDL_SaveBMP_RW(surface, dst, freedst) \
+    PYCSDL2_FUNC(SDL_SaveBMP_RW)(surface, dst, freedst)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetSurfaceRLE) */
+#define SDL_SetSurfaceRLE(surface, flag) \
+    PYCSDL2_FUNC(SDL_SetSurfaceRLE)(surface, flag)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetColorKey) */
+#define SDL_SetColorKey(surface, flag, key) \
+    PYCSDL2_FUNC(SDL_SetColorKey)(surface, flag, key)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetColorKey) */
+#define SDL_GetColorKey(surface, key) \
+    PYCSDL2_FUNC(SDL_GetColorKey)(surface, key)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetSurfaceColorMod) */
+#define SDL_SetSurfaceColorMod(surface, r, g, b) \
+    PYCSDL2_FUNC(SDL_SetSurfaceColorMod)(surface, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetSurfaceColorMod) */
+#define SDL_GetSurfaceColorMod(surface, r, g, b) \
+    PYCSDL2_FUNC(SDL_GetSurfaceColorMod)(surface, r, g, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetSurfaceAlphaMod) */
+#define SDL_SetSurfaceAlphaMod(surface, alpha) \
+    PYCSDL2_FUNC(SDL_SetSurfaceAlphaMod)(surface, alpha)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetSurfaceAlphaMod) */
+#define SDL_GetSurfaceAlphaMod(surface, alpha) \
+    PYCSDL2_FUNC(SDL_GetSurfaceAlphaMod)(surface, alpha)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetSurfaceBlendMode) */
+#define SDL_SetSurfaceBlendMode(surface, blendMode) \
+    PYCSDL2_FUNC(SDL_SetSurfaceBlendMode)(surface, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetSurfaceBlendMode) */
+#define SDL_GetSurfaceBlendMode(surface, blendMode) \
+    PYCSDL2_FUNC(SDL_GetSurfaceBlendMode)(surface, blendMode)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetClipRect) */
+#define SDL_SetClipRect(surface, rect) \
+    PYCSDL2_FUNC(SDL_SetClipRect)(surface, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetClipRect) */
+#define SDL_GetClipRect(surface, rect) \
+    PYCSDL2_FUNC(SDL_GetClipRect)(surface, rect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ConvertSurface) */
+#define SDL_ConvertSurface(src, fmt, flags) \
+    PYCSDL2_FUNC(SDL_ConvertSurface)(src, fmt, flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ConvertSurfaceFormat) */
+#define SDL_ConvertSurfaceFormat(src, pixel_format, flags) \
+    PYCSDL2_FUNC(SDL_ConvertSurfaceFormat)(src, pixel_format, flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ConvertPixels) */
+#define SDL_ConvertPixels(width, height, src_format, src, src_pitch, \
+                          dst_format, dst, dst_pitch) \
+    PYCSDL2_FUNC(SDL_ConvertPixels)(width, height, src_format, src, \
+                                    src_pitch, dst_format, dst, dst_pitch)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FillRect) */
+#define SDL_FillRect(dst, rect, color) \
+    PYCSDL2_FUNC(SDL_FillRect)(dst, rect, color)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_FillRects) */
+#define SDL_FillRects(dst, rects, count, color) \
+    PYCSDL2_FUNC(SDL_FillRects)(dst, rects, count, color)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UpperBlit) */
+#define SDL_UpperBlit(src, srcrect, dst, dstrect) \
+    PYCSDL2_FUNC(SDL_UpperBlit)(src, srcrect, dst, dstrect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LowerBlit) */
+#define SDL_LowerBlit(src, srcrect, dst, dstrect) \
+    PYCSDL2_FUNC(SDL_LowerBlit)(src, srcrect, dst, dstrect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SoftStretch) */
+#define SDL_SoftStretch(src, srcrect, dst, dstrect) \
+    PYCSDL2_FUNC(SDL_SoftStretch)(src, srcrect, dst, dstrect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UpperBlitScaled) */
+#define SDL_UpperBlitScaled(src, srcrect, dst, dstrect) \
+    PYCSDL2_FUNC(SDL_UpperBlitScaled)(src, srcrect, dst, dstrect)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_LowerBlitScaled) */
+#define SDL_LowerBlitScaled(src, srcrect, dst, dstrect) \
+    PYCSDL2_FUNC(SDL_LowerBlitScaled)(src, srcrect, dst, dstrect)
+
+/* SDL_system.h */
+
+#if defined(__IPHONEOS__) && __IPHONEOS__
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iPhoneSetAnimationCallback) */
+#define SDL_iPhoneSetAnimationCallback(window, interval, callback, \
+                                       callbackParam) \
+    PYCSDL2_FUNC(SDL_iPhoneSetAnimationCallback)(window, interval, callback, \
+                                                 callbackParam)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_iPhoneSetEventPump) */
+#define SDL_iPhoneSetEventPump(enabled) \
+    PYCSDL2_FUNC(SDL_iPhoneSetEventPump)(enabled)
+
+#endif /* __IPHONEOS__ */
+
+#if defined(__ANDROID__) && __ANDROID__
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AndroidGetJNIEnv) */
+#define SDL_AndroidGetJNIEnv() \
+    PYCSDL2_FUNC(SDL_AndroidGetJNIEnv)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AndroidGetActivity) */
+#define SDL_AndroidGetActivity() \
+    PYCSDL2_FUNC(SDL_AndroidGetActivity)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AndroidGetInternalStoragePath)*/
+#define SDL_AndroidGetInternalStoragePath() \
+    PYCSDL2_FUNC(SDL_AndroidGetInternalStoragePath)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AndroidGetExternalStorageState)
+ * */
+#define SDL_AndroidGetExternalStorageState() \
+    PYCSDL2_FUNC(SDL_AndroidGetExternalStorageState)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AndroidGetExternalStoragePath)*/
+#define SDL_AndroidGetExternalStoragePath() \
+    PYCSDL2_FUNC(SDL_AndroidGetExternalStoragePath)()
+
+#endif /* __ANDROID__ */
+
+/* SDL_syswm.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowWMInfo) */
+#define SDL_GetWindowWMInfo(window, info) \
+    PYCSDL2_FUNC(SDL_GetWindowWMInfo)(window, info)
+
+/* SDL_thread.h */
+
+#if defined(__WIN32__) && !defined(HAVE_LIBC)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateThread) */
+#define SDL_CreateThread(fn, name, data, pfnBeginThread, pfnEndThread) \
+    PYCSDL2_FUNC(SDL_CreateThread)(fn, name, data, pfnBeginThread, \
+                                   pfnEndThread)
+
+#else
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateThread) */
+#define SDL_CreateThread(fn, name, data) \
+    PYCSDL2_FUNC(SDL_CreateThread)(fn, name, data)
+
+#endif
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetThreadName) */
+#define SDL_GetThreadName(thread) \
+    PYCSDL2_FUNC(SDL_GetThreadName)(thread)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ThreadID) */
+#define SDL_ThreadID() \
+    PYCSDL2_FUNC(SDL_ThreadID)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetThreadID) */
+#define SDL_GetThreadID(thread) \
+    PYCSDL2_FUNC(SDL_GetThreadID)(thread)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetThreadPriority) */
+#define SDL_SetThreadPriority(priority) \
+    PYCSDL2_FUNC(SDL_SetThreadPriority)(priority)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_WaitThread) */
+#define SDL_WaitThread(thread, status) \
+    PYCSDL2_FUNC(SDL_WaitThread)(thread, status)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_TLSCreate) */
+#define SDL_TLSCreate() \
+    PYCSDL2_FUNC(SDL_TLSCreate)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_TLSGet) */
+#define SDL_TLSGet(id) \
+    PYCSDL2_FUNC(SDL_TLSGet)(id)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_TLSSet) */
+#define SDL_TLSSet(id, value, destructor) \
+    PYCSDL2_FUNC(SDL_TLSSet)(id, value, destructor)
+
+/* SDL_timer.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTicks) */
+#define SDL_GetTicks() \
+    PYCSDL2_FUNC(SDL_GetTicks)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetPerformanceCounter) */
+#define SDL_GetPerformanceCounter() \
+    PYCSDL2_FUNC(SDL_GetPerformanceCounter)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetPerformanceFrequency) */
+#define SDL_GetPerformanceFrequency() \
+    PYCSDL2_FUNC(SDL_GetPerformanceFrequency)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_Delay) */
+#define SDL_Delay(ms) \
+    PYCSDL2_FUNC(SDL_Delay)(ms)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_AddTimer) */
+#define SDL_AddTimer(interval, callback, param) \
+    PYCSDL2_FUNC(SDL_AddTimer)(interval, callback, param)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RemoveTimer) */
+#define SDL_RemoveTimer(id) \
+    PYCSDL2_FUNC(SDL_RemoveTimer)(id)
+
+/* SDL_touch.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumTouchDevices) */
+#define SDL_GetNumTouchDevices() \
+    PYCSDL2_FUNC(SDL_GetNumTouchDevices)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTouchDevice) */
+#define SDL_GetTouchDevice(index) \
+    PYCSDL2_FUNC(SDL_GetTouchDevice)(index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumTouchFingers) */
+#define SDL_GetNumTouchFingers(touchID) \
+    PYCSDL2_FUNC(SDL_GetNumTouchFingers)(touchID)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetTouchFinger) */
+#define SDL_GetTouchFinger(touchID, index) \
+    PYCSDL2_FUNC(SDL_GetTouchFinger)(touchID, index)
+
+/* SDL_version.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetVersion) */
+#define SDL_GetVersion(ver) \
+    PYCSDL2_FUNC(SDL_GetVersion)(ver)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRevision) */
+#define SDL_GetRevision() \
+    PYCSDL2_FUNC(SDL_GetRevision)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetRevisionNumber) */
+#define SDL_GetRevisionNumber() \
+    PYCSDL2_FUNC(SDL_GetRevisionNumber)()
+
+/* SDL_video.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumVideoDrivers) */
+#define SDL_GetNumVideoDrivers() \
+    PYCSDL2_FUNC(SDL_GetNumVideoDrivers)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetVideoDriver) */
+#define SDL_GetVideoDriver(index) \
+    PYCSDL2_FUNC(SDL_GetVideoDriver)(index)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_VideoInit) */
+#define SDL_VideoInit(driver_name) \
+    PYCSDL2_FUNC(SDL_VideoInit)(driver_name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_VideoQuit) */
+#define SDL_VideoQuit() \
+    (PYCSDL2_FUNC(SDL_VideoQuit)())
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCurrentVideoDriver) */
+#define SDL_GetCurrentVideoDriver() \
+    (PYCSDL2_FUNC(SDL_GetCurrentVideoDriver)())
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumVideoDisplays) */
+#define SDL_GetNumVideoDisplays() \
+    (PYCSDL2_FUNC(SDL_GetNumVideoDisplays)())
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetDisplayName) */
+#define SDL_GetDisplayName(displayIndex) \
+    (PYCSDL2_FUNC(SDL_GetDisplayName)(displayIndex))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetDisplayBounds) */
+#define SDL_GetDisplayBounds(displayIndex, rect) \
+    (PYCSDL2_FUNC(SDL_GetDisplayBounds)(displayIndex, rect))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetNumDisplayModes) */
+#define SDL_GetNumDisplayModes(displayIndex) \
+    (PYCSDL2_FUNC(SDL_GetNumDisplayModes)(displayIndex))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetDisplayMode) */
+#define SDL_GetDisplayMode(displayIndex, modeIndex, mode) \
+    (PYCSDL2_FUNC(SDL_GetDisplayMode)(displayIndex, modeIndex, mode))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetDesktopDisplayMode) */
+#define SDL_GetDesktopDisplayMode(displayIndex, mode) \
+    (PYCSDL2_FUNC(SDL_GetDesktopDisplayMode)(displayIndex, mode))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetCurrentDisplayMode) */
+#define SDL_GetCurrentDisplayMode(displayIndex, mode) \
+    (PYCSDL2_FUNC(SDL_GetCurrentDisplayMode)(displayIndex, mode))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetClosestDisplayMode) */
+#define SDL_GetClosestDisplayMode(displayIndex, mode, closest) \
+    (PYCSDL2_FUNC(SDL_GetClosestDisplayMode)(displayIndex, mode, closest))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowDisplayIndex) */
+#define SDL_GetWindowDisplayIndex(window) \
+    (PYCSDL2_FUNC(SDL_GetWindowDisplayIndex)(window))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowDisplayMode) */
+#define SDL_SetWindowDisplayMode(window, mode) \
+    (PYCSDL2_FUNC(SDL_SetWindowDisplayMode)(window, mode))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowDisplayMode) */
+#define SDL_GetWindowDisplayMode(window, mode) \
+    (PYCSDL2_FUNC(SDL_GetWindowDisplayMode)(window, mode))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowPixelFormat) */
+#define SDL_GetWindowPixelFormat(window) \
+    (PYCSDL2_FUNC(SDL_GetWindowPixelFormat)(window))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateWindow) */
+#define SDL_CreateWindow(title, x, y, w, h, flags) \
+    (PYCSDL2_FUNC(SDL_CreateWindow)(title, x, y, w, h, flags))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_CreateWindowFrom) */
+#define SDL_CreateWindowFrom(data) \
+    (PYCSDL2_FUNC(SDL_CreateWindowFrom)(data))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowID) */
+#define SDL_GetWindowID(window) \
+    (PYCSDL2_FUNC(SDL_GetWindowID)(window))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowFromID) */
+#define SDL_GetWindowFromID(id) \
+    (PYCSDL2_FUNC(SDL_GetWindowFromID)(id))
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowFlags) */
+#define SDL_GetWindowFlags(window) \
+    PYCSDL2_FUNC(SDL_GetWindowFlags)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowTitle) */
+#define SDL_SetWindowTitle(window, title) \
+    PYCSDL2_FUNC(SDL_SetWindowTitle)(window, title)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowTitle) */
+#define SDL_GetWindowTitle(window) \
+    PYCSDL2_FUNC(SDL_GetWindowTitle)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowIcon) */
+#define SDL_SetWindowIcon(window, icon) \
+    PYCSDL2_FUNC(SDL_SetWindowIcon)(window, icon)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowData) */
+#define SDL_SetWindowData(window, name, userdata) \
+    PYCSDL2_FUNC(SDL_SetWindowData)(window, name, userdata)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowData) */
+#define SDL_GetWindowData(window, name) \
+    PYCSDL2_FUNC(SDL_GetWindowData)(window, name)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowPosition) */
+#define SDL_SetWindowPosition(window, x, y) \
+    PYCSDL2_FUNC(SDL_SetWindowPosition)(window, x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowPosition) */
+#define SDL_GetWindowPosition(window, x, y) \
+    PYCSDL2_FUNC(SDL_GetWindowPosition)(window, x, y)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowSize) */
+#define SDL_SetWindowSize(window, w, h) \
+    PYCSDL2_FUNC(SDL_SetWindowSize)(window, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowSize) */
+#define SDL_GetWindowSize(window, w, h) \
+    PYCSDL2_FUNC(SDL_GetWindowSize)(window, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowMinimumSize) */
+#define SDL_SetWindowMinimumSize(window, min_w, min_h) \
+    PYCSDL2_FUNC(SDL_SetWindowMinimumSize)(window, min_w, min_h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowMinimumSize) */
+#define SDL_GetWindowMinimumSize(window, w, h) \
+    PYCSDL2_FUNC(SDL_GetWindowMinimumSize)(window, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowMaximumSize) */
+#define SDL_SetWindowMaximumSize(window, max_w, max_h) \
+    PYCSDL2_FUNC(SDL_SetWindowMaximumSize)(window, max_w, max_h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowMaximumSize) */
+#define SDL_GetWindowMaximumSize(window, w, h) \
+    PYCSDL2_FUNC(SDL_GetWindowMaximumSize)(window, w, h)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowBordered) */
+#define SDL_SetWindowBordered(window, bordered) \
+    PYCSDL2_FUNC(SDL_SetWindowBordered)(window, bordered)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_ShowWindow) */
+#define SDL_ShowWindow(window) \
+    PYCSDL2_FUNC(SDL_ShowWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_HideWindow) */
+#define SDL_HideWindow(window) \
+    PYCSDL2_FUNC(SDL_HideWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RaiseWindow) */
+#define SDL_RaiseWindow(window) \
+    PYCSDL2_FUNC(SDL_RaiseWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MaximizeWindow) */
+#define SDL_MaximizeWindow(window) \
+    PYCSDL2_FUNC(SDL_MaximizeWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_MinimizeWindow) */
+#define SDL_MinimizeWindow(window) \
+    PYCSDL2_FUNC(SDL_MinimizeWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_RestoreWindow) */
+#define SDL_RestoreWindow(window) \
+    PYCSDL2_FUNC(SDL_RestoreWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowFullscreen) */
+#define SDL_SetWindowFullscreen(window, flags) \
+    PYCSDL2_FUNC(SDL_SetWindowFullscreen)(window, flags)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowSurface) */
+#define SDL_GetWindowSurface(window) \
+    PYCSDL2_FUNC(SDL_GetWindowSurface)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UpdateWindowSurface) */
+#define SDL_UpdateWindowSurface(window) \
+    PYCSDL2_FUNC(SDL_UpdateWindowSurface)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_UpdateWindowSurfaceRects) */
+#define SDL_UpdateWindowSurfaceRects(window, rects, numrects) \
+    PYCSDL2_FUNC(SDL_UpdateWindowSurfaceRects)(window, rects, numrects)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowGrab) */
+#define SDL_SetWindowGrab(window, grabbed) \
+    PYCSDL2_FUNC(SDL_SetWindowGrab)(window, grabbed)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowGrab) */
+#define SDL_GetWindowGrab(window) \
+    PYCSDL2_FUNC(SDL_GetWindowGrab)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowBrightness) */
+#define SDL_SetWindowBrightness(window, brightness) \
+    PYCSDL2_FUNC(SDL_SetWindowBrightness)(window, brightness)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowBrightness) */
+#define SDL_GetWindowBrightness(window) \
+    PYCSDL2_FUNC(SDL_GetWindowBrightness)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_SetWindowGammaRamp) */
+#define SDL_SetWindowGammaRamp(window, red, green, blue) \
+    PYCSDL2_FUNC(SDL_SetWindowGammaRamp)(window, red, green, blue)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GetWindowGammaRamp) */
+#define SDL_GetWindowGammaRamp(window, red, green, blue) \
+    PYCSDL2_FUNC(SDL_GetWindowGammaRamp)(window, red, green, blue)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DestroyWindow) */
+#define SDL_DestroyWindow(window) \
+    PYCSDL2_FUNC(SDL_DestroyWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_IsScreenSaverEnabled) */
+#define SDL_IsScreenSaverEnabled() \
+    PYCSDL2_FUNC(SDL_IsScreenSaverEnabled)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_EnableScreenSaver) */
+#define SDL_EnableScreenSaver() \
+    PYCSDL2_FUNC(SDL_EnableScreenSaver)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_DisableScreenSaver) */
+#define SDL_DisableScreenSaver() \
+    PYCSDL2_FUNC(SDL_DisableScreenSaver)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_LoadLibrary) */
+#define SDL_GL_LoadLibrary(path) \
+    PYCSDL2_FUNC(SDL_GL_LoadLibrary)(path)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_GetProcAddress) */
+#define SDL_GL_GetProcAddress(proc) \
+    PYCSDL2_FUNC(SDL_GL_GetProcAddress)(proc)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_UnloadLibrary) */
+#define SDL_GL_UnloadLibrary() \
+    PYCSDL2_FUNC(SDL_GL_UnloadLibrary)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_ExtensionSupported) */
+#define SDL_GL_ExtensionSupported(extension) \
+    PYCSDL2_FUNC(SDL_GL_ExtensionSupported)(extension)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_SetAttribute) */
+#define SDL_GL_SetAttribute(attr, value) \
+    PYCSDL2_FUNC(SDL_GL_SetAttribute)(attr, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_GetAttribute) */
+#define SDL_GL_GetAttribute(attr, value) \
+    PYCSDL2_FUNC(SDL_GL_GetAttribute)(attr, value)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_CreateContext) */
+#define SDL_GL_CreateContext(window) \
+    PYCSDL2_FUNC(SDL_GL_CreateContext)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_MakeCurrent) */
+#define SDL_GL_MakeCurrent(window, context) \
+    PYCSDL2_FUNC(SDL_GL_MakeCurrent)(window, context)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_GetCurrentWindow) */
+#define SDL_GL_GetCurrentWindow() \
+    PYCSDL2_FUNC(SDL_GL_GetCurrentWindow)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_GetCurrentContext) */
+#define SDL_GL_GetCurrentContext() \
+    PYCSDL2_FUNC(SDL_GL_GetCurrentContext)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_SetSwapInterval) */
+#define SDL_GL_SetSwapInterval(interval) \
+    PYCSDL2_FUNC(SDL_GL_SetSwapInterval)(interval)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_GetSwapInterval) */
+#define SDL_GL_GetSwapInterval() \
+    PYCSDL2_FUNC(SDL_GL_GetSwapInterval)()
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_SwapWindow) */
+#define SDL_GL_SwapWindow(window) \
+    PYCSDL2_FUNC(SDL_GL_SwapWindow)(window)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_DeleteContext) */
+#define SDL_GL_DeleteContext(context) \
+    PYCSDL2_FUNC(SDL_GL_DeleteContext)(context)
+
+#endif /* PYCSDL2_NO_REDIRECT */
+/** @} */ /* \defgroup SDLAPI */
+
 #endif /* PYCSDL2_MODULE */
 
 #ifdef __cplusplus
