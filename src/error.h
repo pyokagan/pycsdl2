@@ -52,6 +52,8 @@ PyCSDL2_RaiseSDLError(void)
         PyErr_NoMemory();
     else if (!strcmp(msg, "Error reading from datastream"))
         PyErr_SetString(PyExc_OSError, msg);
+    else if (!strcmp(msg, "Error writing to datastream"))
+        PyErr_SetString(PyExc_OSError, msg);
     else
         PyErr_SetString(PyExc_RuntimeError, msg);
     return NULL;
