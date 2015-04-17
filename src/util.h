@@ -48,6 +48,23 @@
 #error Could not find C integer type with 2 bytes width
 #endif
 
+#if SIZEOF_SHORT == 4
+/* A short int must be at least 16 bits long */
+#define Sint32_UNIT "h"
+#elif SIZEOF_INT == 4
+/* An int must be at least 16 bits long */
+#define Sint32_UNIT "i"
+#elif SIZEOF_LONG == 4 || defined(DOXYGEN)
+/* A long int must be at least 32 bits long */
+/**
+ * \brief Python format unit for C signed integer type with same size as
+ *        Sint32
+ */
+#define Sint32_UNIT "l"
+#else
+#error Could not find C integer type with 4 bytes width
+#endif
+
 /*!
  * \brief struct for defining constants.
  *
