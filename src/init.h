@@ -31,6 +31,32 @@
 #include <SDL.h>
 #include "../include/pycsdl2.h"
 #include "util.h"
+#include "error.h"
+
+/**
+ * \brief Binding for SDL_Init().
+ *
+ * Implements the following Python function signature:
+ * \code
+ * SDL_Init(flags) -> None
+ * \endcode
+ *
+ * If SDL_Init() returns non-zero, an exception is raised with
+ * PyCSDL2_RaiseSDLError().
+ *
+ * \returns Py_None on success, NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_Init(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+    if (SDL_Init(flags))
+        return PyCSDL2_RaiseSDLError();
+    Py_RETURN_NONE;
+}
 
 /**
  * \brief Initializes bindings to SDL.h
