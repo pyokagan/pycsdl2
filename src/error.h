@@ -31,4 +31,20 @@
 #include <SDL_error.h>
 #include "../include/pycsdl2.h"
 
+/**
+ * \brief Raises RuntimeError(SDL_GetError())
+ *
+ * Raises PyExc_RuntimeError with the string returned by SDL_GetError().
+ *
+ * \returns NULL always.
+ */
+static PyObject*
+PyCSDL2_RaiseSDLError(void)
+{
+    const char *msg = SDL_GetError();
+
+    PyErr_SetString(PyExc_RuntimeError, msg);
+    return NULL;
+}
+
 #endif /* _PYCSDL2_ERROR_H_ */
