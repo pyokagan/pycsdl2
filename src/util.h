@@ -28,6 +28,20 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 
+#if SIZEOF_SHORT == 2 || defined(DOXYGEN)
+/* A short int must be at least 16 bits long */
+/**
+ * \brief Python format unit for C signed integer type with same size as
+ *        Sint16
+ */
+#define Sint16_UNIT "h"
+#elif SIZEOF_INT == 2
+/* An int must be at least 16 bits long */
+#define Sint16_UNIT "i"
+#else
+#error Could not find C integer type with 2 bytes width
+#endif
+
 /*!
  * \brief struct for defining constants.
  *
