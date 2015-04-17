@@ -35,9 +35,15 @@
  *        Sint16
  */
 #define Sint16_UNIT "h"
+/**
+ * \brief Python format unit for C unsigned integer type with same size as
+ *        Uint16
+ */
+#define Uint16_UNIT "H"
 #elif SIZEOF_INT == 2
 /* An int must be at least 16 bits long */
 #define Sint16_UNIT "i"
+#define Uint16_UNIT "I"
 #else
 #error Could not find C integer type with 2 bytes width
 #endif
