@@ -32,9 +32,14 @@
 #include "../include/pycsdl2.h"
 
 /**
- * \brief Raises RuntimeError(SDL_GetError())
+ * \brief Raises exception with contents of SDL_GetError()
  *
- * Raises PyExc_RuntimeError with the string returned by SDL_GetError().
+ * Raises the appropriate exception with the contents of SDL_GetError() based
+ * on the contents of the error message.
+ *
+ * * If error string is "Out of memory", raises PyExc_MemoryError.
+ *
+ * * Or else, raises the generic PyExc_RuntimeError.
  *
  * \returns NULL always.
  */
@@ -43,7 +48,10 @@ PyCSDL2_RaiseSDLError(void)
 {
     const char *msg = SDL_GetError();
 
-    PyErr_SetString(PyExc_RuntimeError, msg);
+    if (!strcmp(msg, "Out of memory"))
+        PyErr_NoMemory();
+    else
+        PyErr_SetString(PyExc_RuntimeError, msg);
     return NULL;
 }
 
