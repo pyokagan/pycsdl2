@@ -28,6 +28,7 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 #include "distutils.h"
+#include "error.h"
 
 /**
  * \brief csdl2 methods definitions.
