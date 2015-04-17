@@ -30,5 +30,36 @@
 #include <Python.h>
 #include <SDL.h>
 #include "../include/pycsdl2.h"
+#include "util.h"
+
+/**
+ * \brief Initializes bindings to SDL.h
+ *
+ * Adds constants defined in SDL.h to module m.
+ *
+ * \param m csdl2 module object
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_initinit(PyObject *m)
+{
+    static const PyCSDL2_Constant constants[] = {
+        {"SDL_INIT_TIMER", SDL_INIT_TIMER},
+        {"SDL_INIT_AUDIO", SDL_INIT_AUDIO},
+        {"SDL_INIT_VIDEO", SDL_INIT_VIDEO},
+        {"SDL_INIT_JOYSTICK", SDL_INIT_JOYSTICK},
+        {"SDL_INIT_HAPTIC", SDL_INIT_HAPTIC},
+        {"SDL_INIT_GAMECONTROLLER", SDL_INIT_GAMECONTROLLER},
+        {"SDL_INIT_EVENTS", SDL_INIT_EVENTS},
+        {"SDL_INIT_NOPARACHUTE", SDL_INIT_NOPARACHUTE},
+        {"SDL_INIT_EVERYTHING", SDL_INIT_EVERYTHING},
+        {NULL, 0}
+    };
+    const PyCSDL2_Constant *c;
+    for (c = constants; c->name; ++c)
+        if (PyModule_AddIntConstant(m, c->name, c->value))
+            return 0;
+    return 1;
+}
 
 #endif /* _PYCSDL2_INIT_H_ */
