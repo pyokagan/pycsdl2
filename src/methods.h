@@ -30,6 +30,7 @@
 #include "distutils.h"
 #include "error.h"
 #include "init.h"
+#include "video.h"
 
 /**
  * \brief csdl2 methods definitions.
@@ -75,6 +76,8 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup\n"
      "signal handlers for some commonly ignored fatal signals like SIGSEGV.\n"
     },
+
+    /* video.h */
 
     /* End */
     {0}
