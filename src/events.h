@@ -33,4 +33,16 @@
 #include "util.h"
 #include "error.h"
 
+/**
+ * \brief Initializes bindings to SDL_events.h
+ *
+ * \param module csdl2 module PyObject
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_initevents(PyObject *module)
+{
+    return 1;
+}
+
 #endif /* _PYCSDL2_EVENTS_H_ */
