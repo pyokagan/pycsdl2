@@ -102,6 +102,25 @@ static PyTypeObject PyCSDL2_WindowType = {
 };
 
 /**
+ * \brief Creates a new instance of PyCSDL2_WindowType
+ *
+ * \param ptr SDL_Window pointer to store in the instance
+ * \returns Pointer to PyCSDL2_Window on success, NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_Window *
+PyCSDL2_WindowCreate(SDL_Window *ptr)
+{
+    PyCSDL2_Window *self;
+
+    self = (PyCSDL2_Window*) PyType_GenericAlloc(&PyCSDL2_WindowType, 0);
+    if (!self)
+        return NULL;
+    self->ptr = ptr;
+    return self;
+}
+
+/**
  * \brief Initializes bindings to SDL_video.h
  *
  * \param m csdl2 module PyObject
