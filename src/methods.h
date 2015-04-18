@@ -79,6 +79,23 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* video.h */
 
+    {"SDL_CreateWindow",
+     (PyCFunction) PyCSDL2_CreateWindow,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateWindow(title: str, x: int, y: int, w: int, h: int,\n"
+     "                 flags: int) -> SDL_Window\n"
+     "\n"
+     "Create a window with the specified `title`, position (`x`, `y`),\n"
+     "dimensions `w` x `h`, and flags `flags`.\n"
+     "\n"
+     "`flags` can be one or more of following OR'ed together:\n"
+     "`SDL_WINDOW_FULLSCREEN`, `SDL_WINDOW_OPENGL`, `SDL_WINDOW_SHOWN`,\n"
+     "`SDL_WINDOW_HIDDEN`, `SDL_WINDOW_BORDERLESS`, `SDL_WINDOW_RESIZABLE`,\n"
+     "`SDL_WINDOW_RESIZABLE`, `SDL_WINDOW_MINIMIZED`,\n"
+     "`SDL_WINDOW_MAXIMIZED`, `SDL_WINDOW_INPUT_GRABBED`,\n"
+     "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
+     "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"},
+
     /* End */
     {0}
 };

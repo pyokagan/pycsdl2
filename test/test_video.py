@@ -1,6 +1,7 @@
 """test bindings in src/video.h"""
 import distutils.util
 import os.path
+import subprocess
 import sys
 import unittest
 
@@ -15,6 +16,16 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+
+
+try:
+    # Check for video support. If SDL_Init(SDL_INIT_VIDEO) fails, most probably
+    # there is no video support on the system (or there is something wrong with
+    # csdl2).
+    SDL_Init(SDL_INIT_VIDEO)
+    has_video = True
+except RuntimeError:
+    has_video = False
 
 
 class TestConstants(unittest.TestCase):
@@ -218,6 +229,17 @@ class TestSDL_Window(unittest.TestCase):
     def test_cannot_inherit(self):
         "SDL_Window cannot be used as a base class"
         self.assertRaises(TypeError, type, "testtype", (SDL_Window,), {})
+
+
+class TestSDL_CreateWindow(unittest.TestCase):
+    """Test SDL_CreateWindow()"""
+
+    def test_returns_SDL_Window(self):
+        "SDL_CreateWindow() will succeed and return a SDL_Window"
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        win = SDL_CreateWindow(self.id(), -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        self.assertIs(type(win), SDL_Window)
 
 
 if __name__ == '__main__':

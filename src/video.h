@@ -32,6 +32,7 @@
 #include <SDL_video.h>
 #include "../include/pycsdl2.h"
 #include "util.h"
+#include "error.h"
 
 /**
  * \brief Instance data of PyCSDL2_WindowType
@@ -118,6 +119,42 @@ PyCSDL2_WindowCreate(SDL_Window *ptr)
         return NULL;
     self->ptr = ptr;
     return self;
+}
+
+/**
+ * \brief Implements csdl2.SDL_CreateWindow()
+ *
+ * Implements the Python function signature:
+ * \code
+ * SDL_CreateWindow(title: str, x: int, y: int, w: int, h: int, flags: int)
+ *     -> SDL_Window
+ * \endcode
+ *
+ * \returns New instance of PyCSDL2_Window* on success, or NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_Window *
+PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *title;
+    int x, y, w, h;
+    Uint32 flags;
+    static char *kwlist[] = {"title", "x", "y", "w", "h", "flags", NULL};
+    SDL_Window *ptr;
+    PyCSDL2_Window *out;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "siiii" Uint32_UNIT, kwlist,
+        &title, &x, &y, &w, &h, &flags))
+        return NULL;
+    if (!(ptr = SDL_CreateWindow(title, x, y, w, h, flags))) {
+        PyCSDL2_RaiseSDLError();
+        return NULL;
+    }
+    if (!(out = PyCSDL2_WindowCreate(ptr))) {
+        SDL_DestroyWindow(ptr);
+        return NULL;
+    }
+    return out;
 }
 
 /**
