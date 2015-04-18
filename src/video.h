@@ -34,6 +34,57 @@
 #include "util.h"
 
 /**
+ * \brief Instance data of PyCSDL2_WindowType
+ */
+typedef struct PyCSDL2_Window {
+    PyObject_HEAD
+} PyCSDL2_Window;
+
+/**
+ * \brief Type definition of csdl2.SDL_Window
+ */
+static PyTypeObject PyCSDL2_WindowType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Window",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Window),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ 0,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "Window",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ 0,
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ 0,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ 0,
+};
+
+/**
  * \brief Initializes bindings to SDL_video.h
  *
  * \param m csdl2 module PyObject
@@ -128,6 +179,12 @@ PyCSDL2_initvideo(PyObject *m)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(m, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_WindowType)) { return 0; }
+    Py_INCREF(&PyCSDL2_WindowType);
+    if (PyModule_AddObject(m, "SDL_Window", (PyObject*) &PyCSDL2_WindowType))
+        return 0;
+
     return 1;
 }
 
