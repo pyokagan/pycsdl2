@@ -28,7 +28,7 @@ except RuntimeError:
     has_video = False
 
 
-class TestConstants(unittest.TestCase):
+class TestVideoConstants(unittest.TestCase):
     """Tests for the availability of constants and their values"""
 
     def test_SDL_WINDOW_FULLSCREEN(self):

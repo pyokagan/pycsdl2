@@ -17,7 +17,7 @@ if __name__ == '__main__':
 from csdl2 import *
 
 
-class TestConstants(unittest.TestCase):
+class TestInitConstants(unittest.TestCase):
     """Tests for the availability of constants and their values in SDL.h"""
 
     def test_SDL_INIT_TIMER(self):
