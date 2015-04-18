@@ -207,5 +207,18 @@ class TestConstants(unittest.TestCase):
         self.assertEqual(SDL_GL_CONTEXT_RESET_ISOLATION_FLAG, 0x0008)
 
 
+class TestSDL_Window(unittest.TestCase):
+    """Test csdl2.SDL_Window"""
+
+    def test_cannot_create(self):
+        "Cannot create SDL_Window instances"
+        self.assertRaises(TypeError, SDL_Window)
+        self.assertRaises(TypeError, SDL_Window.__new__, SDL_Window)
+
+    def test_cannot_inherit(self):
+        "SDL_Window cannot be used as a base class"
+        self.assertRaises(TypeError, type, "testtype", (SDL_Window,), {})
+
+
 if __name__ == '__main__':
     unittest.main()

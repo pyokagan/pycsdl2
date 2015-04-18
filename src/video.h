@@ -34,6 +34,93 @@
 #include "util.h"
 
 /**
+ * \brief Instance data of PyCSDL2_WindowType
+ */
+typedef struct PyCSDL2_Window {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to SDL_Window handle */
+    SDL_Window *ptr;
+} PyCSDL2_Window;
+
+/**
+ * \brief Destructor for PyCSDL2_WindowType
+ */
+static void
+PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
+{
+    if (self->in_weakreflist)
+        PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->ptr)
+        SDL_DestroyWindow(self->ptr);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
+ * \brief Type definition of csdl2.SDL_Window
+ */
+static PyTypeObject PyCSDL2_WindowType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Window",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Window),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_WindowDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "Window",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Window, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ 0,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ 0,
+};
+
+/**
+ * \brief Creates a new instance of PyCSDL2_WindowType
+ *
+ * \param ptr SDL_Window pointer to store in the instance
+ * \returns Pointer to PyCSDL2_Window on success, NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_Window *
+PyCSDL2_WindowCreate(SDL_Window *ptr)
+{
+    PyCSDL2_Window *self;
+
+    self = (PyCSDL2_Window*) PyType_GenericAlloc(&PyCSDL2_WindowType, 0);
+    if (!self)
+        return NULL;
+    self->ptr = ptr;
+    return self;
+}
+
+/**
  * \brief Initializes bindings to SDL_video.h
  *
  * \param m csdl2 module PyObject
@@ -128,6 +215,12 @@ PyCSDL2_initvideo(PyObject *m)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(m, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_WindowType)) { return 0; }
+    Py_INCREF(&PyCSDL2_WindowType);
+    if (PyModule_AddObject(m, "SDL_Window", (PyObject*) &PyCSDL2_WindowType))
+        return 0;
+
     return 1;
 }
 
