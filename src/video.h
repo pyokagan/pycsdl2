@@ -41,6 +41,15 @@ typedef struct PyCSDL2_Window {
 } PyCSDL2_Window;
 
 /**
+ * \brief Destructor for PyCSDL2_WindowType
+ */
+static void
+PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
+{
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
  * \brief Type definition of csdl2.SDL_Window
  */
 static PyTypeObject PyCSDL2_WindowType = {
@@ -48,7 +57,7 @@ static PyTypeObject PyCSDL2_WindowType = {
     /* tp_name           */ "csdl2.SDL_Window",
     /* tp_basicsize      */ sizeof(PyCSDL2_Window),
     /* tp_itemsize       */ 0,
-    /* tp_dealloc        */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_WindowDealloc,
     /* tp_print          */ 0,
     /* tp_getattr        */ 0,
     /* tp_setattr        */ 0,
