@@ -40,6 +40,8 @@ typedef struct PyCSDL2_Window {
     PyObject_HEAD
     /** \brief Head of weak reference list */
     PyObject *in_weakreflist;
+    /** \brief Pointer to SDL_Window handle */
+    SDL_Window *ptr;
 } PyCSDL2_Window;
 
 /**
@@ -50,6 +52,8 @@ PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
 {
     if (self->in_weakreflist)
         PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->ptr)
+        SDL_DestroyWindow(self->ptr);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
