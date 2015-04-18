@@ -33,4 +33,16 @@
 #include "../include/pycsdl2.h"
 #include "util.h"
 
+/**
+ * \brief Initializes bindings to SDL_video.h
+ *
+ * \param m csdl2 module PyObject
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_initvideo(PyObject *m)
+{
+    return 1;
+}
+
 #endif /* _PYCSDL2_VIDEO_H_ */
