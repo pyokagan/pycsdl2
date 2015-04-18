@@ -1,6 +1,7 @@
 """test bindings in src/video.h"""
 import distutils.util
 import os.path
+import subprocess
 import sys
 import unittest
 
@@ -15,6 +16,16 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+
+
+try:
+    # Check for video support. If SDL_Init(SDL_INIT_VIDEO) fails, most probably
+    # there is no video support on the system (or there is something wrong with
+    # csdl2).
+    SDL_Init(SDL_INIT_VIDEO)
+    has_video = True
+except RuntimeError:
+    has_video = False
 
 
 class TestConstants(unittest.TestCase):
