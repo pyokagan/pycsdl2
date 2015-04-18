@@ -3,6 +3,11 @@ Video
 
 Display and Window Management
 -----------------------------
+.. class:: SDL_Window
+
+   A window.
+
+   It cannot be initialized directly.
 
 Window creation
 ~~~~~~~~~~~~~~~
