@@ -231,5 +231,16 @@ class TestSDL_Window(unittest.TestCase):
         self.assertRaises(TypeError, type, "testtype", (SDL_Window,), {})
 
 
+class TestSDL_CreateWindow(unittest.TestCase):
+    """Test SDL_CreateWindow()"""
+
+    def test_returns_SDL_Window(self):
+        "SDL_CreateWindow() will succeed and return a SDL_Window"
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        win = SDL_CreateWindow(self.id(), -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        self.assertIs(type(win), SDL_Window)
+
+
 if __name__ == '__main__':
     unittest.main()
