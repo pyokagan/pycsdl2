@@ -38,6 +38,8 @@
  */
 typedef struct PyCSDL2_Window {
     PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
 } PyCSDL2_Window;
 
 /**
@@ -46,6 +48,8 @@ typedef struct PyCSDL2_Window {
 static void
 PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
 {
+    if (self->in_weakreflist)
+        PyObject_ClearWeakRefs((PyObject*) self);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
@@ -77,7 +81,7 @@ static PyTypeObject PyCSDL2_WindowType = {
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
     /* tp_richcompare    */ 0,
-    /* tp_weaklistoffset */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Window, in_weakreflist),
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
     /* tp_methods        */ 0,
