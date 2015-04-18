@@ -7,10 +7,36 @@ Display and Window Management
 
    A window.
 
-   It cannot be initialized directly.
+   It cannot be initialized directly. Instead, create one with
+   :func:`SDL_CreateWindow`.
 
 Window creation
 ~~~~~~~~~~~~~~~
+.. function:: SDL_CreateWindow(title: str, x: int, y: int, w: int, h: int, flags: int) -> SDL_Window
+
+   Creates a window with the specified title, position, dimensions and flags.
+
+   :param str title: Title of the window
+   :param int x: X position of the window, :const:`SDL_WINDOWPOS_CENTERED` or
+                 :const:`SDL_WINDOWPOS_UNDEFINED`.
+   :param int y: Y position of the window, :const:`SDL_WINDOWPOS_CENTERED` or
+                 :const:`SDL_WINDOWPOS_UNDEFINED`.
+   :param int w: Width of the window.
+   :param int h: Height of the window.
+   :param int flags: 0, or one or more of the following flags OR'ed together:
+                     :const:`SDL_WINDOW_FULLSCREEN`,
+                     :const:`SDL_WINDOW_FULLSCREEN_DESKTOP`,
+                     :const:`SDL_WINDOW_OPENGL`,
+                     :const:`SDL_WINDOW_SHOWN`,
+                     :const:`SDL_WINDOW_HIDDEN`,
+                     :const:`SDL_WINDOW_BORDERLESS`,
+                     :const:`SDL_WINDOW_RESIZABLE`,
+                     :const:`SDL_WINDOW_MINIMIZED`,
+                     :const:`SDL_WINDOW_MAXIMIZED`,
+                     :const:`SDL_WINDOW_INPUT_GRABBED`.
+   :returns: A new :class:`SDL_Window`
+   :raises RuntimeError: if the Window could not be created.
+
 .. data:: SDL_WINDOWPOS_UNDEFINED
 
    Used to indicate that you don't care what the window position is in any
@@ -22,57 +48,56 @@ Window creation
 
 .. data:: SDL_WINDOW_FULLSCREEN
 
-   Flag to create a fullscreen window.
+   The window is fullscreen.
 
 .. data:: SDL_WINDOW_OPENGL
 
-   Flag to create a window usable with OpenGL
-   context.
+   The window is usable with an OpenGL context.
 
 .. data:: SDL_WINDOW_SHOWN
 
-   Flag to create a visible window.
+   The window is visible.
 
 .. data:: SDL_WINDOW_HIDDEN
 
-   Flag to create a hidden window.
+   The window is hidden.
 
 .. data:: SDL_WINDOW_BORDERLESS
 
-   Flag to create a window with no window decoration.
+   The window has no window decoration.
 
 .. data:: SDL_WINDOW_RESIZABLE
 
-   Flag to create a resizable window.
+   The window is resizable.
 
 .. data:: SDL_WINDOW_MINIMIZED
 
-   Flag to create a minimized window.
+   The window is minimized.
 
 .. data:: SDL_WINDOW_MAXIMIZED
 
-   Flag to create a maximized window.
+   The window is maximized.
 
 .. data:: SDL_WINDOW_INPUT_GRABBED
 
-   Flag to create a window with grabbed input focus.
+   The window has grabbed input focus.
 
 .. data:: SDL_WINDOW_INPUT_FOCUS
 
-   Flag to create a window with input focus.
+   The window has input focus.
 
 .. data:: SDL_WINDOW_MOUSE_FOCUS
 
-   Flag to create a window with mouse focus.
+   The window has mouse focus.
 
 .. data:: SDL_WINDOW_FULLSCREEN_DESKTOP
 
-   Flag to create a window that is exclusively fullscreen -- setting the
-   display mode to match the window dimensions.
+   The window is exclusively fullscreen -- the screen display mode is set to
+   match the window dimensions.
 
 .. data:: SDL_WINDOW_FOREIGN
 
-   Flag to signify that the window was not created by SDL.
+   The window was not created by SDL.
 
 Window Events
 ~~~~~~~~~~~~~
@@ -153,7 +178,7 @@ that is created with SDL_GL_CreateContext. These attributes are set with
 SDL_GL_SetAttribute and read with SDL_GL_GetAttribute.
 
 Note that the following attributes must be set *before* the window is created
-with SDL_CreateWindow:
+with :func:`SDL_CreateWindow`:
 
 * :const:`SDL_GL_RED_SIZE`
 * :const:`SDL_GL_GREEN_SIZE`
