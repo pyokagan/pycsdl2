@@ -245,6 +245,21 @@ the application to process the information stored with them.
    Events :const:`SDL_USEREVENT` through :const:`SDL_LASTEVENT` are for your
    use, and should be allocated with SDL_RegisterEvents
 
+.. function:: SDL_PumpEvents() -> None
+
+   Pumps the event loop, gathering events from the input devices.
+
+   This function updates the event queue and internal input device state.
+   Without calling this function, no input events will ever be placed on the
+   queue.
+
+   :func:`SDL_PollEvent` and :func:`SDL_WaitEvent` implicitly call this
+   function. If you are not polling or waiting for events using these
+   functions, you must explicitly call :func:`SDL_PumpEvents` to force an event
+   queue update.
+
+   This should only be run in the thread that sets the video mode.
+
 .. function:: SDL_PeepEvents(events, numevents: int, action: int, minType: int, maxType: int) -> int
 
    If `action` is :const:`SDL_ADDEVENT`, up to `numevents` events will be added
