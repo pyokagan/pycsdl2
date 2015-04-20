@@ -333,6 +333,36 @@ PyCSDL2_FlushEvents(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_PushEvent()
+ *
+ * \code
+ * SDL_PushEvent(event) -> bool
+ * \endcode
+ * where event is any object that provides a buffer with the same size as
+ * SDL_Event.
+ *
+ * \returns Py_True if SDL_PushEvent() returned 1 and Py_False if
+ *          SDL_PushEvent() returned 0.
+ */
+static PyObject *
+PyCSDL2_PushEvent(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyObject *ev_obj;
+    Py_buffer ev_buf;
+    int ret;
+    static char *kwlist[] = {"event", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist,
+                                     &ev_obj))
+        return NULL;
+    if (PyCSDL2_GetEventBuffer(&ev_buf, ev_obj, 1, 0))
+        return NULL;
+    if ((ret = SDL_PushEvent((SDL_Event*) ev_buf.buf)) < 0)
+        return PyCSDL2_RaiseSDLError();
+    PyBuffer_Release(&ev_buf);
+    return PyBool_FromLong(ret);
+}
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject

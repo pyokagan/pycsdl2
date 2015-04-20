@@ -322,6 +322,40 @@ class Test_SDL_PeepEvents(unittest.TestCase):
                           SDL_GETEVENT, 0, 0)
 
 
+class Test_SDL_PushEvent(unittest.TestCase):
+    """Tests SDL_PushEvent()"""
+
+    @classmethod
+    def setUpClass(cls):
+        SDL_Init(SDL_INIT_EVENTS)
+
+    def test_push_SDL_Event(self):
+        "Pushing a SDL_Event works"
+        ev = SDL_Event()
+        self.assertTrue(SDL_PushEvent(ev))
+
+    def test_push_writable_buf(self):
+        "Pushing a writable buffer with the same size as SDL_Event works"
+        mem = memoryview(SDL_Event())
+        self.assertFalse(mem.readonly)
+        self.assertTrue(SDL_PushEvent(mem))
+
+    def test_push_readonly_buf(self):
+        "Pushing a readonly buffer with the same size as SDL_Event works"
+        mem = memoryview(SDL_Event())
+        bites = mem.tobytes()
+        self.assertTrue(SDL_PushEvent(bites))
+
+    def test_push_None(self):
+        "Pushing None fails"
+        self.assertRaises(TypeError, SDL_PushEvent, None)
+
+    def test_buffer_wrong_size(self):
+        "Pushing a buffer with wrong size fails"
+        mem = bytearray(1)
+        self.assertRaises(BufferError, SDL_PushEvent, mem)
+
+
 class Test_SDL_FlushEvents(unittest.TestCase):
     """Tests SDL_FlushEvents()"""
 

@@ -315,3 +315,19 @@ the application to process the information stored with them.
 
    :param int minType: minimum event type to be cleared.
    :param int maxType: maximum event type to be cleared.
+
+.. function:: SDL_PushEvent(event) -> bool
+
+   Copies `event` into the event queue.
+
+   :param SDL_Event event: Event to be copied into the event queue. Either a
+                           :class:`SDL_Event` instance, or a buffer of
+                           equivalent size.
+   :returns: True on success, False if the event was filtered.
+   :raises BufferError: The provided `event` buffer is of the wrong size.
+
+   .. note::
+
+      For pushing application-specific events, please use
+      :func:`SDL_RegisterEvents()` to get an event type that does not conflict
+      with other code that also wants its own custom event types.

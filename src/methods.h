@@ -107,6 +107,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_FlushEvents().\n"
     },
 
+    {"SDL_PushEvent",
+     (PyCFunction) PyCSDL2_PushEvent,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PushEvent(event) -> bool\n"
+     "\n"
+     "Copies `event` into the event queue. Returns True on success, or False\n"
+     "if the event was filtered.\n"
+     "\n"
+     "For pushing application-specific events, please use\n"
+     "SDL_RegisterEvents() to get an event type that does not conflict with\n"
+     "other code that also wants its own custom event types.\n"
+    },
+
     /* init.h */
 
     {"SDL_Init",
