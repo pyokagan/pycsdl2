@@ -6,3 +6,4 @@ API Reference
 
    basics
    video
+   events

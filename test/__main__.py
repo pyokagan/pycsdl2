@@ -12,6 +12,7 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.join(tests_dir, '..', 'build', plat_specifier))
     from .test_distutils import *
     from .test_error import *
+    from .test_events import *
     from .test_init import *
     from .test_video import *
     unittest.main()

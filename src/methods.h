@@ -29,6 +29,7 @@
 #include "../include/pycsdl2.h"
 #include "distutils.h"
 #include "error.h"
+#include "events.h"
 #include "init.h"
 #include "video.h"
 
@@ -52,6 +53,8 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "attributes of the same name in distutils.extension.Extension which\n"
      "were used to link csdl2 against the system's SDL2 library. Returns\n"
      "None if csdl2 was statically linked to SDL2."},
+
+    /* events.h */
 
     /* init.h */
 
