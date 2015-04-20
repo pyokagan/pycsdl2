@@ -310,5 +310,22 @@ class Test_SDL_PeepEvents(unittest.TestCase):
                           SDL_GETEVENT, 0, 0)
 
 
+class Test_SDL_FlushEvents(unittest.TestCase):
+    """Tests SDL_FlushEvents()"""
+
+    @classmethod
+    def setUpClass(cls):
+        SDL_Init(SDL_INIT_EVENTS)
+
+    def test_flush_all(self):
+        "SDL_FlushEvents() flushes all events"
+        ev = SDL_Event()
+        ev.type = SDL_USEREVENT
+        SDL_PeepEvents(ev, 1, SDL_ADDEVENT, 0, 0)
+        self.assertIs(SDL_FlushEvents(SDL_USEREVENT, SDL_LASTEVENT), None)
+        self.assertEqual(SDL_PeepEvents(ev, 1, SDL_GETEVENT,
+                                        SDL_USEREVENT, SDL_LASTEVENT), 0)
+
+
 if __name__ == '__main__':
     unittest.main()
