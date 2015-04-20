@@ -99,14 +99,17 @@
 /* A short int must be at least 16 bits long */
 #define Sint64_UNIT "h"
 #define Uint64_UNIT "H"
+#define Sint64_TYPE T_SHORT
 #elif SIZEOF_INT == 8
 /* An int must be at least 16 bits long */
 #define Sint64_UNIT "i"
 #define Uint64_UNIT "I"
+#define Sint64_TYPE T_INT
 #elif SIZEOF_LONG == 8
 /* A long int must be at least 32 bits long */
 #define Sint64_UNIT "l"
 #define Uint64_UNIT "k"
+#define Sint64_TYPE T_LONG
 #elif SIZEOF_LONG_LONG == 8 || defined(DOXYGEN)
 /* A long long int must be at least 64 bits long */
 /**
@@ -119,6 +122,10 @@
  *        Uint64
  */
 #define Uint64_UNIT "K"
+/**
+ * \brief PyMemberDef type for C signed integer type with same size as Sint64
+ */
+#define Sint64_TYPE T_LONGLONG
 #else
 #error Could not find C integer type with 8 bytes width
 #endif
