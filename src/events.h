@@ -253,6 +253,25 @@ PyCSDL2_GetEventBuffer(Py_buffer *buf, PyObject *obj, size_t len, int flags)
 }
 
 /**
+ * \brief Implements csdl2.SDL_PumpEvents()
+ *
+ * \code
+ * SDL_PumpEvents() -> None
+ * \endcode
+ *
+ * \returns Py_None on success, NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_PumpEvents(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+    SDL_PumpEvents();
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_PeepEvents()
  *
  * \code
