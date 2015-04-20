@@ -56,6 +56,22 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* events.h */
 
+    {"SDL_PumpEvents",
+     (PyCFunction) PyCSDL2_PumpEvents,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PumpEvents() -> None\n"
+     "\n"
+     "Pumps the event loop, gathering events from the input devices.\n"
+     "\n"
+     "This function updates the event queue and internal input device\n"
+     "state.\n"
+     "\n"
+     "SDL_PollEvent() and SDL_WaitEvent() implicitly calls this\n"
+     "function.\n"
+     "\n"
+     "This should only be run in the thread that sets the video mode.\n"
+    },
+
     {"SDL_PeepEvents",
      (PyCFunction) PyCSDL2_PeepEvents,
      METH_VARARGS | METH_KEYWORDS,
