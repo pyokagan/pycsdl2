@@ -284,3 +284,19 @@ the application to process the information stored with them.
           SDL_GETEVENT
 
    Possible actions for :func:`SDL_PeepEvents`.
+
+.. function:: SDL_FlushEvents(minType: int, maxType: int) -> None
+
+   Removes all events from the event queue within the specified `minType` and
+   `maxType`.
+
+   To clear all events, set `minType` to :const:`SDL_FIRSTEVENT` and `maxType`
+   to :const:`SDL_LASTEVENT`. To clear all user events, set `minType` to
+   :const:`SDL_USEREVENT` and `maxType` to :const:`SDL_LASTEVENT`.
+
+   This function only affects currently queued events. If you wish to make sure
+   that all pending OS events are flushed, you can call :func:`SDL_PumpEvents`
+   on the main thread immediately before :func:`SDL_FlushEvents`.
+
+   :param int minType: minimum event type to be cleared.
+   :param int maxType: maximum event type to be cleared.
