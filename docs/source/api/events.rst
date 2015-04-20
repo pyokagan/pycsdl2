@@ -316,6 +316,18 @@ the application to process the information stored with them.
    :param int minType: minimum event type to be cleared.
    :param int maxType: maximum event type to be cleared.
 
+.. function:: SDL_PollEvent(event) -> bool
+
+   Polls for currently pending events.
+
+   :param event: If not None, the next event is removed from the queue and
+                 stored in it. If None, no event will be removed from the
+                 queue.
+   :type event: SDL_Event or None
+   :returns: True if there are events in the queue, False otherwise.
+   :raises BufferError: The provided `event` buffer is of the wrong size or
+                        not writable.
+
 .. function:: SDL_PushEvent(event) -> bool
 
    Copies `event` into the event queue.

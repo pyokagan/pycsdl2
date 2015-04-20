@@ -107,6 +107,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_FlushEvents().\n"
     },
 
+    {"SDL_PollEvent",
+     (PyCFunction) PyCSDL2_PollEvent,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PollEvent(event) -> bool\n"
+     "\n"
+     "Polls for currently pending events.\n"
+     "\n"
+     "If `event` is not None, the next event is removed from the queue and\n"
+     "stored in `event`.\n"
+     "\n"
+     "If `event` is None, no event will be removed from the queue.\n"
+     "\n"
+     "Returns True if there are events in the queue, False otherwise.\n"
+    },
+
     {"SDL_PushEvent",
      (PyCFunction) PyCSDL2_PushEvent,
      METH_VARARGS | METH_KEYWORDS,
