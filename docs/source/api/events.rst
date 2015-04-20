@@ -12,6 +12,73 @@ SDL stores each event as a SDL_Event in an event queue. SDL_Event structures
 are read from the queue with the SDL_PollEvent function and it is then up to
 the application to process the information stored with them.
 
+.. class:: SDL_Event
+
+   A union that contains structures for the different event types.
+
+   .. attribute:: type
+
+      An int specifying the event type. Use the event type's
+      corresponding attribute to get/set information about the event:
+
+      +----------------------------------------+----------------------------+
+      | Value of :attr:`type`                  | Attr of :class:`SDL_Event` |
+      +========================================+============================+
+      | :const:`SDL_CONTROLLERAXISMOTION`      | :attr:`SDL_Event.caxis`    |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_CONTROLLERBUTTONDOWN`,     | :attr:`SDL_Event.cbutton`  |
+      | :const:`SDL_CONTROLLERBUTTONUP`        |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_CONTROLLERDEVICEADDED`,    | :attr:`SDL_Event.cdevice`  |
+      | :const:`SDL_CONTROLLERDEVICEREMOVED`,  |                            |
+      | :const:`SDL_CONTROLLERDEVICEREMAPPED`  |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_DOLLARGESTURE`,            | :attr:`SDL_Event.dgesture` |
+      | :const:`SDL_DOLLARRECORD`              |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_DROPFILE`                  | :attr:`SDL_Event.drop`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_FINGERMOTION`,             | :attr:`SDL_Event.tfinger`  |
+      | :const:`SDL_FINGERDOWN`,               |                            |
+      | :const:`SDL_FINGERUP`                  |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_KEYDOWN`,                  | :attr:`SDL_Event.key`      |
+      | :const:`SDL_KEYUP`                     |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_JOYAXISMOTION`             | :attr:`SDL_Event.jaxis`    |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_JOYBALLMOTION`             | :attr:`SDL_Event.jball`    |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_JOYHATMOTION`              | :attr:`SDL_Event.jhat`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_JOYBUTTONDOWN`,            | :attr:`SDL_Event.jbutton`  |
+      | :const:`SDL_JOYBUTTONUP`               |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_JOYDEVICEADDED`,           | :attr:`SDL_Event.jdevice`  |
+      | :const:`SDL_JOYDEVICEREMOVED`          |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_MOUSEMOTION`               | :attr:`SDL_Event.motion`   |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_MOUSEBUTTONDOWN`,          | :attr:`SDL_Event.button`   |
+      | :const:`SDL_MOUSEBUTTONUP`             |                            |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_MOUSEWHEEL`                | :attr:`SDL_Event.wheel`    |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_MULTIGESTURE`              | :attr:`SDL_Event.mgesture` |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_QUIT`                      | :attr:`SDL_Event.quit`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_SYSWMEVENT`                | :attr:`SDL_Event.syswm`    |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_TEXTEDITING`               | :attr:`SDL_Event.edit`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_TEXTINPUT`                 | :attr:`SDL_Event.text`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_USEREVENT`                 | :attr:`SDL_Event.user`     |
+      +----------------------------------------+----------------------------+
+      | :const:`SDL_WINDOWEVENT`               | :attr:`SDL_Event.window`   |
+      +----------------------------------------+----------------------------+
+
 .. data:: SDL_QUIT
 
    User-requested quit.

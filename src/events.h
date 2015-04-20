@@ -34,6 +34,195 @@
 #include "error.h"
 
 /**
+ * \brief Instance data for PyCSDL2_EventMemType
+ */
+typedef struct PyCSDL2_EventMem {
+    PyObject_HEAD
+    /** \brief SDL_Event struct */
+    SDL_Event ev;
+} PyCSDL2_EventMem;
+
+/**
+ * \brief Type definition for the private class csdl2.SDL_EventMem
+ */
+static PyTypeObject PyCSDL2_EventMemType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_EventMem",
+    /* tp_basicsize      */ sizeof(PyCSDL2_EventMem)
+};
+
+/**
+ * \brief Creates a new instance of PyCSDL2_EventMemType
+ *
+ * \returns Pointer to PyCSDL2_EventMem on success, NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_EventMem *
+PyCSDL2_EventMemCreate(void)
+{
+    return (PyCSDL2_EventMem*) PyType_GenericAlloc(&PyCSDL2_EventMemType, 0);
+}
+
+/**
+ * \brief Instance data of PyCSDL2_EventType
+ */
+typedef struct PyCSDL2_Event {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to the PyCSDL2_EventMem for the event */
+    PyCSDL2_EventMem *ev_mem;
+} PyCSDL2_Event;
+
+/**
+ * \brief Instance creation function for PyCSDL2_EventType
+ *
+ * Sets PyCSDL2_Event.ev_mem to a new instance of PyCSDL2_EventMemType.
+ */
+static PyCSDL2_Event *
+PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Event *self;
+
+    if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
+        return NULL;
+    if (!(self->ev_mem = PyCSDL2_EventMemCreate()))
+        return NULL;
+    return self;
+}
+
+/**
+ * \brief Destructor for PyCSDL2_EventType
+ *
+ * Releases reference to PyCSDL2_EventMem.
+ */
+static void
+PyCSDL2_EventDealloc(PyCSDL2_Event *self)
+{
+    if (self->in_weakreflist)
+        PyObject_ClearWeakRefs((PyObject*) self);
+    Py_XDECREF(self->ev_mem);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
+ * \brief Getter for csdl2.SDL_Event.type
+ */
+static PyObject *
+PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
+{
+    assert(self->ev_mem);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.type);
+}
+
+/**
+ * \brief Setter for csdl2.SDL_Event.type
+ */
+static int
+PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
+{
+    unsigned long x = PyLong_AsUnsignedLong(value);
+    if (PyErr_Occurred()) { return -1; }
+    if (x > ((Uint32)-1)) {
+        PyErr_SetString(PyExc_OverflowError, "value overflows Uint32");
+        return -1;
+    }
+    assert(self->ev_mem);
+    self->ev_mem->ev.type = x;
+    return 0;
+}
+
+/**
+ * \brief get setters for PyCSDL2_EventType
+ */
+static PyGetSetDef PyCSDL2_EventGetSetters[] = {
+    {"type",
+     (getter) PyCSDL2_EventGetType,
+     (setter) PyCSDL2_EventSetType,
+     "Event type",
+     NULL},
+    {NULL}
+};
+
+/**
+ * \brief getbufferproc implementation for PyCSDL2_EventType
+ */
+static int
+PyCSDL2_EventGetBuffer(PyCSDL2_Event *self, Py_buffer *view, int flags)
+{
+    static Py_ssize_t shape[] = {sizeof(SDL_Event)};
+    static Py_ssize_t strides[] = {1};
+
+    assert(self->ev_mem);
+    view->buf = &self->ev_mem->ev;
+    Py_INCREF((PyObject*) self);
+    view->obj = (PyObject*) self;
+    view->len = sizeof(SDL_Event);
+    view->readonly = 0;
+    view->itemsize = 1;
+    view->format = "B";
+    view->ndim = 1;
+    view->shape = shape;
+    view->strides = strides;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
+}
+
+/**
+ * \brief Buffer protocol definition for PyCSDL2_EventType
+ */
+static PyBufferProcs PyCSDL2_EventBufferProcs = {
+    (getbufferproc) PyCSDL2_EventGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/**
+ * \brief Type definition of csdl2.SDL_Event
+ */
+static PyTypeObject PyCSDL2_EventType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Event",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Event),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_EventDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_EventBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "A union that contains structures for the different event types.\n",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Event, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_EventGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc) PyCSDL2_EventNew,
+};
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject
@@ -113,6 +302,13 @@ PyCSDL2_initevents(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_EventMemType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_EventType)) { return 0; }
+    Py_INCREF(&PyCSDL2_EventType);
+    if (PyModule_AddObject(module, "SDL_Event", (PyObject*)&PyCSDL2_EventType))
+        return 0;
 
     return 1;
 }

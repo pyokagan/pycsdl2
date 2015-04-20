@@ -3,6 +3,7 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import weakref
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -148,6 +149,74 @@ class TestEventsConstants(unittest.TestCase):
 
     def test_SDL_LASTEVENT(self):
         self.assertEqual(SDL_LASTEVENT, 0xFFFF)
+
+
+class Test_SDL_Event(unittest.TestCase):
+    """Tests csdl2.SDL_Event"""
+
+    def setUp(self):
+        self.ev = SDL_Event()
+
+    def test_cannot_subclass(self):
+        "Cannot be subclassed"
+        self.assertRaises(TypeError, type, 'TestSubclass', (SDL_Event,), {})
+
+    def test_weakref(self):
+        "Can create weak reference"
+        ref = weakref.ref(self.ev)
+
+    def test_memview(self):
+        "Can create memoryview"
+        mem = memoryview(self.ev)
+
+    def test_memview_obj(self):
+        "memoryview.obj is the SDL_Event"
+        mem = memoryview(self.ev)
+        self.assertIs(mem.obj, self.ev)
+
+    def test_memview_bytes(self):
+        "memoryview is made up of C contiguous bytes"
+        mem = memoryview(self.ev)
+        self.assertTrue(mem.c_contiguous)
+        self.assertTrue(mem.contiguous)
+        self.assertEqual(mem.format, 'B')
+        self.assertEqual(mem.itemsize, 1)
+        self.assertEqual(mem.ndim, 1)
+        self.assertEqual(mem.strides, (1,))
+
+    def test_memview_writable(self):
+        "memoryview contains valid memory that can be written to"
+        mem = memoryview(self.ev)
+        self.assertFalse(mem.readonly)
+        for i in range(mem.nbytes):
+            mem[i] = 42
+
+    def test_memview_zeroes(self):
+        "memory of SDL_Event is initialized with 0s"
+        mem = memoryview(self.ev)
+        zeroes = bytes(mem.nbytes)
+        self.assertEqual(mem.tobytes(), zeroes)
+
+    def test_type_attr_get(self):
+        "SDL_Event.type gets an int that defaults to 0"
+        self.assertIs(type(self.ev.type), int)
+        self.assertEqual(self.ev.type, 0)
+
+    def test_type_attr_set(self):
+        "SDL_Event.type allows setting an int"
+        setattr(self.ev, 'type', 42)
+
+    def test_type_attr_set_no_neg(self):
+        "SDL_Event.type raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'type', -42)
+
+    def test_type_attr_set_no_overflow(self):
+        "SDL_Event.type raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'type', 0xfffffffff)
+
+    def test_type_attr_set_reject_non_int(self):
+        "SDL_Event.type rejects non-integers"
+        self.assertRaises(TypeError, setattr, self.ev, 'type', 42.0)
 
 
 if __name__ == '__main__':
