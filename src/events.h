@@ -52,6 +52,18 @@ static PyTypeObject PyCSDL2_EventMemType = {
 };
 
 /**
+ * \brief Creates a new instance of PyCSDL2_EventMemType
+ *
+ * \returns Pointer to PyCSDL2_EventMem on success, NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_EventMem *
+PyCSDL2_EventMemCreate(void)
+{
+    return (PyCSDL2_EventMem*) PyType_GenericAlloc(&PyCSDL2_EventMemType, 0);
+}
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject
