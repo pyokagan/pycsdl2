@@ -373,5 +373,41 @@ class Test_SDL_FlushEvents(unittest.TestCase):
                                         SDL_USEREVENT, SDL_LASTEVENT), 0)
 
 
+class Test_SDL_PollEvent(unittest.TestCase):
+    """Tests SDL_PollEvent()"""
+
+    @classmethod
+    def setUpClass(cls):
+        SDL_Init(SDL_INIT_EVENTS)
+
+    def test_SDL_Event(self):
+        "Works with SDL_Event"
+        ev = SDL_Event()
+        ev.type = SDL_USEREVENT
+        SDL_PushEvent(ev)
+        self.assertTrue(SDL_PollEvent(ev))
+
+    def test_writable_buffer(self):
+        "Works with writable buffer"
+        ev_src, ev_dst = SDL_Event(), memoryview(SDL_Event())
+        ev_src.type = SDL_USEREVENT
+        SDL_PushEvent(ev_src)
+        self.assertTrue(SDL_PollEvent(ev_dst))
+
+    def test_readonly_buffer(self):
+        "Raises BufferError with readonly buffer"
+        ev_src, ev_dst = SDL_Event(), memoryview(SDL_Event()).tobytes()
+        ev_src.type = SDL_USEREVENT
+        SDL_PushEvent(ev_src)
+        self.assertRaises(BufferError, SDL_PollEvent, ev_dst)
+
+    def test_buffer_wrong_size(self):
+        "Raises BufferError with writable buffer of wrong size"
+        ev_src, ev_dst = SDL_Event(), bytearray(1)
+        ev_src.type = SDL_USEREVENT
+        SDL_PushEvent(ev_src)
+        self.assertRaises(BufferError, SDL_PollEvent, ev_dst)
+
+
 if __name__ == '__main__':
     unittest.main()
