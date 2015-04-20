@@ -34,6 +34,24 @@
 #include "error.h"
 
 /**
+ * \brief Instance data for PyCSDL2_EventMemType
+ */
+typedef struct PyCSDL2_EventMem {
+    PyObject_HEAD
+    /** \brief SDL_Event struct */
+    SDL_Event ev;
+} PyCSDL2_EventMem;
+
+/**
+ * \brief Type definition for the private class csdl2.SDL_EventMem
+ */
+static PyTypeObject PyCSDL2_EventMemType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_EventMem",
+    /* tp_basicsize      */ sizeof(PyCSDL2_EventMem)
+};
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject
@@ -113,6 +131,8 @@ PyCSDL2_initevents(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_EventMemType)) { return 0; }
 
     return 1;
 }
