@@ -45,11 +45,16 @@
  * \brief PyMemberDef type for C signed integer type with same size as Sint16
  */
 #define Sint16_TYPE T_SHORT
+/**
+ * \brief PyMemberDef type for C unsigned integer type with same size as Uint16
+ */
+#define Uint16_TYPE T_USHORT
 #elif SIZEOF_INT == 2
 /* An int must be at least 16 bits long */
 #define Sint16_UNIT "i"
 #define Uint16_UNIT "I"
 #define Sint16_TYPE T_INT
+#define Uint16_TYPE T_UINT
 #else
 #error Could not find C integer type with 2 bytes width
 #endif
