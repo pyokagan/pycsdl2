@@ -356,9 +356,10 @@ PyCSDL2_PushEvent(PyObject *module, PyObject *args, PyObject *kwds)
         return NULL;
     if (PyCSDL2_GetEventBuffer(&ev_buf, ev_obj, 1, 0))
         return NULL;
-    if ((ret = SDL_PushEvent((SDL_Event*) ev_buf.buf)) < 0)
-        return PyCSDL2_RaiseSDLError();
+    ret = SDL_PushEvent((SDL_Event*) ev_buf.buf);
     PyBuffer_Release(&ev_buf);
+    if (ret < 0)
+        return PyCSDL2_RaiseSDLError();
     return PyBool_FromLong(ret);
 }
 
