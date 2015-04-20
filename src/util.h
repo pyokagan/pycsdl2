@@ -64,11 +64,13 @@
 #define Sint32_UNIT "h"
 #define Uint32_UNIT "H"
 #define Sint32_TYPE T_SHORT
+#define Uint32_TYPE T_USHORT
 #elif SIZEOF_INT == 4
 /* An int must be at least 16 bits long */
 #define Sint32_UNIT "i"
 #define Uint32_UNIT "I"
 #define Sint32_TYPE T_INT
+#define Uint32_TYPE T_UINT
 #elif SIZEOF_LONG == 4 || defined(DOXYGEN)
 /* A long int must be at least 32 bits long */
 /**
@@ -85,6 +87,10 @@
  * \brief PyMemberDef type for C signed integer type with same size as Sint32
  */
 #define Sint32_TYPE T_LONG
+/**
+ * \brief PyMemberDef type for C unsigned integer type with same size as Uint32
+ */
+#define Uint32_TYPE T_ULONG
 #else
 #error Could not find C integer type with 4 bytes width
 #endif
