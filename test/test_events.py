@@ -219,6 +219,18 @@ class Test_SDL_Event(unittest.TestCase):
         self.assertRaises(TypeError, setattr, self.ev, 'type', 42.0)
 
 
+class Test_SDL_PumpEvents(unittest.TestCase):
+    """Tests SDL_PumpEvents"""
+
+    @classmethod
+    def setUpClass(cls):
+        SDL_Init(SDL_INIT_EVENTS)
+
+    def test_pump_events(self):
+        "SDL_PumpEvents() works"
+        self.assertIs(SDL_PumpEvents(), None)
+
+
 class Test_SDL_PeepEvents(unittest.TestCase):
     """Tests SDL_PeepEvents"""
 
