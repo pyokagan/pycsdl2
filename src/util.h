@@ -26,6 +26,7 @@
 #ifndef _PYCSDL2_UTIL_H_
 #define _PYCSDL2_UTIL_H_
 #include <Python.h>
+#include <structmember.h>
 #include "../include/pycsdl2.h"
 
 #if SIZEOF_SHORT == 2 || defined(DOXYGEN)
@@ -40,10 +41,15 @@
  *        Uint16
  */
 #define Uint16_UNIT "H"
+/**
+ * \brief PyMemberDef type for C signed integer type with same size as Sint16
+ */
+#define Sint16_TYPE T_SHORT
 #elif SIZEOF_INT == 2
 /* An int must be at least 16 bits long */
 #define Sint16_UNIT "i"
 #define Uint16_UNIT "I"
+#define Sint16_TYPE T_INT
 #else
 #error Could not find C integer type with 2 bytes width
 #endif
