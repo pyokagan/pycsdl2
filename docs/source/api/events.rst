@@ -244,3 +244,43 @@ the application to process the information stored with them.
 
    Events :const:`SDL_USEREVENT` through :const:`SDL_LASTEVENT` are for your
    use, and should be allocated with SDL_RegisterEvents
+
+.. function:: SDL_PeepEvents(events, numevents: int, action: int, minType: int, maxType: int) -> int
+
+   If `action` is :const:`SDL_ADDEVENT`, up to `numevents` events will be added
+   to the back of the event queue. Returns the number of events added.
+
+   If `action` is :const:`SDL_PEEKEVENT`, up to `numevents` events from the
+   front of the event queue, within `minType` and `maxType`, will be returned
+   in `events`, but will not be removed from the queue. Returns number of
+   events peeked.
+
+   If `action` is :const:`SDL_GETEVENT`, up to `numevents` events from the
+   front of the event queue, within `minType` and `maxType`, will be returned
+   in `events`, and will be removed from the queue. Returns number of events
+   retrieved.
+
+   :param SDL_Event events: Either a :class:`SDL_Event` object, or a buffer of
+                            equivalent size.
+   :param int numevents: If `action` is :const:`SDL_ADDEVENT`, the number of
+                         events to add to the event queue. If `action` is
+                         :const:`SDL_PEEKEVENT` or :const:`SDL_GETEVENT`, the
+                         maximum number of events to retrieve.
+   :param int action: One of :const:`SDL_ADDEVENT`, :const:`SDL_PEEKEVENT`
+                      or :const:`SDL_GETEVENT`.
+   :param int minType: minimum value of the event type to be considered.
+                       :const:`SDL_FIRSTEVENT` is a safe choice.
+   :param int maxType: maximum value of the event type to be considered.
+                       :const:`SDL_LASTEVENT` is a safe choice.
+   :returns: Number of events added to the event queue for
+             :const:`SDL_ADDEVENT`, number of events retrieved from the event
+             queue for :const:`SDL_PEEKEVENT` and :const:`SDL_GETEVENT`.
+   :raises BufferError: The provided `events` buffer is of the wrong size, or
+                        is not writable if `action` is :const:`SDL_PEEKEVENT`
+                        or :const:`SDL_GETEVENT`.
+
+.. data:: SDL_ADDEVENT
+          SDL_PEEKEVENT
+          SDL_GETEVENT
+
+   Possible actions for :func:`SDL_PeepEvents`.

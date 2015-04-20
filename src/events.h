@@ -223,6 +223,76 @@ static PyTypeObject PyCSDL2_EventType = {
 };
 
 /**
+ * \brief Checks for and retrieves a SDL_Event Py_buffer from obj.
+ *
+ * \param[out] buf The Py_buffer struct to fill up with buffer info
+ * \param[in] obj The PyObject to retrieve the buffer from
+ * \param[in] len Expected number of SDL_Event struct contained in buffer
+ * \param[in] flags Additional flags to pass to PyObject_GetBuffer()
+ * \returns 0 on success, -1 if the object does not support the buffer
+ *          protocol, -2 if a fatal exception occurred.
+ */
+static int
+PyCSDL2_GetEventBuffer(Py_buffer *buf, PyObject *obj, size_t len, int flags)
+{
+    if (PyObject_GetBuffer(obj, buf, PyBUF_ND | flags))
+        return -1;
+    if (!buf->buf) {
+        PyBuffer_Release(buf);
+        PyErr_SetString(PyExc_BufferError, "SDL_Event buffer is NULL");
+        return -2;
+    }
+    if (buf->len != sizeof(SDL_Event) * len) {
+        PyBuffer_Release(buf);
+        PyErr_Format(PyExc_BufferError, "Invalid SDL_Event buffer size. "
+                     "Expected: %zu. Got: %zd.", sizeof(SDL_Event) * len,
+                     buf->len);
+        return -2;
+    }
+    return 0;
+}
+
+/**
+ * \brief Implements csdl2.SDL_PeepEvents()
+ *
+ * \code
+ * SDL_PeepEvents(events, numevents: int, action: int, minType: int,
+ *                maxType: int) -> int
+ * \endcode
+ * where events is a buffer object with len == sizeof(SDL_Event) * numevents
+ *
+ * \returns PyLong of the number of events actually stored, NULL if an
+ *          exception occurred.
+ */
+static PyObject *
+PyCSDL2_PeepEvents(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyObject *ev_obj;
+    Py_buffer ev_buf;
+    int numevents, action, ret, flags = 0;
+    Uint32 minType, maxType;
+    static char *kwlist[] = {"events", "numevents", "action", "minType",
+                             "maxType", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oii" Uint32_UNIT Uint32_UNIT,
+                                     kwlist, &ev_obj, &numevents, &action,
+                                     &minType, &maxType))
+        return NULL;
+    if (numevents < 0) {
+        PyErr_SetString(PyExc_ValueError, "numevents must be positive");
+        return NULL;
+    }
+    if (action != SDL_ADDEVENT)
+        flags |= PyBUF_WRITABLE;
+    if (PyCSDL2_GetEventBuffer(&ev_buf, ev_obj, numevents, flags))
+        return NULL;
+    ret = SDL_PeepEvents(ev_buf.buf, numevents, action, minType, maxType);
+    PyBuffer_Release(&ev_buf);
+    if (ret < 0)
+        return PyCSDL2_RaiseSDLError();
+    return PyLong_FromLong(ret);
+}
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject

@@ -56,6 +56,27 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* events.h */
 
+    {"SDL_PeepEvents",
+     (PyCFunction) PyCSDL2_PeepEvents,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PeepEvents(events, numevents: int, action: int, minType: int,\n"
+     "               maxType: int) -> int\n"
+     "\n"
+     "If `action` is SDL_ADDEVENT, up to `numevents` events from `events`\n"
+     "will be added to the back of the event queue. Returns the number of\n"
+     "events added.\n"
+     "\n"
+     "If `action` is SDL_PEEKEVENT, up to `numevents` events from the front\n"
+     "of the event queue, within the specified `minType` and `maxType`, will\n"
+     "be returned in `events`, but will not be removed from the queue.\n"
+     "Returns the number of events peeked.\n"
+     "\n"
+     "If `action` is SDL_GETEVENT, up to `numevents` events from the front\n"
+     "of the event queue, within the specified `minType` and `maxType`, will\n"
+     "be returned in `events`, and removed from the queue. Returns the\n"
+     "number of events retrieved.\n"
+    },
+
     /* init.h */
 
     {"SDL_Init",

@@ -219,5 +219,96 @@ class Test_SDL_Event(unittest.TestCase):
         self.assertRaises(TypeError, setattr, self.ev, 'type', 42.0)
 
 
+class Test_SDL_PeepEvents(unittest.TestCase):
+    """Tests SDL_PeepEvents"""
+
+    def test_ADDEVENT_SDL_Event(self):
+        "SDL_ADDEVENT with a SDL_Event works"
+        ev = SDL_Event()
+        self.assertEqual(SDL_PeepEvents(ev, 1, SDL_ADDEVENT, 0, 0), 1)
+
+    def test_ADDEVENT_writable_buf(self):
+        "SDL_ADDEVENT with a writable buffer works"
+        mem = memoryview(SDL_Event())
+        self.assertEqual(SDL_PeepEvents(mem, 1, SDL_ADDEVENT, 0, 0), 1)
+
+    def test_ADDEVENT_readonly_buf(self):
+        "SDL_ADDEVENT with a readonly buffer works"
+        mem = memoryview(SDL_Event())
+        bites = mem.tobytes()
+        self.assertEqual(SDL_PeepEvents(bites, 1, SDL_ADDEVENT, 0, 0), 1)
+
+    def test_ADDEVENT_buf_wrongsize(self):
+        "SDL_ADDEVENT with a buffer with wrong size fails with BufferError"
+        mem = bytearray(1)
+        self.assertRaises(BufferError, SDL_PeepEvents, mem, 1, SDL_ADDEVENT, 0,
+                          0)
+
+    def test_PEEKEVENT_SDL_Event(self):
+        "SDL_PEEKEVENT with a SDL_Event works"
+        ev_type = SDL_USEREVENT + 0
+        ev_src, ev_dst = SDL_Event(), SDL_Event()
+        ev_src.type = ev_type
+        self.assertEqual(ev_dst.type, 0)
+        self.assertEqual(SDL_PeepEvents(ev_src, 1, SDL_ADDEVENT, 0, 0), 1)
+        self.assertEqual(SDL_PeepEvents(ev_dst, 1, SDL_PEEKEVENT,
+                                        ev_type, ev_type), 1)
+        self.assertEqual(ev_dst.type, ev_type)
+
+    def test_PEEKEVENT_writable_buf(self):
+        "SDL_PEEKEVENT with a writable buffer works"
+        ev_type = SDL_USEREVENT + 1
+        ev_src, ev_dst = SDL_Event(), memoryview(SDL_Event())
+        ev_src.type = ev_type
+        self.assertEqual(SDL_PeepEvents(ev_src, 1, SDL_ADDEVENT, 0, 0), 1)
+        self.assertEqual(SDL_PeepEvents(ev_dst, 1, SDL_PEEKEVENT,
+                                        ev_type, ev_type), 1)
+        self.assertEqual(ev_dst.obj.type, ev_type)
+
+    def test_PEEKEVENT_buf_wrongsize(self):
+        "SDL_PEEKEVENT with a buffer of wrong size fails with BufferError"
+        ev_dst = bytearray(1)
+        self.assertRaises(BufferError, SDL_PeepEvents, ev_dst, 1,
+                          SDL_PEEKEVENT, 0, 0)
+
+    def test_PEEKEVENT_readonly_buf(self):
+        "SDL_PEEKEVENT with a readonly buffer fails with BufferError"
+        ev_dst = memoryview(SDL_Event()).tobytes()
+        self.assertRaises(BufferError, SDL_PeepEvents, ev_dst, 1,
+                          SDL_PEEKEVENT, 0, 0)
+
+    def test_GETEVENT_SDL_Event(self):
+        "SDL_GETEVENT with a SDL_Event works"
+        ev_type = SDL_USEREVENT + 2
+        ev_src, ev_dst = SDL_Event(), SDL_Event()
+        ev_src.type = ev_type
+        self.assertEqual(SDL_PeepEvents(ev_src, 1, SDL_ADDEVENT, 0, 0), 1)
+        self.assertEqual(SDL_PeepEvents(ev_dst, 1, SDL_GETEVENT,
+                                        ev_type, ev_type), 1)
+        self.assertEqual(ev_dst.type, ev_type)
+
+    def test_GETEVENT_writable_buf(self):
+        "SDL_GETEVENT with a writable buffer works"
+        ev_type = SDL_USEREVENT + 3
+        ev_src, ev_dst = SDL_Event(), memoryview(SDL_Event())
+        ev_src.type = ev_type
+        self.assertEqual(SDL_PeepEvents(ev_src, 1, SDL_ADDEVENT, 0, 0), 1)
+        self.assertEqual(SDL_PeepEvents(ev_dst, 1, SDL_GETEVENT, ev_type,
+                                        ev_type), 1)
+        self.assertEqual(ev_dst.obj.type, ev_type)
+
+    def test_GETEVENT_buf_wrongsize(self):
+        "SDL_GETEVENT with a buffer of wrong size fails with BufferError"
+        ev_dst = bytearray(1)
+        self.assertRaises(BufferError, SDL_PeepEvents, ev_dst, 1, SDL_GETEVENT,
+                          0, 0)
+
+    def test_GETEVENT_readonly_buf(self):
+        "SDL_GETEVENT with a readonly buffer fails with BufferError"
+        ev_dst = memoryview(SDL_Event()).tobytes()
+        self.assertRaises(BufferError, SDL_PeepEvents, ev_dst, 1,
+                          SDL_GETEVENT, 0, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
