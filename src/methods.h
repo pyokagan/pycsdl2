@@ -77,6 +77,20 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "number of events retrieved.\n"
     },
 
+    {"SDL_FlushEvents",
+     (PyCFunction) PyCSDL2_FlushEvents,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FlushEvents(minType: int, maxType: int) -> None\n"
+     "\n"
+     "Removes all events from the event queue within the specified `minType`\n"
+     "and `maxType`.\n"
+     "\n"
+     "This function only affects currently queued events. If you wish to\n"
+     "make sure that all pending OS events are flushed, you can call\n"
+     "SDL_PumpEvents() on the main thread immediately before\n"
+     "SDL_FlushEvents().\n"
+    },
+
     /* init.h */
 
     {"SDL_Init",

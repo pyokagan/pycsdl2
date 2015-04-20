@@ -293,6 +293,27 @@ PyCSDL2_PeepEvents(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_FlushEvents()
+ *
+ * \code
+ * SDL_FlushEvents(minType: int, maxType: int) -> None
+ * \endcode
+ *
+ * \returns Py_None on success, NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_FlushEvents(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 minType, maxType;
+    static char *kwlist[] = {"minType", "maxType", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT Uint32_UNIT,
+                                     kwlist, &minType, &maxType))
+        return NULL;
+    SDL_FlushEvents(minType, maxType);
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_events.h
  *
  * \param module csdl2 module PyObject
