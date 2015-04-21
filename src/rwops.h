@@ -20,53 +20,29 @@
  *        distribution.
  */
 /**
- * \file csdl2.c
- * \brief csdl2 extension source code.
- */
-#include <Python.h>
-#define PYCSDL2_MODULE
-#include "../include/pycsdl2.h"
-#include "capi.h"
-#include "events.h"
-#include "init.h"
-#include "rwops.h"
-#include "video.h"
-#include "methods.h"
-
-/**
- * \brief csdl2 module definition.
+ * \file rwops.h
+ * \brief Bindings for SDL_rwops.h
  *
- * \sa PyInit_csdl2()
+ * Implements bindings for SDL's File IO API (SDL_rwops.h)
  */
-static PyModuleDef PyCSDL2_Module = {
-    PyModuleDef_HEAD_INIT,
-    /* m_name */ "csdl2",
-    /* m_doc */ "Simple DirectMedia Layer",
-    /* m_size */ -1,
-    /* m_methods */ PyCSDL2_Methods,
-    /* m_reload */ NULL,
-    /* m_traverse */ NULL,
-    /* m_clear */ NULL,
-    /* m_free */ NULL
-};
+#ifndef _PYCSDL2_RWOPS_H_
+#define _PYCSDL2_RWOPS_H_
+#include <Python.h>
+#include <SDL_rwops.h>
+#include "../include/pycsdl2.h"
+#include "util.h"
+#include "error.h"
 
 /**
- * \brief csdl2 module init entry point.
+ * \brief Initializes bindings to SDL_rwops.h
+ *
+ * \param module csdl2 module object
+ * \returns 1 on success, 0 if an exception occurred.
  */
-PyMODINIT_FUNC
-PyInit_csdl2(void)
+static int
+PyCSDL2_initrwops(PyObject *module)
 {
-    PyObject *m = PyModule_Create(&PyCSDL2_Module);
-
-    if (!m) { return NULL; }
-    if (!PyCSDL2_initcapi(m)) { goto fail; }
-    if (!PyCSDL2_initinit(m)) { goto fail; }
-    if (!PyCSDL2_initrwops(m)) { goto fail; }
-    if (!PyCSDL2_initvideo(m)) { goto fail; }
-    if (!PyCSDL2_initevents(m)) { goto fail; }
-    return m;
-
-fail:
-    Py_DECREF(m);
-    return NULL;
+    return 1;
 }
+
+#endif /* _PYCSDL2_RWOPS_H_ */
