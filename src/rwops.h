@@ -36,12 +36,34 @@
 /**
  * \brief Initializes bindings to SDL_rwops.h
  *
+ * Adds constants defined in SDL_rwops.h to module.
+ *
  * \param module csdl2 module object
  * \returns 1 on success, 0 if an exception occurred.
  */
 static int
 PyCSDL2_initrwops(PyObject *module)
 {
+    static const PyCSDL2_Constant constants[] = {
+        {"SDL_RWOPS_UNKNOWN", SDL_RWOPS_UNKNOWN},
+        {"SDL_RWOPS_WINFILE", SDL_RWOPS_WINFILE},
+        {"SDL_RWOPS_STDFILE", SDL_RWOPS_STDFILE},
+        {"SDL_RWOPS_JNIFILE", SDL_RWOPS_JNIFILE},
+        {"SDL_RWOPS_MEMORY", SDL_RWOPS_MEMORY},
+        {"SDL_RWOPS_MEMORY_RO", SDL_RWOPS_MEMORY_RO},
+
+        {"RW_SEEK_SET", RW_SEEK_SET},
+        {"RW_SEEK_CUR", RW_SEEK_CUR},
+        {"RW_SEEK_END", RW_SEEK_END},
+
+        {NULL, 0}
+    };
+    const PyCSDL2_Constant *c;
+
+    for (c = constants; c->name; c++)
+        if (PyModule_AddIntConstant(module, c->name, c->value))
+            return 0;
+
     return 1;
 }
 
