@@ -134,6 +134,136 @@ PyCSDL2_RWopsPtrAssert(PyCSDL2_RWopsPtr *self)
     return 0;
 }
 
+/** \brief Instance data for PyCSDL2_RWopsType */
+typedef struct PyCSDL2_RWops {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to the underlying PyCSDL2_RWopsPtr */
+    PyCSDL2_RWopsPtr *ptr;
+} PyCSDL2_RWops;
+
+/** \brief Traversal function for PyCSDL2_RWopsType */
+static int
+PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->ptr);
+    return 0;
+}
+
+/** \brief Clear function for PyCSDL2_RWopsType */
+static int
+PyCSDL2_RWopsClear(PyCSDL2_RWops *self)
+{
+    Py_CLEAR(self->ptr);
+    return 0;
+}
+
+/** \brief Destructor for PYCSDL2_RWopsType */
+static void
+PyCSDL2_RWopsDealloc(PyCSDL2_RWops *self)
+{
+    PyCSDL2_RWopsClear(self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Implements getter for SDL_RWops.type */
+static PyObject *
+PyCSDL2_RWopsGetType(PyCSDL2_RWops *self, void *closure)
+{
+    if (PyCSDL2_RWopsPtrAssert(self->ptr))
+        return NULL;
+    return PyLong_FromUnsignedLong(self->ptr->rwops->type);
+}
+
+/** \brief Implements setter for SDL_RWops.type */
+static int
+PyCSDL2_RWopsSetType(PyCSDL2_RWops *self, PyObject *value, void *closure)
+{
+    unsigned long val;
+    if (PyCSDL2_RWopsPtrAssert(self->ptr))
+        return -1;
+    val = PyLong_AsUnsignedLong(value);
+    if (PyErr_Occurred())
+        return -1;
+    self->ptr->rwops->type = val;
+    return 0;
+}
+
+/** \brief List of properties for PyCSDL2_RWopsType */
+static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
+    {"type",
+     (getter) PyCSDL2_RWopsGetType,
+     (setter) PyCSDL2_RWopsSetType,
+     "Type of stream.",
+     NULL},
+    {NULL}
+};
+
+/**
+ * \brief Type definition for csdl2.SDL_RWops
+ */
+static PyTypeObject PyCSDL2_RWopsType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_RWops",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RWops),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RWopsDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "SDL_RWops",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_RWopsTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_RWopsClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_RWops, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_RWopsGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ 0
+};
+
+/**
+ * \brief Creates a new instance of PyCSDL2_RWopsType
+ */
+static PyCSDL2_RWops *
+PyCSDL2_RWopsCreate(SDL_RWops *rwops)
+{
+    PyCSDL2_RWops *self;
+    PyTypeObject *type = &PyCSDL2_RWopsType;
+    PyCSDL2_RWopsPtr *ptr;
+    if (!(ptr = PyCSDL2_RWopsPtrCreate(rwops)))
+        return NULL;
+    if (!(self = (PyCSDL2_RWops*)type->tp_alloc(type, 0))) {
+        Py_DECREF(ptr);
+        return NULL;
+    }
+    self->ptr = ptr;
+    return self;
+}
+
 /**
  * \brief Initializes bindings to SDL_rwops.h
  *
@@ -166,6 +296,11 @@ PyCSDL2_initrwops(PyObject *module)
             return 0;
 
     if (PyType_Ready(&PyCSDL2_RWopsPtrType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_RWopsType)) { return 0; }
+    Py_INCREF(&PyCSDL2_RWopsType);
+    if (PyModule_AddObject(module, "SDL_RWops", (PyObject*)&PyCSDL2_RWopsType))
+        return 0;
 
     return 1;
 }
