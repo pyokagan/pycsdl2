@@ -2,6 +2,7 @@
 import distutils.util
 import os.path
 import sys
+import tempfile
 import unittest
 
 
@@ -81,6 +82,49 @@ class Test_SDL_RWops(unittest.TestCase):
         rwops = SDL_AllocRW()
         SDL_FreeRW(rwops)
         self.assertRaises(AssertionError, getattr, rwops, 'type')
+
+
+class Test_SDL_RWFromFile(unittest.TestCase):
+    """Tests for SDL_RWFromFile"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dir = tempfile.TemporaryDirectory()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.dir.cleanup()
+
+    def setUp(self):
+        self.path = os.path.join(self.dir.name, self.id())
+
+    def test_r_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'a') returns SDL_RWops"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        self.assertIs(type(SDL_RWFromFile(self.path, 'r')), SDL_RWops)
+
+    def test_w_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'w') returns SDL_RWops"
+        self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
+
+    def test_a_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'a') returns SDL_RWops"
+        self.assertIs(type(SDL_RWFromFile(self.path, 'a')), SDL_RWops)
+
+    def test_rp_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'r+') returns SDL_RWops"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        self.assertIs(type(SDL_RWFromFile(self.path, 'r+')), SDL_RWops)
+
+    def test_wp_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'w+') returns SDL_RWops"
+        self.assertIs(type(SDL_RWFromFile(self.path, 'w+')), SDL_RWops)
+
+    def test_ap_returns_SDL_RWops(self):
+        "SDL_RWFromFile(file, 'a+') returns SDL_RWops"
+        self.assertIs(type(SDL_RWFromFile(self.path, 'a+')), SDL_RWops)
 
 
 if __name__ == '__main__':
