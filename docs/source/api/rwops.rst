@@ -38,6 +38,33 @@ of data streams.
       :const:`SDL_RWOPS_UNKNOWN`. All other values are currently reserved for
       SDL's internal use.
 
+   .. attribute:: size
+
+      A function that reports the stream's total size in bytes. It must the
+      same function signature as :func:`SDL_RWsize`.
+
+   .. attribute:: seek
+
+      A function that positions the next read/write operation in the stream. It
+      must have the same function signature as :func:`SDL_RWseek`.
+
+   .. attribute:: read
+
+      A function that reads from the stream. It must have the same function
+      signature as :func:`SDL_RWread`.
+
+   .. attribute:: write
+
+      A function that writes to the stream. It must have the same function
+      signature as :func:`SDL_RWwrite`.
+
+   .. attribute:: close
+
+      A function that cleans up the stream. It must release any resources
+      used by the stream and free the :class:`SDL_RWops` itself with
+      :func:`SDL_FreeRW`. It must have the same function signature as
+      :func:`SDL_RWclose`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.

@@ -104,9 +104,61 @@ class Test_SDL_RWFromFile(unittest.TestCase):
             f.write(b'TEST')
         self.assertIs(type(SDL_RWFromFile(self.path, 'r')), SDL_RWops)
 
+    def test_r_size(self):
+        "SDL_RWops.size() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        self.assertEqual(rw.size(rw), 4)
+
+    def test_r_seek(self):
+        "SDL_RWops.seek() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        self.assertEqual(rw.seek(rw, 2, RW_SEEK_SET), 2)
+
+    def test_r_read(self):
+        "SDL_RWops.read() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        dst = bytearray(4)
+        self.assertEqual(rw.read(rw, dst, 1, 4), 4)
+        self.assertEqual(dst, b'TEST')
+
+    def test_r_read_invalid_size(self):
+        "SDL_RWops.read() raises BufferError on buffer of wrong size"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        dst = bytearray(2)
+        self.assertRaises(BufferError, rw.read, rw, dst, 1, 4)
+
+    def test_r_close(self):
+        "SDL_RWops.close() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        self.assertIs(rw.close(rw), None)
+        self.assertRaises(AssertionError, getattr, rw, 'type')
+
     def test_w_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'w') returns SDL_RWops"
         self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
+
+    def test_w_write(self):
+        "SDL_RWops.write() works"
+        rw = SDL_RWFromFile(self.path, 'w')
+        self.assertEqual(rw.write(rw, b'TEST', 1, 4), 4)
+        del rw
+        with open(self.path, 'rb') as f:
+            self.assertEqual(f.read(4), b'TEST')
+
+    def test_w_write_invalid_size(self):
+        "SDL_RWops.read() raises BufferError on buffer of wrong size"
+        rw = SDL_RWFromFile(self.path, 'w')
+        self.assertRaises(BufferError, rw.write, rw, b'TE', 1, 4)
 
     def test_a_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'a') returns SDL_RWops"
