@@ -71,12 +71,14 @@ PyCSDL2_IsInvalidParamError(const char *msg)
  *
  * \returns NULL always.
  */
-static PyObject*
+static void*
 PyCSDL2_RaiseSDLError(void)
 {
     const char *msg = SDL_GetError();
 
-    if (!strcmp(msg, "Out of memory"))
+    if (PyErr_Occurred())
+        ; /* Do nothing */
+    else if (!strcmp(msg, "Out of memory"))
         PyErr_NoMemory();
     else if (!strcmp(msg, "Error reading from datastream"))
         PyErr_SetString(PyExc_OSError, msg);
@@ -86,8 +88,12 @@ PyCSDL2_RaiseSDLError(void)
         PyErr_SetString(PyExc_OSError, msg);
     else if (PyCSDL2_IsInvalidParamError(msg))
         PyErr_SetString(PyExc_ValueError, msg);
-    else
+    else if (msg[0])
         PyErr_SetString(PyExc_RuntimeError, msg);
+    else
+        PyErr_SetString(PyExc_AssertionError, "PyCSDL2_RaiseSDLError() "
+                        "called with no active SDL error");
+    SDL_ClearError();
     return NULL;
 }
 
