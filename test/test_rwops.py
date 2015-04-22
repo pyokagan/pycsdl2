@@ -135,6 +135,14 @@ class Test_SDL_RWFromFile(unittest.TestCase):
         dst = bytearray(2)
         self.assertRaises(BufferError, rw.read, rw, dst, 1, 4)
 
+    def test_r_close(self):
+        "SDL_RWops.close() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        self.assertIs(rw.close(rw), None)
+        self.assertRaises(AssertionError, getattr, rw, 'type')
+
     def test_w_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'w') returns SDL_RWops"
         self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
