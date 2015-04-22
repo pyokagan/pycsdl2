@@ -33,6 +33,9 @@
 #include "util.h"
 #include "error.h"
 
+/** \brief SDL_RWops size callback pointer */
+typedef Sint64 (SDLCALL *rwsizefunc)(SDL_RWops*);
+
 /** \brief Instance data for PyCSDL2_RWopsPtrType */
 typedef struct PyCSDL2_RWopsPtr {
     PyObject_HEAD
@@ -143,6 +146,80 @@ typedef struct PyCSDL2_RWops {
     PyCSDL2_RWopsPtr *ptr;
 } PyCSDL2_RWops;
 
+static PyTypeObject PyCSDL2_RWopsType;
+
+/** \brief Instance data for PyCSDL2_RWSizeFuncType */
+typedef struct PyCSDL2_RWSizeFunc {
+    PyObject_HEAD
+    /** \brief SDL_RWops size callback */
+    rwsizefunc func;
+} PyCSDL2_RWSizeFunc;
+
+/** \brief Implements __call__() for PyCSDL2_RWSizeFuncType */
+static PyObject *
+PyCSDL2_RWSizeFuncCall(PyCSDL2_RWSizeFunc *self, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RWops *rwops_obj;
+    Sint64 ret;
+    static char *kwlist[] = {"context", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RWopsType, &rwops_obj))
+        return NULL;
+    if (PyCSDL2_RWopsPtrAssert(rwops_obj->ptr))
+        return NULL;
+    /*
+     * To prevent segfaults due to invalid SDL_RWops internal data, do not
+     * allow mixing of SDL_RWops and callbacks by checking to see if the
+     * SDL_RWops has the same callback as the one we have.
+     */
+    if (self->func != rwops_obj->ptr->rwops->size) {
+        PyErr_SetString(PyExc_ValueError, "Do not mix different "
+                        "SDL_RWops and callbacks.");
+        return NULL;
+    }
+    ret = self->func(rwops_obj->ptr->rwops);
+    if (ret < 0)
+        return PyCSDL2_RaiseSDLError();
+    return PyLong_FromLong(ret);
+}
+
+/**
+ * \brief Type definition for csdl2.RWSizeFunc
+ */
+static PyTypeObject PyCSDL2_RWSizeFuncType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.RWSizeFunc",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RWSizeFunc),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ 0,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ (ternaryfunc) PyCSDL2_RWSizeFuncCall
+};
+
+/** \brief Creates instance of PyCSDL2_RWSizeFuncType */
+static PyCSDL2_RWSizeFunc *
+PyCSDL2_RWSizeFuncCreate(rwsizefunc func)
+{
+    PyCSDL2_RWSizeFunc *self;
+    PyTypeObject *type = &PyCSDL2_RWSizeFuncType;
+    if (!func) {
+        PyErr_SetString(PyExc_AssertionError, "size callback is NULL");
+        return NULL;
+    }
+    if (!(self = (PyCSDL2_RWSizeFunc*)type->tp_alloc(type, 0)))
+        return NULL;
+    self->func = func;
+    return self;
+}
+
 /** \brief Traversal function for PyCSDL2_RWopsType */
 static int
 PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
@@ -190,12 +267,30 @@ PyCSDL2_RWopsSetType(PyCSDL2_RWops *self, PyObject *value, void *closure)
     return 0;
 }
 
+/** \brief Implements getter for SDL_RWops.size */
+static PyObject *
+PyCSDL2_RWopsGetSize(PyCSDL2_RWops *self, void *closure)
+{
+    if (PyCSDL2_RWopsPtrAssert(self->ptr))
+        return NULL;
+    if (!self->ptr->rwops->size)
+        Py_RETURN_NONE;
+    return (PyObject*) PyCSDL2_RWSizeFuncCreate(self->ptr->rwops->size);
+}
+
 /** \brief List of properties for PyCSDL2_RWopsType */
 static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
     {"type",
      (getter) PyCSDL2_RWopsGetType,
      (setter) PyCSDL2_RWopsSetType,
      "Type of stream.",
+     NULL},
+    {"size",
+     (getter) PyCSDL2_RWopsGetSize,
+     (setter) NULL,
+     "Callback that reports stream size. It has the signature:\n"
+     "\n"
+     "size(context: SDL_RWops) -> int\n",
      NULL},
     {NULL}
 };
@@ -366,6 +461,7 @@ PyCSDL2_initrwops(PyObject *module)
             return 0;
 
     if (PyType_Ready(&PyCSDL2_RWopsPtrType)) { return 0; }
+    if (PyType_Ready(&PyCSDL2_RWSizeFuncType)) { return 0; }
 
     if (PyType_Ready(&PyCSDL2_RWopsType)) { return 0; }
     Py_INCREF(&PyCSDL2_RWopsType);
