@@ -48,6 +48,11 @@ of data streams.
       A function that positions the next read/write operation in the stream. It
       must have the same function signature as :func:`SDL_RWseek`.
 
+   .. attribute:: read
+
+      A function that reads from the stream. It must have the same function
+      signature as :func:`SDL_RWread`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.
