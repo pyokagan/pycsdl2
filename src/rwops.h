@@ -312,6 +312,29 @@ PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_FreeRW()
+ *
+ * \code
+ * SDL_FreeRW(area: SDL_RWops) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreeRW(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RWops *rwops_obj;
+    static char *kwlist[] = {"area", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RWopsType, &rwops_obj))
+        return NULL;
+    if (PyCSDL2_RWopsPtrAssert(rwops_obj->ptr))
+        return NULL;
+    SDL_FreeRW(rwops_obj->ptr->rwops);
+    PyCSDL2_RWopsPtrClear(rwops_obj->ptr);
+    rwops_obj->ptr->rwops = NULL;
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_rwops.h
  *
  * Adds constants defined in SDL_rwops.h to module.

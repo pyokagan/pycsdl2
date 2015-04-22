@@ -197,6 +197,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Allocates and returns a new SDL_RWops structure.\n"
     },
 
+    {"SDL_FreeRW",
+     (PyCFunction) PyCSDL2_FreeRW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeRW(area: SDL_RWops) -> None\n"
+     "\n"
+     "Frees a SDL_RWops structure allocated by SDL_AllocRW()\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
