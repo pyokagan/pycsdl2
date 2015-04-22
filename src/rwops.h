@@ -33,6 +33,107 @@
 #include "util.h"
 #include "error.h"
 
+/** \brief Instance data for PyCSDL2_RWopsPtrType */
+typedef struct PyCSDL2_RWopsPtr {
+    PyObject_HEAD
+    /** \brief Pointer to SDL_RWops */
+    SDL_RWops *rwops;
+} PyCSDL2_RWopsPtr;
+
+/** \brief Traversal function for PyCSDL2_RWopsPtrType */
+static int
+PyCSDL2_RWopsPtrTraverse(PyCSDL2_RWopsPtr *self, visitproc visit, void *arg)
+{
+    return 0;
+}
+
+/** \brief Clear function for PyCSDL2_RWopsPtrType */
+static int
+PyCSDL2_RWopsPtrClear(PyCSDL2_RWopsPtr *self)
+{
+    return 0;
+}
+
+/** \brief Destructor for PyCSDL2_RWopsPtrType */
+static void
+PyCSDL2_RWopsPtrDealloc(PyCSDL2_RWopsPtr *self)
+{
+    PyCSDL2_RWopsPtrClear(self);
+    if (self->rwops) {
+        if (self->rwops->close)
+            self->rwops->close(self->rwops);
+        else
+            SDL_FreeRW(self->rwops);
+    }
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
+ * \brief Type definition for csdl2.SDL_RWopsPtr
+ *
+ * csdl2.SDL_RWopsPtr is an internal type that "owns" the SDL_RWops pointer.
+ */
+static PyTypeObject PyCSDL2_RWopsPtrType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_RWopsPtr",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RWopsPtr),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RWopsPtrDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */ "Owner of SDL_RWops pointer",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_RWopsPtrTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_RWopsPtrClear
+};
+
+/**
+ * \brief Creates a new PyCSDL2_RWopsPtr instance
+ */
+static PyCSDL2_RWopsPtr *
+PyCSDL2_RWopsPtrCreate(SDL_RWops *rwops)
+{
+    PyCSDL2_RWopsPtr *self;
+    PyTypeObject *type = &PyCSDL2_RWopsPtrType;
+    if (!(self = (PyCSDL2_RWopsPtr*) type->tp_alloc(type, 0)))
+        return NULL;
+    self->rwops = rwops;
+    return self;
+}
+
+/**
+ * \brief Asserts that the PyCSDL2_RWopsPtr instance is valid
+ *
+ * \returns 0 on success, -1 on assertion failure.
+ */
+static int
+PyCSDL2_RWopsPtrAssert(PyCSDL2_RWopsPtr *self)
+{
+    if (!self) {
+        PyErr_SetString(PyExc_AssertionError,
+                        "Invalid reference to PyCSDL2_RWopsPtr");
+        return -1;
+    }
+    if (!self->rwops) {
+        PyErr_SetString(PyExc_AssertionError,
+                        "SDL_RWops already freed.");
+        return -1;
+    }
+    return 0;
+}
+
 /**
  * \brief Initializes bindings to SDL_rwops.h
  *
@@ -63,6 +164,8 @@ PyCSDL2_initrwops(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_RWopsPtrType)) { return 0; }
 
     return 1;
 }
