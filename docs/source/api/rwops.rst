@@ -62,6 +62,38 @@ of data streams.
 
    Read-only memory stream.
 
+.. function:: SDL_RWFromFile(file: str, mode: str) -> SDL_RWops
+
+   Creates and returns a :class:`SDL_RWops` structure for reading from and/or
+   writing to the file with name `file`.
+
+   `mode` is one of the following:
+
+   ====== =====================================================================
+   `mode` Behavior
+   ====== =====================================================================
+   ``r``  Open a file for reading. The file must exist.
+   ``w``  Create an empty file for writing. If a file with the same name
+          already exists, its contents are erased and the file is treated as a
+          new empty file.
+   ``a``  Append to a file. Writing operations append data at the end of the
+          file. The file is created if it does not exist.
+   ``r+`` Open a file for both reading and writing. The file must exist.
+   ``w+`` Create an empty file for both reading and writing. If a file with the
+          same name already exists its contents are erased and the file is
+          treated as a new empty file.
+   ``a+`` Open a file for reading and appending. All writing operations are
+          performed at the end of the file. You can seek the internal pointer
+          to anywhere in the file for reading, but writing operations will move
+          it back to the end of the file. The file is created if it does not
+          exist.
+   ====== =====================================================================
+
+   :param str file: File path
+   :param str mode: File open mode
+   :returns: A new :class:`SDL_RWops` structure
+   :raises RuntimeError: SDL could not open the file.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.
