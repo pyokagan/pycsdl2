@@ -189,6 +189,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "  created if it does not exist.\n"
     },
 
+    {"SDL_AllocRW",
+     (PyCFunction) PyCSDL2_AllocRW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AllocRW() -> SDL_RWops\n"
+     "\n"
+     "Allocates and returns a new SDL_RWops structure.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",

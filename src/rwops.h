@@ -286,6 +286,32 @@ PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_AllocRW()
+ *
+ * \code
+ * SDL_AllocRW() -> SDL_RWops
+ * \endcode
+ */
+static PyCSDL2_RWops *
+PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_RWops *ret;
+    static char *kwlist[] = {NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+    if (!(ret = SDL_AllocRW()))
+        return PyCSDL2_RaiseSDLError();
+    /*
+     * PyCSDL2_RWopsPtr calls SDL_RWops.close if it is not NULL on destruction.
+     * However, SDL_AllocRW() does not zero SDL_RWops on allocation, and thus
+     * PyCSDL2_RWopsPtr will call an invalid pointer on destructor and cause a
+     * segfault. Fix this by zeroing SDL_RWops.
+     */
+    memset(ret, 0, sizeof(SDL_RWops));
+    return PyCSDL2_RWopsCreate(ret);
+}
+
+/**
  * \brief Initializes bindings to SDL_rwops.h
  *
  * Adds constants defined in SDL_rwops.h to module.
