@@ -58,6 +58,13 @@ of data streams.
       A function that writes to the stream. It must have the same function
       signature as :func:`SDL_RWwrite`.
 
+   .. attribute:: close
+
+      A function that cleans up the stream. It must release any resources
+      used by the stream and free the :class:`SDL_RWops` itself with
+      :func:`SDL_FreeRW`. It must have the same function signature as
+      :func:`SDL_RWclose`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.
