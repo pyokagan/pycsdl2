@@ -38,6 +38,11 @@ of data streams.
       :const:`SDL_RWOPS_UNKNOWN`. All other values are currently reserved for
       SDL's internal use.
 
+   .. attribute:: size
+
+      A function that reports the stream's total size in bytes. It must the
+      same function signature as :func:`SDL_RWsize`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.
