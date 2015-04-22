@@ -104,6 +104,13 @@ class Test_SDL_RWFromFile(unittest.TestCase):
             f.write(b'TEST')
         self.assertIs(type(SDL_RWFromFile(self.path, 'r')), SDL_RWops)
 
+    def test_r_size(self):
+        "SDL_RWops.size() works"
+        with open(self.path, 'wb') as f:
+            f.write(b'TEST')
+        rw = SDL_RWFromFile(self.path, 'r')
+        self.assertEqual(rw.size(rw), 4)
+
     def test_w_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'w') returns SDL_RWops"
         self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
