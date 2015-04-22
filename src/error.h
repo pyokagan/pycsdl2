@@ -93,6 +93,7 @@ PyCSDL2_RaiseSDLError(void)
     else
         PyErr_SetString(PyExc_AssertionError, "PyCSDL2_RaiseSDLError() "
                         "called with no active SDL error");
+    SDL_ClearError();
     return NULL;
 }
 
