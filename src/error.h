@@ -71,7 +71,7 @@ PyCSDL2_IsInvalidParamError(const char *msg)
  *
  * \returns NULL always.
  */
-static PyObject*
+static void*
 PyCSDL2_RaiseSDLError(void)
 {
     const char *msg = SDL_GetError();
