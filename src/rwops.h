@@ -39,6 +39,9 @@ typedef Sint64 (SDLCALL *rwsizefunc)(SDL_RWops*);
 /** \brief SDL_RWops seek callback pointer */
 typedef Sint64 (SDLCALL *rwseekfunc)(SDL_RWops*, Sint64, int);
 
+/** \brief SDL_RWops read callback pointer */
+typedef size_t (SDLCALL *rwreadfunc)(SDL_RWops*, void*, size_t, size_t);
+
 /** \brief Instance data for PyCSDL2_RWopsPtrType */
 typedef struct PyCSDL2_RWopsPtr {
     PyObject_HEAD
@@ -295,6 +298,88 @@ PyCSDL2_RWSeekFuncCreate(rwseekfunc func)
     return self;
 }
 
+/** \brief Instance data for PyCSDL2_RWReadFuncType */
+typedef struct PyCSDL2_RWReadFunc {
+    PyObject_HEAD
+    /** \brief SDL_RWops read callback */
+    rwreadfunc func;
+} PyCSDL2_RWReadFunc;
+
+/** \brief Implements __call__() for PyCSDL2_RWReadFuncType */
+static PyObject *
+PyCSDL2_RWReadFuncCall(PyCSDL2_RWReadFunc *self, PyObject *args,
+                       PyObject *kwds)
+{
+    PyCSDL2_RWops *rwops_obj;
+    size_t ret;
+    Py_buffer buf;
+    Py_ssize_t size, maxnum;
+    static char *kwlist[] = {"context", "ptr", "size", "maxnum", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!w*nn", kwlist,
+                                     &PyCSDL2_RWopsType, &rwops_obj,
+                                     &buf, &size, &maxnum))
+        return NULL;
+    if (buf.len != size * maxnum) {
+        PyBuffer_Release(&buf);
+        return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
+    }
+    if (PyCSDL2_RWopsPtrAssert(rwops_obj->ptr)) {
+        PyBuffer_Release(&buf);
+        return NULL;
+    }
+    /*
+     * To prevent segfaults due to invalid SDL_RWops internal data, do not
+     * allow mixing of SDL_RWops and callbacks by checking to see if the
+     * SDL_RWops has the same callback as the one we have.
+     */
+    if (self->func != rwops_obj->ptr->rwops->read) {
+        PyBuffer_Release(&buf);
+        PyErr_SetString(PyExc_ValueError, "Do not mix different "
+                        "SDL_RWops and callbacks.");
+        return NULL;
+    }
+    ret = self->func(rwops_obj->ptr->rwops, buf.buf, size, maxnum);
+    PyBuffer_Release(&buf);
+    if (PyErr_Occurred())
+        return NULL;
+    return PyLong_FromUnsignedLong(ret);
+}
+
+/** \brief Type definition for csdl2.RWReadFunc */
+static PyTypeObject PyCSDL2_RWReadFuncType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.RWReadFunc",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RWReadFunc),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ 0,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ (ternaryfunc) PyCSDL2_RWReadFuncCall
+};
+
+/** \brief Creates a new instance of PyCSDL2_RWReadFuncType */
+static PyCSDL2_RWReadFunc *
+PyCSDL2_RWReadFuncCreate(rwreadfunc func)
+{
+    PyCSDL2_RWReadFunc *self;
+    PyTypeObject *type = &PyCSDL2_RWReadFuncType;
+    if (!func) {
+        PyErr_SetString(PyExc_AssertionError, "read callback is NULL");
+        return NULL;
+    }
+    if (!(self = (PyCSDL2_RWReadFunc*)type->tp_alloc(type, 0)))
+        return NULL;
+    self->func = func;
+    return self;
+}
+
 /** \brief Traversal function for PyCSDL2_RWopsType */
 static int
 PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
@@ -364,6 +449,17 @@ PyCSDL2_RWopsGetSeek(PyCSDL2_RWops *self, void *closure)
     return (PyObject*) PyCSDL2_RWSeekFuncCreate(self->ptr->rwops->seek);
 }
 
+/** \brief Implements getter for SDL_RWops.read */
+static PyObject *
+PyCSDL2_RWopsGetRead(PyCSDL2_RWops *self, void *closure)
+{
+    if (PyCSDL2_RWopsPtrAssert(self->ptr))
+        return NULL;
+    if (!self->ptr->rwops->read)
+        Py_RETURN_NONE;
+    return (PyObject*) PyCSDL2_RWReadFuncCreate(self->ptr->rwops->read);
+}
+
 /** \brief List of properties for PyCSDL2_RWopsType */
 static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
     {"type",
@@ -384,6 +480,13 @@ static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
      "Callback that seeks in stream. It has the signature:\n"
      "\n"
      "seek(context: SDL_RWops, offset: int, whence: int) -> int\n",
+     NULL},
+    {"read",
+     (getter) PyCSDL2_RWopsGetRead,
+     (setter) NULL,
+     "Callback that reads from the stream. It has the signature:\n"
+     "\n"
+     "read(context: SDL_RWops, ptr: buffer, size: int, maxnum: int) -> int\n",
      NULL},
     {NULL}
 };
@@ -556,6 +659,7 @@ PyCSDL2_initrwops(PyObject *module)
     if (PyType_Ready(&PyCSDL2_RWopsPtrType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_RWSizeFuncType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_RWSeekFuncType)) { return 0; }
+    if (PyType_Ready(&PyCSDL2_RWReadFuncType)) { return 0; }
 
     if (PyType_Ready(&PyCSDL2_RWopsType)) { return 0; }
     Py_INCREF(&PyCSDL2_RWopsType);
