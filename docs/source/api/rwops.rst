@@ -105,6 +105,20 @@ of data streams.
    :returns: A new :class:`SDL_RWops` structure
    :raises MemoryError: Insufficient memory to allocate the structure.
 
+.. function:: SDL_FreeRW(area: SDL_RWops) -> None
+
+   Frees the :class:`SDL_RWops` structure allocated by :func:`SDL_AllocRW`.
+
+   Applications do not need to use this function unless they are providing
+   their own :attr:`SDL_RWops.close` implementation. When using the built-in
+   implementations of :class:`SDL_RWops` (e.g. through :func:`SDL_RWFromFile`,
+   :func:`SDL_RWFromMem` etc.), you just need to call :func:`SDL_RWclose` with
+   the :class:`SDL_RWops` object, as the built-in implementations of
+   :attr:`SDL_RWops.close` will call :func:`SDL_FreeRW` internally.
+
+   :param SDL_RWops area: The :class:`SDL_RWops` structure allocated with
+                          :func:`SDL_AllocRW`.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.
