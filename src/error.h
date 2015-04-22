@@ -88,8 +88,11 @@ PyCSDL2_RaiseSDLError(void)
         PyErr_SetString(PyExc_OSError, msg);
     else if (PyCSDL2_IsInvalidParamError(msg))
         PyErr_SetString(PyExc_ValueError, msg);
-    else
+    else if (msg[0])
         PyErr_SetString(PyExc_RuntimeError, msg);
+    else
+        PyErr_SetString(PyExc_AssertionError, "PyCSDL2_RaiseSDLError() "
+                        "called with no active SDL error");
     return NULL;
 }
 
