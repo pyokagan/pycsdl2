@@ -53,6 +53,11 @@ of data streams.
       A function that reads from the stream. It must have the same function
       signature as :func:`SDL_RWread`.
 
+   .. attribute:: write
+
+      A function that writes to the stream. It must have the same function
+      signature as :func:`SDL_RWwrite`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.
