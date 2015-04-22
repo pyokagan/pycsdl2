@@ -139,6 +139,19 @@ class Test_SDL_RWFromFile(unittest.TestCase):
         "SDL_RWFromFile(file, 'w') returns SDL_RWops"
         self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
 
+    def test_w_write(self):
+        "SDL_RWops.write() works"
+        rw = SDL_RWFromFile(self.path, 'w')
+        self.assertEqual(rw.write(rw, b'TEST', 1, 4), 4)
+        del rw
+        with open(self.path, 'rb') as f:
+            self.assertEqual(f.read(4), b'TEST')
+
+    def test_w_write_invalid_size(self):
+        "SDL_RWops.read() raises BufferError on buffer of wrong size"
+        rw = SDL_RWFromFile(self.path, 'w')
+        self.assertRaises(BufferError, rw.write, rw, b'TE', 1, 4)
+
     def test_a_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'a') returns SDL_RWops"
         self.assertIs(type(SDL_RWFromFile(self.path, 'a')), SDL_RWops)
