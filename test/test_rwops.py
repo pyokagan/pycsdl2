@@ -135,5 +135,14 @@ class Test_SDL_AllocRW(unittest.TestCase):
         self.assertIs(type(SDL_AllocRW()), SDL_RWops)
 
 
+class Test_SDL_FreeRW(unittest.TestCase):
+    """Tests for SDL_FreeRW()"""
+
+    def test_returns_None(self):
+        "SDL_FreeRW() returns None"
+        rwops = SDL_AllocRW()
+        self.assertIs(SDL_FreeRW(rwops), None)
+
+
 if __name__ == '__main__':
     unittest.main()
