@@ -43,6 +43,11 @@ of data streams.
       A function that reports the stream's total size in bytes. It must the
       same function signature as :func:`SDL_RWsize`.
 
+   .. attribute:: seek
+
+      A function that positions the next read/write operation in the stream. It
+      must have the same function signature as :func:`SDL_RWseek`.
+
 .. data:: SDL_RWOPS_UNKNOWN
 
    Unknown stream type.
