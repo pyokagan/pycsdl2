@@ -94,6 +94,17 @@ of data streams.
    :returns: A new :class:`SDL_RWops` structure
    :raises RuntimeError: SDL could not open the file.
 
+.. function:: SDL_AllocRW() -> SDL_RWops
+
+   Allocates a new :class:`SDL_RWops` structure and returns it.
+
+   Applications do not need to use this function unless they are providing
+   their own RWops implementation. You should use the built-in implementations
+   in SDL, like :func:`SDL_RWFromFile`, :func:`SDL_RWFromMem` etc.
+
+   :returns: A new :class:`SDL_RWops` structure
+   :raises MemoryError: Insufficient memory to allocate the structure.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.
