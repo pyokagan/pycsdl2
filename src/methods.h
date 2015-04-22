@@ -162,6 +162,33 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* rwops.h */
 
+    {"SDL_RWFromFile",
+     (PyCFunction) PyCSDL2_RWFromFile,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWFromFile(file: str, mode: str) -> SDL_RWops\n"
+     "\n"
+     "Creates a SDL_RWops for reading from and/or writing to `file`.\n"
+     "\n"
+     "`mode` is one of the following:\n"
+     "\n"
+     "* 'r'  -- Open a file for reading. The file must exist.\n"
+     "* 'w'  -- Create an empty file for writing. If a file with the same\n"
+     "  name already exists its content is erased and the file is treated\n"
+     "  as a new empty file.\n"
+     "* 'a'  -- Append to a file. Writing operations append data at the end\n"
+     "  of the file. The file is created if it does not exist.\n"
+     "* 'r+' -- Open a file for both reading and writing. The file must\n"
+     "  exist.\n"
+     "* 'w+' -- Create an empty file for both reading and writing. If a file\n"
+     "  with the same name already exists its contents are erased and the\n"
+     "  file is treated as a new empty file.\n"
+     "* 'a+' -- Open a file for reading and appending. All writing\n"
+     "  operations are performed at the end of the file. You can seek the\n"
+     "  internal pointer to anywhere in the file for reading, but writing\n"
+     "  operations will move it back to the end of the file. The file is\n"
+     "  created if it does not exist.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",

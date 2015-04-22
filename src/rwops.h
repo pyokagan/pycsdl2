@@ -265,6 +265,27 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RWFromFile()
+ *
+ * \code
+ * SDL_RWFromFile(file: str, mode: str) -> SDL_RWops
+ * \endcode
+ */
+static PyCSDL2_RWops *
+PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *file, *mode;
+    SDL_RWops *ret;
+    static char *kwlist[] = {"file", "mode", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ss", kwlist,
+                                     &file, &mode))
+        return NULL;
+    if (!(ret = SDL_RWFromFile(file, mode)))
+        return PyCSDL2_RaiseSDLError();
+    return PyCSDL2_RWopsCreate(ret);
+}
+
+/**
  * \brief Initializes bindings to SDL_rwops.h
  *
  * Adds constants defined in SDL_rwops.h to module.
