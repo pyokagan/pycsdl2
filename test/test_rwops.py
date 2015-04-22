@@ -48,5 +48,40 @@ class TestRwopsConstants(unittest.TestCase):
         self.assertEqual(RW_SEEK_END, 2)
 
 
+class Test_SDL_RWops(unittest.TestCase):
+    """Tests for SDL_RWops"""
+
+    def test_cannot_create(self):
+        "Cannot create SDL_RWops instances"
+        self.assertRaises(TypeError, SDL_RWops)
+        self.assertRaises(TypeError, SDL_RWops.__new__, SDL_RWops)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as a base class"
+        self.assertRaises(TypeError, type, "testtype", (SDL_RWops,), {})
+
+    def test_type_is_int(self):
+        "SDL_RWops.type is an integer"
+        rwops = SDL_AllocRW()
+        self.assertIs(type(rwops.type), int)
+
+    def test_type_set_int(self):
+        "SDL_RWops.type can be set to an integer"
+        rwops = SDL_AllocRW()
+        rwops.type = 42
+        self.assertEqual(rwops.type, 42)
+
+    def test_type_set_invalid_type(self):
+        "SDL_RWops.type raises a TypeError if not set to an integer"
+        rwops = SDL_AllocRW()
+        self.assertRaises(TypeError, setattr, rwops, 'type', None)
+
+    def test_freed_type(self):
+        "SDL_RWops.type raises an AssertionError if the object has been freed"
+        rwops = SDL_AllocRW()
+        SDL_FreeRW(rwops)
+        self.assertRaises(AssertionError, getattr, rwops, 'type')
+
+
 if __name__ == '__main__':
     unittest.main()
