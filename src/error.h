@@ -76,7 +76,9 @@ PyCSDL2_RaiseSDLError(void)
 {
     const char *msg = SDL_GetError();
 
-    if (!strcmp(msg, "Out of memory"))
+    if (PyErr_Occurred())
+        ; /* Do nothing */
+    else if (!strcmp(msg, "Out of memory"))
         PyErr_NoMemory();
     else if (!strcmp(msg, "Error reading from datastream"))
         PyErr_SetString(PyExc_OSError, msg);
