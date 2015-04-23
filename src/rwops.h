@@ -218,17 +218,14 @@ static PyTypeObject PyCSDL2_RWSizeFuncType = {
 
 /** \brief Creates instance of PyCSDL2_RWSizeFuncType */
 static PyCSDL2_RWSizeFunc *
-PyCSDL2_RWSizeFuncCreate(rwsizefunc func)
+PyCSDL2_RWSizeFuncCreate(rwsizefunc sizefunc)
 {
     PyCSDL2_RWSizeFunc *self;
     PyTypeObject *type = &PyCSDL2_RWSizeFuncType;
-    if (!func) {
-        PyErr_SetString(PyExc_AssertionError, "size callback is NULL");
-        return NULL;
-    }
+    PyCSDL2_Assert(sizefunc);
     if (!(self = (PyCSDL2_RWSizeFunc*)type->tp_alloc(type, 0)))
         return NULL;
-    self->func = func;
+    self->func = sizefunc;
     return self;
 }
 
@@ -290,17 +287,14 @@ static PyTypeObject PyCSDL2_RWSeekFuncType = {
 
 /** \brief Creates an instance of PyCSDL2_RWSeekFuncType */
 static PyCSDL2_RWSeekFunc *
-PyCSDL2_RWSeekFuncCreate(rwseekfunc func)
+PyCSDL2_RWSeekFuncCreate(rwseekfunc seekfunc)
 {
     PyCSDL2_RWSeekFunc *self;
     PyTypeObject *type = &PyCSDL2_RWSeekFuncType;
-    if (!func) {
-        PyErr_SetString(PyExc_AssertionError, "seek callback is NULL");
-        return NULL;
-    }
+    PyCSDL2_Assert(seekfunc);
     if (!(self = (PyCSDL2_RWSeekFunc*)type->tp_alloc(type, 0)))
         return NULL;
-    self->func = func;
+    self->func = seekfunc;
     return self;
 }
 
@@ -372,17 +366,14 @@ static PyTypeObject PyCSDL2_RWReadFuncType = {
 
 /** \brief Creates a new instance of PyCSDL2_RWReadFuncType */
 static PyCSDL2_RWReadFunc *
-PyCSDL2_RWReadFuncCreate(rwreadfunc func)
+PyCSDL2_RWReadFuncCreate(rwreadfunc readfunc)
 {
     PyCSDL2_RWReadFunc *self;
     PyTypeObject *type = &PyCSDL2_RWReadFuncType;
-    if (!func) {
-        PyErr_SetString(PyExc_AssertionError, "read callback is NULL");
-        return NULL;
-    }
+    PyCSDL2_Assert(readfunc);
     if (!(self = (PyCSDL2_RWReadFunc*)type->tp_alloc(type, 0)))
         return NULL;
-    self->func = func;
+    self->func = readfunc;
     return self;
 }
 
@@ -450,17 +441,14 @@ static PyTypeObject PyCSDL2_RWWriteFuncType = {
 
 /** \brief Creates a new instance of PyCSDL2_RWWriteFuncType */
 static PyCSDL2_RWWriteFunc *
-PyCSDL2_RWWriteFuncCreate(rwwritefunc func)
+PyCSDL2_RWWriteFuncCreate(rwwritefunc writefunc)
 {
     PyCSDL2_RWWriteFunc *self;
     PyTypeObject *type = &PyCSDL2_RWWriteFuncType;
-    if (!func) {
-        PyErr_SetString(PyExc_AssertionError, "read callback is NULL");
-        return NULL;
-    }
+    PyCSDL2_Assert(writefunc);
     if (!(self = (PyCSDL2_RWWriteFunc*)type->tp_alloc(type, 0)))
         return NULL;
-    self->func = func;
+    self->func = writefunc;
     return self;
 }
 
@@ -524,17 +512,14 @@ static PyTypeObject PyCSDL2_RWCloseFuncType = {
 
 /** \brief Creates instance of PyCSDL2_RWCloseFuncType */
 static PyCSDL2_RWCloseFunc *
-PyCSDL2_RWCloseFuncCreate(rwclosefunc func)
+PyCSDL2_RWCloseFuncCreate(rwclosefunc closefunc)
 {
     PyCSDL2_RWCloseFunc *self;
     PyTypeObject *type = &PyCSDL2_RWCloseFuncType;
-    if (!func) {
-        PyErr_SetString(PyExc_AssertionError, "close callback is NULL");
-        return NULL;
-    }
+    PyCSDL2_Assert(closefunc);
     if (!(self = (PyCSDL2_RWCloseFunc*) type->tp_alloc(type, 0)))
         return NULL;
-    self->func = func;
+    self->func = closefunc;
     return self;
 }
 
