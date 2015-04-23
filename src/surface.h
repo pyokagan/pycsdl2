@@ -37,12 +37,28 @@
 /**
  * \brief Initializes bindings to SDL_surface.h
  *
+ * Adds constants defined in SDL_surface.h to module.
+ *
  * \param module csdl2 module object
  * \returns 1 on success, 0 if an exception occurred.
  */
 static int
 PyCSDL2_initsurface(PyObject *module)
 {
+    static const PyCSDL2_Constant constants[] = {
+        {"SDL_SWSURFACE", SDL_SWSURFACE},
+        {"SDL_PREALLOC", SDL_PREALLOC},
+        {"SDL_RLEACCEL", SDL_RLEACCEL},
+        {"SDL_DONTFREE", SDL_DONTFREE},
+
+        {NULL, 0}
+    };
+    const PyCSDL2_Constant *c;
+
+    for (c = constants; c->name; c++)
+        if (PyModule_AddIntConstant(module, c->name, c->value))
+            return 0;
+
     return 1;
 }
 
