@@ -36,12 +36,40 @@
 /**
  * \brief Initializes bindings to SDL_render.h
  *
+ * Adds constants defined in SDL_render.h to module.
+ *
  * \param module csdl2 module object
  * \returns 1 on success, 0 if an exception occurred.
  */
 static int
 PyCSDL2_initrender(PyObject *module)
 {
+    static const PyCSDL2_Constant constants[] = {
+        {"SDL_RENDERER_SOFTWARE", SDL_RENDERER_SOFTWARE},
+        {"SDL_RENDERER_ACCELERATED", SDL_RENDERER_ACCELERATED},
+        {"SDL_RENDERER_PRESENTVSYNC", SDL_RENDERER_PRESENTVSYNC},
+        {"SDL_RENDERER_TARGETTEXTURE", SDL_RENDERER_TARGETTEXTURE},
+
+        {"SDL_TEXTUREACCESS_STATIC", SDL_TEXTUREACCESS_STATIC},
+        {"SDL_TEXTUREACCESS_STREAMING", SDL_TEXTUREACCESS_STREAMING},
+        {"SDL_TEXTUREACCESS_TARGET", SDL_TEXTUREACCESS_TARGET},
+
+        {"SDL_TEXTUREMODULATE_NONE", SDL_TEXTUREMODULATE_NONE},
+        {"SDL_TEXTUREMODULATE_COLOR", SDL_TEXTUREMODULATE_COLOR},
+        {"SDL_TEXTUREMODULATE_ALPHA", SDL_TEXTUREMODULATE_ALPHA},
+
+        {"SDL_FLIP_NONE", SDL_FLIP_NONE},
+        {"SDL_FLIP_HORIZONTAL", SDL_FLIP_HORIZONTAL},
+        {"SDL_FLIP_VERTICAL", SDL_FLIP_VERTICAL},
+
+        {NULL, 0}
+    };
+    const PyCSDL2_Constant *c;
+
+    for (c = constants; c->name; c++)
+        if (PyModule_AddIntConstant(module, c->name, c->value))
+            return 0;
+
     return 1;
 }
 
