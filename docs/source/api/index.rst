@@ -6,5 +6,6 @@ API Reference
 
    basics
    video
+   surface
    events
    rwops

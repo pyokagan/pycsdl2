@@ -32,6 +32,7 @@
 #include "events.h"
 #include "init.h"
 #include "rwops.h"
+#include "surface.h"
 #include "video.h"
 
 /**
@@ -204,6 +205,8 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "Frees a SDL_RWops structure allocated by SDL_AllocRW()\n"
     },
+
+    /* surface.h */
 
     /* video.h */
 
