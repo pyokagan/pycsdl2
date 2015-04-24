@@ -193,3 +193,17 @@ Color Palette
    :returns: A new :class:`SDL_Palette`.
    :raises ValueError: Invalid number of colors.
    :raises MemoryError: Not enough memory to allocate the palette.
+
+.. function:: SDL_FreePalette(palette: SDL_Palette) -> None
+
+   Frees the specified palette.
+
+   There is no need to call this function as csdl2 will automatically call this
+   function on garbage collection.
+
+   :param SDL_Palette palette: The :class:`SDL_Palette` to be freed.
+   :raises AssertionError: The palette has already been freed.
+
+   .. warning:: Do not access the palette once it has been freed. Doing so will
+                at best raise AssertionErrors and at worse crash the
+                interpreter.
