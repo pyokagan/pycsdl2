@@ -167,6 +167,17 @@ Pixel Formats
 
       (readonly) The bit index of the alpha value of a pixel.
 
+.. function:: SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat
+
+   Creates a :class:`SDL_PixelFormat` structure corresponding to the pixel
+   format constant `pixel_format`.
+
+   :param int pixel_format: One of the `Pixel format constants`_.
+   :returns: A :class:`SDL_PixelFormat`.
+   :raises ValueError: Invalid `pixel_format`.
+   :raises MemoryError: Not enough memory to allocate the
+                        :class:`SDL_PixelFormat`.
+
 Pixel format constants
 ~~~~~~~~~~~~~~~~~~~~~~
 .. data:: SDL_PIXELFORMAT_UNKNOWN
