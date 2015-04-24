@@ -183,3 +183,13 @@ Color Palette
       (readonly) An array of :class:`SDL_Color` structures representing the
       palette. This array cannot be directly modified. Use
       :func:`SDL_SetPaletteColors` instead.
+
+.. function:: SDL_AllocPalette(ncolors: int) -> SDL_AllocPalette
+
+   Create a new :class:`SDL_Palette` with `ncolors` number of color entries.
+   The color entries are initialized to white.
+
+   :param int ncolors: Number of colors in the palette.
+   :returns: A new :class:`SDL_Palette`.
+   :raises ValueError: Invalid number of colors.
+   :raises MemoryError: Not enough memory to allocate the palette.
