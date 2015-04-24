@@ -680,6 +680,28 @@ PyCSDL2_AllocFormat(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_FreeFormat()
+ *
+ * \code{.py}
+ * SDL_FreeFormat(format: SDL_PixelFormat) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_PixelFormat *pfmt;
+    static char *kwlist[] = {"format", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_PixelFormatType, &pfmt))
+        return NULL;
+    PyCSDL2_Assert(pfmt->pfmt);
+    PyCSDL2_PixelFormatClear(pfmt);
+    SDL_FreeFormat(pfmt->pfmt);
+    pfmt->pfmt = NULL;
+    Py_RETURN_NONE;
+}
+
+/**
 * \brief Implements csdl2.SDL_AllocPalette()
 *
 * \code{.py}

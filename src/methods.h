@@ -174,6 +174,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "`pixel_format` is one of the SDL_PIXELFORMAT_* constants.\n"
     },
 
+    {"SDL_FreeFormat",
+     (PyCFunction) PyCSDL2_FreeFormat,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeFormat(format: SDL_PixelFormat) -> None\n"
+     "\n"
+     "Frees the SDL_PixelFormat `format`.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_PixelFormat will\n"
+     "automatically call this function as part of its destructor.\n"
+    },
+
     {"SDL_AllocPalette",
      (PyCFunction) PyCSDL2_AllocPalette,
      METH_VARARGS | METH_KEYWORDS,
