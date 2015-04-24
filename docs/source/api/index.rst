@@ -7,5 +7,6 @@ API Reference
    basics
    video
    surface
+   render
    events
    rwops
