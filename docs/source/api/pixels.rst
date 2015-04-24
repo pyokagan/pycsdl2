@@ -1,3 +1,163 @@
 Pixel Formats and Conversion Routines
 =====================================
 .. module:: csdl2
+
+Pixel Types
+-----------
+The pixel type is one of the following values:
+
+.. data:: SDL_PIXELTYPE_UNKNOWN
+
+   Unknown pixel type.
+
+Indexed Pixel Types
+~~~~~~~~~~~~~~~~~~~
+.. data:: SDL_PIXELTYPE_INDEX1
+
+.. data:: SDL_PIXELTYPE_INDEX4
+
+.. data:: SDL_PIXELTYPE_INDEX8
+
+Packed Pixel Types
+~~~~~~~~~~~~~~~~~~
+.. data:: SDL_PIXELTYPE_PACKED8
+
+.. data:: SDL_PIXELTYPE_PACKED16
+
+.. data:: SDL_PIXELTYPE_PACKED32
+
+Bitmap Pixel Types
+~~~~~~~~~~~~~~~~~~
+.. data:: SDL_PIXELTYPE_ARRAYU8
+
+.. data:: SDL_PIXELTYPE_ARRAYU16
+
+.. data:: SDL_PIXELTYPE_ARRAYU32
+
+.. data:: SDL_PIXELTYPE_ARRAYF16
+
+.. data:: SDL_PIXELTYPE_ARRAYF32
+
+Pixel Ordering
+--------------
+Depending on the pixel type there are three different types of orderings --
+bitmapped, packed or array.
+
+Bitmap pixel order (high bit -> low bit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. data:: SDL_BITMAPORDER_NONE
+
+.. data:: SDL_BITMAPORDER_4321
+
+.. data:: SDL_BITMAPORDER_1234
+
+Packed component order (high bit -> low bit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. data:: SDL_PACKEDORDER_NONE
+
+.. data:: SDL_PACKEDORDER_XRGB
+
+.. data:: SDL_PACKEDORDER_RGBX
+
+.. data:: SDL_PACKEDORDER_ARGB
+
+.. data:: SDL_PACKEDORDER_RGBA
+
+.. data:: SDL_PACKEDORDER_XBGR
+
+.. data:: SDL_PACKEDORDER_BGRX
+
+.. data:: SDL_PACKEDORDER_ABGR
+
+.. data:: SDL_PACKEDORDER_BGRA
+
+Array component order (low byte -> high byte)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. data:: SDL_ARRAYORDER_NONE
+
+.. data:: SDL_ARRAYORDER_RGB
+
+.. data:: SDL_ARRAYORDER_RGBA
+
+.. data:: SDL_ARRAYORDER_ARGB
+
+.. data:: SDL_ARRAYORDER_BGR
+
+.. data:: SDL_ARRAYORDER_BGRA
+
+.. data:: SDL_ARRAYORDER_ABGR
+
+Pixel Formats
+-------------
+.. data:: SDL_PIXELFORMAT_UNKNOWN
+
+.. data:: SDL_PIXELFORMAT_INDEX1LSB
+
+.. data:: SDL_PIXELFORMAT_INDEX1MSB
+
+.. data:: SDL_PIXELFORMAT_INDEX4LSB
+
+.. data:: SDL_PIXELFORMAT_INDEX4MSB
+
+.. data:: SDL_PIXELFORMAT_INDEX8
+
+.. data:: SDL_PIXELFORMAT_RGB332
+
+.. data:: SDL_PIXELFORMAT_RGB444
+
+.. data:: SDL_PIXELFORMAT_RGB555
+
+.. data:: SDL_PIXELFORMAT_BGR555
+
+.. data:: SDL_PIXELFORMAT_ARGB4444
+
+.. data:: SDL_PIXELFORMAT_RGBA4444
+
+.. data:: SDL_PIXELFORMAT_ABGR4444
+
+.. data:: SDL_PIXELFORMAT_BGRA4444
+
+.. data:: SDL_PIXELFORMAT_ARGB1555
+
+.. data:: SDL_PIXELFORMAT_RGBA5551
+
+.. data:: SDL_PIXELFORMAT_ABGR1555
+
+.. data:: SDL_PIXELFORMAT_BGRA5551
+
+.. data:: SDL_PIXELFORMAT_RGB565
+
+.. data:: SDL_PIXELFORMAT_BGR565
+
+.. data:: SDL_PIXELFORMAT_RGB24
+
+.. data:: SDL_PIXELFORMAT_BGR24
+
+.. data:: SDL_PIXELFORMAT_RGB888
+
+.. data:: SDL_PIXELFORMAT_RGBX8888
+
+.. data:: SDL_PIXELFORMAT_BGR888
+
+.. data:: SDL_PIXELFORMAT_BGRX8888
+
+.. data:: SDL_PIXELFORMAT_ARGB8888
+
+.. data:: SDL_PIXELFORMAT_RGBA8888
+
+.. data:: SDL_PIXELFORMAT_ABGR8888
+
+.. data:: SDL_PIXELFORMAT_BGRA8888
+
+.. data:: SDL_PIXELFORMAT_ARGB2101010
+
+.. data:: SDL_PIXELFORMAT_YV12
+
+.. data:: SDL_PIXELFORMAT_IYUV
+
+.. data:: SDL_PIXELFORMAT_YUY2
+
+.. data:: SDL_PIXELFORMAT_UYVY
+
+.. data:: SDL_PIXELFORMAT_YVYU
+
