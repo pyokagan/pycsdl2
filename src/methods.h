@@ -165,6 +165,16 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* pixels.h */
 
+    {"SDL_AllocPalette",
+     (PyCFunction) PyCSDL2_AllocPalette,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AllocPalette(ncolors: int) -> SDL_Palette\n"
+     "\n"
+     "Returns a new SDL_Palette with `ncolors` number of colors.\n"
+     "\n"
+     "The color values are initialized to white.\n"
+    },
+
     /* render.h */
 
     /* rwops.h */

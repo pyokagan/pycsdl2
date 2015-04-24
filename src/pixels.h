@@ -311,6 +311,31 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
 }
 
 /**
+ * \brief Implements csdl2.SDL_AllocPalette()
+ *
+ * \code{.py}
+ * SDL_AllocPalette(ncolors: int) -> SDL_Palette
+ * \endcode
+ */
+static PyCSDL2_Palette *
+PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int ncolors;
+    SDL_Palette *palette;
+    PyCSDL2_Palette *out;
+    static char *kwlist[] = {"ncolors", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &ncolors))
+        return NULL;
+    if (!(palette = SDL_AllocPalette(ncolors)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_PaletteCreate(palette))) {
+        SDL_FreePalette(palette);
+        return NULL;
+    }
+    return out;
+}
+
+/**
  * \brief Initializes bindings to SDL_pixels.h
  *
  * Adds constants defined in SDL_pixels.h to module.
