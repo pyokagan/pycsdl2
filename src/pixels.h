@@ -34,6 +34,115 @@
 #include "util.h"
 #include "error.h"
 
+/** \brief Instance data for PyCSDL2_PaletteColorsType */
+typedef struct PyCSDL2_PaletteColors {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to SDL_Palette this instance owns */
+    SDL_Palette *palette;
+    /** \brief Pointer to SDL_Color buffer */
+    SDL_Color *colors;
+    /** \brief Shape of colors buffer */
+    Py_ssize_t shape[1];
+} PyCSDL2_PaletteColors;
+
+/** \brief Destructor for PyCSDL2_PaletteColorsType */
+static void
+PyCSDL2_PaletteColorsDealloc(PyCSDL2_PaletteColors *self)
+{
+    if (self->in_weakreflist)
+        PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->palette)
+        SDL_FreePalette(self->palette);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief getbufferproc for PyCSDL2_PaletteColorsType */
+static int
+PyCSDL2_PaletteColorsGetBuffer(PyCSDL2_PaletteColors *self, Py_buffer *view,
+                               int flags)
+{
+    static Py_ssize_t strides[1] = {sizeof(SDL_Color)};
+
+    if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) {
+        PyErr_SetString(PyExc_BufferError, "Object is not writable.");
+        return -1;
+    }
+    view->buf = self->colors;
+    Py_INCREF((PyObject*) self);
+    view->obj = (PyObject*) self;
+    view->len = self->shape[0] * sizeof(SDL_Color);
+    view->readonly = 1;
+    view->itemsize = sizeof(SDL_Color);
+    view->format = "BBBB";
+    view->ndim = 1;
+    view->shape = self->shape;
+    view->strides = strides;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
+}
+
+/** \brief Buffer protocol definition for PyCSDL2_PaletteColorsType */
+static PyBufferProcs PyCSDL2_PaletteColorsBufferProcs = {
+    (getbufferproc) PyCSDL2_PaletteColorsGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/** \brief Type definition for csdl2.SDL_PaletteColors */
+static PyTypeObject PyCSDL2_PaletteColorsType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_PaletteColors",
+    /* tp_basicsize      */ sizeof(PyCSDL2_PaletteColors),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_PaletteColorsDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_PaletteColorsBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "Array of palette SDL_Colors\n",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_PaletteColors, in_weakreflist),
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_PaletteColorsType
+ *
+ * \param palette SDL_Palette to manage the colors array for. Will steal the
+ *                reference.
+ */
+static PyCSDL2_PaletteColors *
+PyCSDL2_PaletteColorsCreate(SDL_Palette *palette)
+{
+    PyCSDL2_PaletteColors *self;
+    PyTypeObject *type = &PyCSDL2_PaletteColorsType;
+
+    PyCSDL2_Assert(palette);
+    PyCSDL2_Assert(palette->colors);
+    PyCSDL2_Assert(palette->ncolors);
+    if (!(self = (PyCSDL2_PaletteColors*) type->tp_alloc(type, 0)))
+        return NULL;
+    self->palette = palette;
+    self->colors = palette->colors;
+    self->shape[0] = palette->ncolors;
+    return self;
+}
+
 /**
  * \brief Initializes bindings to SDL_pixels.h
  *
@@ -138,6 +247,8 @@ PyCSDL2_initpixels(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_PaletteColorsType)) { return 0; }
 
     return 1;
 }
