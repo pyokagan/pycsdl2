@@ -156,4 +156,18 @@ PyCSDL2_Get(PyObject *var)
     return var;
 }
 
+/**
+ * \brief Sets var to a new reference to value
+ *
+ * If var had a previous value, the refcount of the previous value is
+ * decremented.
+ */
+#define PyCSDL2_Set(var, value) \
+    do { \
+        void *tmp = (var); \
+        Py_XINCREF((PyObject*) value); \
+        (var) = (value); \
+        Py_XDECREF((PyObject*) tmp); \
+    } while(0)
+
 #endif /* _PYCSDL2_UTIL_H_ */
