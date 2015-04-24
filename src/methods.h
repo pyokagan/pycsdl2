@@ -165,6 +165,27 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* pixels.h */
 
+    {"SDL_AllocPalette",
+     (PyCFunction) PyCSDL2_AllocPalette,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AllocPalette(ncolors: int) -> SDL_Palette\n"
+     "\n"
+     "Returns a new SDL_Palette with `ncolors` number of colors.\n"
+     "\n"
+     "The color values are initialized to white.\n"
+    },
+
+    {"SDL_FreePalette",
+     (PyCFunction) PyCSDL2_FreePalette,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreePalette(palette: SDL_Palette) -> None\n"
+     "\n"
+     "Frees the SDL_Palette `palette`.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Palette will\n"
+     "automatically call this function as part of its destructor.\n"
+    },
+
     /* render.h */
 
     /* rwops.h */

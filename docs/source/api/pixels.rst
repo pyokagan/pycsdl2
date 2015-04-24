@@ -161,3 +161,49 @@ Pixel Formats
 
 .. data:: SDL_PIXELFORMAT_YVYU
 
+Color Palette
+-------------
+.. class:: SDL_Palette
+
+   A color palette.
+
+   Every pixel in an 8-bit surface is an index into the `colors` field of the
+   :class:`SDL_Palette` referenced by the :class:`SDL_PixelFormat`.
+
+   This structure cannot be directly constructed. One will be automatically
+   created as needed when SDL allocates a :class:`SDL_PixelFormat`. It can also
+   be created through :func:`SDL_AllocPalette`.
+
+   .. attribute:: ncolors
+
+      (readonly) Number of colors in the palette.
+
+   .. attribute:: colors
+
+      (readonly) An array of :class:`SDL_Color` structures representing the
+      palette. This array cannot be directly modified. Use
+      :func:`SDL_SetPaletteColors` instead.
+
+.. function:: SDL_AllocPalette(ncolors: int) -> SDL_AllocPalette
+
+   Create a new :class:`SDL_Palette` with `ncolors` number of color entries.
+   The color entries are initialized to white.
+
+   :param int ncolors: Number of colors in the palette.
+   :returns: A new :class:`SDL_Palette`.
+   :raises ValueError: Invalid number of colors.
+   :raises MemoryError: Not enough memory to allocate the palette.
+
+.. function:: SDL_FreePalette(palette: SDL_Palette) -> None
+
+   Frees the specified palette.
+
+   There is no need to call this function as csdl2 will automatically call this
+   function on garbage collection.
+
+   :param SDL_Palette palette: The :class:`SDL_Palette` to be freed.
+   :raises AssertionError: The palette has already been freed.
+
+   .. warning:: Do not access the palette once it has been freed. Doing so will
+                at best raise AssertionErrors and at worse crash the
+                interpreter.

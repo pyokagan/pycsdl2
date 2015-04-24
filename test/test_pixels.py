@@ -325,5 +325,105 @@ class TestPixelsConstants(unittest.TestCase):
         self.assertEqual(SDL_PIXELFORMAT_YVYU, x)
 
 
+class Test_SDL_Palette(unittest.TestCase):
+    """Tests SDL_Palette"""
+
+    def setUp(self):
+        self.plt = SDL_AllocPalette(8)
+
+    def test_cannot_create(self):
+        "Cannot create instances directly"
+        self.assertRaises(TypeError, SDL_Palette)
+        self.assertRaises(TypeError, SDL_Palette.__new__, SDL_Palette)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_Palette,), {})
+
+    def test_ncolors(self):
+        "ncolors has the correct int value"
+        self.assertIs(type(self.plt.ncolors), int)
+        self.assertEqual(self.plt.ncolors, 8)
+
+    def test_ncolors_readonly(self):
+        "ncolors is readonly"
+        self.assertRaises(AttributeError, setattr, self.plt, 'ncolors', 42)
+
+    def test_freed_ncolors(self):
+        "ncolors raises AssertionError when freed"
+        SDL_FreePalette(self.plt)
+        self.assertRaises(AssertionError, getattr, self.plt, 'ncolors')
+
+    def test_colors_buffer(self):
+        "colors support buffer protocol"
+        colors = self.plt.colors
+        mem = memoryview(colors)
+        self.assertEqual(mem.shape, (8,))
+
+    def test_colors_readonly(self):
+        "colors is readonly"
+        self.assertRaises(AttributeError, setattr, self.plt, 'colors', 42)
+
+    def test_freed_colors(self):
+        "colors raises AssertionError when freed"
+        SDL_FreePalette(self.plt)
+        self.assertRaises(AssertionError, getattr, self.plt, 'colors')
+
+    def test_version(self):
+        "version is an integer"
+        self.assertIs(type(self.plt.version), int)
+
+    def test_version_readonly(self):
+        "version is readonly"
+        self.assertRaises(AttributeError, setattr, self.plt, 'version', 42)
+
+    def test_freed_version(self):
+        "version raises AssertionError when freed"
+        SDL_FreePalette(self.plt)
+        self.assertRaises(AssertionError, getattr, self.plt, 'version')
+
+    def test_refcount(self):
+        "refcount is an integer"
+        self.assertIs(type(self.plt.refcount), int)
+
+    def test_refcount_readonly(self):
+        "refcount is readonly"
+        self.assertRaises(AttributeError, setattr, self.plt, 'refcount', 42)
+
+    def test_freed_refcount(self):
+        "refcount raises AssertionError when freed"
+        SDL_FreePalette(self.plt)
+        self.assertRaises(AssertionError, getattr, self.plt, 'refcount')
+
+
+class Test_SDL_AllocPalette(unittest.TestCase):
+    "Tests SDL_AllocPalette()"
+
+    def test_returns_SDL_Palette(self):
+        "Returns a SDL_Palette"
+        x = SDL_AllocPalette(8)
+        self.assertIs(type(x), SDL_Palette)
+
+    def test_negative_ncolors(self):
+        "Raises ValueError on negative ncolors"
+        self.assertRaises(ValueError, SDL_AllocPalette, -42)
+
+
+class Test_SDL_FreePalette(unittest.TestCase):
+    "Tests SDL_FreePalette()"
+
+    def setUp(self):
+        self.plt = SDL_AllocPalette(8)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_FreePalette(self.plt), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_FreePalette(self.plt)
+        self.assertRaises(AssertionError, SDL_FreePalette, self.plt)
+
+
 if __name__ == '__main__':
     unittest.main()
