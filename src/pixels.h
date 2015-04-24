@@ -336,6 +336,28 @@ PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_FreePalette()
+ *
+ * \code{.py}
+ * SDL_FreePalette(palette: SDL_Palette) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreePalette(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Palette *palette;
+    static char *kwlist[] = {"palette", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_PaletteType, &palette))
+        return NULL;
+    PyCSDL2_Assert(palette->palette);
+    PyCSDL2_PaletteClear(palette);
+    SDL_FreePalette(palette->palette);
+    palette->palette = NULL;
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_pixels.h
  *
  * Adds constants defined in SDL_pixels.h to module.
