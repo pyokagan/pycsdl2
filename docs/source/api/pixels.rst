@@ -89,6 +89,86 @@ Array component order (low byte -> high byte)
 
 Pixel Formats
 -------------
+.. class:: SDL_PixelFormat
+
+   Pixel format information.
+
+   This structure cannot be directly constructed. Use :func:`SDL_AllocFormat`
+   instead.
+
+   .. attribute:: format
+
+      (readonly) A constant specifying the pixel format. See `Pixel format
+      constants`_ for possible values.
+
+   .. attribute:: palette
+
+      (readonly) The :class:`SDL_Palette` associated with this pixel format, or
+      None if this format does not have a palette.
+
+   .. attribute:: BitsPerPixel
+
+      (readonly) The number of significant bits in a pixel value. E.g. 8, 15,
+      16, 24, 32.
+
+   .. attribute:: BytesPerPixel
+
+      (readonly) The number of bytes required to hold a pixel value. E.g. 1,
+      2, 3, 4.
+
+   .. attribute:: Rmask
+
+      (readonly) A mask representing the location of the red component of a
+      pixel.
+
+   .. attribute:: Gmask
+
+      (readonly) A mask representing the location of the green component of a
+      pixel.
+
+   .. attribute:: Bmask
+
+      (readonly) A mask representing the location of the blue component of a
+      pixel.
+
+   .. attribute:: Rloss
+
+      (readonly) The red value of a pixel has this number of bits less compared
+      to 8-bit values.
+
+   .. attribute:: Gloss
+
+      (readonly) The green value of a pixel has this number of bits less
+      compared to 8-bit values.
+
+   .. attribute:: Bloss
+
+      (readonly) The blue value of a pixel has this number of bits less
+      compared to 8-bit values.
+
+   .. attribute:: Aloss
+
+      (readonly) The alpha value of a pixel has this number of bits less
+      compared to 8-bit values.
+
+   .. attribute:: Rshift
+
+      (readonly) The bit index of the red field of a pixel.
+
+   .. attribute:: Gshift
+
+      (readonly) The bit index of the green value of a pixel.
+
+   .. attribute:: Bshift
+
+      (readonly) The bit index of the blue value of a pixel.
+
+   .. attribute:: Ashift
+
+      (readonly) The bit index of the alpha value of a pixel.
+
+Pixel format constants
+~~~~~~~~~~~~~~~~~~~~~~
 .. data:: SDL_PIXELFORMAT_UNKNOWN
 
 .. data:: SDL_PIXELFORMAT_INDEX1LSB
