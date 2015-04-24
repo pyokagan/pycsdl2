@@ -654,12 +654,38 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
 }
 
 /**
- * \brief Implements csdl2.SDL_AllocPalette()
+ * \brief Implements csdl2.SDL_AllocFormat()
  *
  * \code{.py}
- * SDL_AllocPalette(ncolors: int) -> SDL_Palette
+ * SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat
  * \endcode
  */
+static PyCSDL2_PixelFormat *
+PyCSDL2_AllocFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 pixel_format;
+    SDL_PixelFormat *pfmt;
+    PyCSDL2_PixelFormat *out;
+    static char *kwlist[] = {"pixel_format", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist,
+                                     &pixel_format))
+        return NULL;
+    if (!(pfmt = SDL_AllocFormat(pixel_format)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_PixelFormatCreate(pfmt))) {
+        SDL_FreeFormat(pfmt);
+        return NULL;
+    }
+    return out;
+}
+
+/**
+* \brief Implements csdl2.SDL_AllocPalette()
+*
+* \code{.py}
+* SDL_AllocPalette(ncolors: int) -> SDL_Palette
+* \endcode
+*/
 static PyCSDL2_Palette *
 PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
 {

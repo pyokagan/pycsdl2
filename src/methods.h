@@ -165,6 +165,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* pixels.h */
 
+    {"SDL_AllocFormat",
+     (PyCFunction) PyCSDL2_AllocFormat,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat\n"
+     "\n"
+     "Returns a SDL_PixelFormat corresponding to `pixel_format`, where\n"
+     "`pixel_format` is one of the SDL_PIXELFORMAT_* constants.\n"
+    },
+
     {"SDL_AllocPalette",
      (PyCFunction) PyCSDL2_AllocPalette,
      METH_VARARGS | METH_KEYWORDS,
