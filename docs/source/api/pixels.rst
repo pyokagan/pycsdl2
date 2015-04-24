@@ -161,3 +161,25 @@ Pixel Formats
 
 .. data:: SDL_PIXELFORMAT_YVYU
 
+Color Palette
+-------------
+.. class:: SDL_Palette
+
+   A color palette.
+
+   Every pixel in an 8-bit surface is an index into the `colors` field of the
+   :class:`SDL_Palette` referenced by the :class:`SDL_PixelFormat`.
+
+   This structure cannot be directly constructed. One will be automatically
+   created as needed when SDL allocates a :class:`SDL_PixelFormat`. It can also
+   be created through :func:`SDL_AllocPalette`.
+
+   .. attribute:: ncolors
+
+      (readonly) Number of colors in the palette.
+
+   .. attribute:: colors
+
+      (readonly) An array of :class:`SDL_Color` structures representing the
+      palette. This array cannot be directly modified. Use
+      :func:`SDL_SetPaletteColors` instead.
