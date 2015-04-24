@@ -142,4 +142,18 @@ typedef struct {
         } \
     } while(0)
 
+/**
+ * \brief Returns a new reference to var
+ *
+ * \returns var with if refcount incremented. If var is NULL, returns Py_None.
+ */
+static PyObject *
+PyCSDL2_Get(PyObject *var)
+{
+    if (!var)
+        Py_RETURN_NONE;
+    Py_INCREF(var);
+    return var;
+}
+
 #endif /* _PYCSDL2_UTIL_H_ */
