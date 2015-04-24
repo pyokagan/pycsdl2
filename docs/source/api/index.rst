@@ -8,5 +8,6 @@ API Reference
    video
    surface
    render
+   pixels
    events
    rwops
