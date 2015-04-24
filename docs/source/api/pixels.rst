@@ -178,6 +178,21 @@ Pixel Formats
    :raises MemoryError: Not enough memory to allocate the
                         :class:`SDL_PixelFormat`.
 
+.. function:: SDL_FreeFormat(format: SDL_PixelFormat) -> None
+
+   Frees the :class:`SDL_PixelFormat` structure allocated by
+   :func:`SDL_AllocFormat`.
+
+   There is no need to manually call this function. csdl2 will automatically
+   call this function upon garbage collection.
+
+   :param SDL_PixelFormat format: :class:`SDL_PixelFormat` structure to free.
+   :raises AssertionError: The pixel format has already been freed.
+
+   .. warning:: Do not access the pixel format structure once is has been
+                freed. Doing so will at best raise AssertionErrors and at worse
+                crash the interpreter.
+
 Pixel format constants
 ~~~~~~~~~~~~~~~~~~~~~~
 .. data:: SDL_PIXELFORMAT_UNKNOWN
