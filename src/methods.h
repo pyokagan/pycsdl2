@@ -31,6 +31,7 @@
 #include "error.h"
 #include "events.h"
 #include "init.h"
+#include "pixels.h"
 #include "render.h"
 #include "rwops.h"
 #include "surface.h"
@@ -161,6 +162,8 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup\n"
      "signal handlers for some commonly ignored fatal signals like SIGSEGV.\n"
     },
+
+    /* pixels.h */
 
     /* render.h */
 
