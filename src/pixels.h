@@ -143,6 +143,173 @@ PyCSDL2_PaletteColorsCreate(SDL_Palette *palette)
     return self;
 }
 
+/** \brief Instance data for PyCSDL2_PaletteType */
+typedef struct PyCSDL2_Palette {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to SDL_Palette this instance owns */
+    SDL_Palette *palette;
+    /** \brief View on the "colors" attribute */
+    PyCSDL2_PaletteColors *colors;
+} PyCSDL2_Palette;
+
+/** \brief GC Traverse function for PyCSDL2_PaletteType */
+static int
+PyCSDL2_PaletteTraverse(PyCSDL2_Palette *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->colors);
+    return 0;
+}
+
+/** \brief GC Clear function for PyCSDL2_PaletteType */
+static int
+PyCSDL2_PaletteClear(PyCSDL2_Palette *self)
+{
+    Py_CLEAR(self->colors);
+    return 0;
+}
+
+/** \brief Destructor for PyCSDL2_PaletteType */
+static void
+PyCSDL2_PaletteDealloc(PyCSDL2_Palette *self)
+{
+    PyCSDL2_PaletteClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->palette)
+        SDL_FreePalette(self->palette);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Getter for SDL_Palette.ncolors */
+static PyObject *
+PyCSDL2_PaletteGetNColors(PyCSDL2_Palette *self, void *closure)
+{
+    PyCSDL2_Assert(self->palette);
+    return PyLong_FromLong(self->palette->ncolors);
+}
+
+/** \brief Getter for SDL_Palette.colors */
+static PyObject *
+PyCSDL2_PaletteGetColors(PyCSDL2_Palette *self, void *closure)
+{
+    PyCSDL2_Assert(self->palette);
+    return PyCSDL2_Get((PyObject*) self->colors);
+}
+
+/** \brief Getter for SDL_Palette.version */
+static PyObject *
+PyCSDL2_PaletteGetVersion(PyCSDL2_Palette *self, void *closure)
+{
+    PyCSDL2_Assert(self->palette);
+    return PyLong_FromUnsignedLong(self->palette->version);
+}
+
+/** \brief Getter for SDL_Palette.refcount */
+static PyObject *
+PyCSDL2_PaletteGetRefcount(PyCSDL2_Palette *self, void *closure)
+{
+    PyCSDL2_Assert(self->palette);
+    return PyLong_FromLong(self->palette->refcount);
+}
+
+/** \brief List of getters and setters of PyCSDL2_PaletteType */
+static PyGetSetDef PyCSDL2_PaletteGetSetters[] = {
+    {"ncolors",
+     (getter) PyCSDL2_PaletteGetNColors,
+     (setter) NULL,
+     "(readonly) Number of colors in the palette.",
+     NULL},
+    {"colors",
+     (getter) PyCSDL2_PaletteGetColors,
+     (setter) NULL,
+     "(readonly) An array of SDL_Color structures representing the palette.\n"
+     "This array cannot be modified directly, use SDL_SetPaletteColors()\n"
+     "instead.\n",
+     NULL},
+    {"version",
+     (getter) PyCSDL2_PaletteGetVersion,
+     (setter) NULL,
+     "(readonly) Internal version number used by SDL to track changes to\n"
+     "the palette.\n",
+     NULL},
+    {"refcount",
+     (getter) PyCSDL2_PaletteGetRefcount,
+     (setter) NULL,
+     "(readonly) SDL's internal reference count.\n",
+     NULL},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_Palette */
+static PyTypeObject PyCSDL2_PaletteType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Palette",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Palette),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_PaletteDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "A color palette\n"
+    "\n"
+    "Every pixel in an 8-bit surface is an index into the `colors` field\n"
+    "of the SDL_Palette referenced by the SDL_PixelFormat.\n"
+    "\n"
+    "This structure cannot be directly constructed. One will be\n"
+    "automatically created when needed when SDL allocates a \n"
+    "SDL_PixelFormat, or through SDL_AllocPalette().\n",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_PaletteTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_PaletteClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Palette, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_PaletteGetSetters
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_PaletteType
+ *
+ * \param palette SDL_Palette to manage. Steals the reference.
+ */
+static PyCSDL2_Palette *
+PyCSDL2_PaletteCreate(SDL_Palette *palette)
+{
+    PyCSDL2_Palette *self;
+    PyTypeObject *type = &PyCSDL2_PaletteType;
+    PyCSDL2_PaletteColors *colors;
+
+    PyCSDL2_Assert(palette);
+    PyCSDL2_Assert(palette->colors);
+    if (!(self = (PyCSDL2_Palette*) type->tp_alloc(type, 0)))
+        return NULL;
+    palette->refcount += 1;
+    if (!(colors = PyCSDL2_PaletteColorsCreate(palette))) {
+        palette->refcount -= 1;
+        Py_DECREF(self);
+        return NULL;
+    }
+    self->palette = palette;
+    self->colors = colors;
+    return self;
+}
+
 /**
  * \brief Initializes bindings to SDL_pixels.h
  *
@@ -249,6 +416,12 @@ PyCSDL2_initpixels(PyObject *module)
             return 0;
 
     if (PyType_Ready(&PyCSDL2_PaletteColorsType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_PaletteType)) { return 0; }
+    Py_INCREF(&PyCSDL2_PaletteType);
+    if (PyModule_AddObject(module, "SDL_Palette",
+                           (PyObject*) &PyCSDL2_PaletteType))
+        return 0;
 
     return 1;
 }
