@@ -1,4 +1,5 @@
 """test bindings in src/surface.h"""
+import array
 import distutils.util
 import os.path
 import struct
@@ -255,6 +256,37 @@ class Test_CreateRGBSurface(unittest.TestCase):
         "Returns a SDL_Surface"
         self.assertIs(type(SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)),
                       SDL_Surface)
+
+
+class Test_CreateRGBSurfaceFrom(unittest.TestCase):
+    "Tests SDL_CreateRGBSurfaceFrom()"
+
+    def test_returns_surface(self):
+        "Returns a SDL_Surface"
+        x = bytearray(32 * 4 * 16)
+        y = SDL_CreateRGBSurfaceFrom(x, 32, 16, 32, 32 * 4, 0, 0, 0, 0)
+        self.assertIs(type(y), SDL_Surface)
+        self.assertIs(y.pixels, x)
+
+    def test_invalid_buffer_size(self):
+        "Raises BufferError on invalid buffer size"
+        x = bytearray(32 * 4 * 17)
+        self.assertRaises(BufferError, SDL_CreateRGBSurfaceFrom, x, 32, 16, 32,
+                          32 * 4, 0, 0, 0, 0)
+
+    def test_invalid_pitch(self):
+        "Raises ValueError on invalid pitch"
+        x = bytearray(32 * 3 * 16)
+        self.assertRaises(ValueError, SDL_CreateRGBSurfaceFrom, x, 32, 16, 32,
+                          32 * 3, 0, 0, 0, 0)
+
+    def test_holds_buffer(self):
+        "Holds the pixel buffer, and releases it on destruction"
+        x = array.array('B', [0] * 32 * 4 * 16)
+        y = SDL_CreateRGBSurfaceFrom(x, 32, 16, 32, 32 * 4, 0, 0, 0, 0)
+        self.assertRaises(BufferError, x.extend, [0])
+        SDL_FreeSurface(y)
+        x.extend([0])  # now it works
 
 
 if __name__ == '__main__':
