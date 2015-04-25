@@ -604,6 +604,39 @@ PyCSDL2_MUSTLOCK(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateRGBSurface()
+ *
+ * \code{.py}
+ * SDL_CreateRGBSurface(flags: int, width: int, height: int, depth: int,
+ *                      Rmask: int, Gmask: int, Bmask: int, Amask: int)
+ *                      -> SDL_Surface
+ * \endcode
+ */
+static PyCSDL2_Surface *
+PyCSDL2_CreateRGBSurface(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags, Rmask, Gmask, Bmask, Amask;
+    int width, height, depth;
+    SDL_Surface *ret;
+    PyCSDL2_Surface *out;
+    static char *kwlist[] = {"flags", "width", "height", "depth", "Rmask",
+                             "Gmask", "Bmask", "Amask", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT "iii" Uint32_UNIT
+                                     Uint32_UNIT Uint32_UNIT Uint32_UNIT,
+                                     kwlist, &flags, &width, &height, &depth,
+                                     &Rmask, &Gmask, &Bmask, &Amask))
+        return NULL;
+    if (!(ret = SDL_CreateRGBSurface(flags, width, height, depth, Rmask, Gmask,
+                                     Bmask, Amask)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_SurfaceCreate(ret, NULL))) {
+        SDL_FreeSurface(ret);
+        return NULL;
+    }
+    return out;
+}
+
+/**
  * \brief Initializes bindings to SDL_surface.h
  *
  * Adds constants defined in SDL_surface.h to module.

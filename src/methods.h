@@ -266,6 +266,36 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns True if `surface` needs to be locked before access.\n"
     },
 
+    {"SDL_CreateRGBSurface",
+     (PyCFunction) PyCSDL2_CreateRGBSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateRGBSurface(flags: int, width: int, height: int, depth: int,\n"
+     "                     Rmask: int, Gmask: int, Bmask: int, Amask: int)\n"
+     "                    -> SDL_Surface\n"
+     "\n"
+     "Creates and returns a new SDL_Surface with the specified properties:\n"
+     "\n"
+     "flags\n"
+     "    The flags are unused and should be set to 0.\n"
+     "\n"
+     "width\n"
+     "    The width of the surface in pixels.\n"
+     "\n"
+     "height\n"
+     "    The height of the surface in pixels.\n"
+     "\n"
+     "depth\n"
+     "    The depth of the surface in bits. If `depth` is 4 or 8 bits, an\n"
+     "    empty palette is allocated for the surface. If `depth` is greater\n"
+     "    than 8 bits, the pixel format is set using the `[RGBA]mask`\n"
+     "    parameters.\n"
+     "\n"
+     "Rmask, Gmask, Bmask, Amask\n"
+     "    These parameters are the bitmasks used to extract that color from\n"
+     "    a pixel. Setting them to 0 sets a default value based on the\n"
+     "    depth. Setting `Amask` to 0 results in an `Amask` of 0.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
