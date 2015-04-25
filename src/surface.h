@@ -122,6 +122,166 @@ PyCSDL2_SurfacePixelsCreate(SDL_Surface *surface)
     return self;
 }
 
+/** \brief Instance data for PyCSDL2_SurfaceRectType */
+typedef struct PyCSDL2_SurfaceRect {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief The SDL_Rect */
+    SDL_Rect *rect;
+    /** \brief Pointer to the SDL_Surface that owns the rect */
+    SDL_Surface *surface;
+} PyCSDL2_SurfaceRect;
+
+/** \brief Destructor for PyCSDL2_SurfaceRectType */
+static void
+PyCSDL2_SurfaceRectDealloc(PyCSDL2_SurfaceRect *self)
+{
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->surface)
+        SDL_FreeSurface(self->surface);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief getbufferproc implementation for PyCSDL2_SurfaceRectType */
+static int
+PyCSDL2_SurfaceRectGetBuffer(PyCSDL2_SurfaceRect *self, Py_buffer *view,
+                             int flags)
+{
+    if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) {
+        PyErr_SetString(PyExc_BufferError, "Object is not writable.");
+        return -1;
+    }
+    view->buf = self->rect;
+    Py_INCREF((PyObject*) self);
+    view->obj = (PyObject*) self;
+    view->len = sizeof(SDL_Rect);
+    view->readonly = 1;
+    view->itemsize = sizeof(SDL_Rect);
+    view->format = "iiii";
+    view->ndim = 0;
+    view->shape = NULL;
+    view->strides = NULL;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
+}
+
+/** \brief Buffer protocol definition for PyCSDL2_SurfaceRectType */
+static PyBufferProcs PyCSDL2_SurfaceRectBufferProcs = {
+    (getbufferproc) PyCSDL2_SurfaceRectGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/** \brief Getter for SDL_SurfaceRect.x */
+static PyObject *
+PyCSDL2_SurfaceRectGetX(PyCSDL2_SurfaceRect *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->rect->x);
+}
+
+/** \brief Getter for SDL_SurfaceRect.y */
+static PyObject *
+PyCSDL2_SurfaceRectGetY(PyCSDL2_SurfaceRect *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->rect->y);
+}
+
+/** \brief Getter for SDL_SurfaceRect.w */
+static PyObject *
+PyCSDL2_SurfaceRectGetW(PyCSDL2_SurfaceRect *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->rect->w);
+}
+
+/** \brief Getter for SDL_SurfaceRect.h */
+static PyObject *
+PyCSDL2_SurfaceRectGetH(PyCSDL2_SurfaceRect *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->rect->h);
+}
+
+/** \brief List of properties for PyCSDL2_SurfaceRectType */
+static PyGetSetDef PyCSDL2_SurfaceRectGetSetters[] = {
+    {"x",
+     (getter) PyCSDL2_SurfaceRectGetX,
+     (setter) NULL,
+     "(readonly) The x location of the rectangle's upper left corner.",
+     NULL},
+    {"y",
+     (getter) PyCSDL2_SurfaceRectGetY,
+     (setter) NULL,
+     "(readonly) The y location of the rectangle's upper left corner.",
+     NULL},
+    {"w",
+     (getter) PyCSDL2_SurfaceRectGetW,
+     (setter) NULL,
+     "(readonly) The width of the rectangle.",
+     NULL},
+    {"h",
+     (getter) PyCSDL2_SurfaceRectGetH,
+     (setter) NULL,
+     "(readonly) The height of the rectangle.",
+     NULL},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_SurfaceRect */
+static PyTypeObject PyCSDL2_SurfaceRectType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_SurfaceRect",
+    /* tp_basicsize      */ sizeof(PyCSDL2_SurfaceRect),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_SurfaceRectDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_SurfaceRectBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "A 2d rectangle with its origin at the upper left corner.\n",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_SurfaceRect, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_SurfaceRectGetSetters
+};
+
+/** \brief Creates an instance of PyCSDL2_SurfaceRect */
+PyCSDL2_SurfaceRect *
+PyCSDL2_SurfaceRectCreate(SDL_Surface *surface, SDL_Rect *rect)
+{
+    PyCSDL2_SurfaceRect *self;
+    PyTypeObject *type = &PyCSDL2_SurfaceRectType;
+
+    PyCSDL2_Assert(surface);
+    PyCSDL2_Assert(rect);
+    if (!(self = (PyCSDL2_SurfaceRect*)type->tp_alloc(type, 0)))
+        return NULL;
+    surface->refcount += 1;
+    self->surface = surface;
+    self->rect = rect;
+    return self;
+}
+
 /**
  * \brief Initializes bindings to SDL_surface.h
  *
@@ -148,6 +308,7 @@ PyCSDL2_initsurface(PyObject *module)
             return 0;
 
     if (PyType_Ready(&PyCSDL2_SurfacePixelsType)) { return 0; }
+    if (PyType_Ready(&PyCSDL2_SurfaceRectType)) { return 0; }
 
     return 1;
 }
