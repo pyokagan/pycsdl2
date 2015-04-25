@@ -126,3 +126,15 @@ Surface Creation and Simple Drawing
    :raises ValueError: If provided `pitch` does not match the image `depth` and
                        `width`.
    :raises RuntimeError: If the surface could not be created.
+
+.. function:: SDL_FreeSurface(surface: SDL_Surface)
+
+   Frees the surface.
+
+   There is no need to manually call this function. :class:`SDL_Surface` will
+   automatically call this function as part of its destructor.
+
+   :param SDL_Surface surface: surface to free
+
+   .. warning:: Once freed, do not access the surface. Doing so will at best
+                raise errors and at worse crash the interpreter.
