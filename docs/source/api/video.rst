@@ -1,8 +1,7 @@
-Video
-=====
-
 Display and Window Management
------------------------------
+=============================
+.. module:: csdl2
+
 .. class:: SDL_Window
 
    A window.
@@ -11,7 +10,7 @@ Display and Window Management
    :func:`SDL_CreateWindow`.
 
 Window creation
-~~~~~~~~~~~~~~~
+---------------
 .. function:: SDL_CreateWindow(title: str, x: int, y: int, w: int, h: int, flags: int) -> SDL_Window
 
    Creates a window with the specified title, position, dimensions and flags.
@@ -100,7 +99,7 @@ Window creation
    The window was not created by SDL.
 
 Window Events
-~~~~~~~~~~~~~
+-------------
 .. data:: SDL_WINDOWEVENT_NONE
 
    This constant is not used.
@@ -172,7 +171,7 @@ Window Events
    window be closed.
 
 OpenGL configuration attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 OpenGL configuration attributes control the properties of the OpenGL context
 that is created with SDL_GL_CreateContext. These attributes are set with
 SDL_GL_SetAttribute and read with SDL_GL_GetAttribute.
@@ -296,7 +295,7 @@ with :func:`SDL_CreateWindow`:
    (don't share contexts).
 
 OpenGL flags
-~~~~~~~~~~~~
+------------
 These flags are set through the :const:`SDL_GL_CONTEXT_FLAGS` OpenGL
 configuration attribute.
 
@@ -356,7 +355,7 @@ configuration attribute.
    https://www.opengl.org/registry/specs/ARB/wgl_create_context_robustness.txt
 
 OpenGL Profiles
-~~~~~~~~~~~~~~~
+---------------
 These profile constants are used with SDL_GL_SetAttribute and
 :const:`SDL_GL_CONTEXT_PROFILE_MASK`. Note that these profiles are mutually
 exclusive and SDL_GL_SetAttribute accepts at most one of them. Setting
@@ -377,21 +376,3 @@ between the common and common lite profiles of OpenGL ES versions 1.0 and 1.1.
 .. data:: SDL_GL_CONTEXT_PROFILE_ES
 
    OpenGL ES context. Only a subset of base OpenGL functionality is allowed.
-
-2D Accelerated Rendering
-------------------------
-
-Pixel Formats and Conversion Routines
--------------------------------------
-
-Rectangle Functions
--------------------
-
-Surface Creation and Simple Drawing
------------------------------------
-
-Platform-specific Window Management
------------------------------------
-
-Clipboard Handling
-------------------
