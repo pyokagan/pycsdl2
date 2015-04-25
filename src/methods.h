@@ -32,6 +32,7 @@
 #include "events.h"
 #include "init.h"
 #include "pixels.h"
+#include "rect.h"
 #include "render.h"
 #include "rwops.h"
 #include "surface.h"
@@ -205,6 +206,8 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "There is no need to manually call this function. SDL_Palette will\n"
      "automatically call this function as part of its destructor.\n"
     },
+
+    /* rect.h */
 
     /* render.h */
 
