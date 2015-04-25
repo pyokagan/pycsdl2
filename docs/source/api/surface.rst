@@ -96,3 +96,33 @@ Surface Creation and Simple Drawing
                      If 0, the surface has no alpha channel.
    :returns: A new blank :class:`SDL_Surface` structure.
    :raises RuntimeError: The surface could not be created.
+
+.. function:: SDL_CreateRGBSurfaceFrom(pixels: buffer, width: int, height: int, depth: int, pitch: int, Rmask: int, Gmask: int, Bmask: int, Amask: int) -> SDL_Surface
+
+   Creates and returns a :class:`SDL_Surface` with existing pixel data.
+
+   :param buffer pixels: Existing pixel data. This can be any object that
+                         supports the buffer protocol and exports a
+                         C-contiguous buffer of the correct size.
+   :param int width: The width of the surface in pixels.
+   :param int height: The height of the surface in pixels.
+   :param int depth: The depth of the surface in bits. If `depth` is 4 or 8
+                     bits, an empty :class:`SDL_Palette` is allocated for the
+                     surface. If `depth` is greater than 8 bits, the pixel
+                     format is set using the `Rmask`, `Gmask`, `Bmask` and
+                     `Amask` arguments.
+   :param int Rmask: Bitmask used to extract the red component from a pixel. If
+                     0, a default mask based on the depth is used.
+   :param int Gmask: Bitmask used to extract the green component from a pixel.
+                     If 0, a default mask based on the depth is used.
+   :param int Bmask: Bitmask used to extract the blue component from a pixel.
+                     If 0, a default mask based on the depth is used.
+   :param int Amask: Bitmask used to extract the alpha component from a pixel.
+                     If 0, the surface has no alpha channel.
+   :returns: A :class:`SDL_Surface` with its contents backed by the provided
+             `pixels` buffer.
+   :raises BufferError: If the pixels buffer is not of the expected size. It
+                        must be ``pitch * height`` bytes.
+   :raises ValueError: If provided `pitch` does not match the image `depth` and
+                       `width`.
+   :raises RuntimeError: If the surface could not be created.
