@@ -585,6 +585,25 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
 }
 
 /**
+ * \brief Implements csdl2.SDL_MUSTLOCK()
+ *
+ * \code{.py}
+ * SDL_MUSTLOCK(surface: SDL_Surface) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_MUSTLOCK(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Surface *surface;
+    static char *kwlist[] = {"surface", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_SurfaceType, &surface))
+        return NULL;
+    PyCSDL2_Assert(surface->surface);
+    return PyBool_FromLong(SDL_MUSTLOCK(surface->surface));
+}
+
+/**
  * \brief Initializes bindings to SDL_surface.h
  *
  * Adds constants defined in SDL_surface.h to module.

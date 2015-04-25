@@ -258,6 +258,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* surface.h */
 
+    {"SDL_MUSTLOCK",
+     (PyCFunction) PyCSDL2_MUSTLOCK,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MUSTLOCK(surface: SDL_Surface) -> bool\n"
+     "\n"
+     "Returns True if `surface` needs to be locked before access.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
