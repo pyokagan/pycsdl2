@@ -258,6 +258,89 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* surface.h */
 
+    {"SDL_MUSTLOCK",
+     (PyCFunction) PyCSDL2_MUSTLOCK,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MUSTLOCK(surface: SDL_Surface) -> bool\n"
+     "\n"
+     "Returns True if `surface` needs to be locked before access.\n"
+    },
+
+    {"SDL_CreateRGBSurface",
+     (PyCFunction) PyCSDL2_CreateRGBSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateRGBSurface(flags: int, width: int, height: int, depth: int,\n"
+     "                     Rmask: int, Gmask: int, Bmask: int, Amask: int)\n"
+     "                    -> SDL_Surface\n"
+     "\n"
+     "Creates and returns a new SDL_Surface with the specified properties:\n"
+     "\n"
+     "flags\n"
+     "    The flags are unused and should be set to 0.\n"
+     "\n"
+     "width\n"
+     "    The width of the surface in pixels.\n"
+     "\n"
+     "height\n"
+     "    The height of the surface in pixels.\n"
+     "\n"
+     "depth\n"
+     "    The depth of the surface in bits. If `depth` is 4 or 8 bits, an\n"
+     "    empty palette is allocated for the surface. If `depth` is greater\n"
+     "    than 8 bits, the pixel format is set using the `[RGBA]mask`\n"
+     "    parameters.\n"
+     "\n"
+     "Rmask, Gmask, Bmask, Amask\n"
+     "    These parameters are the bitmasks used to extract that color from\n"
+     "    a pixel. Setting them to 0 sets a default value based on the\n"
+     "    depth. Setting `Amask` to 0 results in an `Amask` of 0.\n"
+    },
+
+    {"SDL_CreateRGBSurfaceFrom",
+     (PyCFunction) PyCSDL2_CreateRGBSurfaceFrom,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateRGBSurfaceFrom(pixels: buffer, width: int, height: int,\n"
+     "                         depth: int, pitch: int, Rmask: int,\n"
+     "                         Gmask: int, Bmask: int, Amask: int)\n"
+     "    -> SDL_Surface\n"
+     "\n"
+     "Creates and returns a new SDL_Surface with the specified properties:\n"
+     "\n"
+     "pixels\n"
+     "    A buffer containing the pixel data.\n"
+     "\n"
+     "width\n"
+     "    The width of the surface in pixels.\n"
+     "\n"
+     "height\n"
+     "    The height of the surface in pixels.\n"
+     "\n"
+     "depth\n"
+     "    The depth of the surface in bits. If `depth` is 4 or 8 bits, an\n"
+     "    empty palette is allocated for the surface. If `depth` is greater\n"
+     "    than 8 bits, the pixel format is set using the `[RGBA]mask`\n"
+     "    parameters.\n"
+     "\n"
+     "Rmask, Gmask, Bmask, Amask\n"
+     "    These parameters are the bitmasks used to extract that color from\n"
+     "    a pixel. Setting them to 0 sets a default value based on the\n"
+     "    depth. Setting `Amask` to 0 results in an `Amask` of 0.\n"
+    },
+
+    {"SDL_FreeSurface",
+     (PyCFunction) PyCSDL2_FreeSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeSurface(surface: SDL_Surface) -> None\n"
+     "\n"
+     "Frees the surface.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Surface will\n"
+     "automatically call this function as part of its destructor.\n"
+     "\n"
+     "Once freed, do not access the surface. Doing so will at best raise\n"
+     "errors and at worse crash the interpreter.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
