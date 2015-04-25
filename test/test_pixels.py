@@ -663,6 +663,22 @@ class Test_AllocFormat(unittest.TestCase):
         self.assertRaises(ValueError, SDL_AllocFormat, 42)
 
 
+class Test_FreeFormat(unittest.TestCase):
+    "Tests SDL_FreeFormat()"
+
+    def setUp(self):
+        self.pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_FreeFormat(self.pfmt), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, SDL_FreeFormat, self.pfmt)
+
+
 class Test_SDL_AllocPalette(unittest.TestCase):
     "Tests SDL_AllocPalette()"
 
