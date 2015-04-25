@@ -28,10 +28,136 @@
 #ifndef _PYCSDL2_RECT_H_
 #define _PYCSDL2_RECT_H_
 #include <Python.h>
+#include <structmember.h>
 #include <SDL_rect.h>
 #include "../include/pycsdl2.h"
 #include "util.h"
 #include "error.h"
+
+/** \brief Instance data for PyCSDL2_RectType */
+typedef struct PyCSDL2_Rect {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief SDL_Rect this instance wraps */
+    SDL_Rect rect;
+} PyCSDL2_Rect;
+
+/** \brief newfunc for PyCSDL2_RectType */
+static PyCSDL2_Rect *
+PyCSDL2_RectNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Rect *self;
+
+    if (!(self = (PyCSDL2_Rect*)type->tp_alloc(type, 0)))
+        return NULL;
+    return self;
+}
+
+/** \brief Destructor for PyCSDL2_RectType */
+static void
+PyCSDL2_RectDealloc(PyCSDL2_Rect *self)
+{
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief initfunc for PyCSDL2_RectType */
+static int
+PyCSDL2_RectInit(PyCSDL2_Rect *self, PyObject *args, PyObject *kwds)
+{
+    int x = 0, y = 0, w = 0, h = 0;
+    static char *kwlist[] = {"x", "y", "w", "h", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|iiii", kwlist,
+                                     &x, &y, &w, &h))
+        return -1;
+    self->rect.x = x;
+    self->rect.y = y;
+    self->rect.w = w;
+    self->rect.h = h;
+    return 0;
+}
+
+/** \brief getbufferproc for PyCSDL2_RectType */
+static int
+PyCSDL2_RectGetBuffer(PyCSDL2_Rect *self, Py_buffer *view, int flags)
+{
+    view->buf = &self->rect;
+    Py_INCREF((PyObject*) self);
+    view->obj = (PyObject*) self;
+    view->len = sizeof(SDL_Rect);
+    view->readonly = 0;
+    view->itemsize = sizeof(SDL_Rect);
+    view->format = "iiii";
+    view->ndim = 0;
+    view->shape = NULL;
+    view->strides = NULL;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
+}
+
+/** \brief Buffer protocol definition for PyCSDL2_RectType */
+static PyBufferProcs PyCSDL2_RectBufferProcs = {
+    (getbufferproc) PyCSDL2_RectGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/** \brief List of members in PyCSDL2_RectType */
+static PyMemberDef PyCSDL2_RectMembers[] = {
+    {"x", T_INT, offsetof(PyCSDL2_Rect, rect.x), 0,
+     "The x location of the rectangle's upper left corner."},
+    {"y", T_INT, offsetof(PyCSDL2_Rect, rect.y), 0,
+     "The y location of the rectangle's upper left corner."},
+    {"w", T_INT, offsetof(PyCSDL2_Rect, rect.w), 0,
+     "The width of the rectangle."},
+    {"h", T_INT, offsetof(PyCSDL2_Rect, rect.h), 0,
+     "The height of the rectangle."},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_Rect */
+static PyTypeObject PyCSDL2_RectType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Rect",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Rect),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RectDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_RectBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "A 2d rectangle with its origin at the upper left.",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Rect, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ PyCSDL2_RectMembers,
+    /* tp_getset         */ 0,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ (initproc) PyCSDL2_RectInit,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc) PyCSDL2_RectNew
+};
 
 /**
  * \brief Initializes bindings to SDL_rect.h
@@ -42,6 +168,11 @@
 static int
 PyCSDL2_initrect(PyObject *module)
 {
+    if (PyType_Ready(&PyCSDL2_RectType) < 0) return 0;
+    Py_INCREF(&PyCSDL2_RectType);
+    if (PyModule_AddObject(module, "SDL_Rect", (PyObject*) &PyCSDL2_RectType))
+        return 0;
+
     return 1;
 }
 
