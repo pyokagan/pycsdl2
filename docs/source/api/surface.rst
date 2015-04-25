@@ -72,3 +72,27 @@ Surface Creation and Simple Drawing
    :param SDL_Surface surface: The surface to test
    :returns: True if the surface needs to be locked before its pixels can be
              accessed, False otherwise.
+
+.. function:: SDL_CreateRGBSurface(flags: int, width: int, height: int, depth: int, Rmask: int, Gmask: int, Bmask: int, Amask: int) -> SDL_Surface
+
+   Creates and returns a new blank :class:`SDL_Surface` with the specified
+   properties.
+
+   :param int flags: This argument is unused and should be set to 0.
+   :param int width: The width of the surface in pixels.
+   :param int height: The height of the surface in pixels.
+   :param int depth: The depth of the surface in bits. If `depth` is 4 or 8
+                     bits, an empty :class:`SDL_Palette` is allocated for the
+                     surface. If `depth` is greater than 8 bits, the pixel
+                     format is set using the `Rmask`, `Gmask`, `Bmask` and
+                     `Amask` arguments.
+   :param int Rmask: Bitmask used to extract the red component from a pixel. If
+                     0, a default mask based on the depth is used.
+   :param int Gmask: Bitmask used to extract the green component from a pixel.
+                     If 0, a default mask based on the depth is used.
+   :param int Bmask: Bitmask used to extract the blue component from a pixel.
+                     If 0, a default mask based on the depth is used.
+   :param int Amask: Bitmask used to extract the alpha component from a pixel.
+                     If 0, the surface has no alpha channel.
+   :returns: A new blank :class:`SDL_Surface` structure.
+   :raises RuntimeError: The surface could not be created.
