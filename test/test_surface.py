@@ -289,5 +289,21 @@ class Test_CreateRGBSurfaceFrom(unittest.TestCase):
         x.extend([0])  # now it works
 
 
+class Test_FreeSurface(unittest.TestCase):
+    "Tests SDL_FreeSurface()"
+
+    def setUp(self):
+        self.surface = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_FreeSurface(self.surface), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_FreeSurface(self.surface)
+        self.assertRaises(AssertionError, SDL_FreeSurface, self.surface)
+
+
 if __name__ == '__main__':
     unittest.main()
