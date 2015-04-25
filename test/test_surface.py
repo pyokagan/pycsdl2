@@ -248,5 +248,14 @@ class Test_MUSTLOCK(unittest.TestCase):
         self.assertIs(type(SDL_MUSTLOCK(self.surface)), bool)
 
 
+class Test_CreateRGBSurface(unittest.TestCase):
+    "Tests SDL_CreateRGBSurface()"
+
+    def test_returns_surface(self):
+        "Returns a SDL_Surface"
+        self.assertIs(type(SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)),
+                      SDL_Surface)
+
+
 if __name__ == '__main__':
     unittest.main()
