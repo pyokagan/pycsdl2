@@ -637,6 +637,71 @@ PyCSDL2_CreateRGBSurface(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateRGBSurfaceFrom()
+ *
+ * \code{.py}
+ * SDL_CreateRGBSurfaceFrom(pixels: buffer, width: int, height: int,
+ *                          depth: int, pitch: int, Rmask: int, Gmask: int,
+ *                          Bmask: int, Amask: int) -> SDL_Surface
+ * \endcode
+ */
+static PyCSDL2_Surface *
+PyCSDL2_CreateRGBSurfaceFrom(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int width, height, depth, pitch;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+    PyObject *pixels;
+    Py_buffer buf;
+    SDL_Surface *surface;
+    PyCSDL2_Surface *out;
+    static char *kwlist[] = {"pixels", "width", "height", "depth", "pitch",
+                             "Rmask", "Gmask", "Bmask", "Amask", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oiiii" Uint32_UNIT
+                                     Uint32_UNIT Uint32_UNIT Uint32_UNIT,
+                                     kwlist, &pixels, &width, &height, &depth,
+                                     &pitch, &Rmask, &Gmask, &Bmask, &Amask))
+        return NULL;
+    if (pixels == Py_None) {
+        buf.obj = NULL;
+        buf.buf = NULL;
+    } else if (PyObject_GetBuffer(pixels, &buf, PyBUF_WRITABLE | PyBUF_ND)) {
+        return NULL;
+    } else if (!PyBuffer_IsContiguous(&buf, 'C')) {
+        PyErr_SetString(PyExc_BufferError, "Pixels buffer is not "
+                        "C Contiguous");
+        PyBuffer_Release(&buf);
+        return NULL;
+    } else if (buf.len != pitch * height) {
+        Py_ssize_t expected = pitch * height;
+        PyErr_Format(PyExc_BufferError, "Invalid pixels buffer size. "
+                     "Expected: %zd. Got: %zd.", expected, buf.len);
+        PyBuffer_Release(&buf);
+        return NULL;
+    }
+    surface = SDL_CreateRGBSurfaceFrom(buf.buf, width, height, depth, pitch,
+                                       Rmask, Gmask, Bmask, Amask);
+    if (!surface) {
+        PyBuffer_Release(&buf);
+        return PyCSDL2_RaiseSDLError();
+    }
+    if (pitch < surface->format->BytesPerPixel * surface->w) {
+        int expected = surface->format->BytesPerPixel * surface->w;
+        SDL_FreeSurface(surface);
+        PyBuffer_Release(&buf);
+        PyErr_Format(PyExc_ValueError, "Invalid pitch. "
+                     "Expected at least: %d. Got: %d", expected, pitch);
+        return NULL;
+    }
+    if (!(out = PyCSDL2_SurfaceCreate(surface, pixels))) {
+        SDL_FreeSurface(surface);
+        PyBuffer_Release(&buf);
+        return NULL;
+    }
+    PyBuffer_Release(&buf);
+    return out;
+}
+
+/**
  * \brief Initializes bindings to SDL_surface.h
  *
  * Adds constants defined in SDL_surface.h to module.
