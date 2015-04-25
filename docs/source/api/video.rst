@@ -1,6 +1,6 @@
 Display and Window Management
 =============================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 .. class:: SDL_Window
 

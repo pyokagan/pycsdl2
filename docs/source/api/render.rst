@@ -1,6 +1,6 @@
 2D Accelerated Rendering
 ========================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 .. data:: SDL_RENDERER_SOFTWARE
 

@@ -1,6 +1,6 @@
 Surface Creation and Simple Drawing
 ===================================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 .. class:: SDL_Surface
 

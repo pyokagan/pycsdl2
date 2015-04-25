@@ -1,6 +1,6 @@
 Initialization and Shutdown
 ===========================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 .. function:: SDL_Init(flags: int) -> None
 
