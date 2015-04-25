@@ -9,5 +9,6 @@ API Reference
    surface
    render
    pixels
+   rect
    events
    rwops
