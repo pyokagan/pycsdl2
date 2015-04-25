@@ -237,5 +237,16 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AssertionError, getattr, self.surface, 'refcount')
 
 
+class Test_MUSTLOCK(unittest.TestCase):
+    "Tests SDL_MUSTLOCK()"
+
+    def setUp(self):
+        self.surface = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+
+    def test_returns_bool(self):
+        "Returns a bool"
+        self.assertIs(type(SDL_MUSTLOCK(self.surface)), bool)
+
+
 if __name__ == '__main__':
     unittest.main()
