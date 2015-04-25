@@ -310,13 +310,404 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
     return self;
 }
 
+/** \brief Instance data for SDL_PixelFormatType */
+typedef struct PyCSDL2_PixelFormat {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief SDL_PixelFormat which this instance owns */
+    SDL_PixelFormat *pfmt;
+    /** \brief Palette attribute */
+    PyCSDL2_Palette *palette;
+} PyCSDL2_PixelFormat;
+
+/** \brief GC traverse function for PyCSDL2_PixelFormatType */
+static int
+PyCSDL2_PixelFormatTraverse(PyCSDL2_PixelFormat *self, visitproc visit,
+                            void *arg)
+{
+    Py_VISIT(self->palette);
+    return 0;
+}
+
+/** \brief GC clear function for PyCSDL2_PixelFormatType */
+static int
+PyCSDL2_PixelFormatClear(PyCSDL2_PixelFormat *self)
+{
+    Py_CLEAR(self->palette);
+    return 0;
+}
+
+/** \brief Destructor for PyCSDL2_PixelFormatType */
+static void
+PyCSDL2_PixelFormatDealloc(PyCSDL2_PixelFormat *self)
+{
+    PyCSDL2_PixelFormatClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->pfmt)
+        SDL_FreeFormat(self->pfmt);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Getter for SDL_PixelFormat.format */
+static PyObject *
+PyCSDL2_PixelFormatGetFormat(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->format);
+}
+
+/** \brief Getter for SDL_PixelFormat.palette */
+static PyObject *
+PyCSDL2_PixelFormatGetPalette(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyCSDL2_Get((PyObject*) self->palette);
+}
+
+/** \brief Getter for SDL_PixelFormat.BitsPerPixel */
+static PyObject *
+PyCSDL2_PixelFormatGetBitsPerPixel(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->BitsPerPixel);
+}
+
+/** \brief Getter for SDL_PixelFormat.BytesPerPixel */
+static PyObject *
+PyCSDL2_PixelFormatGetBytesPerPixel(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->BytesPerPixel);
+}
+
+/** \brief Getter for SDL_PixelFormat.Rmask */
+static PyObject *
+PyCSDL2_PixelFormatGetRmask(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Rmask);
+}
+
+/** \brief Getter for SDL_PixelFormat.Gmask */
+static PyObject *
+PyCSDL2_PixelFormatGetGmask(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Gmask);
+}
+
+/** \brief Getter for SDL_PixelFormat.Bmask */
+static PyObject *
+PyCSDL2_PixelFormatGetBmask(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Bmask);
+}
+
+/** \brief Getter for SDL_PixelFormat.Amask */
+static PyObject *
+PyCSDL2_PixelFormatGetAmask(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Amask);
+}
+
+/** \brief Getter for SDL_PixelFormat.Rloss */
+static PyObject *
+PyCSDL2_PixelFormatGetRloss(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Rloss);
+}
+
+/** \brief Getter for SDL_PixelFormat.Gloss */
+static PyObject *
+PyCSDL2_PixelFormatGetGloss(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Gloss);
+}
+
+/** \brief Getter for SDL_PixelFormat.Bloss */
+static PyObject *
+PyCSDL2_PixelFormatGetBloss(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Bloss);
+}
+
+/** \brief Getter for SDL_PixelFormat.Aloss */
+static PyObject *
+PyCSDL2_PixelFormatGetAloss(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Aloss);
+}
+
+/** \brief Getter for SDL_PixelFormat.Rshift */
+static PyObject *
+PyCSDL2_PixelFormatGetRshift(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Rshift);
+}
+
+/** \brief Getter for SDL_PixelFormat.Gshift */
+static PyObject *
+PyCSDL2_PixelFormatGetGshift(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Gshift);
+}
+
+/** \brief Getter for SDL_PixelFormat.Bshift */
+static PyObject *
+PyCSDL2_PixelFormatGetBshift(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Bshift);
+}
+
+/** \brief Getter for SDL_PixelFormat.Ashift */
+static PyObject *
+PyCSDL2_PixelFormatGetAshift(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromUnsignedLong(self->pfmt->Ashift);
+}
+
+/** \brief Getter for SDL_PixelFormat.refcount */
+static PyObject *
+PyCSDL2_PixelFormatGetRefcount(PyCSDL2_PixelFormat *self, void *closure)
+{
+    PyCSDL2_Assert(self->pfmt);
+    return PyLong_FromLong(self->pfmt->refcount);
+}
+
+/** \brief List of getters and setters for PyCSDL2_PixelFormatType */
+static PyGetSetDef PyCSDL2_PixelFormatGetSetters[] = {
+    {"format",
+     (getter) PyCSDL2_PixelFormatGetFormat,
+     (setter) NULL,
+     "(readonly) SDL_PIXELFORMAT_* constant of this pixel format.",
+     NULL},
+    {"palette",
+     (getter) PyCSDL2_PixelFormatGetPalette,
+     (setter) NULL,
+     "(readonly) The SDL_Palette associated with this pixel format, or None\n"
+     "if the format doesn't have a palette.\n",
+     NULL},
+    {"BitsPerPixel",
+     (getter) PyCSDL2_PixelFormatGetBitsPerPixel,
+     (setter) NULL,
+     "(readonly) The number of significant bits in a pixel value\n"
+     "e.g. 8, 15, 16, 24, 32.\n",
+     NULL},
+    {"BytesPerPixel",
+     (getter) PyCSDL2_PixelFormatGetBytesPerPixel,
+     (setter) NULL,
+     "(readonly) The number of bytes required to hold a pixel value\n"
+     "e.g. 1, 2, 3, 4.\n",
+     NULL},
+    {"Rmask",
+     (getter) PyCSDL2_PixelFormatGetRmask,
+     (setter) NULL,
+     "(readonly) A mask representing the location of the red component of a\n"
+     "pixel.\n",
+     NULL},
+    {"Gmask",
+     (getter) PyCSDL2_PixelFormatGetGmask,
+     (setter) NULL,
+     "(readonly) A mask representing the location of the green component of\n"
+     "a pixel.\n",
+     NULL},
+    {"Bmask",
+     (getter) PyCSDL2_PixelFormatGetBmask,
+     (setter) NULL,
+     "(readonly) A mask representing the location of the blue component of\n"
+     "a pixel.\n",
+     NULL},
+    {"Amask",
+     (getter) PyCSDL2_PixelFormatGetAmask,
+     (setter) NULL,
+     "(readonly) A mask representing the location of the alpha component of\n"
+     "a pixel. 0 if the pixel format doesn't have any alpha channel.\n",
+     NULL},
+    {"Rloss",
+     (getter) PyCSDL2_PixelFormatGetRloss,
+     (setter) NULL,
+     "(readonly) Red value of a pixel has this number of bits less compared\n"
+     "to 8-bit values.\n",
+     NULL},
+    {"Gloss",
+     (getter) PyCSDL2_PixelFormatGetGloss,
+     (setter) NULL,
+     "(readonly) Green value of a pixel has this number of bits less\n"
+     "compared to 8-bit values.\n",
+     NULL},
+    {"Bloss",
+     (getter) PyCSDL2_PixelFormatGetBloss,
+     (setter) NULL,
+     "(readonly) Blue value of a pixel has this number of bits less\n"
+     "compared to 8-bit values.\n",
+     NULL},
+    {"Aloss",
+     (getter) PyCSDL2_PixelFormatGetAloss,
+     (setter) NULL,
+     "(readonly) Alpha value of a pixel has this number of bits less\n"
+     "compared to 8-bit values.\n",
+     NULL},
+    {"Rshift",
+     (getter) PyCSDL2_PixelFormatGetRshift,
+     (setter) NULL,
+     "(readonly) The bit index of the red field of a pixel.\n",
+     NULL},
+    {"Gshift",
+     (getter) PyCSDL2_PixelFormatGetGshift,
+     (setter) NULL,
+     "(readonly) The bit index of the green field of a pixel.\n",
+     NULL},
+    {"Bshift",
+     (getter) PyCSDL2_PixelFormatGetBshift,
+     (setter) NULL,
+     "(readonly) The bit index of the blue field of a pixel.\n",
+     NULL},
+    {"Ashift",
+     (getter) PyCSDL2_PixelFormatGetAshift,
+     (setter) NULL,
+     "(readonly) The bit index of the alpha field of a pixel.\n",
+     NULL},
+    {"refcount",
+     (getter) PyCSDL2_PixelFormatGetRefcount,
+     (setter) NULL,
+     "(readonly) SDL's internal reference count.\n",
+     NULL},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_PixelFormat */
+static PyTypeObject PyCSDL2_PixelFormatType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_PixelFormat",
+    /* tp_basicsize      */ sizeof(PyCSDL2_PixelFormat),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_PixelFormatDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "Pixel format information\n"
+    "\n"
+    "This struct cannot be directly constructed. Use SDL_AllocFormat()\n"
+    "instead.\n",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_PixelFormatTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_PixelFormatClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_PixelFormat, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_PixelFormatGetSetters
+};
+
 /**
- * \brief Implements csdl2.SDL_AllocPalette()
+ * \brief Creates an instance of PyCSDL2_PixelFormatType
+ *
+ * \param pfmt The SDL_PixelFormat to manage. Will steal the reference to it.
+ */
+static PyCSDL2_PixelFormat *
+PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
+{
+    PyCSDL2_PixelFormat *self;
+    PyTypeObject *type = &PyCSDL2_PixelFormatType;
+
+    PyCSDL2_Assert(pfmt);
+    if (!(self = (PyCSDL2_PixelFormat*) type->tp_alloc(type, 0)))
+        return NULL;
+    if (pfmt->palette) {
+        PyCSDL2_Palette *palette;
+
+        pfmt->palette->refcount += 1;
+        if (!(palette = PyCSDL2_PaletteCreate(pfmt->palette))) {
+            pfmt->palette->refcount -= 1;
+            Py_DECREF(self);
+            return NULL;
+        }
+        self->palette = palette;
+    }
+    self->pfmt = pfmt;
+    return self;
+}
+
+/**
+ * \brief Implements csdl2.SDL_AllocFormat()
  *
  * \code{.py}
- * SDL_AllocPalette(ncolors: int) -> SDL_Palette
+ * SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat
  * \endcode
  */
+static PyCSDL2_PixelFormat *
+PyCSDL2_AllocFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 pixel_format;
+    SDL_PixelFormat *pfmt;
+    PyCSDL2_PixelFormat *out;
+    static char *kwlist[] = {"pixel_format", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist,
+                                     &pixel_format))
+        return NULL;
+    if (!(pfmt = SDL_AllocFormat(pixel_format)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_PixelFormatCreate(pfmt))) {
+        SDL_FreeFormat(pfmt);
+        return NULL;
+    }
+    return out;
+}
+
+/**
+ * \brief Implements csdl2.SDL_FreeFormat()
+ *
+ * \code{.py}
+ * SDL_FreeFormat(format: SDL_PixelFormat) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_PixelFormat *pfmt;
+    static char *kwlist[] = {"format", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_PixelFormatType, &pfmt))
+        return NULL;
+    PyCSDL2_Assert(pfmt->pfmt);
+    PyCSDL2_PixelFormatClear(pfmt);
+    SDL_FreeFormat(pfmt->pfmt);
+    pfmt->pfmt = NULL;
+    Py_RETURN_NONE;
+}
+
+/**
+* \brief Implements csdl2.SDL_AllocPalette()
+*
+* \code{.py}
+* SDL_AllocPalette(ncolors: int) -> SDL_Palette
+* \endcode
+*/
 static PyCSDL2_Palette *
 PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
 {
@@ -468,6 +859,12 @@ PyCSDL2_initpixels(PyObject *module)
     Py_INCREF(&PyCSDL2_PaletteType);
     if (PyModule_AddObject(module, "SDL_Palette",
                            (PyObject*) &PyCSDL2_PaletteType))
+        return 0;
+
+    if (PyType_Ready(&PyCSDL2_PixelFormatType)) { return 0; }
+    Py_INCREF(&PyCSDL2_PixelFormatType);
+    if (PyModule_AddObject(module, "SDL_PixelFormat",
+                           (PyObject*) &PyCSDL2_PixelFormatType))
         return 0;
 
     return 1;

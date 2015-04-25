@@ -396,6 +396,289 @@ class Test_SDL_Palette(unittest.TestCase):
         self.assertRaises(AssertionError, getattr, self.plt, 'refcount')
 
 
+class Test_PixelFormat(unittest.TestCase):
+    """Tests SDL_PixelFormat"""
+
+    def setUp(self):
+        self.pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)
+
+    def test_cannot_create(self):
+        "Cannot create instances directly"
+        self.assertRaises(TypeError, SDL_PixelFormat)
+        self.assertRaises(TypeError, SDL_PixelFormat.__new__, SDL_PixelFormat)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_PixelFormat,), {})
+
+    def test_format(self):
+        "format has the correct int value"
+        self.assertIs(type(self.pfmt.format), int)
+        self.assertEqual(self.pfmt.format, SDL_PIXELFORMAT_RGBA8888)
+
+    def test_format_readonly(self):
+        "format is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'format', 42)
+
+    def test_freed_format(self):
+        "when freed, format raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'format')
+
+    def test_palette(self):
+        "palette has the correct value"
+        self.assertIs(self.pfmt.palette, None)
+
+    def test_palette_readonly(self):
+        "palette is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'palette', 42)
+
+    def test_freed_palette(self):
+        "when freed, palette raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'palette')
+
+    def test_BitsPerPixel(self):
+        "BitsPerPixel has the correct int value"
+        self.assertIs(type(self.pfmt.BitsPerPixel), int)
+        self.assertEqual(self.pfmt.BitsPerPixel, 32)
+
+    def test_BitsPerPixel_readonly(self):
+        "BitsPerPixel is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'BitsPerPixel',
+                          42)
+
+    def test_freed_BitsPerPixel(self):
+        "when freed, BitsPerPixel raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'BitsPerPixel')
+
+    def test_BytesPerPixel(self):
+        "BytesPerPixel has the correct int value"
+        self.assertIs(type(self.pfmt.BytesPerPixel), int)
+        self.assertEqual(self.pfmt.BytesPerPixel, 4)
+
+    def test_BytesPerPixel_readonly(self):
+        "BytesPerPixel is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'BytesPerPixel',
+                          42)
+
+    def test_freed_BytesPerPixel(self):
+        "when freed, BytesPerPixel raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'BytesPerPixel')
+
+    def test_Rmask(self):
+        "Rmask has the correct int value"
+        self.assertIs(type(self.pfmt.Rmask), int)
+        self.assertEqual(self.pfmt.Rmask, 0xFF000000)
+
+    def test_Rmask_readonly(self):
+        "Rmask is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Rmask', 42)
+
+    def test_freed_Rmask(self):
+        "when freed, Rmask raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rmask')
+
+    def test_Gmask(self):
+        "Gmask has the correct int value"
+        self.assertIs(type(self.pfmt.Gmask), int)
+        self.assertEqual(self.pfmt.Gmask, 0x00FF0000)
+
+    def test_Gmask_readonly(self):
+        "Gmask is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Gmask', 42)
+
+    def test_freed_Gmask(self):
+        "when freed, Gmask raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gmask')
+
+    def test_Bmask(self):
+        "Bmask has the correct int value"
+        self.assertIs(type(self.pfmt.Bmask), int)
+        self.assertEqual(self.pfmt.Bmask, 0x0000FF00)
+
+    def test_Bmask_readonly(self):
+        "Bmask is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Bmask', 42)
+
+    def test_freed_Bmask(self):
+        "when freed, Bmask raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bmask')
+
+    def test_Amask(self):
+        "Amask has the correct int value"
+        self.assertIs(type(self.pfmt.Amask), int)
+        self.assertEqual(self.pfmt.Amask, 0x000000FF)
+
+    def test_Amask_readonly(self):
+        "Amask is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Amask', 42)
+
+    def test_freed_Amask(self):
+        "when freed, Amask raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Amask')
+
+    def test_Rloss(self):
+        "Rloss has the correct int value"
+        self.assertIs(type(self.pfmt.Rloss), int)
+        self.assertEqual(self.pfmt.Rloss, 0)
+
+    def test_Rloss_readonly(self):
+        "Rloss is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Rloss', 42)
+
+    def test_freed_Rloss(self):
+        "when freed, Rloss raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rloss')
+
+    def test_Gloss(self):
+        "Gloss has the correct int value"
+        self.assertIs(type(self.pfmt.Gloss), int)
+        self.assertEqual(self.pfmt.Gloss, 0)
+
+    def test_Gloss_readonly(self):
+        "Gloss is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Gloss', 42)
+
+    def test_freed_Gloss(self):
+        "when freed, Gloss raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gloss')
+
+    def test_Bloss(self):
+        "Bloss has the correct int value"
+        self.assertIs(type(self.pfmt.Bloss), int)
+        self.assertEqual(self.pfmt.Bloss, 0)
+
+    def test_Bloss_readonly(self):
+        "Bloss is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Bloss', 42)
+
+    def test_freed_Bloss(self):
+        "when freed, Bloss raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bloss')
+
+    def test_Aloss(self):
+        "Aloss has the correct int value"
+        self.assertIs(type(self.pfmt.Aloss), int)
+        self.assertEqual(self.pfmt.Aloss, 0)
+
+    def test_Aloss_readonly(self):
+        "Aloss is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Aloss', 42)
+
+    def test_freed_Aloss(self):
+        "when freed, Aloss raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Aloss')
+
+    def test_Rshift(self):
+        "Rshift has the correct int value"
+        self.assertIs(type(self.pfmt.Rshift), int)
+        self.assertEqual(self.pfmt.Rshift, 24)
+
+    def test_Rshift_readonly(self):
+        "Rshift is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Rshift', 42)
+
+    def test_freed_Rshift(self):
+        "when freed, Rshift raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rshift')
+
+    def test_Gshift(self):
+        "Gshift has the correct int value"
+        self.assertIs(type(self.pfmt.Gshift), int)
+        self.assertEqual(self.pfmt.Gshift, 16)
+
+    def test_Gshift_readonly(self):
+        "Gshift is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Gshift', 42)
+
+    def test_freed_Gshift(self):
+        "when freed, Gshift raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gshift')
+
+    def test_Bshift(self):
+        "Bshift has the correct int value"
+        self.assertIs(type(self.pfmt.Bshift), int)
+        self.assertEqual(self.pfmt.Bshift, 8)
+
+    def test_Bshift_readonly(self):
+        "Bshift is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Bshift', 42)
+
+    def test_freed_Bshift(self):
+        "when freed, Bshift raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bshift')
+
+    def test_Ashift(self):
+        "Ashift has the correct int value"
+        self.assertIs(type(self.pfmt.Ashift), int)
+        self.assertEqual(self.pfmt.Ashift, 0)
+
+    def test_Ashift_readonly(self):
+        "Ashift is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'Ashift', 42)
+
+    def test_freed_Ashift(self):
+        "when freed, Ashift raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'Ashift')
+
+    def test_refcount(self):
+        "refcount has an int value"
+        self.assertIs(type(self.pfmt.refcount), int)
+
+    def test_refcount_readonly(self):
+        "refcount is readonly"
+        self.assertRaises(AttributeError, setattr, self.pfmt, 'refcount', 42)
+
+    def test_freed_refcount(self):
+        "when freed, refcount raises AssertionError"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, getattr, self.pfmt, 'refcount')
+
+
+class Test_AllocFormat(unittest.TestCase):
+    "Tests SDL_AllocFormat()"
+
+    def test_returns_PixelFormat(self):
+        "Returns a SDL_PixelFormat"
+        self.assertIs(type(SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)),
+                      SDL_PixelFormat)
+
+    def test_invalid_format(self):
+        "Raises ValueError on invalid format"
+        self.assertRaises(ValueError, SDL_AllocFormat, 42)
+
+
+class Test_FreeFormat(unittest.TestCase):
+    "Tests SDL_FreeFormat()"
+
+    def setUp(self):
+        self.pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_FreeFormat(self.pfmt), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_FreeFormat(self.pfmt)
+        self.assertRaises(AssertionError, SDL_FreeFormat, self.pfmt)
+
+
 class Test_SDL_AllocPalette(unittest.TestCase):
     "Tests SDL_AllocPalette()"
 
