@@ -650,6 +650,19 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AssertionError, getattr, self.pfmt, 'refcount')
 
 
+class Test_AllocFormat(unittest.TestCase):
+    "Tests SDL_AllocFormat()"
+
+    def test_returns_PixelFormat(self):
+        "Returns a SDL_PixelFormat"
+        self.assertIs(type(SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888)),
+                      SDL_PixelFormat)
+
+    def test_invalid_format(self):
+        "Raises ValueError on invalid format"
+        self.assertRaises(ValueError, SDL_AllocFormat, 42)
+
+
 class Test_SDL_AllocPalette(unittest.TestCase):
     "Tests SDL_AllocPalette()"
 
