@@ -702,6 +702,26 @@ PyCSDL2_CreateRGBSurfaceFrom(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_FreeSurface()
+ *
+ * \code{.py}
+ * SDL_FreeSurface(surface: SDL_Surface) -> NULL
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreeSurface(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Surface *surface;
+    static char *kwlist[] = {"surface", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_SurfaceType, &surface))
+        return NULL;
+    PyCSDL2_Assert(surface->surface);
+    PyCSDL2_SurfaceClear(surface);
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_surface.h
  *
  * Adds constants defined in SDL_surface.h to module.

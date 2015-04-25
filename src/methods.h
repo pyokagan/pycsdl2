@@ -327,6 +327,20 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    depth. Setting `Amask` to 0 results in an `Amask` of 0.\n"
     },
 
+    {"SDL_FreeSurface",
+     (PyCFunction) PyCSDL2_FreeSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeSurface(surface: SDL_Surface) -> None\n"
+     "\n"
+     "Frees the surface.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Surface will\n"
+     "automatically call this function as part of its destructor.\n"
+     "\n"
+     "Once freed, do not access the surface. Doing so will at best raise\n"
+     "errors and at worse crash the interpreter.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
