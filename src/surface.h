@@ -33,6 +33,7 @@
 #include "../include/pycsdl2.h"
 #include "util.h"
 #include "error.h"
+#include "pixels.h"
 
 /** \brief Instance data for PyCSDL2_SurfacePixelsType */
 typedef struct PyCSDL2_SurfacePixels {
@@ -282,6 +283,307 @@ PyCSDL2_SurfaceRectCreate(SDL_Surface *surface, SDL_Rect *rect)
     return self;
 }
 
+/** \brief Instance data for PyCSDL2_SurfaceType */
+typedef struct PyCSDL2_Surface {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief Pointer to the SDL_Surface that this instance owns */
+    SDL_Surface *surface;
+    /** \brief stores "format" object for Python access */
+    PyCSDL2_PixelFormat *format;
+    /** \brief stores "pixels" object for Python access */
+    PyObject *pixels;
+    /** \brief holds the buffer to the "pixels" object */
+    Py_buffer pixels_buf;
+    /** \brief stores "userdata" attribute for Python access */
+    PyObject *userdata;
+    /** \brief stores "clip_rect" object for Python access */
+    PyCSDL2_SurfaceRect *clip_rect;
+} PyCSDL2_Surface;
+
+/** \brief Traversal function for PyCSDL2_SurfaceType */
+static int
+PyCSDL2_SurfaceTraverse(PyCSDL2_Surface *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->format);
+    Py_VISIT(self->pixels);
+    if (self->pixels_buf.obj)
+        Py_VISIT(self->pixels_buf.obj);
+    Py_VISIT(self->userdata);
+    Py_VISIT(self->clip_rect);
+    return 0;
+}
+
+/** \brief Clear function for PyCSDL2_SurfaceType */
+static int
+PyCSDL2_SurfaceClear(PyCSDL2_Surface *self)
+{
+    if (self->pixels_buf.obj) {
+        if (self->surface)
+            self->surface->pixels = NULL;
+        PyBuffer_Release(&self->pixels_buf);
+    }
+    Py_CLEAR(self->format);
+    Py_CLEAR(self->pixels);
+    Py_CLEAR(self->userdata);
+    Py_CLEAR(self->clip_rect);
+    if (self->surface)
+        SDL_FreeSurface(self->surface);
+    self->surface = NULL;
+    return 0;
+}
+
+/** \brief Destructor for PyCSDL2_SurfaceType */
+static void
+PyCSDL2_SurfaceDealloc(PyCSDL2_Surface *self)
+{
+    PyCSDL2_SurfaceClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Getter for SDL_Surface.flags */
+static PyObject *
+PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromUnsignedLong(self->surface->flags);
+}
+
+/** \brief Getter for SDL_Surface.format */
+static PyObject *
+PyCSDL2_SurfaceGetFormat(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyCSDL2_Get((PyObject*) self->format);
+}
+
+/** \brief Getter for SDL_Surface.w */
+static PyObject *
+PyCSDL2_SurfaceGetW(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->surface->w);
+}
+
+/** \brief Getter for SDL_Surface.h */
+static PyObject *
+PyCSDL2_SurfaceGetH(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->surface->h);
+}
+
+/** \brief Getter for SDL_Surface.pitch */
+static PyObject *
+PyCSDL2_SurfaceGetPitch(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->surface->pitch);
+}
+
+/** \brief Getter for SDL_Surface.pixels */
+static PyObject *
+PyCSDL2_SurfaceGetPixels(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyCSDL2_Get(self->pixels);
+}
+
+/** \brief Getter for SDL_Surface.userdata */
+static PyObject *
+PyCSDL2_SurfaceGetUserdata(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyCSDL2_Get(self->userdata);
+}
+
+/** \brief Setter for SDL_Surface.userdata */
+static int
+PyCSDL2_SurfaceSetUserdata(PyCSDL2_Surface *self, PyObject *value,
+                           void *closure)
+{
+    PyCSDL2_Set(self->userdata, value);
+    return 0;
+}
+
+/** \brief Getter for SDL_Surface.locked */
+static PyObject *
+PyCSDL2_SurfaceGetLocked(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyBool_FromLong(self->surface->locked);
+}
+
+/** \brief Getter for SDL_Surface.refcount */
+static PyObject *
+PyCSDL2_SurfaceGetRefcount(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyLong_FromLong(self->surface->refcount);
+}
+
+/** \brief Getter for SDL_Surface.clip_rect */
+static PyObject *
+PyCSDL2_SurfaceGetClipRect(PyCSDL2_Surface *self, void *closure)
+{
+    PyCSDL2_Assert(self->surface);
+    return PyCSDL2_Get((PyObject*) self->clip_rect);
+}
+
+/** \brief List of properties for PyCSDL2_SurfaceType */
+static PyGetSetDef PyCSDL2_SurfaceGetSetters[] = {
+    {"flags",
+     (getter) PyCSDL2_SurfaceGetFlags,
+     (setter) NULL,
+     "(readonly) Flags set on the surface. For internal use.",
+     NULL},
+    {"format",
+     (getter) PyCSDL2_SurfaceGetFormat,
+     (setter) NULL,
+     "(readonly) Format of pixels stored in the surface.",
+     NULL},
+    {"w",
+     (getter) PyCSDL2_SurfaceGetW,
+     (setter) NULL,
+     "(readonly) Width of surface in pixels.",
+     NULL},
+    {"h",
+     (getter) PyCSDL2_SurfaceGetH,
+     (setter) NULL,
+     "(readonly) Height of surface in pixels.",
+     NULL},
+    {"pitch",
+     (getter) PyCSDL2_SurfaceGetPitch,
+     (setter) NULL,
+     "(readonly) The length of a row of pixels in bytes.",
+     NULL},
+    {"pixels",
+     (getter) PyCSDL2_SurfaceGetPixels,
+     (setter) NULL,
+     "The actual pixel data.",
+     NULL},
+    {"userdata",
+     (getter) PyCSDL2_SurfaceGetUserdata,
+     (setter) PyCSDL2_SurfaceSetUserdata,
+     "Application-specific data associated with the surface.",
+     NULL},
+    {"locked",
+     (getter) PyCSDL2_SurfaceGetLocked,
+     (setter) NULL,
+     "(readonly) True if the surface is locked.",
+     NULL},
+    {"clip_rect",
+     (getter) PyCSDL2_SurfaceGetClipRect,
+     (setter) NULL,
+     "(readonly) Clipping information for the surface.",
+     NULL},
+    {"refcount",
+     (getter) PyCSDL2_SurfaceGetRefcount,
+     (setter) NULL,
+     "(readonly) SDL's reference count of the surface.",
+     NULL},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_Surface */
+static PyTypeObject PyCSDL2_SurfaceType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Surface",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Surface),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_SurfaceDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "SDL_Surface",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_SurfaceTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_SurfaceClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Surface, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_SurfaceGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ 0
+};
+
+/**
+ * \brief Creates a new instance of PyCSDL2_SurfaceType.
+ *
+ * This will steal the reference to the SDL_Surface.
+ *
+ * \param surface The SDL_Surface to wrap. The reference to the SDL_Surface
+ *                 will be stolen.
+ * \param pixels Python object owning the surface->pixels buffer. It must
+ *               implement the buffer protocol. If NULL, it is assumed that the
+ *               SDL surface owns the pixel buffer, and a memoryview will be
+ *               created.
+ */
+static PyCSDL2_Surface *
+PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
+{
+    PyCSDL2_Surface *self;
+    PyTypeObject *type = &PyCSDL2_SurfaceType;
+    PyCSDL2_Assert(surface);
+    PyCSDL2_Assert(surface->format);
+    if (!(self = (PyCSDL2_Surface*)type->tp_alloc(type, 0)))
+        return NULL;
+    surface->format->refcount += 1;
+    if (!(self->format = PyCSDL2_PixelFormatCreate(surface->format))) {
+        surface->format->refcount -= 1;
+        Py_DECREF(self);
+        return NULL;
+    }
+    if (pixels) {
+        if (PyObject_GetBuffer(pixels, &self->pixels_buf,
+                               PyBUF_WRITABLE | PyBUF_ND)) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        Py_INCREF(pixels);
+        self->pixels = pixels;
+        surface->pixels = self->pixels_buf.buf;
+    } else if (surface->pixels) {
+        PyCSDL2_SurfacePixels *pixels;
+
+        if (!(pixels = PyCSDL2_SurfacePixelsCreate(surface))) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        self->pixels = (PyObject*) pixels;
+    }
+    if (!(self->clip_rect = PyCSDL2_SurfaceRectCreate(surface,
+                                                      &surface->clip_rect))) {
+        Py_DECREF(self);
+        return NULL;
+    }
+    self->surface = surface;
+    return self;
+}
+
 /**
  * \brief Initializes bindings to SDL_surface.h
  *
@@ -309,6 +611,12 @@ PyCSDL2_initsurface(PyObject *module)
 
     if (PyType_Ready(&PyCSDL2_SurfacePixelsType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_SurfaceRectType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_SurfaceType)) { return 0; }
+    Py_INCREF(&PyCSDL2_SurfaceType);
+    if (PyModule_AddObject(module, "SDL_Surface",
+                           (PyObject*) &PyCSDL2_SurfaceType))
+        return 0;
 
     return 1;
 }
