@@ -1,8 +1,7 @@
-Basics
-======
-
 Initialization and Shutdown
----------------------------
+===========================
+.. currentmodule:: csdl2
+
 .. function:: SDL_Init(flags: int) -> None
 
    Initializes the subsystems specified by `flags`, which is one or more of the

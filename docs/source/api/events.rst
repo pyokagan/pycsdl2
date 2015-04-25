@@ -1,6 +1,6 @@
 Event Handling
 ==============
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 Event handling allows your application to receive input from the user. Event
 handling is initialized with a call to:

@@ -1,6 +1,6 @@
 Rectangle Functions
 ===================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 .. class:: SDL_Rect(x: int =0, y: int =0, w: int =0, h: int =0)
 

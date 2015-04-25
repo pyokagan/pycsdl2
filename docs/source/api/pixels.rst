@@ -1,6 +1,6 @@
 Pixel Formats and Conversion Routines
 =====================================
-.. module:: csdl2
+.. currentmodule:: csdl2
 
 Pixel Types
 -----------
