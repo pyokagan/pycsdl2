@@ -63,3 +63,12 @@ Surface Creation and Simple Drawing
 .. data:: SDL_DONTFREE
 
    Surface is referenced internally.
+
+.. function:: SDL_MUSTLOCK(surface: SDL_Surface) -> bool
+
+   Returns True if `surface` needs to be locked before its
+   :attr:`SDL_Surface.pixels` can be accessed.
+
+   :param SDL_Surface surface: The surface to test
+   :returns: True if the surface needs to be locked before its pixels can be
+             accessed, False otherwise.
