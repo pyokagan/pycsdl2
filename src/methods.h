@@ -231,6 +231,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Creates a SDL_Renderer for `surface`.\n"
     },
 
+    {"SDL_DestroyRenderer",
+     (PyCFunction) PyCSDL2_DestroyRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_DestroyRenderer(renderer: SDL_Renderer) -> None\n"
+     "\n"
+     "Destroys `renderer`, freeing up its associated SDL_Texture's and\n"
+     "resources.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Renderer will\n"
+     "automatically call this function as part of its destructor.\n"
+     "\n"
+     "Once destroyed, do not access the renderer. Doing so will at best\n"
+     "raise errors and at worse crash the interpreter.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",

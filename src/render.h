@@ -189,6 +189,28 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
 }
 
 /**
+ * \brief Implements csdl2.SDL_DestroyRenderer()
+ *
+ * \code{.py}
+ * SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_DestroyRenderer(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer;
+    static char *kwlist[] = {"renderer", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RendererType, &renderer))
+        return NULL;
+    PyCSDL2_Assert(renderer->renderer);
+    SDL_DestroyRenderer(renderer->renderer);
+    renderer->renderer = NULL;
+    PyCSDL2_RendererClear(renderer);
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_render.h
  *
  * Adds constants defined in SDL_render.h to module.
