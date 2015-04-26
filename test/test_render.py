@@ -17,6 +17,16 @@ if __name__ == '__main__':
 from csdl2 import *
 
 
+try:
+    # Check for video support. If SDL_Init(SDL_INIT_VIDEO) fails, most probably
+    # there is no video support on the system (or there is something wrong with
+    # csdl2).
+    SDL_Init(SDL_INIT_VIDEO)
+    has_video = True
+except RuntimeError:
+    has_video = False
+
+
 class TestRenderConstants(unittest.TestCase):
     """Test value of constants defined in SDL_render.h"""
 
