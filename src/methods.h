@@ -223,6 +223,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "flags OR'ed together.\n"
     },
 
+    {"SDL_CreateSoftwareRenderer",
+     (PyCFunction) PyCSDL2_CreateSoftwareRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer\n"
+     "\n"
+     "Creates a SDL_Renderer for `surface`.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",

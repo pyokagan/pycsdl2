@@ -161,6 +161,34 @@ PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateSoftwareRenderer()
+ *
+ * \code{.py}
+ * SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer
+ * \endcode
+ */
+static PyCSDL2_Renderer *
+PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
+                               PyObject *kwds)
+{
+    PyCSDL2_Surface *surface;
+    SDL_Renderer *renderer;
+    PyCSDL2_Renderer *out;
+    static char *kwlist[] = {"surface", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_SurfaceType, &surface))
+        return NULL;
+    PyCSDL2_Assert(surface->surface);
+    if (!(renderer = SDL_CreateSoftwareRenderer(surface->surface)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) surface))) {
+        SDL_DestroyRenderer(renderer);
+        return NULL;
+    }
+    return out;
+}
+
+/**
  * \brief Initializes bindings to SDL_render.h
  *
  * Adds constants defined in SDL_render.h to module.
