@@ -26,6 +26,13 @@ Creating a renderer
    :raises RuntimeError: If no render driver supports `flags`.
    :raises RuntimeError: If the render driver index is invalid.
 
+.. function:: SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer
+
+   Creates a :class:`SDL_Renderer` for `surface`.
+
+   :param SDL_Surface surface: :class:`SDL_Surface` to render to.
+   :returns: A new :class:`SDL_Renderer` that renders to `surface`.
+
 Renderer creation flags
 -----------------------
 These flags can be passed to :func:`SDL_CreateRenderer` to request that the
