@@ -83,5 +83,33 @@ class TestRenderer(unittest.TestCase):
         self.assertRaises(TypeError, type, "testtype", (SDL_Renderer,), {})
 
 
+class TestCreateRenderer(unittest.TestCase):
+    """Tests SDL_CreateRenderer()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+
+    def setUp(self):
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+
+    def test_returns_SDL_Renderer(self):
+        "Returns a SDL_Renderer instance"
+        rdr = SDL_CreateRenderer(self.win, -1, 0)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_already_created(self):
+        "Raises RuntimeError if the window already has a renderer"
+        rdr = SDL_CreateRenderer(self.win, -1, 0)
+        self.assertRaises(RuntimeError, SDL_CreateRenderer, self.win, -1, 0)
+
+    def test_destroyed_window(self):
+        "Raises AssertionError if the window has already been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(AssertionError, SDL_CreateRenderer, self.win, -1, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
