@@ -2,6 +2,13 @@
 ========================
 .. currentmodule:: csdl2
 
+.. class:: SDL_Renderer
+
+   A 2d rendering context.
+
+   This is an opaque handle that cannot be directly constructed. Instead, use
+   :func:`SDL_CreateRenderer` or :func:`SDL_CreateSoftwareRenderer`.
+
 .. data:: SDL_RENDERER_SOFTWARE
 
    The renderer is a software fallback.
