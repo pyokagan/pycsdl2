@@ -17,6 +17,16 @@ if __name__ == '__main__':
 from csdl2 import *
 
 
+try:
+    # Check for video support. If SDL_Init(SDL_INIT_VIDEO) fails, most probably
+    # there is no video support on the system (or there is something wrong with
+    # csdl2).
+    SDL_Init(SDL_INIT_VIDEO)
+    has_video = True
+except RuntimeError:
+    has_video = False
+
+
 class TestRenderConstants(unittest.TestCase):
     """Test value of constants defined in SDL_render.h"""
 
@@ -58,6 +68,81 @@ class TestRenderConstants(unittest.TestCase):
 
     def test_SDL_FLIP_VERTICAL(self):
         self.assertEqual(SDL_FLIP_VERTICAL, 0x02)
+
+
+class TestRenderer(unittest.TestCase):
+    """Tests properties of SDL_Renderer"""
+
+    def test_cannot_create(self):
+        "Cannot directly create SDL_Renderer instances"
+        self.assertRaises(TypeError, SDL_Renderer)
+        self.assertRaises(TypeError, SDL_Renderer.__new__, SDL_Renderer)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as a base class"
+        self.assertRaises(TypeError, type, "testtype", (SDL_Renderer,), {})
+
+
+class TestCreateRenderer(unittest.TestCase):
+    """Tests SDL_CreateRenderer()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+
+    def setUp(self):
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+
+    def test_returns_SDL_Renderer(self):
+        "Returns a SDL_Renderer instance"
+        rdr = SDL_CreateRenderer(self.win, -1, 0)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_already_created(self):
+        "Raises RuntimeError if the window already has a renderer"
+        rdr = SDL_CreateRenderer(self.win, -1, 0)
+        self.assertRaises(RuntimeError, SDL_CreateRenderer, self.win, -1, 0)
+
+    def test_destroyed_window(self):
+        "Raises AssertionError if the window has already been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(AssertionError, SDL_CreateRenderer, self.win, -1, 0)
+
+
+class TestCreateSoftwareRenderer(unittest.TestCase):
+    """Tests SDL_CreateSoftwareRenderer()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+
+    def test_returns_SDL_Renderer(self):
+        "Returns a SDL_Renderer instance"
+        rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_freed_surface(self):
+        "Raises AssertionError if the surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
+
+
+class TestDestroyRenderer(unittest.TestCase):
+    """Tests SDL_DestroyRenderer()"""
+
+    def setUp(self):
+        sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_DestroyRenderer(self.rdr), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(AssertionError, SDL_DestroyRenderer, self.rdr)
 
 
 if __name__ == '__main__':

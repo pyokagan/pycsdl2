@@ -211,6 +211,41 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* render.h */
 
+    {"SDL_CreateRenderer",
+     (PyCFunction) PyCSDL2_CreateRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateRenderer(window: SDL_Window, index: int, flags: int)\n"
+     "    -> SDL_Renderer\n"
+     "\n"
+     "Creates a SDL_Renderer for `window`. `index` is the index of the\n"
+     "rendering driver to initialize, or -1 to initialize the first one\n"
+     "supporting `flags`. `flags` can be 0, or one or more SDL_RENDERER_*\n"
+     "flags OR'ed together.\n"
+    },
+
+    {"SDL_CreateSoftwareRenderer",
+     (PyCFunction) PyCSDL2_CreateSoftwareRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer\n"
+     "\n"
+     "Creates a SDL_Renderer for `surface`.\n"
+    },
+
+    {"SDL_DestroyRenderer",
+     (PyCFunction) PyCSDL2_DestroyRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_DestroyRenderer(renderer: SDL_Renderer) -> None\n"
+     "\n"
+     "Destroys `renderer`, freeing up its associated SDL_Texture's and\n"
+     "resources.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Renderer will\n"
+     "automatically call this function as part of its destructor.\n"
+     "\n"
+     "Once destroyed, do not access the renderer. Doing so will at best\n"
+     "raise errors and at worse crash the interpreter.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",
