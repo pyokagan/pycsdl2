@@ -32,6 +32,102 @@
 #include "../include/pycsdl2.h"
 #include "util.h"
 #include "error.h"
+#include "video.h"
+#include "surface.h"
+
+/** \brief Instance data of PyCSDL2_RendererType */
+typedef struct PyCSDL2_Renderer {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief SDL_Renderer which this instance owns. */
+    SDL_Renderer *renderer;
+    /** \brief PyObject representing the default render target */
+    PyObject *deftarget;
+} PyCSDL2_Renderer;
+
+/** \brief Traversal function for PyCSDL2_RendererType */
+static int
+PyCSDL2_RendererTraverse(PyCSDL2_Renderer *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->deftarget);
+    return 0;
+}
+
+/** \brief Clear function for PyCSDL2_RendererType */
+static int
+PyCSDL2_RendererClear(PyCSDL2_Renderer *self)
+{
+    Py_CLEAR(self->deftarget);
+    return 0;
+}
+
+/** \brief Destructor for PyCSDL2_RendererType */
+static void
+PyCSDL2_RendererDealloc(PyCSDL2_Renderer *self)
+{
+    PyCSDL2_RendererClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->renderer)
+        SDL_DestroyRenderer(self->renderer);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Type definition for csdl2.SDL_Renderer */
+static PyTypeObject PyCSDL2_RendererType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Renderer",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Renderer),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RendererDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "Renderer",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_RendererTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_RendererClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Renderer, in_weakreflist)
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_RendererType
+ *
+ * \param renderer SDL_Renderer to manage. The new instance will take over
+ *                 ownership of this renderer.
+ * \param deftarget The PyCSDL2_Window or PyCSDL2_Surface which is the default
+ *                  target for the renderer.
+ */
+static PyCSDL2_Renderer *
+PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
+{
+    PyCSDL2_Renderer *self;
+    PyTypeObject *type = &PyCSDL2_RendererType;
+
+    PyCSDL2_Assert(renderer);
+    PyCSDL2_Assert(deftarget);
+    PyCSDL2_Assert(Py_TYPE(deftarget) == &PyCSDL2_WindowType
+                   || Py_TYPE(deftarget) == &PyCSDL2_SurfaceType);
+
+    if (!(self = (PyCSDL2_Renderer*) type->tp_alloc(type, 0)))
+        return NULL;
+    self->renderer = renderer;
+    PyCSDL2_Set(self->deftarget, deftarget);
+    return self;
+}
 
 /**
  * \brief Initializes bindings to SDL_render.h
@@ -69,6 +165,12 @@ PyCSDL2_initrender(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_RendererType)) { return 0; }
+    Py_INCREF(&PyCSDL2_RendererType);
+    if (PyModule_AddObject(module, "SDL_Renderer",
+                           (PyObject*) &PyCSDL2_RendererType))
+        return 0;
 
     return 1;
 }
