@@ -54,6 +54,21 @@ renderer support certain functions.
 
    The renderer supports rendering to texture.
 
+Destroying a renderer
+---------------------
+.. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
+
+   Destroys `renderer`, freeing up its associated :class:`SDL_Texture`s and
+   resources.
+
+   There is no need to manually call this function. :class:`SDL_Renderer` will
+   automatically call this function as part of its destructor.
+
+   :param SDL_Renderer renderer: :class:`SDL_Renderer` to destroy
+
+   .. warning:: Once destroyed, do not access the renderer. Doing so will at
+                best raise errors and at worse crash the interpreter.
+
 .. data:: SDL_TEXTUREACCESS_STATIC
 
    Texture changes rarely, not lockable.
