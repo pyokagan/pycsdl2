@@ -130,6 +130,37 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateRenderer()
+ *
+ * \code{.py}
+ * SDL_CreateRenderer(window: SDL_Window, index: int, flags: int)
+ *                   -> SDL_Renderer
+ * \endcode
+ */
+static PyCSDL2_Renderer *
+PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    PyCSDL2_Window *window;
+    int index;
+    Uint32 flags;
+    PyCSDL2_Renderer *out;
+    static char *kwlist[] = {"window", "index", "flags", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!i" Uint32_UNIT, kwlist,
+                                     &PyCSDL2_WindowType, &window, &index,
+                                     &flags))
+        return NULL;
+    PyCSDL2_Assert(window->window);
+    if (!(renderer = SDL_CreateRenderer(window->window, index, flags)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) window))) {
+        SDL_DestroyRenderer(renderer);
+        return NULL;
+    }
+    return out;
+}
+
+/**
  * \brief Initializes bindings to SDL_render.h
  *
  * Adds constants defined in SDL_render.h to module.

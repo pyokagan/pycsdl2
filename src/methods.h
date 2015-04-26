@@ -211,6 +211,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* render.h */
 
+    {"SDL_CreateRenderer",
+     (PyCFunction) PyCSDL2_CreateRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateRenderer(window: SDL_Window, index: int, flags: int)\n"
+     "    -> SDL_Renderer\n"
+     "\n"
+     "Creates a SDL_Renderer for `window`. `index` is the index of the\n"
+     "rendering driver to initialize, or -1 to initialize the first one\n"
+     "supporting `flags`. `flags` can be 0, or one or more SDL_RENDERER_*\n"
+     "flags OR'ed together.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",
