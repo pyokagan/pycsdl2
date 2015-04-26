@@ -360,6 +360,20 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
      "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"},
 
+    {"SDL_DestroyWindow",
+     (PyCFunction) PyCSDL2_DestroyWindow,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_DestroyWindow(window: SDL_Surface) -> None\n"
+     "\n"
+     "Destroys a window, freeing up its resources.\n"
+     "\n"
+     "There is no need to manually call this function. SDL_Window will\n"
+     "automatically call it as part of its destructor.\n"
+     "\n"
+     "Once destroyed, do not access the window. Doing so will at best raise\n"
+     "errors and at worse crash the interpreter.\n"
+    },
+
     /* End */
     {0}
 };

@@ -141,6 +141,27 @@ PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_DestroyWindow()
+ *
+ * \code{.py}
+ * SDL_DestroyWindow(window: SDL_Window) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_DestroyWindow(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Window *window;
+    static char *kwlist[] = {"window", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_WindowType, &window))
+        return NULL;
+    PyCSDL2_Assert(window->window);
+    SDL_DestroyWindow(window->window);
+    window->window = NULL;
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL_video.h
  *
  * \param m csdl2 module PyObject

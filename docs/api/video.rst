@@ -98,6 +98,20 @@ Window creation
 
    The window was not created by SDL.
 
+Window destruction
+------------------
+.. function:: SDL_DestroyWindow(window: SDL_Window) -> None
+
+   Destroys a window, freeing up its resources.
+
+   There is no need to manually call this function. :class:`SDL_Window` will
+   automatically call it as part of its destructor.
+
+   :param SDL_Window window: Window to be destroyed.
+
+   .. warning:: Once destroyed, do not access the window. Doing so will at best
+                raise errors and at worse crash the interpreter.
+
 Window Events
 -------------
 .. data:: SDL_WINDOWEVENT_NONE

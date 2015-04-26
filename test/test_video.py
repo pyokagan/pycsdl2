@@ -242,5 +242,22 @@ class TestCreateWindow(unittest.TestCase):
         self.assertIs(type(win), SDL_Window)
 
 
+class TestDestroyWindow(unittest.TestCase):
+    """Tests SDL_DestroyWindow()"""
+
+    def setUp(self):
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_DestroyWindow(self.win), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(AssertionError, SDL_DestroyWindow, self.win)
+
+
 if __name__ == '__main__':
     unittest.main()
