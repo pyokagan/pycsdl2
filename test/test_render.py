@@ -128,5 +128,22 @@ class TestCreateSoftwareRenderer(unittest.TestCase):
         self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
 
 
+class TestDestroyRenderer(unittest.TestCase):
+    """Tests SDL_DestroyRenderer()"""
+
+    def setUp(self):
+        sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_DestroyRenderer(self.rdr), None)
+
+    def test_double_free(self):
+        "Raises AssertionError on double free"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(AssertionError, SDL_DestroyRenderer, self.rdr)
+
+
 if __name__ == '__main__':
     unittest.main()
