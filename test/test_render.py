@@ -70,5 +70,18 @@ class TestRenderConstants(unittest.TestCase):
         self.assertEqual(SDL_FLIP_VERTICAL, 0x02)
 
 
+class TestRenderer(unittest.TestCase):
+    """Tests properties of SDL_Renderer"""
+
+    def test_cannot_create(self):
+        "Cannot directly create SDL_Renderer instances"
+        self.assertRaises(TypeError, SDL_Renderer)
+        self.assertRaises(TypeError, SDL_Renderer.__new__, SDL_Renderer)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as a base class"
+        self.assertRaises(TypeError, type, "testtype", (SDL_Renderer,), {})
+
+
 if __name__ == '__main__':
     unittest.main()
