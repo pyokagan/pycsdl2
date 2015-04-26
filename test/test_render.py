@@ -111,5 +111,22 @@ class TestCreateRenderer(unittest.TestCase):
         self.assertRaises(AssertionError, SDL_CreateRenderer, self.win, -1, 0)
 
 
+class TestCreateSoftwareRenderer(unittest.TestCase):
+    """Tests SDL_CreateSoftwareRenderer()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+
+    def test_returns_SDL_Renderer(self):
+        "Returns a SDL_Renderer instance"
+        rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_freed_surface(self):
+        "Raises AssertionError if the surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
+
+
 if __name__ == '__main__':
     unittest.main()
