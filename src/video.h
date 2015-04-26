@@ -19,7 +19,7 @@
  *     3. This notice may not be removed or altered from any source
  *        distribution.
  */
-/*!
+/**
  * \file video.h
  * \brief Bindings for SDL_video.h.
  *
@@ -34,33 +34,26 @@
 #include "util.h"
 #include "error.h"
 
-/**
- * \brief Instance data of PyCSDL2_WindowType
- */
+/** \brief Instance data of PyCSDL2_WindowType */
 typedef struct PyCSDL2_Window {
     PyObject_HEAD
     /** \brief Head of weak reference list */
     PyObject *in_weakreflist;
-    /** \brief Pointer to SDL_Window handle */
-    SDL_Window *ptr;
+    /** \brief SDL_Window handle which this instance owns */
+    SDL_Window *window;
 } PyCSDL2_Window;
 
-/**
- * \brief Destructor for PyCSDL2_WindowType
- */
+/** \brief Destructor for PyCSDL2_WindowType */
 static void
 PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
 {
-    if (self->in_weakreflist)
-        PyObject_ClearWeakRefs((PyObject*) self);
-    if (self->ptr)
-        SDL_DestroyWindow(self->ptr);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->window)
+        SDL_DestroyWindow(self->window);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
-/**
- * \brief Type definition of csdl2.SDL_Window
- */
+/** \brief Type definition of csdl2.SDL_Window */
 static PyTypeObject PyCSDL2_WindowType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     /* tp_name           */ "csdl2.SDL_Window",
@@ -82,50 +75,42 @@ static PyTypeObject PyCSDL2_WindowType = {
     /* tp_setattro       */ 0,
     /* tp_as_buffer      */ 0,
     /* tp_flags          */ Py_TPFLAGS_DEFAULT,
-    /* tp_doc            */ "Window",
+    /* tp_doc            */
+    "A Window.\n"
+    "\n"
+    "This is an opaque handle that cannot be directly constructed. To create\n"
+    "one, use SDL_CreateWindow().\n",
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
     /* tp_richcompare    */ 0,
-    /* tp_weaklistoffset */ offsetof(PyCSDL2_Window, in_weakreflist),
-    /* tp_iter           */ 0,
-    /* tp_iternext       */ 0,
-    /* tp_methods        */ 0,
-    /* tp_members        */ 0,
-    /* tp_getset         */ 0,
-    /* tp_base           */ 0,
-    /* tp_dict           */ 0,
-    /* tp_descr_get      */ 0,
-    /* tp_descr_set      */ 0,
-    /* tp_dictoffset     */ 0,
-    /* tp_init           */ 0,
-    /* tp_alloc          */ 0,
-    /* tp_new            */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Window, in_weakreflist)
 };
 
 /**
  * \brief Creates a new instance of PyCSDL2_WindowType
  *
- * \param ptr SDL_Window pointer to store in the instance
+ * \param window SDL_Window to manage. The new instance will steal the
+ *               SDL_Window reference.
  * \returns Pointer to PyCSDL2_Window on success, NULL if an exception
  *          occurred.
  */
 static PyCSDL2_Window *
-PyCSDL2_WindowCreate(SDL_Window *ptr)
+PyCSDL2_WindowCreate(SDL_Window *window)
 {
     PyCSDL2_Window *self;
+    PyTypeObject *type = &PyCSDL2_WindowType;
 
-    self = (PyCSDL2_Window*) PyType_GenericAlloc(&PyCSDL2_WindowType, 0);
-    if (!self)
+    PyCSDL2_Assert(window);
+    if (!(self = (PyCSDL2_Window*) type->tp_alloc(type, 0)))
         return NULL;
-    self->ptr = ptr;
+    self->window = window;
     return self;
 }
 
 /**
  * \brief Implements csdl2.SDL_CreateWindow()
  *
- * Implements the Python function signature:
- * \code
+ * \code{.py}
  * SDL_CreateWindow(title: str, x: int, y: int, w: int, h: int, flags: int)
  *     -> SDL_Window
  * \endcode
@@ -140,18 +125,16 @@ PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
     int x, y, w, h;
     Uint32 flags;
     static char *kwlist[] = {"title", "x", "y", "w", "h", "flags", NULL};
-    SDL_Window *ptr;
+    SDL_Window *window;
     PyCSDL2_Window *out;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "siiii" Uint32_UNIT, kwlist,
         &title, &x, &y, &w, &h, &flags))
         return NULL;
-    if (!(ptr = SDL_CreateWindow(title, x, y, w, h, flags))) {
-        PyCSDL2_RaiseSDLError();
-        return NULL;
-    }
-    if (!(out = PyCSDL2_WindowCreate(ptr))) {
-        SDL_DestroyWindow(ptr);
+    if (!(window = SDL_CreateWindow(title, x, y, w, h, flags)))
+        return PyCSDL2_RaiseSDLError();
+    if (!(out = PyCSDL2_WindowCreate(window))) {
+        SDL_DestroyWindow(window);
         return NULL;
     }
     return out;
