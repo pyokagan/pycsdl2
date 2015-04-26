@@ -218,7 +218,7 @@ class TestVideoConstants(unittest.TestCase):
         self.assertEqual(SDL_GL_CONTEXT_RESET_ISOLATION_FLAG, 0x0008)
 
 
-class TestSDL_Window(unittest.TestCase):
+class TestWindow(unittest.TestCase):
     """Test csdl2.SDL_Window"""
 
     def test_cannot_create(self):
@@ -231,7 +231,7 @@ class TestSDL_Window(unittest.TestCase):
         self.assertRaises(TypeError, type, "testtype", (SDL_Window,), {})
 
 
-class TestSDL_CreateWindow(unittest.TestCase):
+class TestCreateWindow(unittest.TestCase):
     """Test SDL_CreateWindow()"""
 
     def test_returns_SDL_Window(self):
