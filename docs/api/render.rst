@@ -69,6 +69,25 @@ Destroying a renderer
    .. warning:: Once destroyed, do not access the renderer. Doing so will at
                 best raise errors and at worse crash the interpreter.
 
+Drawing
+-------
+.. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
+
+   Sets the color used for drawing primitives, and for :func:`SDL_RenderClear`.
+
+   :param renderer: The rendering context.
+   :type rendering: :class:`SDL_Renderer`
+   :param int r: The red value used to draw on the rendering target, within the
+                 range 0-255.
+   :param int g: The green value used to draw on the rendering target, within
+                 the range 0-255.
+   :param int b: The blue value used to draw on the rendering target, within
+                 the range 0-255.
+   :param int a: The alpha value used to draw on the rendering target, within
+                 the range 0-255. Use :func:`SDL_SetRenderDrawBlendMode` to
+                 specify how the alpha channel is used.
+   :raises RuntimeError: If the drawing color could not be set.
+
 .. data:: SDL_TEXTUREACCESS_STATIC
 
    Texture changes rarely, not lockable.

@@ -241,6 +241,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Creates a SDL_Renderer for `surface`.\n"
     },
 
+    {"SDL_SetRenderDrawColor",
+     (PyCFunction) PyCSDL2_SetRenderDrawColor,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int,\n"
+     "                       a: int) -> None\n"
+     "\n"
+     "Sets the color used for drawing primitives and for SDL_RenderClear()\n"
+    },
+
     {"SDL_DestroyRenderer",
      (PyCFunction) PyCSDL2_DestroyRenderer,
      METH_VARARGS | METH_KEYWORDS,
