@@ -63,6 +63,303 @@ PyCSDL2_EventMemCreate(void)
     return (PyCSDL2_EventMem*) PyType_GenericAlloc(&PyCSDL2_EventMemType, 0);
 }
 
+/** \brief Instance data for PyCSDL2_MouseMotionEventType */
+typedef struct PyCSDL2_MouseMotionEvent {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief Underlying PyCSDL2_EventMem */
+    PyCSDL2_EventMem *ev_mem;
+} PyCSDL2_MouseMotionEvent;
+
+/** \brief newfunc for PyCSDL2_MouseMotionEventType */
+static PyCSDL2_MouseMotionEvent *
+PyCSDL2_MouseMotionEventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_MouseMotionEvent *self;
+
+    if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
+        return NULL;
+    if (!(self->ev_mem = PyCSDL2_EventMemCreate()))
+        return NULL;
+    return self;
+}
+
+/** \brief Destructor for PyCSDL2_MouseMotionEventType */
+static void
+PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
+{
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_XDECREF(self->ev_mem);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.type */
+static PyObject *
+PyCSDL2_MouseMotionEventGetType(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.type);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.type */
+static int
+PyCSDL2_MouseMotionEventSetType(PyCSDL2_MouseMotionEvent *self,
+                                PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.type);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.timestamp */
+static PyObject *
+PyCSDL2_MouseMotionEventGetTimestamp(PyCSDL2_MouseMotionEvent *self,
+                                     void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.timestamp);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.timestamp */
+static int
+PyCSDL2_MouseMotionEventSetTimestamp(PyCSDL2_MouseMotionEvent *self,
+                                     PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.timestamp);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.windowID */
+static PyObject *
+PyCSDL2_MouseMotionEventGetWindowID(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.windowID);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.windowID */
+static int
+PyCSDL2_MouseMotionEventSetWindowID(PyCSDL2_MouseMotionEvent *self,
+                                    PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.windowID);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.which */
+static PyObject *
+PyCSDL2_MouseMotionEventGetWhich(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.which);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.which */
+static int
+PyCSDL2_MouseMotionEventSetWhich(PyCSDL2_MouseMotionEvent *self,
+                                 PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.which);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.state */
+static PyObject *
+PyCSDL2_MouseMotionEventGetState(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.state);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.state */
+static int
+PyCSDL2_MouseMotionEventSetState(PyCSDL2_MouseMotionEvent *self,
+                                 PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.state);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.x */
+static PyObject *
+PyCSDL2_MouseMotionEventGetX(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromLong(self->ev_mem->ev.motion.x);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.x */
+static int
+PyCSDL2_MouseMotionEventSetX(PyCSDL2_MouseMotionEvent *self,
+                             PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.x);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.y */
+static PyObject *
+PyCSDL2_MouseMotionEventGetY(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromLong(self->ev_mem->ev.motion.y);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.y */
+static int
+PyCSDL2_MouseMotionEventSetY(PyCSDL2_MouseMotionEvent *self,
+                             PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.y);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.xrel */
+static PyObject *
+PyCSDL2_MouseMotionEventGetXRel(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromLong(self->ev_mem->ev.motion.xrel);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.xrel */
+static int
+PyCSDL2_MouseMotionEventSetXRel(PyCSDL2_MouseMotionEvent *self,
+                                PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.xrel);
+}
+
+/** \brief Getter for SDL_MouseMotionEvent.yrel */
+static PyObject *
+PyCSDL2_MouseMotionEventGetYRel(PyCSDL2_MouseMotionEvent *self, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, NULL);
+    return PyLong_FromLong(self->ev_mem->ev.motion.yrel);
+}
+
+/** \brief Setter for SDL_MouseMotionEvent.yrel */
+static int
+PyCSDL2_MouseMotionEventSetYRel(PyCSDL2_MouseMotionEvent *self,
+                                PyObject *value, void *closure)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.yrel);
+}
+
+/** \brief List of attributes for PyCSDL2_MouseMotionEventType */
+static PyGetSetDef PyCSDL2_MouseMotionEventGetSetters[] = {
+    {"type",
+     (getter) PyCSDL2_MouseMotionEventGetType,
+     (setter) PyCSDL2_MouseMotionEventSetType,
+     "The event type. Should be set to SDL_MOUSEMOTION.",
+     NULL},
+    {"timestamp",
+     (getter) PyCSDL2_MouseMotionEventGetTimestamp,
+     (setter) PyCSDL2_MouseMotionEventSetTimestamp,
+     "Timestamp of the event.",
+     NULL},
+    {"windowID",
+     (getter) PyCSDL2_MouseMotionEventGetWindowID,
+     (setter) PyCSDL2_MouseMotionEventSetWindowID,
+     "The window with mouse focus, if any.",
+     NULL},
+    {"which",
+     (getter) PyCSDL2_MouseMotionEventGetWhich,
+     (setter) PyCSDL2_MouseMotionEventSetWhich,
+     "The mouse instance ID, or SDL_TOUCH_MOUSEID.",
+     NULL},
+    {"state",
+     (getter) PyCSDL2_MouseMotionEventGetState,
+     (setter) PyCSDL2_MouseMotionEventSetState,
+     "A 32-bit button bitmask of the current button state.\n"
+     "\n"
+     "You can test if different buttons are pressed by using the\n"
+     "SDL_BUTTON_*MASK mask constants.\n",
+     NULL},
+    {"x",
+     (getter) PyCSDL2_MouseMotionEventGetX,
+     (setter) PyCSDL2_MouseMotionEventSetX,
+     "Mouse X coordinate, relative to window's origin.",
+     NULL},
+    {"y",
+     (getter) PyCSDL2_MouseMotionEventGetY,
+     (setter) PyCSDL2_MouseMotionEventSetY,
+     "Mouse Y coordinate, relative to window's origin.",
+     NULL},
+    {"xrel",
+     (getter) PyCSDL2_MouseMotionEventGetXRel,
+     (setter) PyCSDL2_MouseMotionEventSetXRel,
+     "Relative motion in the X direction.",
+     NULL},
+    {"yrel",
+     (getter) PyCSDL2_MouseMotionEventGetYRel,
+     (setter) PyCSDL2_MouseMotionEventSetYRel,
+     "Relative motion in the Y direction.",
+     NULL},
+    {NULL}
+};
+
+/** \brief getbufferproc implementation for PyCSDL2_MouseMotionEventType */
+static int
+PyCSDL2_MouseMotionEventGetBuffer(PyCSDL2_MouseMotionEvent *self,
+                                  Py_buffer *view, int flags)
+{
+    PyCSDL2_Assert(self->ev_mem, -1);
+    return PyBuffer_FillInfo(view, (PyObject*) self, &self->ev_mem->ev.motion,
+                             sizeof(SDL_MouseMotionEvent), 0, flags);
+}
+
+/** \brief Buffer protocol definition for PyCSDL2_MouseMotionEventType */
+static PyBufferProcs PyCSDL2_MouseMotionEventBufferProcs = {
+    (getbufferproc) PyCSDL2_MouseMotionEventGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/** \brief Type definition for csdl2.SDL_MouseMotionEvent */
+static PyTypeObject PyCSDL2_MouseMotionEventType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_MouseMotionEvent",
+    /* tp_basicsize      */ sizeof(PyCSDL2_MouseMotionEvent),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_MouseMotionEventDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_MouseMotionEventBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "A structure that contains mouse motion event information.\n",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_MouseMotionEvent, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_MouseMotionEventGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc) PyCSDL2_MouseMotionEventNew,
+};
+
 /**
  * \brief Instance data of PyCSDL2_EventType
  */
@@ -479,6 +776,12 @@ PyCSDL2_initevents(PyObject *module)
             return 0;
 
     if (PyType_Ready(&PyCSDL2_EventMemType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_MouseMotionEventType)) { return 0; }
+    Py_INCREF(&PyCSDL2_MouseMotionEventType);
+    if (PyModule_AddObject(module, "SDL_MouseMotionEvent",
+                           (PyObject*) &PyCSDL2_MouseMotionEventType))
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_EventType)) { return 0; }
     Py_INCREF(&PyCSDL2_EventType);
