@@ -79,6 +79,12 @@ the application to process the information stored with them.
       | :const:`SDL_WINDOWEVENT`               | :attr:`SDL_Event.window`   |
       +----------------------------------------+----------------------------+
 
+   .. attribute:: motion
+
+      (readonly) If :attr:`SDL_Event.type` is :const:`SDL_MOUSEMOTION`, use
+      this attribute to access the underlying :class:`SDL_MouseMotionEvent`
+      mouse motion event data.
+
 .. data:: SDL_QUIT
 
    User-requested quit.
