@@ -151,6 +151,240 @@ class TestEventsConstants(unittest.TestCase):
         self.assertEqual(SDL_LASTEVENT, 0xFFFF)
 
 
+class TestMouseMotionEvent(unittest.TestCase):
+    """Tests csdl2.SDL_MouseMotionEvent"""
+
+    def setUp(self):
+        self.ev = SDL_MouseMotionEvent()
+
+    def test_cannot_subclass(self):
+        "Cannot be subclassed"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_MouseMotionEvent,),
+                          {})
+
+    def test_weakref(self):
+        "Can create weak reference"
+        ref = weakref.ref(self.ev)
+
+    def test_buffer(self):
+        "Supports the buffer protocol"
+        mem = memoryview(self.ev)
+        self.assertTrue(mem.c_contiguous)
+        self.assertTrue(mem.contiguous)
+        self.assertFalse(mem.readonly)
+        self.assertEqual(mem.format, 'B')
+        self.assertEqual(mem.itemsize, 1)
+        self.assertEqual(mem.ndim, 1)
+        self.assertEqual(mem.strides, (1,))
+
+    def test_buffer_writable(self):
+        "Exported buffer contains writable valid memory"
+        mem = memoryview(self.ev)
+        for i in range(mem.nbytes):
+            mem[i] = 42
+
+    def test_buffer_zeroes(self):
+        "buffert is initialized with 0s"
+        mem = memoryview(self.ev)
+        zeroes = bytes(mem.nbytes)
+        self.assertEqual(mem.tobytes(), zeroes)
+
+    def test_type(self):
+        "type is an int"
+        self.assertIs(type(self.ev.type), int)
+        self.assertEqual(self.ev.type, 0)
+
+    def test_type_set(self):
+        "type can be set to an int"
+        setattr(self.ev, 'type', 42)
+
+    def test_type_set_no_neg(self):
+        "type raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'type', -42)
+
+    def test_type_set_no_overflow(self):
+        "type raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'type', 0xfffffffff)
+
+    def test_type_set_non_int(self):
+        "type raises TypeError on non-ints"
+        self.assertRaises(TypeError, setattr, self.ev, 'type', 42.0)
+
+    def test_timestamp(self):
+        "timestamp is an int"
+        self.assertIs(type(self.ev.timestamp), int)
+        self.assertEqual(self.ev.timestamp, 0)
+
+    def test_timestamp_set(self):
+        "timestamp can be set to an int"
+        setattr(self.ev, 'timestamp', 42)
+
+    def test_timestamp_set_no_neg(self):
+        "timestamp raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'timestamp', -42)
+
+    def test_timestamp_set_no_overflow(self):
+        "timestamp raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'timestamp',
+                          0xfffffffff)
+
+    def test_timestamp_set_non_int(self):
+        "timestamp raises TypeError on non-ints"
+        self.assertRaises(TypeError, setattr, self.ev, 'timestamp', 42.0)
+
+    def test_windowID(self):
+        "windowID is an int"
+        self.assertIs(type(self.ev.windowID), int)
+        self.assertEqual(self.ev.windowID, 0)
+
+    def test_windowID_set(self):
+        "windowID can be set to an int"
+        setattr(self.ev, 'windowID', 42)
+
+    def test_windowID_set_no_neg(self):
+        "windowID raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'windowID', -42)
+
+    def test_windowID_set_no_overflow(self):
+        "windowID raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'windowID',
+                          0xfffffffff)
+
+    def test_windowID_set_non_int(self):
+        "windowID raises TypeError on non-ints"
+        self.assertRaises(TypeError, setattr, self.ev, 'windowID', 42.0)
+
+    def test_which(self):
+        "which is an int"
+        self.assertIs(type(self.ev.which), int)
+        self.assertEqual(self.ev.which, 0)
+
+    def test_which_set(self):
+        "which can be set to an int"
+        setattr(self.ev, 'which', 42)
+
+    def test_which_set_no_neg(self):
+        "which raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'which', -42)
+
+    def test_which_set_no_overflow(self):
+        "which raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'which',
+                          0xfffffffff)
+
+    def test_which_set_non_int(self):
+        "which raises TypeError on non-ints"
+        self.assertRaises(TypeError, setattr, self.ev, 'which', 42.0)
+
+    def test_state(self):
+        "state is an int"
+        self.assertIs(type(self.ev.state), int)
+        self.assertEqual(self.ev.state, 0)
+
+    def test_state_set(self):
+        "state can be set to an int"
+        setattr(self.ev, 'state', 42)
+
+    def test_state_set_no_neg(self):
+        "state raises OverflowError on negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'state', -42)
+
+    def test_state_set_no_overflow(self):
+        "state raises OverflowError on ints overflowing Uint32"
+        self.assertRaises(OverflowError, setattr, self.ev, 'state',
+                          0xfffffffff)
+
+    def test_state_set_non_int(self):
+        "state raises TypeError on non-ints"
+        self.assertRaises(TypeError, setattr, self.ev, 'state', 42.0)
+
+    def test_x(self):
+        "x is an int"
+        self.assertIs(type(self.ev.x), int)
+        self.assertEqual(self.ev.x, 0)
+
+    def test_x_set(self):
+        "x can be set to an int"
+        setattr(self.ev, 'x', 42)
+
+    def test_x_set_no_neg_overflow(self):
+        "x raises OverflowError on Sint32 overflowing negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'x', -0xfffffffff)
+
+    def test_x_set_no_overflow(self):
+        "x raises OverflowError on Sint32 overflowing positive ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'x', 0xfffffffff)
+
+    def test_x_set_convert(self):
+        "x implicitly converts int-like objects"
+        setattr(self.ev, 'x', 42.1)
+
+    def test_y(self):
+        "y is an int"
+        self.assertIs(type(self.ev.y), int)
+        self.assertEqual(self.ev.y, 0)
+
+    def test_y_set(self):
+        "y can be set to an int"
+        setattr(self.ev, 'y', 42)
+
+    def test_y_set_no_neg_overflow(self):
+        "y raises OverflowError on Sint32 overflowing negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'y', -0xfffffffff)
+
+    def test_y_set_no_overflow(self):
+        "y raises OverflowError on Sint32 overflowing positive ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'y', 0xfffffffff)
+
+    def test_y_set_convert(self):
+        "y implicitly converts int-like objects"
+        setattr(self.ev, 'y', 42.1)
+
+    def test_xrel(self):
+        "xrel is an int"
+        self.assertIs(type(self.ev.xrel), int)
+        self.assertEqual(self.ev.xrel, 0)
+
+    def test_xrel_set(self):
+        "xrel can be set to an int"
+        setattr(self.ev, 'xrel', 42)
+
+    def test_xrel_set_no_neg_overflow(self):
+        "xrel raises OverflowError on Sint32 overflowing negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'xrel',
+                          -0xfffffffff)
+
+    def test_xrel_set_no_overflow(self):
+        "xrel raises OverflowError on Sint32 overflowing positive ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'xrel', 0xfffffffff)
+
+    def test_xrel_set_convert(self):
+        "xrel implicitly converts int-like objects"
+        setattr(self.ev, 'xrel', 42.1)
+
+    def test_yrel(self):
+        "yrel is an int"
+        self.assertIs(type(self.ev.yrel), int)
+        self.assertEqual(self.ev.yrel, 0)
+
+    def test_yrel_set(self):
+        "yrel can be set to an int"
+        setattr(self.ev, 'yrel', 42)
+
+    def test_yrel_set_no_neg_overflow(self):
+        "yrel raises OverflowError on Sint32 overflowing negative ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'yrel',
+                          -0xfffffffff)
+
+    def test_yrel_set_no_overflow(self):
+        "yrel raises OverflowError on Sint32 overflowing positive ints"
+        self.assertRaises(OverflowError, setattr, self.ev, 'yrel', 0xfffffffff)
+
+    def test_yrel_set_convert(self):
+        "yrel implicitly converts int-like objects"
+        setattr(self.ev, 'yrel', 42.1)
+
+
 class Test_SDL_Event(unittest.TestCase):
     """Tests csdl2.SDL_Event"""
 
