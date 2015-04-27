@@ -250,6 +250,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Sets the color used for drawing primitives and for SDL_RenderClear()\n"
     },
 
+    {"SDL_RenderClear",
+     (PyCFunction) PyCSDL2_RenderClear,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderClear(renderer: SDL_Renderer) -> None\n"
+     "\n"
+     "Clears the current rendering target with the current drawing color.\n"
+     "The entire rendering target is cleared, ignoring the viewport.\n"
+    },
+
     {"SDL_DestroyRenderer",
      (PyCFunction) PyCSDL2_DestroyRenderer,
      METH_VARARGS | METH_KEYWORDS,
