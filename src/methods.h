@@ -271,6 +271,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "If `rect` is None, the entire rendering target will be filled.\n"
     },
 
+    {"SDL_RenderPresent",
+     (PyCFunction) PyCSDL2_RenderPresent,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderPresent(renderer: SDL_Renderer) -> None\n"
+     "\n"
+     "Updates the screen with any rendering performed since the previous\n"
+     "call.\n"
+    },
+
     {"SDL_DestroyRenderer",
      (PyCFunction) PyCSDL2_DestroyRenderer,
      METH_VARARGS | METH_KEYWORDS,

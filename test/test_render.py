@@ -219,6 +219,29 @@ class TestRenderFillRect(unittest.TestCase):
                           self.rect)
 
 
+class TestRenderPresent(unittest.TestCase):
+    """Tests SDL_RenderPresent()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_RenderPresent(self.rdr), None)
+
+    def test_destroyed_renderer(self):
+        "Raises AssertionError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(AssertionError, SDL_RenderPresent, self.rdr)
+
+    @unittest.skip('FIXME: Does not raise AssertionError')
+    def test_freed_surface(self):
+        "Raises AssertionError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(AssertionError, SDL_RenderPresent, self.rdr)
+
+
 class TestDestroyRenderer(unittest.TestCase):
     """Tests SDL_DestroyRenderer()"""
 

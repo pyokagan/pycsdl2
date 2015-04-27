@@ -110,6 +110,30 @@ Drawing
    :type rect: :class:`SDL_Rect` or None
    :raises RuntimeError: If the rectangle could not be filled.
 
+Updating the screen
+-------------------
+SDL's rendering functions operate on a backbuffer. Calling a rendering function
+such as :func:`SDL_RenderDrawLine` does not directly draw a line on the screen,
+but rather updates the backbuffer. As such, after composing your entire scene
+with the drawing functions, you need to *present* the composed buffer to the
+screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
+
+.. function:: SDL_RenderPresent(renderer: SDL_Renderer) -> None
+
+   Updates the screen with any rendering performed since the previous call.
+
+   If the renderer has VSync enabled, this function will block while waiting
+   for the next vertical refresh, hence eliminating screen tearing.
+
+   :param renderer: The rendering context
+   :type renderer: :class:`SDL_Renderer`
+
+   .. note:: The backbuffer should be considered invalidated after each call to
+             :func:`SDL_RenderPresent`. Do not assume that previous contents
+             will exist between frames. You are strongly encouraged to call
+             :func:`SDL_RenderClear` to initialize the backbuffer before
+             drawing each frame.
+
 .. data:: SDL_TEXTUREACCESS_STATIC
 
    Texture changes rarely, not lockable.
