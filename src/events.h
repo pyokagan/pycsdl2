@@ -111,7 +111,7 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
 static PyObject *
 PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
 {
-    assert(self->ev_mem);
+    PyCSDL2_Assert(self->ev_mem, NULL);
     return PyLong_FromUnsignedLong(self->ev_mem->ev.type);
 }
 
@@ -121,13 +121,15 @@ PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
 static int
 PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
 {
-    unsigned long x = PyLong_AsUnsignedLong(value);
+    unsigned long x;
+
+    PyCSDL2_Assert(self->ev_mem, -1);
+    x = PyLong_AsUnsignedLong(value);
     if (PyErr_Occurred()) { return -1; }
     if (x > ((Uint32)-1)) {
         PyErr_SetString(PyExc_OverflowError, "value overflows Uint32");
         return -1;
     }
-    assert(self->ev_mem);
     self->ev_mem->ev.type = x;
     return 0;
 }
@@ -153,7 +155,7 @@ PyCSDL2_EventGetBuffer(PyCSDL2_Event *self, Py_buffer *view, int flags)
     static Py_ssize_t shape[] = {sizeof(SDL_Event)};
     static Py_ssize_t strides[] = {1};
 
-    assert(self->ev_mem);
+    PyCSDL2_Assert(self->ev_mem, -1);
     view->buf = &self->ev_mem->ev;
     Py_INCREF((PyObject*) self);
     view->obj = (PyObject*) self;
