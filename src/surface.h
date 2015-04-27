@@ -112,8 +112,8 @@ PyCSDL2_SurfacePixelsCreate(SDL_Surface *surface)
 {
     PyCSDL2_SurfacePixels *self;
     PyTypeObject *type = &PyCSDL2_SurfacePixelsType;
-    PyCSDL2_Assert(surface);
-    PyCSDL2_Assert(surface->pixels);
+    PyCSDL2_Assert(surface, NULL);
+    PyCSDL2_Assert(surface->pixels, NULL);
     if (!(self = (PyCSDL2_SurfacePixels*)type->tp_alloc(type, 0)))
         return NULL;
     surface->refcount += 1;
@@ -178,7 +178,7 @@ static PyBufferProcs PyCSDL2_SurfaceRectBufferProcs = {
 static PyObject *
 PyCSDL2_SurfaceRectGetX(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->rect->x);
 }
 
@@ -186,7 +186,7 @@ PyCSDL2_SurfaceRectGetX(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetY(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->rect->y);
 }
 
@@ -194,7 +194,7 @@ PyCSDL2_SurfaceRectGetY(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetW(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->rect->w);
 }
 
@@ -202,7 +202,7 @@ PyCSDL2_SurfaceRectGetW(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetH(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->rect->h);
 }
 
@@ -273,8 +273,8 @@ PyCSDL2_SurfaceRectCreate(SDL_Surface *surface, SDL_Rect *rect)
     PyCSDL2_SurfaceRect *self;
     PyTypeObject *type = &PyCSDL2_SurfaceRectType;
 
-    PyCSDL2_Assert(surface);
-    PyCSDL2_Assert(rect);
+    PyCSDL2_Assert(surface, NULL);
+    PyCSDL2_Assert(rect, NULL);
     if (!(self = (PyCSDL2_SurfaceRect*)type->tp_alloc(type, 0)))
         return NULL;
     surface->refcount += 1;
@@ -347,7 +347,7 @@ PyCSDL2_SurfaceDealloc(PyCSDL2_Surface *self)
 static PyObject *
 PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromUnsignedLong(self->surface->flags);
 }
 
@@ -355,7 +355,7 @@ PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetFormat(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyCSDL2_Get((PyObject*) self->format);
 }
 
@@ -363,7 +363,7 @@ PyCSDL2_SurfaceGetFormat(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetW(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->surface->w);
 }
 
@@ -371,7 +371,7 @@ PyCSDL2_SurfaceGetW(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetH(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->surface->h);
 }
 
@@ -379,7 +379,7 @@ PyCSDL2_SurfaceGetH(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetPitch(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->surface->pitch);
 }
 
@@ -387,7 +387,7 @@ PyCSDL2_SurfaceGetPitch(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetPixels(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyCSDL2_Get(self->pixels);
 }
 
@@ -395,7 +395,7 @@ PyCSDL2_SurfaceGetPixels(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetUserdata(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyCSDL2_Get(self->userdata);
 }
 
@@ -404,6 +404,7 @@ static int
 PyCSDL2_SurfaceSetUserdata(PyCSDL2_Surface *self, PyObject *value,
                            void *closure)
 {
+    PyCSDL2_Assert(self->surface, -1);
     PyCSDL2_Set(self->userdata, value);
     return 0;
 }
@@ -412,7 +413,7 @@ PyCSDL2_SurfaceSetUserdata(PyCSDL2_Surface *self, PyObject *value,
 static PyObject *
 PyCSDL2_SurfaceGetLocked(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyBool_FromLong(self->surface->locked);
 }
 
@@ -420,7 +421,7 @@ PyCSDL2_SurfaceGetLocked(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetRefcount(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyLong_FromLong(self->surface->refcount);
 }
 
@@ -428,7 +429,7 @@ PyCSDL2_SurfaceGetRefcount(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetClipRect(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface);
+    PyCSDL2_Assert(self->surface, NULL);
     return PyCSDL2_Get((PyObject*) self->clip_rect);
 }
 
@@ -547,8 +548,8 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
 {
     PyCSDL2_Surface *self;
     PyTypeObject *type = &PyCSDL2_SurfaceType;
-    PyCSDL2_Assert(surface);
-    PyCSDL2_Assert(surface->format);
+    PyCSDL2_Assert(surface, NULL);
+    PyCSDL2_Assert(surface->format, NULL);
     if (!(self = (PyCSDL2_Surface*)type->tp_alloc(type, 0)))
         return NULL;
     surface->format->refcount += 1;
@@ -599,7 +600,7 @@ PyCSDL2_MUSTLOCK(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface);
+    PyCSDL2_Assert(surface->surface, NULL);
     return PyBool_FromLong(SDL_MUSTLOCK(surface->surface));
 }
 
@@ -716,7 +717,7 @@ PyCSDL2_FreeSurface(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface);
+    PyCSDL2_Assert(surface->surface, NULL);
     PyCSDL2_SurfaceClear(surface);
     Py_RETURN_NONE;
 }

@@ -117,10 +117,10 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
     PyCSDL2_Renderer *self;
     PyTypeObject *type = &PyCSDL2_RendererType;
 
-    PyCSDL2_Assert(renderer);
-    PyCSDL2_Assert(deftarget);
+    PyCSDL2_Assert(renderer, NULL);
+    PyCSDL2_Assert(deftarget, NULL);
     PyCSDL2_Assert(Py_TYPE(deftarget) == &PyCSDL2_WindowType
-                   || Py_TYPE(deftarget) == &PyCSDL2_SurfaceType);
+                   || Py_TYPE(deftarget) == &PyCSDL2_SurfaceType, NULL);
 
     if (!(self = (PyCSDL2_Renderer*) type->tp_alloc(type, 0)))
         return NULL;
@@ -150,7 +150,7 @@ PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
                                      &PyCSDL2_WindowType, &window, &index,
                                      &flags))
         return NULL;
-    PyCSDL2_Assert(window->window);
+    PyCSDL2_Assert(window->window, NULL);
     if (!(renderer = SDL_CreateRenderer(window->window, index, flags)))
         return PyCSDL2_RaiseSDLError();
     if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) window))) {
@@ -178,7 +178,7 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface);
+    PyCSDL2_Assert(surface->surface, NULL);
     if (!(renderer = SDL_CreateSoftwareRenderer(surface->surface)))
         return PyCSDL2_RaiseSDLError();
     if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) surface))) {
@@ -203,7 +203,7 @@ PyCSDL2_DestroyRenderer(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RendererType, &renderer))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer);
+    PyCSDL2_Assert(renderer->renderer, NULL);
     SDL_DestroyRenderer(renderer->renderer);
     renderer->renderer = NULL;
     PyCSDL2_RendererClear(renderer);
