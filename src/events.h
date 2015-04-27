@@ -432,29 +432,13 @@ static PyGetSetDef PyCSDL2_EventGetSetters[] = {
     {NULL}
 };
 
-/**
- * \brief getbufferproc implementation for PyCSDL2_EventType
- */
+/** \brief getbufferproc implementation for PyCSDL2_EventType */
 static int
 PyCSDL2_EventGetBuffer(PyCSDL2_Event *self, Py_buffer *view, int flags)
 {
-    static Py_ssize_t shape[] = {sizeof(SDL_Event)};
-    static Py_ssize_t strides[] = {1};
-
     PyCSDL2_Assert(self->ev_mem, -1);
-    view->buf = &self->ev_mem->ev;
-    Py_INCREF((PyObject*) self);
-    view->obj = (PyObject*) self;
-    view->len = sizeof(SDL_Event);
-    view->readonly = 0;
-    view->itemsize = 1;
-    view->format = "B";
-    view->ndim = 1;
-    view->shape = shape;
-    view->strides = strides;
-    view->suboffsets = NULL;
-    view->internal = NULL;
-    return 0;
+    return PyBuffer_FillInfo(view, (PyObject*) self, &self->ev_mem->ev,
+                             sizeof(SDL_Event), 0, flags);
 }
 
 /**
