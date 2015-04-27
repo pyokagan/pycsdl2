@@ -206,4 +206,35 @@ PyCSDL2_LongAsSint32(PyObject *obj, Sint32 *out)
     return 0;
 }
 
+#ifndef UINT32_MAX
+/** \brief Maximum value a Uint32 can hold */
+#define UINT32_MAX 4294967295U
+#endif
+
+/**
+ * \brief Returns a Uint32 representation of obj
+ *
+ * \returns 0 on success, -1 with an exception set if the value of obj is out
+ *          of range for a Uint32.
+ */
+static int
+PyCSDL2_LongAsUint32(PyObject *obj, Uint32 *out)
+{
+#if SIZEOF_LONG >= 4
+    unsigned long x = PyLong_AsUnsignedLong(obj);
+#elif SIZEOF_SIZE_T >= 4
+    size_t x = PyLong_AsSize_t(obj);
+#elif SIZEOF_LONG_LONG >= 4
+    unsigned PY_LONG_LONG x = PyLong_AsUnsignedLongLong(obj);
+#endif
+    if (PyErr_Occurred()) return -1;
+    if (x > UINT32_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int is too large to convert to Uint32");
+        return -1;
+    }
+    *out = (Uint32) x;
+    return 0;
+}
+
 #endif /* _PYCSDL2_UTIL_H_ */
