@@ -361,6 +361,26 @@ static PyTypeObject PyCSDL2_MouseMotionEventType = {
 };
 
 /**
+ * \brief Creates an instance of PyCSDL2_MouseMotionEventType
+ *
+ * \param ev_mem PyCSDL2_EventMem providing the backing storage for SDL_Event.
+ * \returns A new PyCSDL2_MouseMotionEvent on success, NULL if an exception
+ *          occurred.
+ */
+static PyCSDL2_MouseMotionEvent *
+PyCSDL2_MouseMotionEventCreate(PyCSDL2_EventMem *ev_mem)
+{
+    PyCSDL2_MouseMotionEvent *self;
+    PyTypeObject *type = &PyCSDL2_MouseMotionEventType;
+
+    PyCSDL2_Assert(ev_mem, NULL);
+    if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
+        return NULL;
+    PyCSDL2_Set(self->ev_mem, ev_mem);
+    return self;
+}
+
+/**
  * \brief Instance data of PyCSDL2_EventType
  */
 typedef struct PyCSDL2_Event {
@@ -369,6 +389,8 @@ typedef struct PyCSDL2_Event {
     PyObject *in_weakreflist;
     /** \brief Pointer to the PyCSDL2_EventMem for the event */
     PyCSDL2_EventMem *ev_mem;
+    /** \brief Object providing view to "motion" attribute of SDL_Event */
+    PyCSDL2_MouseMotionEvent *motion;
 } PyCSDL2_Event;
 
 /**
@@ -383,8 +405,14 @@ PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
     if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
         return NULL;
-    if (!(self->ev_mem = PyCSDL2_EventMemCreate()))
+    if (!(self->ev_mem = PyCSDL2_EventMemCreate())) {
+        Py_DECREF(self);
         return NULL;
+    }
+    if (!(self->motion = PyCSDL2_MouseMotionEventCreate(self->ev_mem))) {
+        Py_DECREF(self);
+        return NULL;
+    }
     return self;
 }
 
@@ -399,6 +427,7 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
     if (self->in_weakreflist)
         PyObject_ClearWeakRefs((PyObject*) self);
     Py_XDECREF(self->ev_mem);
+    Py_XDECREF(self->motion);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
@@ -420,6 +449,13 @@ PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.type);
 }
 
+/** \brief Getter for SDL_Event.motion */
+static PyObject *
+PyCSDL2_EventGetMotion(PyCSDL2_Event *self, void *closure)
+{
+    return PyCSDL2_Get((PyObject*) self->motion);
+}
+
 /**
  * \brief get setters for PyCSDL2_EventType
  */
@@ -429,6 +465,15 @@ static PyGetSetDef PyCSDL2_EventGetSetters[] = {
      (setter) PyCSDL2_EventSetType,
      "Event type",
      NULL},
+    {"motion",
+     (getter) PyCSDL2_EventGetMotion,
+     (setter) NULL,
+     "(readonly) Mouse motion event data.\n"
+     "\n"
+     "Use this attribute to access the mouse motion event data when a mouse\n"
+     "motion event occurs (event type if SDL_MOUSEMOTION).",
+     NULL
+    },
     {NULL}
 };
 
