@@ -192,6 +192,29 @@ PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)
 }
 
 /**
+ * \brief Implements csdl2.SDL_HasIntersection()
+ *
+ * \code{.py}
+ * SDL_HasIntersection(A: SDL_Rect, B: SDL_Rect) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_HasIntersection(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Py_buffer a, b;
+    static char *kwlist[] = {"A", "B", NULL};
+    int ret;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_ConvertRectRead, &a,
+                                     PyCSDL2_ConvertRectRead, &b))
+        return NULL;
+    ret = SDL_HasIntersection(a.buf, b.buf);
+    PyBuffer_Release(&a);
+    PyBuffer_Release(&b);
+    return PyBool_FromLong(ret);
+}
+
+/**
  * \brief Initializes bindings to SDL_rect.h
  *
  * \param module csdl2 module object

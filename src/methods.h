@@ -209,6 +209,16 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* rect.h */
 
+    {"SDL_HasIntersection",
+     (PyCFunction) PyCSDL2_HasIntersection,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_HasIntersection(A: SDL_Rect, B: SDL_Rect) -> bool\n"
+     "\n"
+     "Returns True if rectangles `A` and `B` are intersecting, False\n"
+     "otherwise. If either argument is None the function will return\n"
+     "False.\n"
+    },
+
     /* render.h */
 
     {"SDL_CreateRenderer",
