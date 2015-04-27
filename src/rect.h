@@ -159,6 +159,61 @@ static PyTypeObject PyCSDL2_RectType = {
     /* tp_new            */ (newfunc) PyCSDL2_RectNew
 };
 
+/** \brief converter for a readonly SDL_Rect exporting object */
+static int
+PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)
+{
+    if (!object) {
+        PyBuffer_Release(view);
+        return 1;
+    }
+    if (object == Py_None) {
+        view->obj = NULL;
+        view->buf = NULL;
+        view->len = 0;
+        return 1;
+    }
+    if (PyObject_GetBuffer(object, view, PyBUF_SIMPLE))
+        return 0;
+    if (!PyBuffer_IsContiguous(view, 'C')) {
+        PyErr_SetString(PyExc_BufferError,
+                        "SDL_Rect buffer must be C-contiguous");
+        PyBuffer_Release(view);
+        return 0;
+    }
+    if (view->len != sizeof(SDL_Rect)) {
+        size_t expected = sizeof(SDL_Rect);
+        PyErr_Format(PyExc_BufferError, "Invalid SDL_Rect buffer size. "
+                     "Expected: %zu. Got: %zd", expected, view->len);
+        PyBuffer_Release(view);
+        return 0;
+    }
+    return Py_CLEANUP_SUPPORTED;
+}
+
+/**
+ * \brief Implements csdl2.SDL_HasIntersection()
+ *
+ * \code{.py}
+ * SDL_HasIntersection(A: SDL_Rect, B: SDL_Rect) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_HasIntersection(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Py_buffer a, b;
+    static char *kwlist[] = {"A", "B", NULL};
+    int ret;
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_ConvertRectRead, &a,
+                                     PyCSDL2_ConvertRectRead, &b))
+        return NULL;
+    ret = SDL_HasIntersection(a.buf, b.buf);
+    PyBuffer_Release(&a);
+    PyBuffer_Release(&b);
+    return PyBool_FromLong(ret);
+}
+
 /**
  * \brief Initializes bindings to SDL_rect.h
  *
