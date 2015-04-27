@@ -179,6 +179,46 @@ class TestRenderClear(unittest.TestCase):
         self.assertRaises(AssertionError, SDL_RenderClear, self.rdr)
 
 
+class TestRenderFillRect(unittest.TestCase):
+    """Tests SDL_RenderFillRect()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rect = SDL_Rect(0, 0, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_RenderFillRect(self.rdr, self.rect), None)
+
+    def test_rect_none(self):
+        "rect can be None"
+        self.assertIs(SDL_RenderFillRect(self.rdr, None), None)
+
+    def test_rect_buffer(self):
+        "rect can be a buffer of valid size"
+        rect = memoryview(self.rect).tobytes()
+        self.assertIs(SDL_RenderFillRect(self.rdr, rect), None)
+
+    def test_rect_buffer_invalid_size(self):
+        "Raises BufferError if rect is of invalid buffer size"
+        rect = bytes(1)
+        self.assertRaises(BufferError, SDL_RenderFillRect, self.rdr, rect)
+
+    def test_destroyed_renderer(self):
+        "Raises AssertionError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(AssertionError, SDL_RenderFillRect, self.rdr,
+                          self.rect)
+
+    @unittest.skip('FIXME: Causes a segfault')
+    def test_freed_surface(self):
+        "Raises AssertionError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(AssertionError, SDL_RenderFillRect, self.rdr,
+                          self.rect)
+
+
 class TestDestroyRenderer(unittest.TestCase):
     """Tests SDL_DestroyRenderer()"""
 
