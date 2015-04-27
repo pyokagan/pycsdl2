@@ -260,6 +260,26 @@ PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderPresent()
+ *
+ * \code{.py}
+ * SDL_RenderPresent(renderer: SDL_Renderer) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderPresent(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer;
+    static char *kwlist[] = {"renderer", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RendererType, &renderer))
+        return NULL;
+    PyCSDL2_Assert(renderer->renderer, NULL);
+    SDL_RenderPresent(renderer->renderer);
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_DestroyRenderer()
  *
  * \code{.py}
