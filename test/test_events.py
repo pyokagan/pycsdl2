@@ -452,6 +452,19 @@ class Test_SDL_Event(unittest.TestCase):
         "SDL_Event.type rejects non-integers"
         self.assertRaises(TypeError, setattr, self.ev, 'type', 42.0)
 
+    def test_motion(self):
+        "motion is a SDL_MouseMotionEvent"
+        self.assertIs(type(self.ev.motion), SDL_MouseMotionEvent)
+
+    def test_motion_readonly(self):
+        "motion is readonly"
+        self.assertRaises(AttributeError, setattr, self.ev, 'motion', 42)
+
+    def test_motion_same_event(self):
+        "motion shares the same underlying SDL_Event"
+        self.ev.type = 42
+        self.assertEqual(self.ev.motion.type, 42)
+
 
 class Test_SDL_PumpEvents(unittest.TestCase):
     """Tests SDL_PumpEvents"""
