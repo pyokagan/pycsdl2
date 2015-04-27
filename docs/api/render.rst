@@ -98,6 +98,18 @@ Drawing
    :type renderer: :class:`SDL_Renderer`
    :raises RuntimeError: If the rendering target could not be cleared.
 
+.. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
+
+   Fills a rectangle on the current rendering target with the current drawing
+   color.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The :class:`SDL_Rect` representing the rectangle to fill. If
+                None, the entire rendering target will be filled.
+   :type rect: :class:`SDL_Rect` or None
+   :raises RuntimeError: If the rectangle could not be filled.
+
 .. data:: SDL_TEXTUREACCESS_STATIC
 
    Texture changes rarely, not lockable.

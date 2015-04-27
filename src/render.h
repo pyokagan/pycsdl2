@@ -34,6 +34,7 @@
 #include "error.h"
 #include "video.h"
 #include "surface.h"
+#include "rect.h"
 
 /** \brief Instance data of PyCSDL2_RendererType */
 typedef struct PyCSDL2_Renderer {
@@ -230,6 +231,31 @@ PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
     PyCSDL2_Assert(renderer->renderer, NULL);
     if (SDL_RenderClear(renderer->renderer))
         return PyCSDL2_RaiseSDLError();
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderFillRect()
+ *
+ * \code{.py}
+ * SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect or None) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O&", kwlist,
+                                     &PyCSDL2_RendererType, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+    PyCSDL2_Assert(renderer->renderer, (PyBuffer_Release(&rect), NULL));
+    ret = SDL_RenderFillRect(renderer->renderer, rect.buf);
+    PyBuffer_Release(&rect);
+    if (ret) return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
 }
 
