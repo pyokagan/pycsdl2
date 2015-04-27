@@ -21,3 +21,14 @@ Rectangle Functions
    .. attribute:: h
 
       The height of the rectangle.
+
+.. function:: SDL_HasIntersection(A: SDL_Rect, B: SDL_Rect) -> bool
+
+   Determines if two rectangles intersect.
+
+   :param A: First rectangle.
+   :type A: :class:`SDL_Rect` or None
+   :param B: Second rectangle.
+   :type B: :class:`SDL_Rect` or None
+   :returns: True if there is an intersection, False otherwise. If `A` and/or
+             `B` are None, the function will return False.
