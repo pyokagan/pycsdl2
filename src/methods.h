@@ -259,6 +259,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "The entire rendering target is cleared, ignoring the viewport.\n"
     },
 
+    {"SDL_RenderFillRect",
+     (PyCFunction) PyCSDL2_RenderFillRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect or None)\n"
+     "    -> None\n"
+     "\n"
+     "Fills a rectangle `rect` on the current rendering target with the\n"
+     "current drawing color.\n"
+     "\n"
+     "If `rect` is None, the entire rendering target will be filled.\n"
+    },
+
     {"SDL_DestroyRenderer",
      (PyCFunction) PyCSDL2_DestroyRenderer,
      METH_VARARGS | METH_KEYWORDS,
