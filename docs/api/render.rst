@@ -88,6 +88,16 @@ Drawing
                  specify how the alpha channel is used.
    :raises RuntimeError: If the drawing color could not be set.
 
+.. function:: SDL_RenderClear(renderer: SDL_Renderer) -> None
+
+   Clears the current rendering target with the current drawing color.
+
+   The entire rendering target will be cleared, ignoring the viewport.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :raises RuntimeError: If the rendering target could not be cleared.
+
 .. data:: SDL_TEXTUREACCESS_STATIC
 
    Texture changes rarely, not lockable.

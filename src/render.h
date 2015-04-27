@@ -213,6 +213,27 @@ PyCSDL2_SetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderClear()
+ *
+ * \code{.py}
+ * SDL_RenderClear(renderer: SDL_Renderer) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer;
+    static char *kwlist[] = {"renderer", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RendererType, &renderer))
+        return NULL;
+    PyCSDL2_Assert(renderer->renderer, NULL);
+    if (SDL_RenderClear(renderer->renderer))
+        return PyCSDL2_RaiseSDLError();
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_DestroyRenderer()
  *
  * \code{.py}
