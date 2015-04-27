@@ -128,6 +128,34 @@ class TestCreateSoftwareRenderer(unittest.TestCase):
         self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
 
 
+class TestSetRenderDrawColor(unittest.TestCase):
+    """Tests SDL_SetRenderDrawColor()"""
+
+    def setUp(self):
+        sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_SetRenderDrawColor(self.rdr, 0, 0, 0, 0), None)
+
+    def test_neg_color(self):
+        "Raises OverflowError on negative integers"
+        self.assertRaises(OverflowError, SDL_SetRenderDrawColor, self.rdr, -1,
+                          -1, -1, -1)
+
+    def test_overflow_color(self):
+        "Raises OverflowError on color integers > 255"
+        self.assertRaises(OverflowError, SDL_SetRenderDrawColor, self.rdr,
+                          256, 256, 256, 256)
+
+    def test_destroyed_renderer(self):
+        "Raises AssertionError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(AssertionError, SDL_SetRenderDrawColor, self.rdr,
+                          0, 0, 0, 0)
+
+
 class TestDestroyRenderer(unittest.TestCase):
     """Tests SDL_DestroyRenderer()"""
 
