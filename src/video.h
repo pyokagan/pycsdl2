@@ -100,7 +100,7 @@ PyCSDL2_WindowCreate(SDL_Window *window)
     PyCSDL2_Window *self;
     PyTypeObject *type = &PyCSDL2_WindowType;
 
-    PyCSDL2_Assert(window);
+    PyCSDL2_Assert(window, NULL);
     if (!(self = (PyCSDL2_Window*) type->tp_alloc(type, 0)))
         return NULL;
     self->window = window;
@@ -155,7 +155,7 @@ PyCSDL2_DestroyWindow(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_WindowType, &window))
         return NULL;
-    PyCSDL2_Assert(window->window);
+    PyCSDL2_Assert(window->window, NULL);
     SDL_DestroyWindow(window->window);
     window->window = NULL;
     Py_RETURN_NONE;

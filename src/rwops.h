@@ -222,7 +222,7 @@ PyCSDL2_RWSizeFuncCreate(rwsizefunc sizefunc)
 {
     PyCSDL2_RWSizeFunc *self;
     PyTypeObject *type = &PyCSDL2_RWSizeFuncType;
-    PyCSDL2_Assert(sizefunc);
+    PyCSDL2_Assert(sizefunc, NULL);
     if (!(self = (PyCSDL2_RWSizeFunc*)type->tp_alloc(type, 0)))
         return NULL;
     self->func = sizefunc;
@@ -291,7 +291,7 @@ PyCSDL2_RWSeekFuncCreate(rwseekfunc seekfunc)
 {
     PyCSDL2_RWSeekFunc *self;
     PyTypeObject *type = &PyCSDL2_RWSeekFuncType;
-    PyCSDL2_Assert(seekfunc);
+    PyCSDL2_Assert(seekfunc, NULL);
     if (!(self = (PyCSDL2_RWSeekFunc*)type->tp_alloc(type, 0)))
         return NULL;
     self->func = seekfunc;
@@ -370,7 +370,7 @@ PyCSDL2_RWReadFuncCreate(rwreadfunc readfunc)
 {
     PyCSDL2_RWReadFunc *self;
     PyTypeObject *type = &PyCSDL2_RWReadFuncType;
-    PyCSDL2_Assert(readfunc);
+    PyCSDL2_Assert(readfunc, NULL);
     if (!(self = (PyCSDL2_RWReadFunc*)type->tp_alloc(type, 0)))
         return NULL;
     self->func = readfunc;
@@ -445,7 +445,7 @@ PyCSDL2_RWWriteFuncCreate(rwwritefunc writefunc)
 {
     PyCSDL2_RWWriteFunc *self;
     PyTypeObject *type = &PyCSDL2_RWWriteFuncType;
-    PyCSDL2_Assert(writefunc);
+    PyCSDL2_Assert(writefunc, NULL);
     if (!(self = (PyCSDL2_RWWriteFunc*)type->tp_alloc(type, 0)))
         return NULL;
     self->func = writefunc;
@@ -516,7 +516,7 @@ PyCSDL2_RWCloseFuncCreate(rwclosefunc closefunc)
 {
     PyCSDL2_RWCloseFunc *self;
     PyTypeObject *type = &PyCSDL2_RWCloseFuncType;
-    PyCSDL2_Assert(closefunc);
+    PyCSDL2_Assert(closefunc, NULL);
     if (!(self = (PyCSDL2_RWCloseFunc*) type->tp_alloc(type, 0)))
         return NULL;
     self->func = closefunc;
