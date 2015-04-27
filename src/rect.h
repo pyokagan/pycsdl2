@@ -159,6 +159,38 @@ static PyTypeObject PyCSDL2_RectType = {
     /* tp_new            */ (newfunc) PyCSDL2_RectNew
 };
 
+/** \brief converter for a readonly SDL_Rect exporting object */
+static int
+PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)
+{
+    if (!object) {
+        PyBuffer_Release(view);
+        return 1;
+    }
+    if (object == Py_None) {
+        view->obj = NULL;
+        view->buf = NULL;
+        view->len = 0;
+        return 1;
+    }
+    if (PyObject_GetBuffer(object, view, PyBUF_SIMPLE))
+        return 0;
+    if (!PyBuffer_IsContiguous(view, 'C')) {
+        PyErr_SetString(PyExc_BufferError,
+                        "SDL_Rect buffer must be C-contiguous");
+        PyBuffer_Release(view);
+        return 0;
+    }
+    if (view->len != sizeof(SDL_Rect)) {
+        size_t expected = sizeof(SDL_Rect);
+        PyErr_Format(PyExc_BufferError, "Invalid SDL_Rect buffer size. "
+                     "Expected: %zu. Got: %zd", expected, view->len);
+        PyBuffer_Release(view);
+        return 0;
+    }
+    return Py_CLEANUP_SUPPORTED;
+}
+
 /**
  * \brief Initializes bindings to SDL_rect.h
  *
