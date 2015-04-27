@@ -170,4 +170,40 @@ PyCSDL2_Get(PyObject *var)
         Py_XDECREF((PyObject*) tmp); \
     } while(0)
 
+#ifndef INT32_MAX
+/** \brief Maximum value a Sint32 can hold */
+#define INT32_MAX 2147483647
+#endif
+
+#ifndef INT32_MIN
+/** \brief Minimum value a Sint32 can hold */
+#define INT32_MIN (-INT32_MAX - 1)
+#endif
+
+/**
+ * \brief Returns a Sint32 representation of obj.
+ *
+ * \returns 0 on success, -1 with an exception set if the value of obj is out
+ *          of range for a Sint32.
+ */
+static int
+PyCSDL2_LongAsSint32(PyObject *obj, Sint32 *out)
+{
+#if SIZEOF_LONG >= 4
+    long x = PyLong_AsLong(obj);
+#elif SIZEOF_SIZE_T >= 4
+    Py_ssize_t x = PyLong_AsSsize_t(obj);
+#elif SIZEOF_LONG_LONG >= 4
+    PY_LONG_LONG x = PyLong_AsLongLong(obj);
+#endif
+    if (PyErr_Occurred()) return -1;
+    if (x < INT32_MIN || x > INT32_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int too large to convert to Sint32");
+        return -1;
+    }
+    *out = (Sint32) x;
+    return 0;
+}
+
 #endif /* _PYCSDL2_UTIL_H_ */
