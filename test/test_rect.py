@@ -82,5 +82,46 @@ class Test_Rect(unittest.TestCase):
         self.assertEqual(struct.unpack('iiii', mem.tobytes()), (1, 2, 3, 4))
 
 
+class TestHasIntersection(unittest.TestCase):
+    """Tests SDL_HasIntersection"""
+
+    def setUp(self):
+        # set up 2 intersecting rectangles
+        self.a = SDL_Rect(0, 0, 10, 10)
+        self.b = SDL_Rect(0, 0, 5, 5)
+
+    def test_returns_bool(self):
+        "Returns a bool"
+        self.assertIs(SDL_HasIntersection(self.a, self.b), True)
+
+    def test_A_none(self):
+        "A can be None"
+        self.assertIs(SDL_HasIntersection(None, self.b), False)
+
+    def test_A_buffer(self):
+        "A can be a buffer of suitable size"
+        a = memoryview(self.a).tobytes()
+        self.assertIs(SDL_HasIntersection(a, self.b), True)
+
+    def test_A_buffer_invalid_size(self):
+        "Raise BufferError if A has an invalid buffer size"
+        a = bytes(1)
+        self.assertRaises(BufferError, SDL_HasIntersection, a, self.b)
+
+    def test_B_none(self):
+        "B can be None"
+        self.assertIs(SDL_HasIntersection(self.a, None), False)
+
+    def test_B_buffer(self):
+        "B can be a buffer of suitable size"
+        b = memoryview(self.b).tobytes()
+        self.assertIs(SDL_HasIntersection(self.a, b), True)
+
+    def test_B_buffer_invalid_size(self):
+        "Raise BufferError if B has an invalid buffer size"
+        b = bytes(1)
+        self.assertRaises(BufferError, SDL_HasIntersection, self.a, b)
+
+
 if __name__ == '__main__':
     unittest.main()
