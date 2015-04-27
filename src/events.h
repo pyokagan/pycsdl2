@@ -412,23 +412,12 @@ PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
     return PyLong_FromUnsignedLong(self->ev_mem->ev.type);
 }
 
-/**
- * \brief Setter for csdl2.SDL_Event.type
- */
+/** \brief Setter for csdl2.SDL_Event.type */
 static int
 PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
 {
-    unsigned long x;
-
     PyCSDL2_Assert(self->ev_mem, -1);
-    x = PyLong_AsUnsignedLong(value);
-    if (PyErr_Occurred()) { return -1; }
-    if (x > ((Uint32)-1)) {
-        PyErr_SetString(PyExc_OverflowError, "value overflows Uint32");
-        return -1;
-    }
-    self->ev_mem->ev.type = x;
-    return 0;
+    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.type);
 }
 
 /**
