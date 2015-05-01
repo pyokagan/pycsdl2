@@ -157,6 +157,7 @@ def get_csdl2_base_ext(platform):
     ext = Extension(name='csdl2',
                     sources=[join('src', 'csdl2.c')])
     headers = glob(join('include', '*.h'))
+    headers += glob(join('include', '*.pxd'))
     return ext, headers
 
 
