@@ -45,6 +45,8 @@
  */
 static PyMethodDef PyCSDL2_Methods[] = {
 
+    /* audio.h */
+
     /* distutils.h */
 
     {"PyCSDL2_GetSystemSDL",
