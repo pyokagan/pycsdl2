@@ -87,6 +87,26 @@ static PyTypeObject PyCSDL2_WindowType = {
 };
 
 /**
+ * \brief Validates the PyCSDL2_Window object
+ *
+ * A window is valid if its internal SDL_Window pointer is not NULL. If it is,
+ * raise a ValueError.
+ *
+ * \param window PyCSDL2_Window to validate.
+ * \returns 1 if the object is valid, 0 if an exception set otherwise.
+ */
+static int
+PyCSDL2_WindowValid(PyCSDL2_Window *window)
+{
+    PyCSDL2_Assert(window, 0);
+    if (!window->window) {
+        PyErr_SetString(PyExc_ValueError, "Invalid SDL_Window");
+        return 0;
+    }
+    return 1;
+}
+
+/**
  * \brief Creates a new instance of PyCSDL2_WindowType
  *
  * \param window SDL_Window to manage. The new instance will steal the
