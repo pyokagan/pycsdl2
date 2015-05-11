@@ -125,12 +125,9 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
         return 0;
     }
     PyCSDL2_Assert(renderer->deftarget, 0);
-    if (Py_TYPE(renderer->deftarget) == &PyCSDL2_WindowType) {
-        if (!((PyCSDL2_Window*)renderer->deftarget)->window) {
-            PyErr_SetString(PyExc_ValueError, "Invalid SDL_Window");
-            return 0;
-        }
-    } else if (Py_TYPE(renderer->deftarget) == &PyCSDL2_SurfaceType) {
+    if (Py_TYPE(renderer->deftarget) == &PyCSDL2_WindowType)
+        return PyCSDL2_WindowValid((PyCSDL2_Window*) renderer->deftarget);
+    else if (Py_TYPE(renderer->deftarget) == &PyCSDL2_SurfaceType) {
         if (!((PyCSDL2_Surface*)renderer->deftarget)->surface) {
             PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
             return 0;
