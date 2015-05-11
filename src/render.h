@@ -105,6 +105,45 @@ static PyTypeObject PyCSDL2_RendererType = {
 };
 
 /**
+ * \brief Validates the PyCSDL2_Renderer object
+ *
+ * PyCSDL2_Renderer is valid if:
+ *
+ * * Its contained SDL_Renderer is not NULL
+ * * The contained SDL_Window or SDL_Surface of its default render target is
+ *   not NULL.
+ *
+ * \param renderer PyCSDL2_Renderer to check
+ * \returns 1 if the renderer is valid, 0 with an exception set if it is not.
+ */
+
+static int
+PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
+{
+    if (!renderer->renderer) {
+        PyErr_SetString(PyExc_ValueError, "Invalid SDL_Renderer");
+        return 0;
+    }
+    PyCSDL2_Assert(renderer->deftarget, 0);
+    if (Py_TYPE(renderer->deftarget) == &PyCSDL2_WindowType) {
+        if (!((PyCSDL2_Window*)renderer->deftarget)->window) {
+            PyErr_SetString(PyExc_ValueError, "Invalid SDL_Window");
+            return 0;
+        }
+    } else if (Py_TYPE(renderer->deftarget) == &PyCSDL2_SurfaceType) {
+        if (!((PyCSDL2_Surface*)renderer->deftarget)->surface) {
+            PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
+            return 0;
+        }
+    } else {
+        PyErr_SetString(PyExc_AssertionError, "renderer->deftarget must be "
+                        "SDL_Window or SDL_Surface");
+        return 0;
+    }
+    return 1;
+}
+
+/**
  * \brief Creates an instance of PyCSDL2_RendererType
  *
  * \param renderer SDL_Renderer to manage. The new instance will take over
