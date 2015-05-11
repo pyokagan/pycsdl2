@@ -343,6 +343,26 @@ PyCSDL2_SurfaceDealloc(PyCSDL2_Surface *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates a PyCSDL2_Surface object.
+ *
+ * A PyCSDL2_Surface object is valid if its internal SDL_Surface pointer is not
+ * NULL. Otherwise, raise a ValueError;
+ *
+ * \param surface PyCSDL2_Surface object to validate.
+ * \returns 1 if surface is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_SurfaceValid(PyCSDL2_Surface *surface)
+{
+    PyCSDL2_Assert(surface, 0);
+    if (!surface->surface) {
+        PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
+        return 0;
+    }
+    return 1;
+}
+
 /** \brief Getter for SDL_Surface.flags */
 static PyObject *
 PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
