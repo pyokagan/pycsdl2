@@ -26,6 +26,7 @@
 #include <Python.h>
 #define PYCSDL2_MODULE
 #include "../include/pycsdl2.h"
+#include "audio.h"
 #include "capi.h"
 #include "events.h"
 #include "init.h"
@@ -63,6 +64,7 @@ PyInit_csdl2(void)
     PyObject *m = PyModule_Create(&PyCSDL2_Module);
 
     if (!m) { return NULL; }
+    if (!PyCSDL2_initaudio(m)) { goto fail; }
     if (!PyCSDL2_initcapi(m)) { goto fail; }
     if (!PyCSDL2_initinit(m)) { goto fail; }
     if (!PyCSDL2_initpixels(m)) { goto fail; }
