@@ -150,9 +150,9 @@ class TestSetRenderDrawColor(unittest.TestCase):
                           256, 256, 256, 256)
 
     def test_destroyed_renderer(self):
-        "Raises AssertionError if the renderer has been destroyed"
+        "Raises ValueError if the renderer has been destroyed"
         SDL_DestroyRenderer(self.rdr)
-        self.assertRaises(AssertionError, SDL_SetRenderDrawColor, self.rdr,
+        self.assertRaises(ValueError, SDL_SetRenderDrawColor, self.rdr,
                           0, 0, 0, 0)
 
 
@@ -168,15 +168,14 @@ class TestRenderClear(unittest.TestCase):
         self.assertIs(SDL_RenderClear(self.rdr), None)
 
     def test_destroyed_renderer(self):
-        "Raises AssertionError if the renderer has been destroyed"
+        "Raises ValueError if the renderer has been destroyed"
         SDL_DestroyRenderer(self.rdr)
-        self.assertRaises(AssertionError, SDL_RenderClear, self.rdr)
+        self.assertRaises(ValueError, SDL_RenderClear, self.rdr)
 
-    @unittest.skip('FIXME: Causes a segfault')
     def test_freed_surface(self):
-        "Raises AssertionError if the surface has been freed"
+        "Raises ValueError if the surface has been freed"
         SDL_FreeSurface(self.sf)
-        self.assertRaises(AssertionError, SDL_RenderClear, self.rdr)
+        self.assertRaises(ValueError, SDL_RenderClear, self.rdr)
 
 
 class TestRenderFillRect(unittest.TestCase):
@@ -206,16 +205,15 @@ class TestRenderFillRect(unittest.TestCase):
         self.assertRaises(BufferError, SDL_RenderFillRect, self.rdr, rect)
 
     def test_destroyed_renderer(self):
-        "Raises AssertionError if the renderer has been destroyed"
+        "Raises ValueError if the renderer has been destroyed"
         SDL_DestroyRenderer(self.rdr)
-        self.assertRaises(AssertionError, SDL_RenderFillRect, self.rdr,
+        self.assertRaises(ValueError, SDL_RenderFillRect, self.rdr,
                           self.rect)
 
-    @unittest.skip('FIXME: Causes a segfault')
     def test_freed_surface(self):
-        "Raises AssertionError if the surface has been freed"
+        "Raises ValueError if the surface has been freed"
         SDL_FreeSurface(self.sf)
-        self.assertRaises(AssertionError, SDL_RenderFillRect, self.rdr,
+        self.assertRaises(ValueError, SDL_RenderFillRect, self.rdr,
                           self.rect)
 
 
@@ -231,15 +229,14 @@ class TestRenderPresent(unittest.TestCase):
         self.assertIs(SDL_RenderPresent(self.rdr), None)
 
     def test_destroyed_renderer(self):
-        "Raises AssertionError if the renderer has been destroyed"
+        "Raises ValueError if the renderer has been destroyed"
         SDL_DestroyRenderer(self.rdr)
-        self.assertRaises(AssertionError, SDL_RenderPresent, self.rdr)
+        self.assertRaises(ValueError, SDL_RenderPresent, self.rdr)
 
-    @unittest.skip('FIXME: Does not raise AssertionError')
     def test_freed_surface(self):
-        "Raises AssertionError if the surface has been freed"
+        "Raises ValueError if the surface has been freed"
         SDL_FreeSurface(self.sf)
-        self.assertRaises(AssertionError, SDL_RenderPresent, self.rdr)
+        self.assertRaises(ValueError, SDL_RenderPresent, self.rdr)
 
 
 class TestDestroyRenderer(unittest.TestCase):
@@ -254,9 +251,9 @@ class TestDestroyRenderer(unittest.TestCase):
         self.assertIs(SDL_DestroyRenderer(self.rdr), None)
 
     def test_double_free(self):
-        "Raises AssertionError on double free"
+        "Raises ValueError on double free"
         SDL_DestroyRenderer(self.rdr)
-        self.assertRaises(AssertionError, SDL_DestroyRenderer, self.rdr)
+        self.assertRaises(ValueError, SDL_DestroyRenderer, self.rdr)
 
 
 if __name__ == '__main__':

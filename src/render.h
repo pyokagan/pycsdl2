@@ -246,7 +246,8 @@ PyCSDL2_SetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
                                      &PyCSDL2_RendererType, &renderer,
                                      &r, &g, &b, &a))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer, NULL);
+    if (!PyCSDL2_RendererValid(renderer))
+        return NULL;
     if (SDL_SetRenderDrawColor(renderer->renderer, r, g, b, a))
         return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
@@ -267,7 +268,8 @@ PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RendererType, &renderer))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer, NULL);
+    if (!PyCSDL2_RendererValid(renderer))
+        return NULL;
     if (SDL_RenderClear(renderer->renderer))
         return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
@@ -291,7 +293,10 @@ PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
                                      &PyCSDL2_RendererType, &renderer,
                                      PyCSDL2_ConvertRectRead, &rect))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer, (PyBuffer_Release(&rect), NULL));
+    if (!PyCSDL2_RendererValid(renderer)) {
+        PyBuffer_Release(&rect);
+        return NULL;
+    }
     ret = SDL_RenderFillRect(renderer->renderer, rect.buf);
     PyBuffer_Release(&rect);
     if (ret) return PyCSDL2_RaiseSDLError();
@@ -313,7 +318,8 @@ PyCSDL2_RenderPresent(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RendererType, &renderer))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer, NULL);
+    if (!PyCSDL2_RendererValid(renderer))
+        return NULL;
     SDL_RenderPresent(renderer->renderer);
     Py_RETURN_NONE;
 }
@@ -333,7 +339,8 @@ PyCSDL2_DestroyRenderer(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RendererType, &renderer))
         return NULL;
-    PyCSDL2_Assert(renderer->renderer, NULL);
+    if (!PyCSDL2_RendererValid(renderer))
+        return NULL;
     SDL_DestroyRenderer(renderer->renderer);
     renderer->renderer = NULL;
     PyCSDL2_RendererClear(renderer);
