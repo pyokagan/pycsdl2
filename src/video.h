@@ -175,7 +175,8 @@ PyCSDL2_DestroyWindow(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_WindowType, &window))
         return NULL;
-    PyCSDL2_Assert(window->window, NULL);
+    if (!PyCSDL2_WindowValid(window))
+        return NULL;
     SDL_DestroyWindow(window->window);
     window->window = NULL;
     Py_RETURN_NONE;

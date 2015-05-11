@@ -254,9 +254,9 @@ class TestDestroyWindow(unittest.TestCase):
         self.assertIs(SDL_DestroyWindow(self.win), None)
 
     def test_double_free(self):
-        "Raises AssertionError on double free"
+        "Raises ValueError on double free"
         SDL_DestroyWindow(self.win)
-        self.assertRaises(AssertionError, SDL_DestroyWindow, self.win)
+        self.assertRaises(ValueError, SDL_DestroyWindow, self.win)
 
 
 if __name__ == '__main__':
