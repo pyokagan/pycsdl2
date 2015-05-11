@@ -343,11 +343,32 @@ PyCSDL2_SurfaceDealloc(PyCSDL2_Surface *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates a PyCSDL2_Surface object.
+ *
+ * A PyCSDL2_Surface object is valid if its internal SDL_Surface pointer is not
+ * NULL. Otherwise, raise a ValueError;
+ *
+ * \param surface PyCSDL2_Surface object to validate.
+ * \returns 1 if surface is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_SurfaceValid(PyCSDL2_Surface *surface)
+{
+    PyCSDL2_Assert(surface, 0);
+    if (!surface->surface) {
+        PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
+        return 0;
+    }
+    return 1;
+}
+
 /** \brief Getter for SDL_Surface.flags */
 static PyObject *
 PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->surface->flags);
 }
 
@@ -355,7 +376,8 @@ PyCSDL2_SurfaceGetFlags(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetFormat(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyCSDL2_Get((PyObject*) self->format);
 }
 
@@ -363,7 +385,8 @@ PyCSDL2_SurfaceGetFormat(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetW(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyLong_FromLong(self->surface->w);
 }
 
@@ -371,7 +394,8 @@ PyCSDL2_SurfaceGetW(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetH(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyLong_FromLong(self->surface->h);
 }
 
@@ -379,7 +403,8 @@ PyCSDL2_SurfaceGetH(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetPitch(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyLong_FromLong(self->surface->pitch);
 }
 
@@ -387,7 +412,8 @@ PyCSDL2_SurfaceGetPitch(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetPixels(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyCSDL2_Get(self->pixels);
 }
 
@@ -395,7 +421,8 @@ PyCSDL2_SurfaceGetPixels(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetUserdata(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyCSDL2_Get(self->userdata);
 }
 
@@ -404,7 +431,8 @@ static int
 PyCSDL2_SurfaceSetUserdata(PyCSDL2_Surface *self, PyObject *value,
                            void *closure)
 {
-    PyCSDL2_Assert(self->surface, -1);
+    if (!PyCSDL2_SurfaceValid(self))
+        return -1;
     PyCSDL2_Set(self->userdata, value);
     return 0;
 }
@@ -413,7 +441,8 @@ PyCSDL2_SurfaceSetUserdata(PyCSDL2_Surface *self, PyObject *value,
 static PyObject *
 PyCSDL2_SurfaceGetLocked(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyBool_FromLong(self->surface->locked);
 }
 
@@ -421,7 +450,8 @@ PyCSDL2_SurfaceGetLocked(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetRefcount(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyLong_FromLong(self->surface->refcount);
 }
 
@@ -429,7 +459,8 @@ PyCSDL2_SurfaceGetRefcount(PyCSDL2_Surface *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceGetClipRect(PyCSDL2_Surface *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(self))
+        return NULL;
     return PyCSDL2_Get((PyObject*) self->clip_rect);
 }
 
@@ -600,7 +631,8 @@ PyCSDL2_MUSTLOCK(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(surface))
+        return NULL;
     return PyBool_FromLong(SDL_MUSTLOCK(surface->surface));
 }
 
@@ -717,7 +749,8 @@ PyCSDL2_FreeSurface(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface, NULL);
+    if (!PyCSDL2_SurfaceValid(surface))
+        return NULL;
     PyCSDL2_SurfaceClear(surface);
     Py_RETURN_NONE;
 }

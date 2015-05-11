@@ -59,9 +59,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'flags', 42)
 
     def test_freed_flags(self):
-        "Once freed, flags raises AssertionError"
+        "Once freed, flags raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'flags')
+        self.assertRaises(ValueError, getattr, self.surface, 'flags')
 
     def test_format(self):
         "format is a SDL_PixelFormat"
@@ -79,9 +79,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'format', x)
 
     def test_freed_format(self):
-        "Once freed, format raises AssertionError"
+        "Once freed, format raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'format')
+        self.assertRaises(ValueError, getattr, self.surface, 'format')
 
     def test_w(self):
         "w is correct"
@@ -93,9 +93,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'w', 42)
 
     def test_freed_w(self):
-        "Once freed, w raises AssertionError"
+        "Once freed, w raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'w')
+        self.assertRaises(ValueError, getattr, self.surface, 'w')
 
     def test_h(self):
         "h is correct"
@@ -107,9 +107,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'h', 42)
 
     def test_freed_h(self):
-        "Once freed, h raises AssertionError"
+        "Once freed, h raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'h')
+        self.assertRaises(ValueError, getattr, self.surface, 'h')
 
     def test_pitch(self):
         "pitch is correct"
@@ -122,9 +122,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'pitch', 42)
 
     def test_freed_pitch(self):
-        "Once freed, pitch raises AssertionError"
+        "Once freed, pitch raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'pitch')
+        self.assertRaises(ValueError, getattr, self.surface, 'pitch')
 
     def test_pixels(self):
         "pixels is a buffer of bytes"
@@ -145,9 +145,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.surface, 'pixels', x)
 
     def test_freed_pixels(self):
-        "Once freed, pixels raises AssertionError"
+        "Once freed, pixels raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'pixels')
+        self.assertRaises(ValueError, getattr, self.surface, 'pixels')
 
     def test_userdata(self):
         "userdata is correct"
@@ -159,9 +159,9 @@ class Test_Surface(unittest.TestCase):
         self.assertIs(self.surface.userdata, True)
 
     def test_freed_userdata(self):
-        "Once freed, userdata raises AssertionError"
+        "Once freed, userdata raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'userdata')
+        self.assertRaises(ValueError, getattr, self.surface, 'userdata')
 
     def test_locked(self):
         "locked is correct"
@@ -173,9 +173,9 @@ class Test_Surface(unittest.TestCase):
                           True)
 
     def test_freed_locked(self):
-        "Once freed, locked raises AssertionError"
+        "Once freed, locked raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'locked')
+        self.assertRaises(ValueError, getattr, self.surface, 'locked')
 
     def test_clip_rect(self):
         "clip_rect is correct"
@@ -210,9 +210,9 @@ class Test_Surface(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, rect, 'h', 42)
 
     def test_freed_clip_rect(self):
-        "Once freed, clip_rect raises AssertionError"
+        "Once freed, clip_rect raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'clip_rect')
+        self.assertRaises(ValueError, getattr, self.surface, 'clip_rect')
 
     def test_freed_clip_rect_ref(self):
         "Once freed, any remaining references to clip_rect still works"
@@ -233,9 +233,9 @@ class Test_Surface(unittest.TestCase):
                           42)
 
     def test_freed_refcount(self):
-        "Once freed, refcount raises AssertionError"
+        "Once freed, refcount raises ValueError"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, getattr, self.surface, 'refcount')
+        self.assertRaises(ValueError, getattr, self.surface, 'refcount')
 
 
 class Test_MUSTLOCK(unittest.TestCase):
@@ -300,9 +300,9 @@ class Test_FreeSurface(unittest.TestCase):
         self.assertIs(SDL_FreeSurface(self.surface), None)
 
     def test_double_free(self):
-        "Raises AssertionError on double free"
+        "Raises ValueError on double free"
         SDL_FreeSurface(self.surface)
-        self.assertRaises(AssertionError, SDL_FreeSurface, self.surface)
+        self.assertRaises(ValueError, SDL_FreeSurface, self.surface)
 
 
 if __name__ == '__main__':
