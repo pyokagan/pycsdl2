@@ -170,11 +170,37 @@ PyCSDL2_SurfaceRectDealloc(PyCSDL2_SurfaceRect *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_SurfaceRect object.
+ *
+ * A PyCSDL2_SurfaceRect object is valid if self->rect and self->surface are
+ * not NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_SurfaceRectValid(PyCSDL2_SurfaceRect *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->surface) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_SurfaceRect");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->rect, 0);
+
+    return 1;
+}
+
 /** \brief getbufferproc implementation for PyCSDL2_SurfaceRectType */
 static int
 PyCSDL2_SurfaceRectGetBuffer(PyCSDL2_SurfaceRect *self, Py_buffer *view,
                              int flags)
 {
+    if (!PyCSDL2_SurfaceRectValid(self))
+        return -1;
+
     if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) {
         PyErr_SetString(PyExc_BufferError, "Object is not writable.");
         return -1;
@@ -204,7 +230,8 @@ static PyBufferProcs PyCSDL2_SurfaceRectBufferProcs = {
 static PyObject *
 PyCSDL2_SurfaceRectGetX(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceRectValid(self))
+        return NULL;
     return PyLong_FromLong(self->rect->x);
 }
 
@@ -212,7 +239,8 @@ PyCSDL2_SurfaceRectGetX(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetY(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceRectValid(self))
+        return NULL;
     return PyLong_FromLong(self->rect->y);
 }
 
@@ -220,7 +248,8 @@ PyCSDL2_SurfaceRectGetY(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetW(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceRectValid(self))
+        return NULL;
     return PyLong_FromLong(self->rect->w);
 }
 
@@ -228,7 +257,8 @@ PyCSDL2_SurfaceRectGetW(PyCSDL2_SurfaceRect *self, void *closure)
 static PyObject *
 PyCSDL2_SurfaceRectGetH(PyCSDL2_SurfaceRect *self, void *closure)
 {
-    PyCSDL2_Assert(self->surface, NULL);
+    if (!PyCSDL2_SurfaceRectValid(self))
+        return NULL;
     return PyLong_FromLong(self->rect->h);
 }
 
