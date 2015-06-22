@@ -525,14 +525,24 @@ typedef struct PyCSDL2_RWCloseFunc {
     rwclosefunc func;
 } PyCSDL2_RWCloseFunc;
 
-/** \brief Implements __call__() for PyCSDL2_RWCloseFuncType */
+static PyTypeObject PyCSDL2_RWCloseFuncType;
+
+/**
+ * \brief Implements SDL_RWclose() and __call__() for PyCSDL2_RWCloseFuncType
+ *
+ * \code{.py}
+ * SDL_RWclose(context: SDL_RWops) -> None
+ * \endcode
+ */
 static PyObject *
-PyCSDL2_RWCloseFuncCall(PyCSDL2_RWCloseFunc *self, PyObject *args,
-                        PyObject *kwds)
+PyCSDL2_RWclose(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RWops *rwops_obj;
     int ret;
+    SDL_RWops *rwops;
+    rwclosefunc callback;
     static char *kwlist[] = {"context", NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RWopsType, &rwops_obj))
         return NULL;
@@ -540,22 +550,40 @@ PyCSDL2_RWCloseFuncCall(PyCSDL2_RWCloseFunc *self, PyObject *args,
     if (!PyCSDL2_RWopsValid(rwops_obj))
         return NULL;
 
+    rwops = rwops_obj->rwops;
+
+    if (Py_TYPE(self) == &PyCSDL2_RWCloseFuncType)
+        callback = ((PyCSDL2_RWCloseFunc*)self)->func;
+    else
+        callback = rwops->close;
+
+    if (!callback) {
+        PyErr_SetString(PyExc_ValueError,
+                        "SDL_RWops object has no close callback");
+        return NULL;
+    }
+
     /*
      * To prevent segfaults due to invalid SDL_RWops internal data, do not
      * allow mixing of SDL_RWops and callbacks by checking to see if the
      * SDL_RWops has the same callback as the one we have.
      */
-    if (self->func != rwops_obj->rwops->close) {
+    if (callback != rwops->close) {
         PyErr_SetString(PyExc_ValueError, "Do not mix different "
                         "SDL_RWops and callbacks.");
         return NULL;
     }
 
-    ret = self->func(rwops_obj->rwops);
+    Py_BEGIN_ALLOW_THREADS
+    ret = callback(rwops);
+    Py_END_ALLOW_THREADS
+
     /* We expect out SDL_RWops to be freed, so invalidate the rwops pointer */
     rwops_obj->rwops = NULL;
-    if (ret < 0)
+
+    if (ret)
         return PyCSDL2_RaiseSDLError();
+
     Py_RETURN_NONE;
 }
 
@@ -575,7 +603,7 @@ static PyTypeObject PyCSDL2_RWCloseFuncType = {
     /* tp_as_sequence    */ 0,
     /* tp_as_mapping     */ 0,
     /* tp_hash           */ 0,
-    /* tp_call           */ (ternaryfunc) PyCSDL2_RWCloseFuncCall
+    /* tp_call           */ PyCSDL2_RWclose
 };
 
 /** \brief Creates instance of PyCSDL2_RWCloseFuncType */

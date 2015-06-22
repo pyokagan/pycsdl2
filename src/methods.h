@@ -387,6 +387,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "to show how far the write progressed. On success, it returns `num`.\n"
     },
 
+    {"SDL_RWclose",
+     (PyCFunction) PyCSDL2_RWclose,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWclose(context: SDL_RWops) -> None\n"
+     "\n"
+     "Closes and cleans up the data stream. The SDL_RWops object will\n"
+     "be freed.\n"
+     "\n"
+     "Note that even if an error occurs, the SDL_RWops object will still be\n"
+     "invalidated.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

@@ -201,3 +201,13 @@ of data streams.
    :param int maxnum: The number of objects to write.
    :returns: The number of objects written, which can be less than `num` on
               error or when the end of file has been reached.
+
+.. function:: SDL_RWclose(context: SDL_RWops) -> None
+
+   Closes and cleans up the data stream. The :class:`SDL_RWops` object will be
+   freed.
+
+   :param SDL_RWops context: Data stream to close.
+
+   .. note:: The :class:`SDL_RWops` object will still be freed even when an
+             exception occurs while closing the stream.

@@ -176,6 +176,11 @@ class TestRWFromFile_Read(unittest.TestCase):
         "close is readonly"
         self.assertRaises(AttributeError, setattr, self.rw, 'close', 42)
 
+    def test_RWclose(self):
+        "SDL_RWclose() works"
+        self.assertIs(SDL_RWclose(self.rw), None)
+        self.assertRaises(ValueError, getattr, self.rw, 'type')
+
 
 class TestRWFromFile_Write(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'w')"
