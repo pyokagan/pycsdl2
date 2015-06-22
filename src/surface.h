@@ -58,11 +58,37 @@ PyCSDL2_SurfacePixelsDealloc(PyCSDL2_SurfacePixels *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_SurfacePixels object.
+ *
+ * A PyCSDL2_SurfacePixels object is valid if self->pixels and self->surface
+ * are not NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_SurfacePixelsValid(PyCSDL2_SurfacePixels *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->surface) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_SurfacePixels");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->pixels, 0);
+
+    return 1;
+}
+
 /** \brief getbufferproc implementation for PyCSDL2_SurfacePixelsType */
 static int
 PyCSDL2_SurfacePixelsGetBuffer(PyCSDL2_SurfacePixels *self, Py_buffer *view,
                                int flags)
 {
+    if (!PyCSDL2_SurfacePixelsValid(self))
+        return -1;
+
     return PyBuffer_FillInfo(view, (PyObject*) self, self->pixels, self->len,
                              0, flags);
 }
