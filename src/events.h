@@ -105,7 +105,8 @@ PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
 static int
 PyCSDL2_MouseMotionEventValid(PyCSDL2_MouseMotionEvent *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->ev_mem) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_MouseMotionEvent");
@@ -413,7 +414,9 @@ PyCSDL2_MouseMotionEventCreate(PyCSDL2_EventMem *ev_mem)
     PyCSDL2_MouseMotionEvent *self;
     PyTypeObject *type = &PyCSDL2_MouseMotionEventType;
 
-    PyCSDL2_Assert(ev_mem, NULL);
+    if (!PyCSDL2_Assert(ev_mem))
+        return NULL;
+
     if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
         return NULL;
     PyCSDL2_Set(self->ev_mem, ev_mem);
@@ -482,14 +485,16 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
 static int
 PyCSDL2_EventValid(PyCSDL2_Event *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->ev_mem) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_Event");
         return 0;
     }
 
-    PyCSDL2_Assert(self->motion, 0);
+    if (!PyCSDL2_Assert(self->motion))
+        return 0;
 
     return 1;
 }

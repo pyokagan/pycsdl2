@@ -98,7 +98,9 @@ static PyTypeObject PyCSDL2_WindowType = {
 static int
 PyCSDL2_WindowValid(PyCSDL2_Window *window)
 {
-    PyCSDL2_Assert(window, 0);
+    if (!PyCSDL2_Assert(window))
+        return 0;
+
     if (!window->window) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Window");
         return 0;
@@ -120,7 +122,9 @@ PyCSDL2_WindowCreate(SDL_Window *window)
     PyCSDL2_Window *self;
     PyTypeObject *type = &PyCSDL2_WindowType;
 
-    PyCSDL2_Assert(window, NULL);
+    if (!PyCSDL2_Assert(window))
+        return NULL;
+
     if (!(self = (PyCSDL2_Window*) type->tp_alloc(type, 0)))
         return NULL;
     self->window = window;

@@ -69,14 +69,16 @@ PyCSDL2_PaletteColorsDealloc(PyCSDL2_PaletteColors *self)
 static int
 PyCSDL2_PaletteColorsValid(PyCSDL2_PaletteColors *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->palette) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_PaletteColors");
         return 0;
     }
 
-    PyCSDL2_Assert(self->colors, 0);
+    if (!PyCSDL2_Assert(self->colors))
+        return 0;
 
     return 1;
 }
@@ -158,9 +160,15 @@ PyCSDL2_PaletteColorsCreate(SDL_Palette *palette)
     PyCSDL2_PaletteColors *self;
     PyTypeObject *type = &PyCSDL2_PaletteColorsType;
 
-    PyCSDL2_Assert(palette, NULL);
-    PyCSDL2_Assert(palette->colors, NULL);
-    PyCSDL2_Assert(palette->ncolors, NULL);
+    if (!PyCSDL2_Assert(palette))
+        return NULL;
+
+    if (!PyCSDL2_Assert(palette->colors))
+        return NULL;
+
+    if (!PyCSDL2_Assert(palette->ncolors))
+        return NULL;
+
     if (!(self = (PyCSDL2_PaletteColors*) type->tp_alloc(type, 0)))
         return NULL;
     self->palette = palette;
@@ -218,14 +226,16 @@ PyCSDL2_PaletteDealloc(PyCSDL2_Palette *self)
 static int
 PyCSDL2_PaletteValid(PyCSDL2_Palette *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->palette) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_Palette");
         return 0;
     }
 
-    PyCSDL2_Assert(self->colors, 0);
+    if (!PyCSDL2_Assert(self->colors))
+        return 0;
 
     return 1;
 }
@@ -348,8 +358,12 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
     PyTypeObject *type = &PyCSDL2_PaletteType;
     PyCSDL2_PaletteColors *colors;
 
-    PyCSDL2_Assert(palette, NULL);
-    PyCSDL2_Assert(palette->colors, NULL);
+    if (!PyCSDL2_Assert(palette))
+        return NULL;
+
+    if (!PyCSDL2_Assert(palette->colors))
+        return NULL;
+
     if (!(self = (PyCSDL2_Palette*) type->tp_alloc(type, 0)))
         return NULL;
     palette->refcount += 1;
@@ -412,7 +426,8 @@ PyCSDL2_PixelFormatDealloc(PyCSDL2_PixelFormat *self)
 static int
 PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->pfmt) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_PixelFormat");
@@ -725,7 +740,9 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
     PyCSDL2_PixelFormat *self;
     PyTypeObject *type = &PyCSDL2_PixelFormatType;
 
-    PyCSDL2_Assert(pfmt, NULL);
+    if (!PyCSDL2_Assert(pfmt))
+        return NULL;
+
     if (!(self = (PyCSDL2_PixelFormat*) type->tp_alloc(type, 0)))
         return NULL;
     if (pfmt->palette) {
