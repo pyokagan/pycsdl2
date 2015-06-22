@@ -232,4 +232,305 @@ PyCSDL2_LongAsUint32(PyObject *obj, Uint32 *out)
     return 0;
 }
 
+/**
+ * \brief Base instance struct members for PyCSDL2_Buffer-based types
+ *
+ * This macro will insert the required field members required for a type to use
+ * the PyCSDL2_Buffer* utility functions and protocols.
+ *
+ * The PyCSDL2_Buffer* functions and protocols are useful for exposing a bytes
+ * buffer that is managed by ther SDL library.
+ */
+#define PyCSDL2_BufferHEAD \
+    PyObject_HEAD \
+    unsigned char *buf; \
+    Py_ssize_t len; \
+    char readonly; \
+    int num_exports;
+
+/**
+ * \brief Represents the data of PyCSDL2_Buffer-based types
+ */
+typedef struct PyCSDL2_Buffer {
+    PyCSDL2_BufferHEAD
+} PyCSDL2_Buffer;
+
+/**
+ * \brief Validates the PyCSDL2_Buffer object.
+ *
+ * A PyCSDL2_Buffer is valid if its internal buf pointer is not NULL. If it is,
+ * raise a ValueError.
+ *
+ * \param buffer PyCSDL2_Buffer to validate.
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_BufferValid(PyCSDL2_Buffer *buffer)
+{
+    if (!PyCSDL2_Assert(buffer))
+        return 0;
+
+    if (!buffer->buf) {
+        PyErr_SetString(PyExc_ValueError, "buffer has been released");
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
+ * \brief bf_getbuffer for PyCSDL2_Buffer-based types
+ */
+static int
+PyCSDL2_BufferGetBuffer(PyCSDL2_Buffer *self, Py_buffer *view, int flags)
+{
+    if (!PyCSDL2_BufferValid(self))
+        return -1;
+
+    if (PyBuffer_FillInfo(view, (PyObject*) self, self->buf, self->len,
+                          self->readonly, flags))
+        return -1;
+
+    self->num_exports++;
+
+    return 0;
+}
+
+/**
+ * \brief bf_releasebuffer for PyCSDL2_Buffer-based types
+ */
+static void
+PyCSDL2_BufferReleaseBuffer(PyCSDL2_Buffer *self, Py_buffer *view)
+{
+    self->num_exports--;
+}
+
+/**
+ * \brief tp_as_buffer for PyCSDL2_Buffer-based types
+ */
+static PyBufferProcs PyCSDL2_BufferAsBuffer = {
+    /* bf_getbuffer     */ (getbufferproc) PyCSDL2_BufferGetBuffer,
+    /* bf_releasebuffer */ (releasebufferproc) PyCSDL2_BufferReleaseBuffer
+};
+
+/**
+ * \brief sq_length, mp_length for PyCSDL2_Buffer-based types
+ */
+static Py_ssize_t
+PyCSDL2_BufferLength(PyCSDL2_Buffer *self)
+{
+    if (!PyCSDL2_BufferValid(self))
+        return -1;
+
+    return self->len;
+}
+
+/**
+ * \brief sq_item for PyCSDL2_Buffer-based types
+ */
+static PyObject *
+PyCSDL2_BufferGetItem(PyCSDL2_Buffer *self, Py_ssize_t index)
+{
+    if (!PyCSDL2_BufferValid(self))
+        return NULL;
+
+    if (index < 0 || index >= self->len) {
+        PyErr_SetString(PyExc_IndexError, "index out of bounds");
+        return NULL;
+    }
+
+    return PyLong_FromUnsignedLong(self->buf[index]);
+}
+
+/**
+ * \brief tp_as_sequence for PyCSDL2_Buffer-based types
+ */
+static PySequenceMethods PyCSDL2_BufferAsSequence = {
+    /* sq_length         */ (lenfunc) PyCSDL2_BufferLength,
+    /* sq_concat         */ (binaryfunc) NULL,
+    /* sq_repeat         */ (ssizeargfunc) NULL,
+    /* sq_item           */ (ssizeargfunc) PyCSDL2_BufferGetItem
+};
+
+/**
+ * \brief mp_subscript for PyCSDL2_Buffer-based types
+ */
+static PyObject *
+PyCSDL2_BufferSubscript(PyCSDL2_Buffer *self, PyObject *key)
+{
+    if (!PyCSDL2_BufferValid(self))
+        return NULL;
+
+    if (PyIndex_Check(key)) {
+        Py_ssize_t index;
+
+        index = PyNumber_AsSsize_t(key, PyExc_IndexError);
+        if (index == -1 && PyErr_Occurred())
+            return NULL;
+
+        return PyCSDL2_BufferGetItem(self, index);
+    } else if (PySlice_Check(key)) {
+        PyObject *memview, *out;
+
+        memview = PyMemoryView_FromObject((PyObject*) self);
+        if (!memview)
+            return NULL;
+
+        out = PyObject_GetItem(memview, key);
+        if (!out) {
+            Py_DECREF(memview);
+            return NULL;
+        }
+
+        Py_DECREF(memview);
+        return out;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Invalid slice key");
+        return NULL;
+    }
+}
+
+/**
+ * \brief mp_ass_subscript for PyCSDL2_Buffer-based types
+ */
+static int
+PyCSDL2_BufferSetItem(PyCSDL2_Buffer *self, PyObject *key, PyObject *value)
+{
+    if (!PyCSDL2_BufferValid(self))
+        return -1;
+
+    if (self->readonly) {
+        PyErr_SetString(PyExc_TypeError, "cannot modify read-only memory");
+        return -1;
+    }
+
+    if (value == NULL) {
+        PyErr_SetString(PyExc_TypeError, "cannot delete memory");
+        return -1;
+    }
+
+    if (PyIndex_Check(key)) {
+        unsigned long x;
+        Py_ssize_t index;
+
+        index = PyNumber_AsSsize_t(key, PyExc_IndexError);
+        if (index == -1 && PyErr_Occurred())
+            return -1;
+
+        if (index < 0)
+            index = self->len + index;
+
+        if (index < 0 || index >= self->len) {
+            PyErr_SetString(PyExc_IndexError, "index out of bounds");
+            return -1;
+        }
+
+        x = PyLong_AsUnsignedLong(value);
+        if (PyErr_Occurred())
+            return -1;
+
+        if (x > (unsigned char)-1) {
+            PyErr_SetString(PyExc_OverflowError, "value overflows byte");
+            return -1;
+        }
+
+        self->buf[index] = x;
+
+        return 0;
+    } else {
+        PyObject *memview;
+        int ret;
+
+        memview = PyMemoryView_FromObject((PyObject*) self);
+        if (!memview)
+            return -1;
+
+        ret = PyObject_SetItem(memview, key, value);
+        Py_DECREF(memview);
+        return ret;
+    }
+}
+
+/**
+ * \brief tp_as_mapping for PyCSDL2_Buffer-based types.
+ */
+static PyMappingMethods PyCSDL2_BufferAsMapping = {
+    /* mp_length        */ (lenfunc) PyCSDL2_BufferLength,
+    /* mp_subscript     */ (binaryfunc) PyCSDL2_BufferSubscript,
+    /* mp_ass_subscript */ (objobjargproc) PyCSDL2_BufferSetItem
+};
+
+/** \brief Type definition for csdl2.SDL_SurfacePixels */
+static PyTypeObject PyCSDL2_BufferType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Buffer",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Buffer),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ 0,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ &PyCSDL2_BufferAsSequence,
+    /* tp_as_mapping     */ &PyCSDL2_BufferAsMapping,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_BufferAsBuffer,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "Temporary buffer"
+};
+
+/**
+ * \brief Initializes the PyCSDL2_BufferHEAD members.
+ *
+ * All PyCSDL2_Buffer-based types need to call this during initialization.
+ */
+static void
+PyCSDL2_BufferInit(PyCSDL2_Buffer *self, void *buf, Py_ssize_t len,
+                   char readonly)
+{
+    PyCSDL2_Buffer *bufself = self;
+
+    bufself->buf = buf;
+    bufself->len = len;
+    bufself->readonly = readonly;
+}
+
+/**
+ * \brief Creates an instance of PyCSDL2_BufferType
+ */
+static PyCSDL2_Buffer *
+PyCSDL2_BufferCreate(void *buf, Py_ssize_t len, char readonly)
+{
+    PyCSDL2_Buffer *self;
+    PyTypeObject *type = &PyCSDL2_BufferType;
+
+    self = (PyCSDL2_Buffer*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    PyCSDL2_BufferInit(self, buf, len, readonly);
+
+    return self;
+}
+
+/**
+ * \brief Initializes csdl2's utility types
+ *
+ * \param module csdl2 module object
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_initutil(PyObject *module)
+{
+    if (PyType_Ready(&PyCSDL2_BufferType)) { return 0; }
+
+    return 1;
+}
+
 #endif /* _PYCSDL2_UTIL_H_ */
