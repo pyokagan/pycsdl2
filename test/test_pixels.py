@@ -350,9 +350,9 @@ class Test_SDL_Palette(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.plt, 'ncolors', 42)
 
     def test_freed_ncolors(self):
-        "ncolors raises AssertionError when freed"
+        "ncolors raises ValueError when freed"
         SDL_FreePalette(self.plt)
-        self.assertRaises(AssertionError, getattr, self.plt, 'ncolors')
+        self.assertRaises(ValueError, getattr, self.plt, 'ncolors')
 
     def test_colors_buffer(self):
         "colors support buffer protocol"
@@ -365,9 +365,9 @@ class Test_SDL_Palette(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.plt, 'colors', 42)
 
     def test_freed_colors(self):
-        "colors raises AssertionError when freed"
+        "colors raises ValueError when freed"
         SDL_FreePalette(self.plt)
-        self.assertRaises(AssertionError, getattr, self.plt, 'colors')
+        self.assertRaises(ValueError, getattr, self.plt, 'colors')
 
     def test_version(self):
         "version is an integer"
@@ -378,9 +378,9 @@ class Test_SDL_Palette(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.plt, 'version', 42)
 
     def test_freed_version(self):
-        "version raises AssertionError when freed"
+        "version raises ValueError when freed"
         SDL_FreePalette(self.plt)
-        self.assertRaises(AssertionError, getattr, self.plt, 'version')
+        self.assertRaises(ValueError, getattr, self.plt, 'version')
 
     def test_refcount(self):
         "refcount is an integer"
@@ -391,9 +391,9 @@ class Test_SDL_Palette(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.plt, 'refcount', 42)
 
     def test_freed_refcount(self):
-        "refcount raises AssertionError when freed"
+        "refcount raises ValueError when freed"
         SDL_FreePalette(self.plt)
-        self.assertRaises(AssertionError, getattr, self.plt, 'refcount')
+        self.assertRaises(ValueError, getattr, self.plt, 'refcount')
 
 
 class Test_PixelFormat(unittest.TestCase):
@@ -703,9 +703,9 @@ class Test_SDL_FreePalette(unittest.TestCase):
         self.assertIs(SDL_FreePalette(self.plt), None)
 
     def test_double_free(self):
-        "Raises AssertionError on double free"
+        "Raises ValueError on double free"
         SDL_FreePalette(self.plt)
-        self.assertRaises(AssertionError, SDL_FreePalette, self.plt)
+        self.assertRaises(ValueError, SDL_FreePalette, self.plt)
 
 
 if __name__ == '__main__':

@@ -195,11 +195,7 @@ PyCSDL2_PaletteValid(PyCSDL2_Palette *self)
     PyCSDL2_Assert(self, 0);
 
     if (!self->palette) {
-        /*
-         * FIXME: should be PyExc_ValueError to be consistent with what
-         * memoryview raises when its buffer has been released.
-         */
-        PyErr_SetString(PyExc_AssertionError, "invalid SDL_Palette");
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_Palette");
         return 0;
     }
 
