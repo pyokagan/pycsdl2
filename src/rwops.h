@@ -190,14 +190,25 @@ typedef struct PyCSDL2_RWSeekFunc {
     rwseekfunc func;
 } PyCSDL2_RWSeekFunc;
 
-/** \brief Implements __call__() for PyCSDL2_RWSeekFuncType */
+static PyTypeObject PyCSDL2_RWSeekFuncType;
+
+/**
+ * \brief Implements SDL_RWseek() and __call__() for PyCSDL2_RWSeekFuncType
+ *
+ * \code{.py}
+ * SDL_RWseek(context: SDL_RWops, offset: int, whence: int) -> int
+ * \endcode
+ */
 static PyObject *
-PyCSDL2_RWSeekFuncCall(PyCSDL2_RWSeekFunc *self, PyObject *args, PyObject *kwds)
+PyCSDL2_RWseek(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RWops *rwops_obj;
     Sint64 offset, ret;
     int whence;
+    SDL_RWops *rwops;
+    rwseekfunc callback;
     static char *kwlist[] = {"context", "offset", "whence", NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!" Sint64_UNIT "i", kwlist,
                                      &PyCSDL2_RWopsType, &rwops_obj, &offset,
                                      &whence))
@@ -206,21 +217,38 @@ PyCSDL2_RWSeekFuncCall(PyCSDL2_RWSeekFunc *self, PyObject *args, PyObject *kwds)
     if (!PyCSDL2_RWopsValid(rwops_obj))
         return NULL;
 
+    rwops = rwops_obj->rwops;
+
+    if (Py_TYPE(self) == &PyCSDL2_RWSeekFuncType)
+        callback = ((PyCSDL2_RWSeekFunc*)self)->func;
+    else
+        callback = rwops->seek;
+
+    if (!callback) {
+        PyErr_SetString(PyExc_ValueError,
+                        "SDL_RWops object has no seek callback");
+        return NULL;
+    }
+
     /*
      * To prevent segfaults due to invalid SDL_RWops internal data, do not
      * allow mixing of SDL_RWops and callbacks by checking to see if the
      * SDL_RWops has the same callback as the one we have.
      */
-    if (self->func != rwops_obj->rwops->seek) {
+    if (callback != rwops->seek) {
         PyErr_SetString(PyExc_ValueError, "Do not mix different "
                         "SDL_RWops and callbacks.");
         return NULL;
     }
 
-    ret = self->func(rwops_obj->rwops, offset, whence);
+    Py_BEGIN_ALLOW_THREADS
+    ret = callback(rwops, offset, whence);
+    Py_END_ALLOW_THREADS
+
     if (ret < 0)
         return PyCSDL2_RaiseSDLError();
-    return PyLong_FromLong(ret);
+
+    return PyLong_FromLongLong(ret);
 }
 
 /** \brief Type definition of csdl2.RWSeekFunc */
@@ -239,7 +267,7 @@ static PyTypeObject PyCSDL2_RWSeekFuncType = {
     /* tp_as_sequence    */ 0,
     /* tp_as_mapping     */ 0,
     /* tp_hash           */ 0,
-    /* tp_call           */ (ternaryfunc) PyCSDL2_RWSeekFuncCall
+    /* tp_call           */ PyCSDL2_RWseek
 };
 
 /** \brief Creates an instance of PyCSDL2_RWSeekFuncType */

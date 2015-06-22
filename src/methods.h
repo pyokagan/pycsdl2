@@ -350,6 +350,20 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the size of the data stream in the SDL_RWops context.\n"
     },
 
+    {"SDL_RWseek",
+     (PyCFunction) PyCSDL2_RWseek,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWseek(context: SDL_RWops, offset: int, whence: int) -> int\n"
+     "\n"
+     "Seeks to `offset` relative to `whence`, where `whence` is one of:\n"
+     "\n"
+     "    * RW_SEEK_SET -- seek from the beginning of data\n"
+     "    * RW_SEEK_CUR -- seek relative to the current read point\n"
+     "    * RW_SEEK_END -- seek relative to the end of data\n"
+     "\n"
+     "Returns the final offset in the data stream after the seek.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

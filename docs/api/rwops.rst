@@ -153,6 +153,17 @@ of data streams.
    :param SDL_RWops context: The :class:`SDL_RWops` stream to get the size of.
    :returns: Size of the data stream in bytes.
 
+.. function:: SDL_RWseek(context: SDL_RWops, offset: int, whence: int) -> int
+
+   Seeks to `offset` relative to `whence`.
+
+   :param SDL_RWops context: Stream to seek in.
+   :param int offset: New position in stream, measured in bytes, relative to
+                      `whence`.
+   :param int whence: :const:`RW_SEEK_SET`, :const:`RW_SEEK_CUR` or
+                      :const:`RW_SEEK_END`.
+   :returns: New offset, measured in bytes, from the start of the stream.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.

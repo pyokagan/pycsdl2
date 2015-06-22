@@ -131,6 +131,10 @@ class TestRWFromFile_Read(unittest.TestCase):
         "seek is readonly"
         self.assertRaises(AttributeError, setattr, self.rw, 'seek', 42)
 
+    def test_RWseek(self):
+        "SDL_RWseek() works"
+        self.assertEqual(SDL_RWseek(self.rw, 2, RW_SEEK_SET), 2)
+
     def test_read(self):
         "read() works"
         dst = bytearray(len(self.content))
