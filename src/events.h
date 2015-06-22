@@ -94,11 +94,33 @@ PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_MouseMotionEvent object.
+ *
+ * A PyCSDL2_MouseMotionEvent object is valid if it's underlying ev_mem object
+ * is not NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_MouseMotionEventValid(PyCSDL2_MouseMotionEvent *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->ev_mem) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_MouseMotionEvent");
+        return 0;
+    }
+
+    return 1;
+}
+
 /** \brief Getter for SDL_MouseMotionEvent.type */
 static PyObject *
 PyCSDL2_MouseMotionEventGetType(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.type);
 }
 
@@ -107,7 +129,8 @@ static int
 PyCSDL2_MouseMotionEventSetType(PyCSDL2_MouseMotionEvent *self,
                                 PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.type);
 }
 
@@ -116,7 +139,8 @@ static PyObject *
 PyCSDL2_MouseMotionEventGetTimestamp(PyCSDL2_MouseMotionEvent *self,
                                      void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.timestamp);
 }
 
@@ -125,7 +149,8 @@ static int
 PyCSDL2_MouseMotionEventSetTimestamp(PyCSDL2_MouseMotionEvent *self,
                                      PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.timestamp);
 }
 
@@ -133,7 +158,8 @@ PyCSDL2_MouseMotionEventSetTimestamp(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetWindowID(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.windowID);
 }
 
@@ -142,7 +168,8 @@ static int
 PyCSDL2_MouseMotionEventSetWindowID(PyCSDL2_MouseMotionEvent *self,
                                     PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.windowID);
 }
 
@@ -150,7 +177,8 @@ PyCSDL2_MouseMotionEventSetWindowID(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetWhich(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.which);
 }
 
@@ -159,7 +187,8 @@ static int
 PyCSDL2_MouseMotionEventSetWhich(PyCSDL2_MouseMotionEvent *self,
                                  PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.which);
 }
 
@@ -167,7 +196,8 @@ PyCSDL2_MouseMotionEventSetWhich(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetState(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.motion.state);
 }
 
@@ -176,7 +206,8 @@ static int
 PyCSDL2_MouseMotionEventSetState(PyCSDL2_MouseMotionEvent *self,
                                  PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.motion.state);
 }
 
@@ -184,7 +215,8 @@ PyCSDL2_MouseMotionEventSetState(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetX(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromLong(self->ev_mem->ev.motion.x);
 }
 
@@ -193,7 +225,8 @@ static int
 PyCSDL2_MouseMotionEventSetX(PyCSDL2_MouseMotionEvent *self,
                              PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.x);
 }
 
@@ -201,7 +234,8 @@ PyCSDL2_MouseMotionEventSetX(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetY(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromLong(self->ev_mem->ev.motion.y);
 }
 
@@ -210,7 +244,8 @@ static int
 PyCSDL2_MouseMotionEventSetY(PyCSDL2_MouseMotionEvent *self,
                              PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.y);
 }
 
@@ -218,7 +253,8 @@ PyCSDL2_MouseMotionEventSetY(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetXRel(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromLong(self->ev_mem->ev.motion.xrel);
 }
 
@@ -227,7 +263,8 @@ static int
 PyCSDL2_MouseMotionEventSetXRel(PyCSDL2_MouseMotionEvent *self,
                                 PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.xrel);
 }
 
@@ -235,7 +272,8 @@ PyCSDL2_MouseMotionEventSetXRel(PyCSDL2_MouseMotionEvent *self,
 static PyObject *
 PyCSDL2_MouseMotionEventGetYRel(PyCSDL2_MouseMotionEvent *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return NULL;
     return PyLong_FromLong(self->ev_mem->ev.motion.yrel);
 }
 
@@ -244,7 +282,8 @@ static int
 PyCSDL2_MouseMotionEventSetYRel(PyCSDL2_MouseMotionEvent *self,
                                 PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyCSDL2_LongAsSint32(value, &self->ev_mem->ev.motion.yrel);
 }
 
@@ -306,7 +345,8 @@ static int
 PyCSDL2_MouseMotionEventGetBuffer(PyCSDL2_MouseMotionEvent *self,
                                   Py_buffer *view, int flags)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return -1;
     return PyBuffer_FillInfo(view, (PyObject*) self, &self->ev_mem->ev.motion,
                              sizeof(SDL_MouseMotionEvent), 0, flags);
 }
