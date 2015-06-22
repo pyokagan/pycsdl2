@@ -472,12 +472,36 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
 }
 
 /**
+ * \brief Validates the PyCSDL2_Event object.
+ *
+ * A PyCSDL2_Event object is valid if it's underlying ev_mem object is not
+ * NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_EventValid(PyCSDL2_Event *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->ev_mem) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_Event");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->motion, 0);
+
+    return 1;
+}
+
+/**
  * \brief Getter for csdl2.SDL_Event.type
  */
 static PyObject *
 PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, NULL);
+    if (!PyCSDL2_EventValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->ev_mem->ev.type);
 }
 
@@ -485,7 +509,8 @@ PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
 static int
 PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_EventValid(self))
+        return -1;
     return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.type);
 }
 
@@ -521,7 +546,8 @@ static PyGetSetDef PyCSDL2_EventGetSetters[] = {
 static int
 PyCSDL2_EventGetBuffer(PyCSDL2_Event *self, Py_buffer *view, int flags)
 {
-    PyCSDL2_Assert(self->ev_mem, -1);
+    if (!PyCSDL2_EventValid(self))
+        return -1;
     return PyBuffer_FillInfo(view, (PyObject*) self, &self->ev_mem->ev,
                              sizeof(SDL_Event), 0, flags);
 }
