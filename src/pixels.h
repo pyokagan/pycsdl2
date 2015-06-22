@@ -402,11 +402,36 @@ PyCSDL2_PixelFormatDealloc(PyCSDL2_PixelFormat *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_PixelFormat object.
+ *
+ * A PyCSDL2_PixelFormat object is valid of self->pfmt is not NULL.
+ *
+ * \returns 1 if the object is valid, 0 otherwise.
+ */
+static int
+PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->pfmt) {
+        /*
+         * FIXME: should raise PyExc_ValueError to be consistent with a
+         * released memoryview.
+         */
+        PyErr_SetString(PyExc_AssertionError, "invalid SDL_PixelFormat");
+        return 0;
+    }
+
+    return 1;
+}
+
 /** \brief Getter for SDL_PixelFormat.format */
 static PyObject *
 PyCSDL2_PixelFormatGetFormat(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->format);
 }
 
@@ -414,7 +439,8 @@ PyCSDL2_PixelFormatGetFormat(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetPalette(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyCSDL2_Get((PyObject*) self->palette);
 }
 
@@ -422,7 +448,8 @@ PyCSDL2_PixelFormatGetPalette(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBitsPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->BitsPerPixel);
 }
 
@@ -430,7 +457,8 @@ PyCSDL2_PixelFormatGetBitsPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBytesPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->BytesPerPixel);
 }
 
@@ -438,7 +466,8 @@ PyCSDL2_PixelFormatGetBytesPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rmask);
 }
 
@@ -446,7 +475,8 @@ PyCSDL2_PixelFormatGetRmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gmask);
 }
 
@@ -454,7 +484,8 @@ PyCSDL2_PixelFormatGetGmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bmask);
 }
 
@@ -462,7 +493,8 @@ PyCSDL2_PixelFormatGetBmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Amask);
 }
 
@@ -470,7 +502,8 @@ PyCSDL2_PixelFormatGetAmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rloss);
 }
 
@@ -478,7 +511,8 @@ PyCSDL2_PixelFormatGetRloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gloss);
 }
 
@@ -486,7 +520,8 @@ PyCSDL2_PixelFormatGetGloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bloss);
 }
 
@@ -494,7 +529,8 @@ PyCSDL2_PixelFormatGetBloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Aloss);
 }
 
@@ -502,7 +538,8 @@ PyCSDL2_PixelFormatGetAloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rshift);
 }
 
@@ -510,7 +547,8 @@ PyCSDL2_PixelFormatGetRshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gshift);
 }
 
@@ -518,7 +556,8 @@ PyCSDL2_PixelFormatGetGshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bshift);
 }
 
@@ -526,7 +565,8 @@ PyCSDL2_PixelFormatGetBshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Ashift);
 }
 
@@ -534,7 +574,8 @@ PyCSDL2_PixelFormatGetAshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRefcount(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromLong(self->pfmt->refcount);
 }
 
@@ -747,7 +788,10 @@ PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_PixelFormatType, &pfmt))
         return NULL;
-    PyCSDL2_Assert(pfmt->pfmt, NULL);
+
+    if (!PyCSDL2_PixelFormatValid(pfmt))
+        return NULL;
+
     PyCSDL2_PixelFormatClear(pfmt);
     SDL_FreeFormat(pfmt->pfmt);
     pfmt->pfmt = NULL;
