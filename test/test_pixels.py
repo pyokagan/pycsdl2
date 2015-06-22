@@ -421,9 +421,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'format', 42)
 
     def test_freed_format(self):
-        "when freed, format raises AssertionError"
+        "when freed, format raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'format')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'format')
 
     def test_palette(self):
         "palette has the correct value"
@@ -434,9 +434,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'palette', 42)
 
     def test_freed_palette(self):
-        "when freed, palette raises AssertionError"
+        "when freed, palette raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'palette')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'palette')
 
     def test_BitsPerPixel(self):
         "BitsPerPixel has the correct int value"
@@ -449,9 +449,9 @@ class Test_PixelFormat(unittest.TestCase):
                           42)
 
     def test_freed_BitsPerPixel(self):
-        "when freed, BitsPerPixel raises AssertionError"
+        "when freed, BitsPerPixel raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'BitsPerPixel')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'BitsPerPixel')
 
     def test_BytesPerPixel(self):
         "BytesPerPixel has the correct int value"
@@ -464,9 +464,9 @@ class Test_PixelFormat(unittest.TestCase):
                           42)
 
     def test_freed_BytesPerPixel(self):
-        "when freed, BytesPerPixel raises AssertionError"
+        "when freed, BytesPerPixel raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'BytesPerPixel')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'BytesPerPixel')
 
     def test_Rmask(self):
         "Rmask has the correct int value"
@@ -478,9 +478,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Rmask', 42)
 
     def test_freed_Rmask(self):
-        "when freed, Rmask raises AssertionError"
+        "when freed, Rmask raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rmask')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Rmask')
 
     def test_Gmask(self):
         "Gmask has the correct int value"
@@ -492,9 +492,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Gmask', 42)
 
     def test_freed_Gmask(self):
-        "when freed, Gmask raises AssertionError"
+        "when freed, Gmask raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gmask')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Gmask')
 
     def test_Bmask(self):
         "Bmask has the correct int value"
@@ -506,9 +506,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Bmask', 42)
 
     def test_freed_Bmask(self):
-        "when freed, Bmask raises AssertionError"
+        "when freed, Bmask raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bmask')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Bmask')
 
     def test_Amask(self):
         "Amask has the correct int value"
@@ -520,9 +520,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Amask', 42)
 
     def test_freed_Amask(self):
-        "when freed, Amask raises AssertionError"
+        "when freed, Amask raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Amask')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Amask')
 
     def test_Rloss(self):
         "Rloss has the correct int value"
@@ -534,9 +534,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Rloss', 42)
 
     def test_freed_Rloss(self):
-        "when freed, Rloss raises AssertionError"
+        "when freed, Rloss raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rloss')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Rloss')
 
     def test_Gloss(self):
         "Gloss has the correct int value"
@@ -548,9 +548,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Gloss', 42)
 
     def test_freed_Gloss(self):
-        "when freed, Gloss raises AssertionError"
+        "when freed, Gloss raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gloss')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Gloss')
 
     def test_Bloss(self):
         "Bloss has the correct int value"
@@ -562,9 +562,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Bloss', 42)
 
     def test_freed_Bloss(self):
-        "when freed, Bloss raises AssertionError"
+        "when freed, Bloss raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bloss')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Bloss')
 
     def test_Aloss(self):
         "Aloss has the correct int value"
@@ -576,9 +576,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Aloss', 42)
 
     def test_freed_Aloss(self):
-        "when freed, Aloss raises AssertionError"
+        "when freed, Aloss raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Aloss')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Aloss')
 
     def test_Rshift(self):
         "Rshift has the correct int value"
@@ -590,9 +590,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Rshift', 42)
 
     def test_freed_Rshift(self):
-        "when freed, Rshift raises AssertionError"
+        "when freed, Rshift raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Rshift')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Rshift')
 
     def test_Gshift(self):
         "Gshift has the correct int value"
@@ -604,9 +604,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Gshift', 42)
 
     def test_freed_Gshift(self):
-        "when freed, Gshift raises AssertionError"
+        "when freed, Gshift raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Gshift')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Gshift')
 
     def test_Bshift(self):
         "Bshift has the correct int value"
@@ -618,9 +618,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Bshift', 42)
 
     def test_freed_Bshift(self):
-        "when freed, Bshift raises AssertionError"
+        "when freed, Bshift raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Bshift')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Bshift')
 
     def test_Ashift(self):
         "Ashift has the correct int value"
@@ -632,9 +632,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'Ashift', 42)
 
     def test_freed_Ashift(self):
-        "when freed, Ashift raises AssertionError"
+        "when freed, Ashift raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'Ashift')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'Ashift')
 
     def test_refcount(self):
         "refcount has an int value"
@@ -645,9 +645,9 @@ class Test_PixelFormat(unittest.TestCase):
         self.assertRaises(AttributeError, setattr, self.pfmt, 'refcount', 42)
 
     def test_freed_refcount(self):
-        "when freed, refcount raises AssertionError"
+        "when freed, refcount raises ValueError"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, getattr, self.pfmt, 'refcount')
+        self.assertRaises(ValueError, getattr, self.pfmt, 'refcount')
 
 
 class Test_AllocFormat(unittest.TestCase):
@@ -674,9 +674,9 @@ class Test_FreeFormat(unittest.TestCase):
         self.assertIs(SDL_FreeFormat(self.pfmt), None)
 
     def test_double_free(self):
-        "Raises AssertionError on double free"
+        "Raises ValueError on double free"
         SDL_FreeFormat(self.pfmt)
-        self.assertRaises(AssertionError, SDL_FreeFormat, self.pfmt)
+        self.assertRaises(ValueError, SDL_FreeFormat, self.pfmt)
 
 
 class Test_SDL_AllocPalette(unittest.TestCase):

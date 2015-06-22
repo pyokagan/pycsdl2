@@ -415,11 +415,7 @@ PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
     PyCSDL2_Assert(self, 0);
 
     if (!self->pfmt) {
-        /*
-         * FIXME: should raise PyExc_ValueError to be consistent with a
-         * released memoryview.
-         */
-        PyErr_SetString(PyExc_AssertionError, "invalid SDL_PixelFormat");
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_PixelFormat");
         return 0;
     }
 
