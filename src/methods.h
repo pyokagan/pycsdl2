@@ -342,6 +342,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Frees a SDL_RWops structure allocated by SDL_AllocRW()\n"
     },
 
+    {"SDL_RWsize",
+     (PyCFunction) PyCSDL2_RWsize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWsize(context: SDL_RWops) -> int\n"
+     "\n"
+     "Returns the size of the data stream in the SDL_RWops context.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

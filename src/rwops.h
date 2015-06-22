@@ -87,13 +87,24 @@ typedef struct PyCSDL2_RWSizeFunc {
     rwsizefunc func;
 } PyCSDL2_RWSizeFunc;
 
-/** \brief Implements __call__() for PyCSDL2_RWSizeFuncType */
+static PyTypeObject PyCSDL2_RWSizeFuncType;
+
+/**
+ * \brief Implements SDL_RWsize() and __call__() for PyCSDL2_RWSizeFuncType
+ *
+ * \code{.py}
+ * SDL_RWsize(context: SDL_RWops) -> int
+ * \endcode
+ */
 static PyObject *
-PyCSDL2_RWSizeFuncCall(PyCSDL2_RWSizeFunc *self, PyObject *args, PyObject *kwds)
+PyCSDL2_RWsize(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RWops *rwops_obj;
     Sint64 ret;
+    SDL_RWops *rwops;
+    rwsizefunc callback;
     static char *kwlist[] = {"context", NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_RWopsType, &rwops_obj))
         return NULL;
@@ -101,21 +112,38 @@ PyCSDL2_RWSizeFuncCall(PyCSDL2_RWSizeFunc *self, PyObject *args, PyObject *kwds)
     if (!PyCSDL2_RWopsValid(rwops_obj))
         return NULL;
 
+    rwops = rwops_obj->rwops;
+
+    if (Py_TYPE(self) == &PyCSDL2_RWSizeFuncType)
+        callback = ((PyCSDL2_RWSizeFunc*)self)->func;
+    else
+        callback = rwops->size;
+
+    if (!callback) {
+        PyErr_SetString(PyExc_ValueError,
+                        "SDL_RWops object has no size callback");
+        return NULL;
+    }
+
     /*
      * To prevent segfaults due to invalid SDL_RWops internal data, do not
      * allow mixing of SDL_RWops and callbacks by checking to see if the
      * SDL_RWops has the same callback as the one we have.
      */
-    if (self->func != rwops_obj->rwops->size) {
+    if (callback != rwops->size) {
         PyErr_SetString(PyExc_ValueError, "Do not mix different "
                         "SDL_RWops and callbacks.");
         return NULL;
     }
 
-    ret = self->func(rwops_obj->rwops);
+    Py_BEGIN_ALLOW_THREADS
+    ret = callback(rwops);
+    Py_END_ALLOW_THREADS
+
     if (ret < 0)
         return PyCSDL2_RaiseSDLError();
-    return PyLong_FromLong(ret);
+
+    return PyLong_FromLongLong(ret);
 }
 
 /**
@@ -136,7 +164,7 @@ static PyTypeObject PyCSDL2_RWSizeFuncType = {
     /* tp_as_sequence    */ 0,
     /* tp_as_mapping     */ 0,
     /* tp_hash           */ 0,
-    /* tp_call           */ (ternaryfunc) PyCSDL2_RWSizeFuncCall
+    /* tp_call           */ PyCSDL2_RWsize
 };
 
 /** \brief Creates instance of PyCSDL2_RWSizeFuncType */

@@ -119,6 +119,10 @@ class TestRWFromFile_Read(unittest.TestCase):
         "size is readonly"
         self.assertRaises(AttributeError, setattr, self.rw, 'size', 42)
 
+    def test_RWsize(self):
+        "SDL_RWsize() works"
+        self.assertEqual(SDL_RWsize(self.rw), len(self.content))
+
     def test_seek(self):
         "seek() works"
         self.assertEqual(self.rw.seek(self.rw, 2, RW_SEEK_SET), 2)

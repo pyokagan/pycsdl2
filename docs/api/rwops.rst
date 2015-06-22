@@ -146,6 +146,13 @@ of data streams.
    :param SDL_RWops area: The :class:`SDL_RWops` structure allocated with
                           :func:`SDL_AllocRW`.
 
+.. function:: SDL_RWsize(context: SDL_RWops) -> int
+
+   Returns the size of the data stream in the :class:`SDL_RWops`.
+
+   :param SDL_RWops context: The :class:`SDL_RWops` stream to get the size of.
+   :returns: Size of the data stream in bytes.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.
