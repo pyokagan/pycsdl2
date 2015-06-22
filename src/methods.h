@@ -376,6 +376,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "requested.\n"
     },
 
+    {"SDL_RWwrite",
+     (PyCFunction) PyCSDL2_RWwrite,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWwrite(context: SDL_RWops, ptr: buffer, size: int, num: int)\n"
+     "    -> int\n"
+     "\n"
+     "Writes exactly `num` objects, each `size` bytes, from the buffer\n"
+     "`ptr`. If this fails for any reason, it will return less than `num`\n"
+     "to show how far the write progressed. On success, it returns `num`.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

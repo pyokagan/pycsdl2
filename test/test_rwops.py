@@ -217,6 +217,13 @@ class TestRWFromFile_Write(unittest.TestCase):
         "write is readonly"
         self.assertRaises(AttributeError, setattr, self.rw, 'write', 42)
 
+    def test_RWwrite(self):
+        "SDL_RWwrite() works"
+        self.assertEqual(self.rw.write(self.rw, b'TEST', 1, 4), 4)
+        del self.rw
+        with open(self.path, 'rb') as f:
+            self.assertEqual(f.read(), b'TEST')
+
 
 if __name__ == '__main__':
     unittest.main()

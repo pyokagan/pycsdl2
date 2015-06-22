@@ -188,3 +188,16 @@ of data streams.
    :param int maxnum: The maximum number of objects to be read.
    :returns: The number of objects read. This function may read less objects
              than requested.
+
+.. function:: SDL_RWwrite(context: SDL_RWops, ptr: buffer, size: int, num: int) -> int
+
+   Writes exactly `num` objects, each `size` bytes, from the buffer `ptr` to
+   the stream.
+
+   :param SDL_RWops context: Data stream to write to.
+   :param buffer ptr: Buffer containing the data to write to the stream. It
+                      must be exactly ``size * num`` bytes.
+   :param int size: The size of each object to write, in bytes.
+   :param int maxnum: The number of objects to write.
+   :returns: The number of objects written, which can be less than `num` on
+              error or when the end of file has been reached.

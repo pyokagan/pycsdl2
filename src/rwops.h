@@ -412,20 +412,26 @@ typedef struct PyCSDL2_RWWriteFunc {
     rwwritefunc func;
 } PyCSDL2_RWWriteFunc;
 
+static PyTypeObject PyCSDL2_RWWriteFuncType;
+
 /** \brief Implements __call__() for PyCSDL2_RWWriteFuncType */
 static PyObject *
-PyCSDL2_RWWriteFuncCall(PyCSDL2_RWWriteFunc *self, PyObject *args,
-                        PyObject *kwds)
+PyCSDL2_RWwrite(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RWops *rwops_obj;
     Py_buffer buf;
-    size_t ret;
-    Py_ssize_t size, num;
+    size_t ret, size, num;
+    SDL_RWops *rwops;
+    rwwritefunc callback;
+    const char *err;
     static char *kwlist[] = {"context", "ptr", "size", "num", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!y*nn", kwlist,
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "O!y*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
                                      &PyCSDL2_RWopsType, &rwops_obj,
                                      &buf, &size, &num))
         return NULL;
+
     if (buf.len != size * num) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
@@ -436,23 +442,45 @@ PyCSDL2_RWWriteFuncCall(PyCSDL2_RWWriteFunc *self, PyObject *args,
         return NULL;
     }
 
+    rwops = rwops_obj->rwops;
+
+    if (Py_TYPE(self) == &PyCSDL2_RWWriteFuncType)
+        callback = ((PyCSDL2_RWWriteFunc*)self)->func;
+    else
+        callback = rwops->write;
+
+    if (!callback) {
+        PyBuffer_Release(&buf);
+        PyErr_SetString(PyExc_ValueError,
+                        "SDL_RWops object has no write callback");
+        return NULL;
+    }
+
     /*
      * To prevent segfaults due to invalid SDL_RWops internal data, do not
      * allow mixing of SDL_RWops and callbacks by checking to see if the
      * SDL_RWops has the same callback as the one we have.
      */
-    if (self->func != rwops_obj->rwops->write) {
+    if (callback != rwops->write) {
         PyBuffer_Release(&buf);
         PyErr_SetString(PyExc_ValueError, "Do not mix different "
                         "SDL_RWops and callbacks.");
         return NULL;
     }
 
-    ret = self->func(rwops_obj->rwops, buf.buf, size, num);
+    PyErr_Clear();
+    SDL_ClearError();
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = callback(rwops, buf.buf, size, num);
+    Py_END_ALLOW_THREADS
+
     PyBuffer_Release(&buf);
-    if (PyErr_Occurred())
+
+    if (!ret && (PyErr_Occurred() || ((err = SDL_GetError()) && err[0])))
         return NULL;
-    return PyLong_FromUnsignedLong(ret);
+
+    return PyLong_FromSize_t(ret);
 }
 
 /** \brief Type definition for csdl2.RWWriteFunc */
@@ -471,7 +499,7 @@ static PyTypeObject PyCSDL2_RWWriteFuncType = {
     /* tp_as_sequence    */ 0,
     /* tp_as_mapping     */ 0,
     /* tp_hash           */ 0,
-    /* tp_call           */ (ternaryfunc) PyCSDL2_RWWriteFuncCall
+    /* tp_call           */ PyCSDL2_RWwrite
 };
 
 /** \brief Creates a new instance of PyCSDL2_RWWriteFuncType */
