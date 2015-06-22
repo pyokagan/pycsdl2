@@ -37,13 +37,9 @@
 
 /** \brief Instance data for PyCSDL2_SurfacePixelsType */
 typedef struct PyCSDL2_SurfacePixels {
-    PyObject_HEAD
+    PyCSDL2_BufferHEAD
     /** \brief Head of weak reference list */
     PyObject *in_weakreflist;
-    /** \brief Pixels buffer */
-    void *pixels;
-    /** \brief Size of pixels buffer */
-    Py_ssize_t len;
     /** \brief Pointer to the SDL_Surface that owns the pixels buffer */
     SDL_Surface *surface;
 } PyCSDL2_SurfacePixels;
@@ -77,7 +73,7 @@ PyCSDL2_SurfacePixelsValid(PyCSDL2_SurfacePixels *self)
         return 0;
     }
 
-    if (!PyCSDL2_Assert(self->pixels))
+    if (!PyCSDL2_BufferValid((PyCSDL2_Buffer*) self))
         return 0;
 
     return 1;
@@ -91,14 +87,13 @@ PyCSDL2_SurfacePixelsGetBuffer(PyCSDL2_SurfacePixels *self, Py_buffer *view,
     if (!PyCSDL2_SurfacePixelsValid(self))
         return -1;
 
-    return PyBuffer_FillInfo(view, (PyObject*) self, self->pixels, self->len,
-                             0, flags);
+    return PyCSDL2_BufferGetBuffer((PyCSDL2_Buffer*) self, view, flags);
 }
 
 /** \brief Buffer protocol definition for PyCSDL2_SurfacePixelsType */
 static PyBufferProcs PyCSDL2_SurfacePixelsBufferProcs = {
     (getbufferproc) PyCSDL2_SurfacePixelsGetBuffer,
-    (releasebufferproc) NULL
+    (releasebufferproc) PyCSDL2_BufferReleaseBuffer
 };
 
 /** \brief Type definition for csdl2.SDL_SurfacePixels */
@@ -114,8 +109,8 @@ static PyTypeObject PyCSDL2_SurfacePixelsType = {
     /* tp_reserved       */ 0,
     /* tp_repr           */ 0,
     /* tp_as_number      */ 0,
-    /* tp_as_sequence    */ 0,
-    /* tp_as_mapping     */ 0,
+    /* tp_as_sequence    */ &PyCSDL2_BufferAsSequence,
+    /* tp_as_mapping     */ &PyCSDL2_BufferAsMapping,
     /* tp_hash           */ 0,
     /* tp_call           */ 0,
     /* tp_str            */ 0,
@@ -149,10 +144,12 @@ PyCSDL2_SurfacePixelsCreate(SDL_Surface *surface)
 
     if (!(self = (PyCSDL2_SurfacePixels*)type->tp_alloc(type, 0)))
         return NULL;
+
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, surface->pixels,
+                       surface->h * surface->pitch, 0);
+
     surface->refcount += 1;
     self->surface = surface;
-    self->pixels = surface->pixels;
-    self->len = surface->h * surface->pitch;
     return self;
 }
 
