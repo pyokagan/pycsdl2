@@ -52,6 +52,9 @@ class TestRwopsConstants(unittest.TestCase):
 class Test_SDL_RWops(unittest.TestCase):
     """Tests for SDL_RWops"""
 
+    def setUp(self):
+        self.rw = SDL_AllocRW()
+
     def test_cannot_create(self):
         "Cannot create SDL_RWops instances"
         self.assertRaises(TypeError, SDL_RWops)
@@ -63,25 +66,21 @@ class Test_SDL_RWops(unittest.TestCase):
 
     def test_type_is_int(self):
         "SDL_RWops.type is an integer"
-        rwops = SDL_AllocRW()
-        self.assertIs(type(rwops.type), int)
+        self.assertIs(type(self.rw.type), int)
 
     def test_type_set_int(self):
         "SDL_RWops.type can be set to an integer"
-        rwops = SDL_AllocRW()
-        rwops.type = 42
-        self.assertEqual(rwops.type, 42)
+        self.rw.type = 42
+        self.assertEqual(self.rw.type, 42)
 
     def test_type_set_invalid_type(self):
         "SDL_RWops.type raises a TypeError if not set to an integer"
-        rwops = SDL_AllocRW()
-        self.assertRaises(TypeError, setattr, rwops, 'type', None)
+        self.assertRaises(TypeError, setattr, self.rw, 'type', None)
 
     def test_freed_type(self):
         "SDL_RWops.type raises an ValueError if the object has been freed"
-        rwops = SDL_AllocRW()
-        SDL_FreeRW(rwops)
-        self.assertRaises(ValueError, getattr, rwops, 'type')
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'type')
 
 
 class Test_SDL_RWFromFile(unittest.TestCase):
