@@ -58,12 +58,38 @@ PyCSDL2_PaletteColorsDealloc(PyCSDL2_PaletteColors *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_PaletteColors object.
+ *
+ * A PyCSDL2_PaletteColors object is valid if self->palette and self->colors
+ * are not NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_PaletteColorsValid(PyCSDL2_PaletteColors *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->palette) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_PaletteColors");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->colors, 0);
+
+    return 1;
+}
+
 /** \brief getbufferproc for PyCSDL2_PaletteColorsType */
 static int
 PyCSDL2_PaletteColorsGetBuffer(PyCSDL2_PaletteColors *self, Py_buffer *view,
                                int flags)
 {
     static Py_ssize_t strides[1] = {sizeof(SDL_Color)};
+
+    if (!PyCSDL2_PaletteColorsValid(self))
+        return -1;
 
     if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) {
         PyErr_SetString(PyExc_BufferError, "Object is not writable.");
@@ -181,11 +207,35 @@ PyCSDL2_PaletteDealloc(PyCSDL2_Palette *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_Palette object.
+ *
+ * A PyCSDL2_Palette object is valid if self->palette and self->colors are not
+ * NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_PaletteValid(PyCSDL2_Palette *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->palette) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_Palette");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->colors, 0);
+
+    return 1;
+}
+
 /** \brief Getter for SDL_Palette.ncolors */
 static PyObject *
 PyCSDL2_PaletteGetNColors(PyCSDL2_Palette *self, void *closure)
 {
-    PyCSDL2_Assert(self->palette, NULL);
+    if (!PyCSDL2_PaletteValid(self))
+        return NULL;
     return PyLong_FromLong(self->palette->ncolors);
 }
 
@@ -193,7 +243,8 @@ PyCSDL2_PaletteGetNColors(PyCSDL2_Palette *self, void *closure)
 static PyObject *
 PyCSDL2_PaletteGetColors(PyCSDL2_Palette *self, void *closure)
 {
-    PyCSDL2_Assert(self->palette, NULL);
+    if (!PyCSDL2_PaletteValid(self))
+        return NULL;
     return PyCSDL2_Get((PyObject*) self->colors);
 }
 
@@ -201,7 +252,8 @@ PyCSDL2_PaletteGetColors(PyCSDL2_Palette *self, void *closure)
 static PyObject *
 PyCSDL2_PaletteGetVersion(PyCSDL2_Palette *self, void *closure)
 {
-    PyCSDL2_Assert(self->palette, NULL);
+    if (!PyCSDL2_PaletteValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->palette->version);
 }
 
@@ -209,7 +261,8 @@ PyCSDL2_PaletteGetVersion(PyCSDL2_Palette *self, void *closure)
 static PyObject *
 PyCSDL2_PaletteGetRefcount(PyCSDL2_Palette *self, void *closure)
 {
-    PyCSDL2_Assert(self->palette, NULL);
+    if (!PyCSDL2_PaletteValid(self))
+        return NULL;
     return PyLong_FromLong(self->palette->refcount);
 }
 
@@ -349,11 +402,32 @@ PyCSDL2_PixelFormatDealloc(PyCSDL2_PixelFormat *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_PixelFormat object.
+ *
+ * A PyCSDL2_PixelFormat object is valid of self->pfmt is not NULL.
+ *
+ * \returns 1 if the object is valid, 0 otherwise.
+ */
+static int
+PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->pfmt) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_PixelFormat");
+        return 0;
+    }
+
+    return 1;
+}
+
 /** \brief Getter for SDL_PixelFormat.format */
 static PyObject *
 PyCSDL2_PixelFormatGetFormat(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->format);
 }
 
@@ -361,7 +435,8 @@ PyCSDL2_PixelFormatGetFormat(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetPalette(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyCSDL2_Get((PyObject*) self->palette);
 }
 
@@ -369,7 +444,8 @@ PyCSDL2_PixelFormatGetPalette(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBitsPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->BitsPerPixel);
 }
 
@@ -377,7 +453,8 @@ PyCSDL2_PixelFormatGetBitsPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBytesPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->BytesPerPixel);
 }
 
@@ -385,7 +462,8 @@ PyCSDL2_PixelFormatGetBytesPerPixel(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rmask);
 }
 
@@ -393,7 +471,8 @@ PyCSDL2_PixelFormatGetRmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gmask);
 }
 
@@ -401,7 +480,8 @@ PyCSDL2_PixelFormatGetGmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bmask);
 }
 
@@ -409,7 +489,8 @@ PyCSDL2_PixelFormatGetBmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAmask(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Amask);
 }
 
@@ -417,7 +498,8 @@ PyCSDL2_PixelFormatGetAmask(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rloss);
 }
 
@@ -425,7 +507,8 @@ PyCSDL2_PixelFormatGetRloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gloss);
 }
 
@@ -433,7 +516,8 @@ PyCSDL2_PixelFormatGetGloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bloss);
 }
 
@@ -441,7 +525,8 @@ PyCSDL2_PixelFormatGetBloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAloss(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Aloss);
 }
 
@@ -449,7 +534,8 @@ PyCSDL2_PixelFormatGetAloss(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Rshift);
 }
 
@@ -457,7 +543,8 @@ PyCSDL2_PixelFormatGetRshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetGshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Gshift);
 }
 
@@ -465,7 +552,8 @@ PyCSDL2_PixelFormatGetGshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetBshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Bshift);
 }
 
@@ -473,7 +561,8 @@ PyCSDL2_PixelFormatGetBshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetAshift(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromUnsignedLong(self->pfmt->Ashift);
 }
 
@@ -481,7 +570,8 @@ PyCSDL2_PixelFormatGetAshift(PyCSDL2_PixelFormat *self, void *closure)
 static PyObject *
 PyCSDL2_PixelFormatGetRefcount(PyCSDL2_PixelFormat *self, void *closure)
 {
-    PyCSDL2_Assert(self->pfmt, NULL);
+    if (!PyCSDL2_PixelFormatValid(self))
+        return NULL;
     return PyLong_FromLong(self->pfmt->refcount);
 }
 
@@ -694,7 +784,10 @@ PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_PixelFormatType, &pfmt))
         return NULL;
-    PyCSDL2_Assert(pfmt->pfmt, NULL);
+
+    if (!PyCSDL2_PixelFormatValid(pfmt))
+        return NULL;
+
     PyCSDL2_PixelFormatClear(pfmt);
     SDL_FreeFormat(pfmt->pfmt);
     pfmt->pfmt = NULL;
@@ -741,7 +834,10 @@ PyCSDL2_FreePalette(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_PaletteType, &palette))
         return NULL;
-    PyCSDL2_Assert(palette->palette, NULL);
+
+    if (!PyCSDL2_PaletteValid(palette))
+        return NULL;
+
     PyCSDL2_PaletteClear(palette);
     SDL_FreePalette(palette->palette);
     palette->palette = NULL;
