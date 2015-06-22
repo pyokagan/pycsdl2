@@ -78,10 +78,10 @@ class Test_SDL_RWops(unittest.TestCase):
         self.assertRaises(TypeError, setattr, rwops, 'type', None)
 
     def test_freed_type(self):
-        "SDL_RWops.type raises an AssertionError if the object has been freed"
+        "SDL_RWops.type raises an ValueError if the object has been freed"
         rwops = SDL_AllocRW()
         SDL_FreeRW(rwops)
-        self.assertRaises(AssertionError, getattr, rwops, 'type')
+        self.assertRaises(ValueError, getattr, rwops, 'type')
 
 
 class Test_SDL_RWFromFile(unittest.TestCase):
@@ -141,7 +141,7 @@ class Test_SDL_RWFromFile(unittest.TestCase):
             f.write(b'TEST')
         rw = SDL_RWFromFile(self.path, 'r')
         self.assertIs(rw.close(rw), None)
-        self.assertRaises(AssertionError, getattr, rw, 'type')
+        self.assertRaises(ValueError, getattr, rw, 'type')
 
     def test_w_returns_SDL_RWops(self):
         "SDL_RWFromFile(file, 'w') returns SDL_RWops"

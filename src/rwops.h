@@ -73,7 +73,7 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
         return 0;
 
     if (!self->rwops) {
-        PyErr_SetString(PyExc_AssertionError, "SDL_RWops has been freed");
+        PyErr_SetString(PyExc_ValueError, "SDL_RWops has been freed");
         return 0;
     }
 
