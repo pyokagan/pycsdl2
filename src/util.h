@@ -129,18 +129,13 @@ typedef struct {
 /**
  * \brief Asserts that condition is true.
  *
- * This is a utility macro for asserting that a condition is true, and if it is
- * not, raises a Python AssertionError exception and causes the current
- * function to return with errorval.
+ * \returns 1 if the condition is true, 0 with an AssertionError exception set
+ *          if it is false.
  */
-#define PyCSDL2_Assert(condition, errorval) \
-    do { \
-        if (!(condition)) { \
-            PyErr_Format(PyExc_AssertionError, "%s:%d: %s", __FILE__, \
-                         __LINE__, #condition); \
-            return (errorval); \
-        } \
-    } while(0)
+#define PyCSDL2_Assert(condition) \
+    ((condition) ? 1 : \
+        (PyErr_Format(PyExc_AssertionError, "%s:%d: %s", __FILE__, __LINE__, \
+                     #condition), 0))
 
 /**
  * \brief Returns a new reference to var

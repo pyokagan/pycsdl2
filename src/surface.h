@@ -69,14 +69,16 @@ PyCSDL2_SurfacePixelsDealloc(PyCSDL2_SurfacePixels *self)
 static int
 PyCSDL2_SurfacePixelsValid(PyCSDL2_SurfacePixels *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->surface) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_SurfacePixels");
         return 0;
     }
 
-    PyCSDL2_Assert(self->pixels, 0);
+    if (!PyCSDL2_Assert(self->pixels))
+        return 0;
 
     return 1;
 }
@@ -138,8 +140,13 @@ PyCSDL2_SurfacePixelsCreate(SDL_Surface *surface)
 {
     PyCSDL2_SurfacePixels *self;
     PyTypeObject *type = &PyCSDL2_SurfacePixelsType;
-    PyCSDL2_Assert(surface, NULL);
-    PyCSDL2_Assert(surface->pixels, NULL);
+
+    if (!PyCSDL2_Assert(surface))
+        return NULL;
+
+    if (!PyCSDL2_Assert(surface->pixels))
+        return NULL;
+
     if (!(self = (PyCSDL2_SurfacePixels*)type->tp_alloc(type, 0)))
         return NULL;
     surface->refcount += 1;
@@ -181,14 +188,16 @@ PyCSDL2_SurfaceRectDealloc(PyCSDL2_SurfaceRect *self)
 static int
 PyCSDL2_SurfaceRectValid(PyCSDL2_SurfaceRect *self)
 {
-    PyCSDL2_Assert(self, 0);
+    if (!PyCSDL2_Assert(self))
+        return 0;
 
     if (!self->surface) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_SurfaceRect");
         return 0;
     }
 
-    PyCSDL2_Assert(self->rect, 0);
+    if (!PyCSDL2_Assert(self->rect))
+        return 0;
 
     return 1;
 }
@@ -329,8 +338,12 @@ PyCSDL2_SurfaceRectCreate(SDL_Surface *surface, SDL_Rect *rect)
     PyCSDL2_SurfaceRect *self;
     PyTypeObject *type = &PyCSDL2_SurfaceRectType;
 
-    PyCSDL2_Assert(surface, NULL);
-    PyCSDL2_Assert(rect, NULL);
+    if (!PyCSDL2_Assert(surface))
+        return NULL;
+
+    if (!PyCSDL2_Assert(rect))
+        return NULL;
+
     if (!(self = (PyCSDL2_SurfaceRect*)type->tp_alloc(type, 0)))
         return NULL;
     surface->refcount += 1;
@@ -411,7 +424,9 @@ PyCSDL2_SurfaceDealloc(PyCSDL2_Surface *self)
 static int
 PyCSDL2_SurfaceValid(PyCSDL2_Surface *surface)
 {
-    PyCSDL2_Assert(surface, 0);
+    if (!PyCSDL2_Assert(surface))
+        return 0;
+
     if (!surface->surface) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
         return 0;
@@ -635,8 +650,13 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
 {
     PyCSDL2_Surface *self;
     PyTypeObject *type = &PyCSDL2_SurfaceType;
-    PyCSDL2_Assert(surface, NULL);
-    PyCSDL2_Assert(surface->format, NULL);
+
+    if (!PyCSDL2_Assert(surface))
+        return NULL;
+
+    if (!PyCSDL2_Assert(surface->format))
+        return NULL;
+
     if (!(self = (PyCSDL2_Surface*)type->tp_alloc(type, 0)))
         return NULL;
     surface->format->refcount += 1;

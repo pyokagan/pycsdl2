@@ -124,7 +124,10 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Renderer");
         return 0;
     }
-    PyCSDL2_Assert(renderer->deftarget, 0);
+
+    if (!PyCSDL2_Assert(renderer->deftarget))
+        return 0;
+
     if (Py_TYPE(renderer->deftarget) == &PyCSDL2_WindowType)
         return PyCSDL2_WindowValid((PyCSDL2_Window*) renderer->deftarget);
     else if (Py_TYPE(renderer->deftarget) == &PyCSDL2_SurfaceType) {
@@ -151,10 +154,15 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
     PyCSDL2_Renderer *self;
     PyTypeObject *type = &PyCSDL2_RendererType;
 
-    PyCSDL2_Assert(renderer, NULL);
-    PyCSDL2_Assert(deftarget, NULL);
-    PyCSDL2_Assert(Py_TYPE(deftarget) == &PyCSDL2_WindowType
-                   || Py_TYPE(deftarget) == &PyCSDL2_SurfaceType, NULL);
+    if (!PyCSDL2_Assert(renderer))
+        return NULL;
+
+    if (!PyCSDL2_Assert(deftarget))
+        return NULL;
+
+    if (!PyCSDL2_Assert(Py_TYPE(deftarget) == &PyCSDL2_WindowType ||
+                        Py_TYPE(deftarget) == &PyCSDL2_SurfaceType))
+        return NULL;
 
     if (!(self = (PyCSDL2_Renderer*) type->tp_alloc(type, 0)))
         return NULL;
@@ -184,7 +192,10 @@ PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
                                      &PyCSDL2_WindowType, &window, &index,
                                      &flags))
         return NULL;
-    PyCSDL2_Assert(window->window, NULL);
+
+    if (!PyCSDL2_Assert(window->window))
+        return NULL;
+
     if (!(renderer = SDL_CreateRenderer(window->window, index, flags)))
         return PyCSDL2_RaiseSDLError();
     if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) window))) {
@@ -212,7 +223,10 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
         return NULL;
-    PyCSDL2_Assert(surface->surface, NULL);
+
+    if (!PyCSDL2_Assert(surface->surface))
+        return NULL;
+
     if (!(renderer = SDL_CreateSoftwareRenderer(surface->surface)))
         return PyCSDL2_RaiseSDLError();
     if (!(out = PyCSDL2_RendererCreate(renderer, (PyObject*) surface))) {
