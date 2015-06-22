@@ -83,8 +83,79 @@ class Test_SDL_RWops(unittest.TestCase):
         self.assertRaises(ValueError, getattr, self.rw, 'type')
 
 
-class Test_SDL_RWFromFile(unittest.TestCase):
-    """Tests for SDL_RWFromFile"""
+class TestRWFromFile_Read(unittest.TestCase):
+    "Tests for SDL_RWFromFile(file, 'r')"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.content = b'TEST'
+        cls.dir = tempfile.TemporaryDirectory()
+
+    @classmethod
+    def tearDownClass(cls):
+        # Handle "directory not empty" errors on Windows by attempting 3 times
+        for i in range(3):
+            try:
+                cls.dir.cleanup()
+            except OSError:
+                continue
+            break
+
+    def setUp(self):
+        self.path = os.path.join(self.dir.name, self.id())
+        with open(self.path, 'wb') as f:
+            f.write(self.content)
+        self.rw = SDL_RWFromFile(self.path, 'r')
+
+    def test_return(self):
+        "returns SDL_RWops"
+        self.assertIs(type(self.rw), SDL_RWops)
+
+    def test_size(self):
+        "size() works"
+        self.assertEqual(self.rw.size(self.rw), len(self.content))
+
+    def test_size_set(self):
+        "size is readonly"
+        self.assertRaises(AttributeError, setattr, self.rw, 'size', 42)
+
+    def test_seek(self):
+        "seek() works"
+        self.assertEqual(self.rw.seek(self.rw, 2, RW_SEEK_SET), 2)
+
+    def test_seek_set(self):
+        "seek is readonly"
+        self.assertRaises(AttributeError, setattr, self.rw, 'seek', 42)
+
+    def test_read(self):
+        "read() works"
+        dst = bytearray(len(self.content))
+        self.assertEqual(self.rw.read(self.rw, dst, 1, len(self.content)),
+                         len(self.content))
+        self.assertEqual(dst, self.content)
+
+    def test_read_invalid_size(self):
+        "read() raises BufferError if buffer has invalid size"
+        dst = bytearray(2)
+        self.assertRaises(BufferError, self.rw.read, self.rw, dst, 1,
+                          len(self.content))
+
+    def test_read_set(self):
+        "read is readonly"
+        self.assertRaises(AttributeError, setattr, self.rw, 'read', 42)
+
+    def test_close(self):
+        "close() works"
+        self.assertIs(self.rw.close(self.rw), None)
+        self.assertRaises(ValueError, getattr, self.rw, 'type')
+
+    def test_close_set(self):
+        "close is readonly"
+        self.assertRaises(AttributeError, setattr, self.rw, 'close', 42)
+
+
+class TestRWFromFile_Write(unittest.TestCase):
+    "Tests for SDL_RWFromFile(file, 'w')"
 
     @classmethod
     def setUpClass(cls):
@@ -92,90 +163,36 @@ class Test_SDL_RWFromFile(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.dir.cleanup()
+        # Handle "directory not empty" errors on Windows by attempting 3 times
+        for i in range(3):
+            try:
+                cls.dir.cleanup()
+            except OSError:
+                continue
+            break
 
     def setUp(self):
         self.path = os.path.join(self.dir.name, self.id())
+        self.rw = SDL_RWFromFile(self.path, 'w')
 
-    def test_r_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'a') returns SDL_RWops"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        self.assertIs(type(SDL_RWFromFile(self.path, 'r')), SDL_RWops)
+    def test_return(self):
+        "returns SDL_RWops"
+        self.assertIs(type(self.rw), SDL_RWops)
 
-    def test_r_size(self):
-        "SDL_RWops.size() works"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        rw = SDL_RWFromFile(self.path, 'r')
-        self.assertEqual(rw.size(rw), 4)
-
-    def test_r_seek(self):
-        "SDL_RWops.seek() works"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        rw = SDL_RWFromFile(self.path, 'r')
-        self.assertEqual(rw.seek(rw, 2, RW_SEEK_SET), 2)
-
-    def test_r_read(self):
-        "SDL_RWops.read() works"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        rw = SDL_RWFromFile(self.path, 'r')
-        dst = bytearray(4)
-        self.assertEqual(rw.read(rw, dst, 1, 4), 4)
-        self.assertEqual(dst, b'TEST')
-
-    def test_r_read_invalid_size(self):
-        "SDL_RWops.read() raises BufferError on buffer of wrong size"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        rw = SDL_RWFromFile(self.path, 'r')
-        dst = bytearray(2)
-        self.assertRaises(BufferError, rw.read, rw, dst, 1, 4)
-
-    def test_r_close(self):
-        "SDL_RWops.close() works"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        rw = SDL_RWFromFile(self.path, 'r')
-        self.assertIs(rw.close(rw), None)
-        self.assertRaises(ValueError, getattr, rw, 'type')
-
-    def test_w_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'w') returns SDL_RWops"
-        self.assertIs(type(SDL_RWFromFile(self.path, 'w')), SDL_RWops)
-
-    def test_w_write(self):
-        "SDL_RWops.write() works"
-        rw = SDL_RWFromFile(self.path, 'w')
-        self.assertEqual(rw.write(rw, b'TEST', 1, 4), 4)
-        del rw
+    def test_write(self):
+        "write() works"
+        self.assertEqual(self.rw.write(self.rw, b'TEST', 1, 4), 4)
+        del self.rw
         with open(self.path, 'rb') as f:
-            self.assertEqual(f.read(4), b'TEST')
+            self.assertEqual(f.read(), b'TEST')
 
-    def test_w_write_invalid_size(self):
-        "SDL_RWops.read() raises BufferError on buffer of wrong size"
-        rw = SDL_RWFromFile(self.path, 'w')
-        self.assertRaises(BufferError, rw.write, rw, b'TE', 1, 4)
+    def test_write_invalid_size(self):
+        "write() raises BufferError when buffer is of invalid size"
+        self.assertRaises(BufferError, self.rw.write, self.rw, b'TE', 1, 4)
 
-    def test_a_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'a') returns SDL_RWops"
-        self.assertIs(type(SDL_RWFromFile(self.path, 'a')), SDL_RWops)
-
-    def test_rp_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'r+') returns SDL_RWops"
-        with open(self.path, 'wb') as f:
-            f.write(b'TEST')
-        self.assertIs(type(SDL_RWFromFile(self.path, 'r+')), SDL_RWops)
-
-    def test_wp_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'w+') returns SDL_RWops"
-        self.assertIs(type(SDL_RWFromFile(self.path, 'w+')), SDL_RWops)
-
-    def test_ap_returns_SDL_RWops(self):
-        "SDL_RWFromFile(file, 'a+') returns SDL_RWops"
-        self.assertIs(type(SDL_RWFromFile(self.path, 'a+')), SDL_RWops)
+    def test_write_set(self):
+        "write is readonly"
+        self.assertRaises(AttributeError, setattr, self.rw, 'write', 42)
 
 
 if __name__ == '__main__':
