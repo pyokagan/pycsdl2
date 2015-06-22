@@ -293,20 +293,32 @@ typedef struct PyCSDL2_RWReadFunc {
     rwreadfunc func;
 } PyCSDL2_RWReadFunc;
 
-/** \brief Implements __call__() for PyCSDL2_RWReadFuncType */
+static PyTypeObject PyCSDL2_RWReadFuncType;
+
+/**
+ * \brief Implements SDL_RWread() and __call__() for PyCSDL2_RWReadFuncType
+ *
+ * \code{.py}
+ * SDL_RWread(context: SDL_RWops, ptr: buffer, size: int, maxnum: int) -> int
+ * \endcode
+ */
 static PyObject *
-PyCSDL2_RWReadFuncCall(PyCSDL2_RWReadFunc *self, PyObject *args,
-                       PyObject *kwds)
+PyCSDL2_RWread(PyObject *self, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RWops *rwops_obj;
-    size_t ret;
+    size_t ret, size, maxnum;
     Py_buffer buf;
-    Py_ssize_t size, maxnum;
+    SDL_RWops *rwops;
+    rwreadfunc callback;
+    const char *err;
     static char *kwlist[] = {"context", "ptr", "size", "maxnum", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!w*nn", kwlist,
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "O!w*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
                                      &PyCSDL2_RWopsType, &rwops_obj,
                                      &buf, &size, &maxnum))
         return NULL;
+
     if (buf.len != size * maxnum) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
@@ -317,23 +329,45 @@ PyCSDL2_RWReadFuncCall(PyCSDL2_RWReadFunc *self, PyObject *args,
         return NULL;
     }
 
+    rwops = rwops_obj->rwops;
+
+    if (Py_TYPE(self) == &PyCSDL2_RWReadFuncType)
+        callback = ((PyCSDL2_RWReadFunc*)self)->func;
+    else
+        callback = rwops->read;
+
+    if (!callback) {
+        PyBuffer_Release(&buf);
+        PyErr_SetString(PyExc_ValueError,
+                        "SDL_RWops object has no read callback");
+        return NULL;
+    }
+
     /*
      * To prevent segfaults due to invalid SDL_RWops internal data, do not
      * allow mixing of SDL_RWops and callbacks by checking to see if the
      * SDL_RWops has the same callback as the one we have.
      */
-    if (self->func != rwops_obj->rwops->read) {
+    if (callback != rwops->read) {
         PyBuffer_Release(&buf);
         PyErr_SetString(PyExc_ValueError, "Do not mix different "
                         "SDL_RWops and callbacks.");
         return NULL;
     }
 
-    ret = self->func(rwops_obj->rwops, buf.buf, size, maxnum);
+    PyErr_Clear();
+    SDL_ClearError();
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = callback(rwops, buf.buf, size, maxnum);
+    Py_END_ALLOW_THREADS
+
     PyBuffer_Release(&buf);
-    if (PyErr_Occurred())
+
+    if (!ret && (PyErr_Occurred() || ((err = SDL_GetError()) && err[0])))
         return NULL;
-    return PyLong_FromUnsignedLong(ret);
+
+    return PyLong_FromSize_t(ret);
 }
 
 /** \brief Type definition for csdl2.RWReadFunc */
@@ -352,7 +386,7 @@ static PyTypeObject PyCSDL2_RWReadFuncType = {
     /* tp_as_sequence    */ 0,
     /* tp_as_mapping     */ 0,
     /* tp_hash           */ 0,
-    /* tp_call           */ (ternaryfunc) PyCSDL2_RWReadFuncCall
+    /* tp_call           */ PyCSDL2_RWread
 };
 
 /** \brief Creates a new instance of PyCSDL2_RWReadFuncType */

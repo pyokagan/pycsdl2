@@ -175,3 +175,16 @@ of data streams.
 .. data:: RW_SEEK_END
 
    Seek relative to the end of data.
+
+.. function:: SDL_RWread(context: SDL_RWops, ptr: buffer, size: int, maxnum: int) -> int
+
+   Reads up to `maxnum` objects, each of size `size` bytes, from the data
+   source to the buffer `ptr`.
+
+   :param SDL_RWops context: Data stream to read from.
+   :param buffer ptr: Buffer to read data into. It must be exactly
+                      ``size * maxnum`` bytes.
+   :param int size: The size of each object to read, in bytes.
+   :param int maxnum: The maximum number of objects to be read.
+   :returns: The number of objects read. This function may read less objects
+             than requested.

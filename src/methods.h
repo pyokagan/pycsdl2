@@ -364,6 +364,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the final offset in the data stream after the seek.\n"
     },
 
+    {"SDL_RWread",
+     (PyCFunction) PyCSDL2_RWread,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWread(context: SDL_RWops, ptr: buffer, size: int, maxnum: int)\n"
+     "    -> int\n"
+     "\n"
+     "Reads up to `maxnum` objects, each of size `size` bytes, from the data\n"
+     "source to the buffer `ptr`. Returns the number of objects read, or 0\n"
+     "at the end of file. This function may read less objects than\n"
+     "requested.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

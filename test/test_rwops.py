@@ -152,6 +152,21 @@ class TestRWFromFile_Read(unittest.TestCase):
         "read is readonly"
         self.assertRaises(AttributeError, setattr, self.rw, 'read', 42)
 
+    def test_RWread(self):
+        "SDL_RWread() works"
+        dst = bytearray(len(self.content))
+        self.assertEqual(SDL_RWread(self.rw, dst, 1, len(self.content)),
+                         len(self.content))
+        self.assertEqual(dst, self.content)
+
+    def test_RWread_eof(self):
+        "SDL_RWread() returns 0 on EOF without raising an exception"
+        dst = bytearray(1)
+        contents = b''
+        while SDL_RWread(self.rw, dst, 1, 1):
+            contents += dst
+        self.assertEqual(contents, self.content)
+
     def test_close(self):
         "close() works"
         self.assertIs(self.rw.close(self.rw), None)
