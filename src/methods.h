@@ -342,6 +342,63 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Frees a SDL_RWops structure allocated by SDL_AllocRW()\n"
     },
 
+    {"SDL_RWsize",
+     (PyCFunction) PyCSDL2_RWsize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWsize(context: SDL_RWops) -> int\n"
+     "\n"
+     "Returns the size of the data stream in the SDL_RWops context.\n"
+    },
+
+    {"SDL_RWseek",
+     (PyCFunction) PyCSDL2_RWseek,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWseek(context: SDL_RWops, offset: int, whence: int) -> int\n"
+     "\n"
+     "Seeks to `offset` relative to `whence`, where `whence` is one of:\n"
+     "\n"
+     "    * RW_SEEK_SET -- seek from the beginning of data\n"
+     "    * RW_SEEK_CUR -- seek relative to the current read point\n"
+     "    * RW_SEEK_END -- seek relative to the end of data\n"
+     "\n"
+     "Returns the final offset in the data stream after the seek.\n"
+    },
+
+    {"SDL_RWread",
+     (PyCFunction) PyCSDL2_RWread,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWread(context: SDL_RWops, ptr: buffer, size: int, maxnum: int)\n"
+     "    -> int\n"
+     "\n"
+     "Reads up to `maxnum` objects, each of size `size` bytes, from the data\n"
+     "source to the buffer `ptr`. Returns the number of objects read, or 0\n"
+     "at the end of file. This function may read less objects than\n"
+     "requested.\n"
+    },
+
+    {"SDL_RWwrite",
+     (PyCFunction) PyCSDL2_RWwrite,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWwrite(context: SDL_RWops, ptr: buffer, size: int, num: int)\n"
+     "    -> int\n"
+     "\n"
+     "Writes exactly `num` objects, each `size` bytes, from the buffer\n"
+     "`ptr`. If this fails for any reason, it will return less than `num`\n"
+     "to show how far the write progressed. On success, it returns `num`.\n"
+    },
+
+    {"SDL_RWclose",
+     (PyCFunction) PyCSDL2_RWclose,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RWclose(context: SDL_RWops) -> None\n"
+     "\n"
+     "Closes and cleans up the data stream. The SDL_RWops object will\n"
+     "be freed.\n"
+     "\n"
+     "Note that even if an error occurs, the SDL_RWops object will still be\n"
+     "invalidated.\n"
+    },
+
     /* surface.h */
 
     {"SDL_MUSTLOCK",

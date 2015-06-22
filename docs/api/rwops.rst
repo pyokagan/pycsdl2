@@ -146,6 +146,24 @@ of data streams.
    :param SDL_RWops area: The :class:`SDL_RWops` structure allocated with
                           :func:`SDL_AllocRW`.
 
+.. function:: SDL_RWsize(context: SDL_RWops) -> int
+
+   Returns the size of the data stream in the :class:`SDL_RWops`.
+
+   :param SDL_RWops context: The :class:`SDL_RWops` stream to get the size of.
+   :returns: Size of the data stream in bytes.
+
+.. function:: SDL_RWseek(context: SDL_RWops, offset: int, whence: int) -> int
+
+   Seeks to `offset` relative to `whence`.
+
+   :param SDL_RWops context: Stream to seek in.
+   :param int offset: New position in stream, measured in bytes, relative to
+                      `whence`.
+   :param int whence: :const:`RW_SEEK_SET`, :const:`RW_SEEK_CUR` or
+                      :const:`RW_SEEK_END`.
+   :returns: New offset, measured in bytes, from the start of the stream.
+
 .. data:: RW_SEEK_SET
 
    Seek from the beginning of data.
@@ -157,3 +175,39 @@ of data streams.
 .. data:: RW_SEEK_END
 
    Seek relative to the end of data.
+
+.. function:: SDL_RWread(context: SDL_RWops, ptr: buffer, size: int, maxnum: int) -> int
+
+   Reads up to `maxnum` objects, each of size `size` bytes, from the data
+   source to the buffer `ptr`.
+
+   :param SDL_RWops context: Data stream to read from.
+   :param buffer ptr: Buffer to read data into. It must be exactly
+                      ``size * maxnum`` bytes.
+   :param int size: The size of each object to read, in bytes.
+   :param int maxnum: The maximum number of objects to be read.
+   :returns: The number of objects read. This function may read less objects
+             than requested.
+
+.. function:: SDL_RWwrite(context: SDL_RWops, ptr: buffer, size: int, num: int) -> int
+
+   Writes exactly `num` objects, each `size` bytes, from the buffer `ptr` to
+   the stream.
+
+   :param SDL_RWops context: Data stream to write to.
+   :param buffer ptr: Buffer containing the data to write to the stream. It
+                      must be exactly ``size * num`` bytes.
+   :param int size: The size of each object to write, in bytes.
+   :param int maxnum: The number of objects to write.
+   :returns: The number of objects written, which can be less than `num` on
+              error or when the end of file has been reached.
+
+.. function:: SDL_RWclose(context: SDL_RWops) -> None
+
+   Closes and cleans up the data stream. The :class:`SDL_RWops` object will be
+   freed.
+
+   :param SDL_RWops context: Data stream to close.
+
+   .. note:: The :class:`SDL_RWops` object will still be freed even when an
+             exception occurs while closing the stream.

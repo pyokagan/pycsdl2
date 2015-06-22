@@ -100,6 +100,21 @@
 #error Could not find C integer type with 8 bytes width
 #endif
 
+#if SIZEOF_SHORT == SIZEOF_SIZE_T || defined(DOXYGEN)
+/**
+ * \brief Python format unit for C unsigned integer type with same size as
+ *        size_t
+ */
+#define SIZE_T_UNIT "H"
+#elif SIZEOF_INT == SIZEOF_SIZE_T
+#define SIZE_T_UNIT "I"
+#elif SIZEOF_LONG == SIZEOF_SIZE_T || defined(DOXYGEN)
+#define SIZE_T_UNIT "k"
+#elif SIZEOF_LONG_LONG == SIZEOF_SIZE_T
+#define SIZE_T_UNIT "K"
+#else
+#error Could not find C integer type with size_t width
+#endif
 
 /*!
  * \brief struct for defining constants.
