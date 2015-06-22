@@ -476,16 +476,34 @@ PyCSDL2_RWCloseFuncCreate(rwclosefunc closefunc)
     return self;
 }
 
+/** \brief tp_finalize for PyCSDL2_RWopsType */
+static void
+PyCSDL2_RWopsFinalize(PyCSDL2_RWops *self)
+{
+    PyObject *error_type, *error_value, *error_traceback;
+
+    if (!self->rwops)
+        return;
+
+    PyErr_Fetch(&error_type, &error_value, &error_traceback);
+
+    if (self->rwops->close)
+        self->rwops->close(self->rwops);
+    else
+        SDL_FreeRW(self->rwops);
+
+    self->rwops = NULL;
+
+    PyErr_Restore(error_type, error_value, error_traceback);
+}
+
 /** \brief Destructor for PYCSDL2_RWopsType */
 static void
 PyCSDL2_RWopsDealloc(PyCSDL2_RWops *self)
 {
-    if (self->rwops) {
-        if (self->rwops->close)
-            self->rwops->close(self->rwops);
-        else
-            SDL_FreeRW(self->rwops);
-    }
+    if (PyObject_CallFinalizerFromDealloc((PyObject*) self) < 0)
+        return;
+    PyObject_ClearWeakRefs((PyObject*) self);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
@@ -650,7 +668,7 @@ static PyTypeObject PyCSDL2_RWopsType = {
     /* tp_getattro       */ 0,
     /* tp_setattro       */ 0,
     /* tp_as_buffer      */ 0,
-    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_FINALIZE,
     /* tp_doc            */
     "SDL_RWops",
     /* tp_traverse       */ 0,
@@ -669,7 +687,17 @@ static PyTypeObject PyCSDL2_RWopsType = {
     /* tp_dictoffset     */ 0,
     /* tp_init           */ 0,
     /* tp_alloc          */ 0,
-    /* tp_new            */ 0
+    /* tp_new            */ 0,
+    /* tp_free           */ 0,
+    /* tp_is_gc          */ 0,
+    /* tp_bases          */ 0,
+    /* tp_mro            */ 0,
+    /* tp_cache          */ 0,
+    /* tp_subclasses     */ 0,
+    /* tp_weaklist       */ 0,
+    /* tp_del            */ 0,
+    /* tp_version_tag    */ 0,
+    /* tp_finalize       */ (destructor) PyCSDL2_RWopsFinalize
 };
 
 /**
