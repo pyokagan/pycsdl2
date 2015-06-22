@@ -58,12 +58,38 @@ PyCSDL2_PaletteColorsDealloc(PyCSDL2_PaletteColors *self)
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
+/**
+ * \brief Validates the PyCSDL2_PaletteColors object.
+ *
+ * A PyCSDL2_PaletteColors object is valid if self->palette and self->colors
+ * are not NULL.
+ *
+ * \returns 1 if the object is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_PaletteColorsValid(PyCSDL2_PaletteColors *self)
+{
+    PyCSDL2_Assert(self, 0);
+
+    if (!self->palette) {
+        PyErr_SetString(PyExc_ValueError, "invalid SDL_PaletteColors");
+        return 0;
+    }
+
+    PyCSDL2_Assert(self->colors, 0);
+
+    return 1;
+}
+
 /** \brief getbufferproc for PyCSDL2_PaletteColorsType */
 static int
 PyCSDL2_PaletteColorsGetBuffer(PyCSDL2_PaletteColors *self, Py_buffer *view,
                                int flags)
 {
     static Py_ssize_t strides[1] = {sizeof(SDL_Color)};
+
+    if (!PyCSDL2_PaletteColorsValid(self))
+        return -1;
 
     if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) {
         PyErr_SetString(PyExc_BufferError, "Object is not writable.");
