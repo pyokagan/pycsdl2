@@ -154,6 +154,51 @@ class Test_SDL_RWops(unittest.TestCase):
         self.rw.seek = seek_callback
         self.assertRaises(SeekException, SDL_RWseek, self.rw, 41, 0)
 
+    def test_read(self):
+        "read is initialized to None"
+        self.assertIs(self.rw.read, None)
+
+    def test_read_freed(self):
+        "When freed, read raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'read')
+
+    def test_read_set(self):
+        "read can be set to any object"
+        x = {}
+        self.rw.read = x
+        self.assertIs(self.rw.read, x)
+
+    def test_RWread(self):
+        "SDL_RWread() with custom read callback"
+        def read_callback(context, ptr, size, maxnum):
+            self.assertIs(context, self.rw)
+            self.assertEqual(size, 1)
+            self.assertEqual(maxnum, 2)
+            with memoryview(ptr) as x:
+                self.assertEqual(x.nbytes, 2)
+                self.assertFalse(x.readonly)
+                x[0] = 1
+                x[1] = 2
+            return 2
+
+        x = bytearray(2)
+        self.rw.read = read_callback
+        self.assertEqual(SDL_RWread(self.rw, x, 1, 2), 2)
+        self.assertEqual(x, b'\x01\x02')
+
+    def test_RWread_exception(self):
+        "SDL_RWread() with custom exception"
+        class ReadException(Exception):
+            pass
+
+        def read_callback(context, ptr, size, maxnum):
+            raise ReadException()
+
+        x = bytearray(2)
+        self.rw.read = read_callback
+        self.assertRaises(ReadException, SDL_RWread, self.rw, x, 1, 2)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"

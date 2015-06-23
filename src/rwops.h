@@ -59,12 +59,17 @@ typedef struct PyCSDL2_RWops {
     PyObject *size;
     /** \brief Python callback for rwops->seek */
     PyObject *seek;
+    /** \brief Python callback for rwops->read */
+    PyObject *read;
+    /** \brief Internal buffer object for Python callbacks */
+    PyCSDL2_Buffer *buffer;
 } PyCSDL2_RWops;
 
 static PyTypeObject PyCSDL2_RWopsType;
 
 static Sint64 SDLCALL PyCSDL2_RWSizePyCall(SDL_RWops*);
 static Sint64 SDLCALL PyCSDL2_RWSeekPyCall(SDL_RWops*, Sint64, int);
+static size_t SDLCALL PyCSDL2_RWReadPyCall(SDL_RWops*, void*, size_t, size_t);
 
 /** \brief tp_traverse for PyCSDL2_RWopsType */
 static int
@@ -72,6 +77,8 @@ PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
 {
     Py_VISIT(self->size);
     Py_VISIT(self->seek);
+    Py_VISIT(self->read);
+    Py_VISIT(self->buffer);
     return 0;
 }
 
@@ -81,6 +88,8 @@ PyCSDL2_RWopsClear(PyCSDL2_RWops *self)
 {
     Py_CLEAR(self->size);
     Py_CLEAR(self->seek);
+    Py_CLEAR(self->read);
+    Py_CLEAR(self->buffer);
     return 0;
 }
 
@@ -105,12 +114,19 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
         return 0;
     }
 
+    if (!PyCSDL2_Assert(self->buffer))
+        return 0;
+
+    if (!PyCSDL2_Assert(!self->buffer->num_exports))
+        return 0;
+
     /*
      * If we have installed our C-to-Python callbacks, check to ensure that
      * hidden.unknown.data1 points to our PyCSDL2_RWops object.
      */
     if (self->rwops->size == PyCSDL2_RWSizePyCall ||
-        self->rwops->seek == PyCSDL2_RWSeekPyCall) {
+        self->rwops->seek == PyCSDL2_RWSeekPyCall ||
+        self->rwops->read == PyCSDL2_RWReadPyCall) {
         if (!PyCSDL2_Assert(self->rwops->hidden.unknown.data1 == self))
             return 0;
     }
@@ -184,6 +200,52 @@ PyCSDL2_RWSeekPyCall(SDL_RWops *ctx, Sint64 offset, int whence)
         ret = -1;
 
     Py_DECREF(ret_obj);
+
+finish:
+    Py_XDECREF(rwops_obj);
+    PyGILState_Release(gstate);
+    return ret;
+}
+
+/**
+ * \brief SDL_RWops C to Python "read" callback
+ */
+static size_t SDLCALL
+PyCSDL2_RWReadPyCall(SDL_RWops *ctx, void *ptr, size_t size, size_t maxnum)
+{
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyCSDL2_RWops *rwops_obj = ctx->hidden.unknown.data1;
+    PyObject *callback, *ret_obj;
+    size_t ret = 0;
+
+    Py_XINCREF(rwops_obj);
+
+    if (!PyCSDL2_RWopsValid(rwops_obj))
+        goto finish;
+
+    callback = PyCSDL2_Get(rwops_obj->read);
+
+    PyCSDL2_BufferInit(rwops_obj->buffer, ptr, size * maxnum, 0);
+
+    ret_obj = PyObject_CallFunction(callback, "OO" SIZE_T_UNIT SIZE_T_UNIT,
+                                    rwops_obj, rwops_obj->buffer, size,
+                                    maxnum);
+
+    Py_DECREF(callback);
+
+    if (rwops_obj->buffer->num_exports)
+        Py_FatalError("SDL_RWops read buffer is still exported");
+
+    if (!ret_obj)
+        goto finish;
+
+    ret = PyLong_AsSize_t(ret_obj);
+    if (PyErr_Occurred())
+        ret = 0;
+
+    Py_DECREF(ret_obj);
+
+    rwops_obj->buffer->buf = NULL;
 
 finish:
     Py_XDECREF(rwops_obj);
@@ -866,7 +928,26 @@ PyCSDL2_RWopsGetRead(PyCSDL2_RWops *self, void *closure)
     if (!self->rwops->read)
         Py_RETURN_NONE;
 
+    if (self->rwops->read == PyCSDL2_RWReadPyCall)
+        return PyCSDL2_Get(self->read);
+
     return (PyObject*) PyCSDL2_RWReadFuncCreate(self->rwops->read);
+}
+
+/** \brief Implements setter for SDL_RWops.read */
+static int
+PyCSDL2_RWopsSetRead(PyCSDL2_RWops *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RWopsValid(self))
+        return -1;
+
+    if (self->rwops->read != PyCSDL2_RWReadPyCall) {
+        PyErr_SetString(PyExc_AttributeError, "read is readonly");
+        return -1;
+    }
+
+    PyCSDL2_Set(self->read, value);
+    return 0;
 }
 
 /** \brief Implements getter for SDL_RWops.write */
@@ -918,7 +999,7 @@ static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
      NULL},
     {"read",
      (getter) PyCSDL2_RWopsGetRead,
-     (setter) NULL,
+     (setter) PyCSDL2_RWopsSetRead,
      "Callback that reads from the stream. It has the signature:\n"
      "\n"
      "read(context: SDL_RWops, ptr: buffer, size: int, maxnum: int) -> int\n",
@@ -1010,6 +1091,12 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
     if (!self)
         return NULL;
 
+    self->buffer = PyCSDL2_BufferCreate(NULL, 0, 0);
+    if (!self->buffer) {
+        Py_DECREF(self);
+        return NULL;
+    }
+
     self->rwops = rwops;
 
     return self;
@@ -1079,6 +1166,7 @@ PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
 
     rwops->size = PyCSDL2_RWSizePyCall;
     rwops->seek = PyCSDL2_RWSeekPyCall;
+    rwops->read = PyCSDL2_RWReadPyCall;
 
     return ret;
 }
