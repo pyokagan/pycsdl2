@@ -199,6 +199,50 @@ class Test_SDL_RWops(unittest.TestCase):
         self.rw.read = read_callback
         self.assertRaises(ReadException, SDL_RWread, self.rw, x, 1, 2)
 
+    def test_write(self):
+        "write is initialized to None"
+        self.assertIs(self.rw.write, None)
+
+    def test_write_freed(self):
+        "When freed, write raises ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'write')
+
+    def test_write_set(self):
+        "write can be set to any object"
+        x = {}
+        self.rw.write = x
+        self.assertIs(self.rw.write, x)
+
+    def test_RWwrite(self):
+        "SDL_RWwrite() with custom write callback"
+        def write_callback(context, ptr, size, num):
+            self.assertIs(context, self.rw)
+            self.assertEqual(size, 1)
+            self.assertEqual(num, 2)
+            with memoryview(ptr) as x:
+                self.assertEqual(x.nbytes, 2)
+                self.assertTrue(x.readonly)
+                self.assertEqual(x[0], 1)
+                self.assertEqual(x[1], 2)
+            return 2
+
+        x = b'\x01\x02'
+        self.rw.write = write_callback
+        self.assertEqual(SDL_RWwrite(self.rw, x, 1, 2), 2)
+
+    def test_RWwrite_exception(self):
+        "SDL_RWwrite() with custom exception"
+        class WriteException(Exception):
+            pass
+
+        def write_callback(context, ptr, size, num):
+            raise WriteException()
+
+        x = b'\x01\x02'
+        self.rw.write = write_callback
+        self.assertRaises(WriteException, SDL_RWwrite, self.rw, x, 1, 2)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"
