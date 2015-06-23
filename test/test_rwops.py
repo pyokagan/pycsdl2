@@ -243,6 +243,43 @@ class Test_SDL_RWops(unittest.TestCase):
         self.rw.write = write_callback
         self.assertRaises(WriteException, SDL_RWwrite, self.rw, x, 1, 2)
 
+    def test_close(self):
+        "close is initialized to None"
+        self.assertIs(self.rw.close, None)
+
+    def test_close_freed(self):
+        "When freed, close raises ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'close')
+
+    def test_RWclose(self):
+        "SDL_RWclose() with custom close callback"
+        def close_callback(ctx):
+            self.assertIs(ctx, self.rw)
+            SDL_FreeRW(ctx)
+
+        self.rw.close = close_callback
+        self.assertIs(SDL_RWclose(self.rw), None)
+
+    def test_RWclose_exception(self):
+        "SDL_RWclose() with custom exception"
+        class CloseException(Exception):
+            pass
+
+        def close_callback(ctx):
+            raise CloseException()
+
+        self.rw.close = close_callback
+        self.assertRaises(CloseException, SDL_RWclose, self.rw)
+
+    def test_RWclose_not_freed(self):
+        "SDL_RWclose() with callback that does not call SDL_FreeRW()"
+        def close_callback(ctx):
+            pass
+
+        self.rw.close = close_callback
+        self.assertRaises(AssertionError, SDL_RWclose, self.rw)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"

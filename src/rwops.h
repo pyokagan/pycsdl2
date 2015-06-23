@@ -63,6 +63,8 @@ typedef struct PyCSDL2_RWops {
     PyObject *read;
     /** \brief Python callback for rwops->write */
     PyObject *write;
+    /** \brief Python callback for rwops->close */
+    PyObject *close;
     /** \brief Internal buffer object for Python callbacks */
     PyCSDL2_Buffer *buffer;
 } PyCSDL2_RWops;
@@ -74,6 +76,7 @@ static Sint64 SDLCALL PyCSDL2_RWSeekPyCall(SDL_RWops*, Sint64, int);
 static size_t SDLCALL PyCSDL2_RWReadPyCall(SDL_RWops*, void*, size_t, size_t);
 static size_t SDLCALL PyCSDL2_RWWritePyCall(SDL_RWops*, const void*, size_t,
                                             size_t);
+static int SDLCALL PyCSDL2_RWClosePyCall(SDL_RWops*);
 
 /** \brief tp_traverse for PyCSDL2_RWopsType */
 static int
@@ -83,6 +86,7 @@ PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
     Py_VISIT(self->seek);
     Py_VISIT(self->read);
     Py_VISIT(self->write);
+    Py_VISIT(self->close);
     Py_VISIT(self->buffer);
     return 0;
 }
@@ -95,6 +99,7 @@ PyCSDL2_RWopsClear(PyCSDL2_RWops *self)
     Py_CLEAR(self->seek);
     Py_CLEAR(self->read);
     Py_CLEAR(self->write);
+    Py_CLEAR(self->close);
     Py_CLEAR(self->buffer);
     return 0;
 }
@@ -133,7 +138,8 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
     if (self->rwops->size == PyCSDL2_RWSizePyCall ||
         self->rwops->seek == PyCSDL2_RWSeekPyCall ||
         self->rwops->read == PyCSDL2_RWReadPyCall ||
-        self->rwops->write == PyCSDL2_RWWritePyCall) {
+        self->rwops->write == PyCSDL2_RWWritePyCall ||
+        self->rwops->close == PyCSDL2_RWClosePyCall) {
         if (!PyCSDL2_Assert(self->rwops->hidden.unknown.data1 == self))
             return 0;
     }
@@ -324,6 +330,49 @@ PyCSDL2_RWWritePyCall(SDL_RWops *ctx, const void *ptr, size_t size, size_t num)
     Py_DECREF(ret_obj);
 
     rwops_obj->buffer->buf = NULL;
+
+finish:
+    Py_XDECREF(rwops_obj);
+    PyGILState_Release(gstate);
+    return ret;
+}
+
+/**
+ * \brief SDL_RWops C to Python "close" callback
+ */
+static int SDLCALL
+PyCSDL2_RWClosePyCall(SDL_RWops *ctx)
+{
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyCSDL2_RWops *rwops_obj = ctx->hidden.unknown.data1;
+    PyObject *callback, *ret_obj;
+    int ret = -1;
+
+    Py_XINCREF(rwops_obj);
+
+    if (!PyCSDL2_RWopsValid(rwops_obj))
+        goto finish;
+
+    callback = PyCSDL2_Get(rwops_obj->close);
+
+    ret_obj = PyObject_CallFunction(callback, "O", rwops_obj);
+
+    Py_DECREF(callback);
+
+    if (!ret_obj)
+        goto finish;
+
+    Py_DECREF(ret_obj);
+
+    if (rwops_obj->rwops) {
+        PyErr_SetString(PyExc_AssertionError,
+                        "The SDL_RWops object was not invalidated. "
+                        "Make sure SDL_FreeRW() is called.");
+        PyCSDL2_RWopsDetach(rwops_obj);
+        goto finish;
+    }
+
+    ret = 0;
 
 finish:
     Py_XDECREF(rwops_obj);
@@ -1070,7 +1119,26 @@ PyCSDL2_RWopsGetClose(PyCSDL2_RWops *self, void *closure)
     if (!self->rwops->close)
         Py_RETURN_NONE;
 
+    if (self->rwops->close == PyCSDL2_RWClosePyCall)
+        return PyCSDL2_Get(self->close);
+
     return (PyObject*) PyCSDL2_RWCloseFuncCreate(self->rwops->close);
+}
+
+/** \brief Implements setter for SDL_RWops.close */
+static int
+PyCSDL2_RWopsSetClose(PyCSDL2_RWops *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RWopsValid(self))
+        return -1;
+
+    if (self->rwops->close != PyCSDL2_RWClosePyCall) {
+        PyErr_SetString(PyExc_AttributeError, "close is readonly");
+        return -1;
+    }
+
+    PyCSDL2_Set(self->close, value);
+    return 0;
 }
 
 /** \brief List of properties for PyCSDL2_RWopsType */
@@ -1110,7 +1178,7 @@ static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
      NULL},
     {"close",
      (getter) PyCSDL2_RWopsGetClose,
-     (setter) NULL,
+     (setter) PyCSDL2_RWopsSetClose,
      "Callback that closes the stream and deallocates the SDL_RWops. It has\n"
      "signature:\n"
      "\n"
@@ -1265,6 +1333,7 @@ PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
     rwops->seek = PyCSDL2_RWSeekPyCall;
     rwops->read = PyCSDL2_RWReadPyCall;
     rwops->write = PyCSDL2_RWWritePyCall;
+    rwops->close = PyCSDL2_RWClosePyCall;
 
     return ret;
 }
