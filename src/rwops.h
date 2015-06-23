@@ -57,17 +57,21 @@ typedef struct PyCSDL2_RWops {
     SDL_RWops *rwops;
     /** \brief Python callback for rwops->size */
     PyObject *size;
+    /** \brief Python callback for rwops->seek */
+    PyObject *seek;
 } PyCSDL2_RWops;
 
 static PyTypeObject PyCSDL2_RWopsType;
 
 static Sint64 SDLCALL PyCSDL2_RWSizePyCall(SDL_RWops*);
+static Sint64 SDLCALL PyCSDL2_RWSeekPyCall(SDL_RWops*, Sint64, int);
 
 /** \brief tp_traverse for PyCSDL2_RWopsType */
 static int
 PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
 {
     Py_VISIT(self->size);
+    Py_VISIT(self->seek);
     return 0;
 }
 
@@ -76,6 +80,7 @@ static int
 PyCSDL2_RWopsClear(PyCSDL2_RWops *self)
 {
     Py_CLEAR(self->size);
+    Py_CLEAR(self->seek);
     return 0;
 }
 
@@ -104,7 +109,8 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
      * If we have installed our C-to-Python callbacks, check to ensure that
      * hidden.unknown.data1 points to our PyCSDL2_RWops object.
      */
-    if (self->rwops->size == PyCSDL2_RWSizePyCall) {
+    if (self->rwops->size == PyCSDL2_RWSizePyCall ||
+        self->rwops->seek == PyCSDL2_RWSeekPyCall) {
         if (!PyCSDL2_Assert(self->rwops->hidden.unknown.data1 == self))
             return 0;
     }
@@ -131,6 +137,43 @@ PyCSDL2_RWSizePyCall(SDL_RWops *ctx)
     callback = PyCSDL2_Get(rwops_obj->size);
 
     ret_obj = PyObject_CallFunction(callback, "O", rwops_obj);
+
+    Py_DECREF(callback);
+
+    if (!ret_obj)
+        goto finish;
+
+    if (PyCSDL2_LongAsSint64(ret_obj, &ret))
+        ret = -1;
+
+    Py_DECREF(ret_obj);
+
+finish:
+    Py_XDECREF(rwops_obj);
+    PyGILState_Release(gstate);
+    return ret;
+}
+
+/**
+ * \brief SDL_RWops C to Python "seek" callback
+ */
+static Sint64 SDLCALL
+PyCSDL2_RWSeekPyCall(SDL_RWops *ctx, Sint64 offset, int whence)
+{
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyCSDL2_RWops *rwops_obj = ctx->hidden.unknown.data1;
+    PyObject *callback, *ret_obj;
+    Sint64 ret = -1;
+
+    Py_XINCREF(rwops_obj);
+
+    if (!PyCSDL2_RWopsValid(rwops_obj))
+        goto finish;
+
+    callback = PyCSDL2_Get(rwops_obj->seek);
+
+    ret_obj = PyObject_CallFunction(callback, "O" Sint64_UNIT "i", rwops_obj,
+                                    offset, whence);
 
     Py_DECREF(callback);
 
@@ -791,7 +834,26 @@ PyCSDL2_RWopsGetSeek(PyCSDL2_RWops *self, void *closure)
     if (!self->rwops->seek)
         Py_RETURN_NONE;
 
+    if (self->rwops->seek == PyCSDL2_RWSeekPyCall)
+        return PyCSDL2_Get(self->seek);
+
     return (PyObject*) PyCSDL2_RWSeekFuncCreate(self->rwops->seek);
+}
+
+/** \brief Implements setter for SDL_RWops.seek */
+static int
+PyCSDL2_RWopsSetSeek(PyCSDL2_RWops *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RWopsValid(self))
+        return -1;
+
+    if (self->rwops->seek != PyCSDL2_RWSeekPyCall) {
+        PyErr_SetString(PyExc_AttributeError, "seek is readonly");
+        return -1;
+    }
+
+    PyCSDL2_Set(self->seek, value);
+    return 0;
 }
 
 /** \brief Implements getter for SDL_RWops.read */
@@ -849,7 +911,7 @@ static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
      NULL},
     {"seek",
      (getter) PyCSDL2_RWopsGetSeek,
-     (setter) NULL,
+     (setter) PyCSDL2_RWopsSetSeek,
      "Callback that seeks in stream. It has the signature:\n"
      "\n"
      "seek(context: SDL_RWops, offset: int, whence: int) -> int\n",
@@ -1016,6 +1078,7 @@ PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
     rwops->hidden.unknown.data1 = ret;
 
     rwops->size = PyCSDL2_RWSizePyCall;
+    rwops->seek = PyCSDL2_RWSeekPyCall;
 
     return ret;
 }

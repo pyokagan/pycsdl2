@@ -117,6 +117,43 @@ class Test_SDL_RWops(unittest.TestCase):
         self.rw.size = size_callback
         self.assertRaises(SizeException, SDL_RWsize, self.rw)
 
+    def test_seek(self):
+        "seek is initialized to None"
+        self.assertIs(self.rw.seek, None)
+
+    def test_seek_freed(self):
+        "When freed, seek raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'seek')
+
+    def test_seek_set(self):
+        "seek can be set to any object"
+        x = {}
+        self.rw.seek = x
+        self.assertIs(self.rw.seek, x)
+
+    def test_RWseek(self):
+        "SDL_RWseek() with custom seek callback"
+        def seek_callback(ctx, offset, whence):
+            self.assertIs(ctx, self.rw)
+            self.assertEqual(offset, 41)
+            self.assertEqual(whence, 0)
+            return 42
+
+        self.rw.seek = seek_callback
+        self.assertEqual(SDL_RWseek(self.rw, 41, 0), 42)
+
+    def test_RWseek_exception(self):
+        "SDL_RWseek() with custom exception"
+        class SeekException(Exception):
+            pass
+
+        def seek_callback(ctx, offset, whence):
+            raise SeekException()
+
+        self.rw.seek = seek_callback
+        self.assertRaises(SeekException, SDL_RWseek, self.rw, 41, 0)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"
