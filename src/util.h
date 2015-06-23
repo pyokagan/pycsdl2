@@ -284,6 +284,49 @@ PyCSDL2_LongAsUint32(PyObject *obj, Uint32 *out)
     return 0;
 }
 
+#ifndef INT64_MAX
+#if HAVE_LONG_LONG
+#define INT64_MAX 9223372036854775807LL
+#else
+/** \brief Maximum value a Sint64 can hold */
+#define INT64_MAX 9223372036854775807L
+#endif  /* HAVE_LONG_LONG */
+#endif  /* INT64_MAX */
+
+#ifndef INT64_MIN
+/** \brief Minimum value a Sint64 can hold */
+#define INT64_MIN (-INT64_MAX - 1)
+#endif
+
+/**
+ * \brief Returns a Sint64 representation of obj
+ *
+ * \returns 0 on success, -1 with an exception set on failure.
+ */
+static int
+PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
+{
+#if SIZEOF_LONG >= 8
+    long x = PyLong_AsLong(obj);
+#elif SIZEOF_SIZE_T >= 8
+    Py_ssize_t x = PyLong_AsSsize_t(obj);
+#elif SIZEOF_LONG_LONG >= 8
+    PY_LONG_LONG x = PyLong_AsLongLong(obj);
+#endif
+
+    if (PyErr_Occurred())
+        return -1;
+
+    if (x < INT64_MIN || x > INT64_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int too large to convert to Sint64");
+        return -1;
+    }
+
+    *out = (Sint64) x;
+    return 0;
+}
+
 /**
  * \brief Base instance struct members for PyCSDL2_Buffer-based types
  *

@@ -82,6 +82,204 @@ class Test_SDL_RWops(unittest.TestCase):
         SDL_FreeRW(self.rw)
         self.assertRaises(ValueError, getattr, self.rw, 'type')
 
+    def test_size(self):
+        "size is initialized to None"
+        self.assertIs(self.rw.size, None)
+
+    def test_size_freed(self):
+        "When freed, size raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'size')
+
+    def test_size_set(self):
+        "size can be set to any object"
+        x = {}
+        self.rw.size = x
+        self.assertIs(self.rw.size, x)
+
+    def test_RWsize(self):
+        "SDL_RWsize() with custom size callback"
+        def size_callback(ctx):
+            self.assertIs(ctx, self.rw)
+            return 42
+
+        self.rw.size = size_callback
+        self.assertEqual(SDL_RWsize(self.rw), 42)
+
+    def test_RWsize_exception(self):
+        "SDL_RWsize() with custom exception"
+        class SizeException(Exception):
+            pass
+
+        def size_callback(ctx):
+            raise SizeException()
+
+        self.rw.size = size_callback
+        self.assertRaises(SizeException, SDL_RWsize, self.rw)
+
+    def test_seek(self):
+        "seek is initialized to None"
+        self.assertIs(self.rw.seek, None)
+
+    def test_seek_freed(self):
+        "When freed, seek raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'seek')
+
+    def test_seek_set(self):
+        "seek can be set to any object"
+        x = {}
+        self.rw.seek = x
+        self.assertIs(self.rw.seek, x)
+
+    def test_RWseek(self):
+        "SDL_RWseek() with custom seek callback"
+        def seek_callback(ctx, offset, whence):
+            self.assertIs(ctx, self.rw)
+            self.assertEqual(offset, 41)
+            self.assertEqual(whence, 0)
+            return 42
+
+        self.rw.seek = seek_callback
+        self.assertEqual(SDL_RWseek(self.rw, 41, 0), 42)
+
+    def test_RWseek_exception(self):
+        "SDL_RWseek() with custom exception"
+        class SeekException(Exception):
+            pass
+
+        def seek_callback(ctx, offset, whence):
+            raise SeekException()
+
+        self.rw.seek = seek_callback
+        self.assertRaises(SeekException, SDL_RWseek, self.rw, 41, 0)
+
+    def test_read(self):
+        "read is initialized to None"
+        self.assertIs(self.rw.read, None)
+
+    def test_read_freed(self):
+        "When freed, read raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'read')
+
+    def test_read_set(self):
+        "read can be set to any object"
+        x = {}
+        self.rw.read = x
+        self.assertIs(self.rw.read, x)
+
+    def test_RWread(self):
+        "SDL_RWread() with custom read callback"
+        def read_callback(context, ptr, size, maxnum):
+            self.assertIs(context, self.rw)
+            self.assertEqual(size, 1)
+            self.assertEqual(maxnum, 2)
+            with memoryview(ptr) as x:
+                self.assertEqual(x.nbytes, 2)
+                self.assertFalse(x.readonly)
+                x[0] = 1
+                x[1] = 2
+            return 2
+
+        x = bytearray(2)
+        self.rw.read = read_callback
+        self.assertEqual(SDL_RWread(self.rw, x, 1, 2), 2)
+        self.assertEqual(x, b'\x01\x02')
+
+    def test_RWread_exception(self):
+        "SDL_RWread() with custom exception"
+        class ReadException(Exception):
+            pass
+
+        def read_callback(context, ptr, size, maxnum):
+            raise ReadException()
+
+        x = bytearray(2)
+        self.rw.read = read_callback
+        self.assertRaises(ReadException, SDL_RWread, self.rw, x, 1, 2)
+
+    def test_write(self):
+        "write is initialized to None"
+        self.assertIs(self.rw.write, None)
+
+    def test_write_freed(self):
+        "When freed, write raises ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'write')
+
+    def test_write_set(self):
+        "write can be set to any object"
+        x = {}
+        self.rw.write = x
+        self.assertIs(self.rw.write, x)
+
+    def test_RWwrite(self):
+        "SDL_RWwrite() with custom write callback"
+        def write_callback(context, ptr, size, num):
+            self.assertIs(context, self.rw)
+            self.assertEqual(size, 1)
+            self.assertEqual(num, 2)
+            with memoryview(ptr) as x:
+                self.assertEqual(x.nbytes, 2)
+                self.assertTrue(x.readonly)
+                self.assertEqual(x[0], 1)
+                self.assertEqual(x[1], 2)
+            return 2
+
+        x = b'\x01\x02'
+        self.rw.write = write_callback
+        self.assertEqual(SDL_RWwrite(self.rw, x, 1, 2), 2)
+
+    def test_RWwrite_exception(self):
+        "SDL_RWwrite() with custom exception"
+        class WriteException(Exception):
+            pass
+
+        def write_callback(context, ptr, size, num):
+            raise WriteException()
+
+        x = b'\x01\x02'
+        self.rw.write = write_callback
+        self.assertRaises(WriteException, SDL_RWwrite, self.rw, x, 1, 2)
+
+    def test_close(self):
+        "close is initialized to None"
+        self.assertIs(self.rw.close, None)
+
+    def test_close_freed(self):
+        "When freed, close raises ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'close')
+
+    def test_RWclose(self):
+        "SDL_RWclose() with custom close callback"
+        def close_callback(ctx):
+            self.assertIs(ctx, self.rw)
+            SDL_FreeRW(ctx)
+
+        self.rw.close = close_callback
+        self.assertIs(SDL_RWclose(self.rw), None)
+
+    def test_RWclose_exception(self):
+        "SDL_RWclose() with custom exception"
+        class CloseException(Exception):
+            pass
+
+        def close_callback(ctx):
+            raise CloseException()
+
+        self.rw.close = close_callback
+        self.assertRaises(CloseException, SDL_RWclose, self.rw)
+
+    def test_RWclose_not_freed(self):
+        "SDL_RWclose() with callback that does not call SDL_FreeRW()"
+        def close_callback(ctx):
+            pass
+
+        self.rw.close = close_callback
+        self.assertRaises(AssertionError, SDL_RWclose, self.rw)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"
