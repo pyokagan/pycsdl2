@@ -55,9 +55,29 @@ typedef struct PyCSDL2_RWops {
     PyObject *in_weakreflist;
     /** \brief SDL_RWops pointer that this instance owns */
     SDL_RWops *rwops;
+    /** \brief Python callback for rwops->size */
+    PyObject *size;
 } PyCSDL2_RWops;
 
 static PyTypeObject PyCSDL2_RWopsType;
+
+static Sint64 SDLCALL PyCSDL2_RWSizePyCall(SDL_RWops*);
+
+/** \brief tp_traverse for PyCSDL2_RWopsType */
+static int
+PyCSDL2_RWopsTraverse(PyCSDL2_RWops *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->size);
+    return 0;
+}
+
+/** \brief tp_clear for PyCSDL2_RWopsType */
+static int
+PyCSDL2_RWopsClear(PyCSDL2_RWops *self)
+{
+    Py_CLEAR(self->size);
+    return 0;
+}
 
 /**
  * \brief Validates the PyCSDL2_RWops object
@@ -72,12 +92,60 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
     if (!PyCSDL2_Assert(self))
         return 0;
 
+    if (!PyCSDL2_Assert(Py_TYPE(self) == &PyCSDL2_RWopsType))
+        return 0;
+
     if (!self->rwops) {
         PyErr_SetString(PyExc_ValueError, "SDL_RWops has been freed");
         return 0;
     }
 
+    /*
+     * If we have installed our C-to-Python callbacks, check to ensure that
+     * hidden.unknown.data1 points to our PyCSDL2_RWops object.
+     */
+    if (self->rwops->size == PyCSDL2_RWSizePyCall) {
+        if (!PyCSDL2_Assert(self->rwops->hidden.unknown.data1 == self))
+            return 0;
+    }
+
     return 1;
+}
+
+/**
+ * \brief SDL_RWops C to Python "size" callback
+ */
+static Sint64 SDLCALL
+PyCSDL2_RWSizePyCall(SDL_RWops *ctx)
+{
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    PyCSDL2_RWops *rwops_obj = ctx->hidden.unknown.data1;
+    PyObject *callback, *ret_obj;
+    Sint64 ret = -1;
+
+    Py_XINCREF(rwops_obj);
+
+    if (!PyCSDL2_RWopsValid(rwops_obj))
+        goto finish;
+
+    callback = PyCSDL2_Get(rwops_obj->size);
+
+    ret_obj = PyObject_CallFunction(callback, "O", rwops_obj);
+
+    Py_DECREF(callback);
+
+    if (!ret_obj)
+        goto finish;
+
+    if (PyCSDL2_LongAsSint64(ret_obj, &ret))
+        ret = -1;
+
+    Py_DECREF(ret_obj);
+
+finish:
+    Py_XDECREF(rwops_obj);
+    PyGILState_Release(gstate);
+    return ret;
 }
 
 /** \brief Instance data for PyCSDL2_RWSizeFuncType */
@@ -650,6 +718,7 @@ PyCSDL2_RWopsDealloc(PyCSDL2_RWops *self)
     if (PyObject_CallFinalizerFromDealloc((PyObject*) self) < 0)
         return;
     PyObject_ClearWeakRefs((PyObject*) self);
+    PyCSDL2_RWopsClear(self);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
@@ -690,7 +759,26 @@ PyCSDL2_RWopsGetSize(PyCSDL2_RWops *self, void *closure)
     if (!self->rwops->size)
         Py_RETURN_NONE;
 
+    if (self->rwops->size == PyCSDL2_RWSizePyCall)
+        return PyCSDL2_Get(self->size);
+
     return (PyObject*) PyCSDL2_RWSizeFuncCreate(self->rwops->size);
+}
+
+/** \brief Implements setter for SDL_RWops.size */
+static int
+PyCSDL2_RWopsSetSize(PyCSDL2_RWops *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RWopsValid(self))
+        return -1;
+
+    if (self->rwops->size != PyCSDL2_RWSizePyCall) {
+        PyErr_SetString(PyExc_AttributeError, "size is readonly");
+        return -1;
+    }
+
+    PyCSDL2_Set(self->size, value);
+    return 0;
 }
 
 /** \brief Implements getter for SDL_RWops.seek */
@@ -754,7 +842,7 @@ static PyGetSetDef PyCSDL2_RWopsGetSetters[] = {
      NULL},
     {"size",
      (getter) PyCSDL2_RWopsGetSize,
-     (setter) NULL,
+     (setter) PyCSDL2_RWopsSetSize,
      "Callback that reports stream size. It has the signature:\n"
      "\n"
      "size(context: SDL_RWops) -> int\n",
@@ -814,11 +902,12 @@ static PyTypeObject PyCSDL2_RWopsType = {
     /* tp_getattro       */ 0,
     /* tp_setattro       */ 0,
     /* tp_as_buffer      */ 0,
-    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_FINALIZE,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC |
+                            Py_TPFLAGS_HAVE_FINALIZE,
     /* tp_doc            */
     "SDL_RWops",
-    /* tp_traverse       */ 0,
-    /* tp_clear          */ 0,
+    /* tp_traverse       */ (traverseproc) PyCSDL2_RWopsTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_RWopsClear,
     /* tp_richcompare    */ 0,
     /* tp_weaklistoffset */ offsetof(PyCSDL2_RWops, in_weakreflist),
     /* tp_iter           */ 0,
@@ -895,20 +984,40 @@ PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
 static PyCSDL2_RWops *
 PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    SDL_RWops *ret;
+    SDL_RWops *rwops;
+    PyCSDL2_RWops *ret;
     static char *kwlist[] = {NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
         return NULL;
-    if (!(ret = SDL_AllocRW()))
+
+    rwops = SDL_AllocRW();
+    if (!rwops)
         return PyCSDL2_RaiseSDLError();
+
     /*
      * PyCSDL2_RWopsPtr calls SDL_RWops.close if it is not NULL on destruction.
      * However, SDL_AllocRW() does not zero SDL_RWops on allocation, and thus
      * PyCSDL2_RWopsPtr will call an invalid pointer on destructor and cause a
      * segfault. Fix this by zeroing SDL_RWops.
      */
-    memset(ret, 0, sizeof(SDL_RWops));
-    return PyCSDL2_RWopsCreate(ret);
+    memset(rwops, 0, sizeof(SDL_RWops));
+
+    ret = PyCSDL2_RWopsCreate(rwops);
+    if (!ret) {
+        SDL_FreeRW(rwops);
+        return NULL;
+    }
+
+    /*
+     * Initialize C-to-Python callbacks. These callbacks require the
+     * PyCSDL2_RWops instance ptr to be stored in hidden.unknown.data1.
+     */
+    rwops->hidden.unknown.data1 = ret;
+
+    rwops->size = PyCSDL2_RWSizePyCall;
+
+    return ret;
 }
 
 /**

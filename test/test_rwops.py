@@ -82,6 +82,41 @@ class Test_SDL_RWops(unittest.TestCase):
         SDL_FreeRW(self.rw)
         self.assertRaises(ValueError, getattr, self.rw, 'type')
 
+    def test_size(self):
+        "size is initialized to None"
+        self.assertIs(self.rw.size, None)
+
+    def test_size_freed(self):
+        "When freed, size raises a ValueError"
+        SDL_FreeRW(self.rw)
+        self.assertRaises(ValueError, getattr, self.rw, 'size')
+
+    def test_size_set(self):
+        "size can be set to any object"
+        x = {}
+        self.rw.size = x
+        self.assertIs(self.rw.size, x)
+
+    def test_RWsize(self):
+        "SDL_RWsize() with custom size callback"
+        def size_callback(ctx):
+            self.assertIs(ctx, self.rw)
+            return 42
+
+        self.rw.size = size_callback
+        self.assertEqual(SDL_RWsize(self.rw), 42)
+
+    def test_RWsize_exception(self):
+        "SDL_RWsize() with custom exception"
+        class SizeException(Exception):
+            pass
+
+        def size_callback(ctx):
+            raise SizeException()
+
+        self.rw.size = size_callback
+        self.assertRaises(SizeException, SDL_RWsize, self.rw)
+
 
 class TestRWFromFile_Read(unittest.TestCase):
     "Tests for SDL_RWFromFile(file, 'r')"
