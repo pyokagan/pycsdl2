@@ -142,6 +142,32 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
 }
 
 /**
+ * \brief Detaches the SDL_RWops pointer from the PyCSDL2_RWops object
+ *
+ * \returns The SDL_RWops pointer owned by the object, or NULL if the object
+ *          did not have any SDL_RWops pointer.
+ */
+static SDL_RWops *
+PyCSDL2_RWopsDetach(PyCSDL2_RWops *self)
+{
+    SDL_RWops *rwops;
+
+    if (!self)
+        return NULL;
+
+    if (Py_TYPE(self) != &PyCSDL2_RWopsType)
+        return NULL;
+
+    rwops = self->rwops;
+
+    PyCSDL2_RWopsClear(self);
+
+    self->rwops = NULL;
+
+    return rwops;
+}
+
+/**
  * \brief SDL_RWops C to Python "size" callback
  */
 static Sint64 SDLCALL
@@ -803,8 +829,8 @@ PyCSDL2_RWclose(PyObject *self, PyObject *args, PyObject *kwds)
     ret = callback(rwops);
     Py_END_ALLOW_THREADS
 
-    /* We expect out SDL_RWops to be freed, so invalidate the rwops pointer */
-    rwops_obj->rwops = NULL;
+    /* We expect out SDL_RWops to be freed, so invalidate rwops_obj */
+    PyCSDL2_RWopsDetach(rwops_obj);
 
     if (ret)
         return PyCSDL2_RaiseSDLError();
@@ -863,7 +889,7 @@ PyCSDL2_RWopsFinalize(PyCSDL2_RWops *self)
     else
         SDL_FreeRW(self->rwops);
 
-    self->rwops = NULL;
+    PyCSDL2_RWopsDetach(self);
 
     PyErr_Restore(error_type, error_value, error_traceback);
 }
@@ -1262,8 +1288,7 @@ PyCSDL2_FreeRW(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyCSDL2_RWopsValid(rwops_obj))
         return NULL;
 
-    SDL_FreeRW(rwops_obj->rwops);
-    rwops_obj->rwops = NULL;
+    SDL_FreeRW(PyCSDL2_RWopsDetach(rwops_obj));
 
     Py_RETURN_NONE;
 }
