@@ -695,6 +695,49 @@ PyCSDL2_LoadWAV_RW(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_LoadWAV()
+ *
+ * \code{.py}
+ * SDL_LoadWAV(file: str) -> (SDL_AudioSpec, SDL_WAVBuf, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LoadWAV(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *file;
+    SDL_AudioSpec spec;
+    SDL_AudioSpec *ret;
+    Uint8 *audio_buf;
+    Uint32 audio_len;
+    PyCSDL2_AudioSpec *outspec = NULL;
+    PyCSDL2_WAVBuf *outbuf = NULL;
+    PyObject *out = NULL;
+    static char *kwlist[] = {"file", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s", kwlist, &file))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_LoadWAV(file, &spec, &audio_buf, &audio_len);
+    Py_END_ALLOW_THREADS
+
+    if (!ret)
+        return PyCSDL2_RaiseSDLError();
+
+    outbuf = PyCSDL2_WAVBufCreate(audio_buf, audio_len);
+    if (!outbuf)
+        SDL_FreeWAV(audio_buf);
+
+    outspec = PyCSDL2_AudioSpecCreate(&spec);
+
+    out = Py_BuildValue("OO" Uint32_UNIT, outspec, outbuf, audio_len);
+
+    Py_XDECREF(outspec);
+    Py_XDECREF(outbuf);
+    return out;
+}
+
+/**
  * \brief Implements csdl2.SDL_FreeWAV()
  *
  * \code{.py}

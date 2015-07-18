@@ -301,6 +301,18 @@ stream.
              * A byte buffer containing the audio data.
              * An int specifying the size of the audio data buffer in bytes.
 
+.. function:: SDL_LoadWAV(file: str)
+
+   Loads a WAVE from a file.
+
+   :param str file: Name of the file to load
+   :returns: A 3-tuple (:class:`SDL_AudioSpec`, buffer, int):
+
+             * A :class:`SDL_AudioSpec` specifying the audio format of the
+               wave file.
+             * A byte buffer containing the audio data.
+             * An int specifying the size of the audio data buffer in bytes.
+
 .. function:: SDL_FreeWAV(audio_buf) -> None
 
    Frees the buffer previously allocated with :func:`SDL_LoadWAV` or

@@ -6,6 +6,7 @@ import unittest
 import threading
 import struct
 import io
+import tempfile
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -419,6 +420,42 @@ class TestLoadWAVRW(unittest.TestCase):
     def test_return(self):
         "Returns a (SDL_AudioSpec, buffer, int) tuple"
         audiospec, buf, size = SDL_LoadWAV_RW(self.rwops, True)
+        self.assertIs(type(audiospec), SDL_AudioSpec)
+        self.assertEqual(audiospec.freq, self.sample_rate)
+        self.assertEqual(audiospec.format, AUDIO_U8)
+        self.assertEqual(audiospec.channels, self.num_channels)
+        self.assertIs(audiospec.callback, None)
+        self.assertIs(audiospec.userdata, None)
+        self.assertIs(type(size), int)
+
+
+class TestLoadWAV(unittest.TestCase):
+    """Tests for SDL_LoadWAV()"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.num_channels = 1
+        cls.sample_rate = 8000
+        cls.bits_per_sample = 8
+        cls.dir = tempfile.TemporaryDirectory()
+        cls.path = os.path.join(cls.dir.name, 'test.wav')
+        with open(cls.path, 'wb') as f:
+            f.write(sample_wave(cls.num_channels, cls.sample_rate,
+                                cls.bits_per_sample))
+
+    @classmethod
+    def tearDownClass(cls):
+        # Handle "directory not empty" errors on Windows by attempting 3 times
+        for i in range(3):
+            try:
+                cls.dir.cleanup()
+            except OSError:
+                continue
+            break
+
+    def test_return(self):
+        "Returns a (SDL_AudioSpec, buffer, int) tuple"
+        audiospec, buf, size = SDL_LoadWAV(self.path)
         self.assertIs(type(audiospec), SDL_AudioSpec)
         self.assertEqual(audiospec.freq, self.sample_rate)
         self.assertEqual(audiospec.format, AUDIO_U8)

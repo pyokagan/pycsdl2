@@ -120,6 +120,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "data. If `freesrc` is True, the data source will be freed.\n"
     },
 
+    {"SDL_LoadWAV",
+     (PyCFunction) PyCSDL2_LoadWAV,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadWAV(file: str) -> (SDL_AudioSpec, buffer, int)\n"
+     "\n"
+     "Loads a WAVE from `file`. Returns a 3-tuple containing a\n"
+     "SDL_AudioSpec, a byte buffer and the buffer's size in bytes as an\n"
+     "integer. The SDL_AudioSpec is filled with the audio data format of\n"
+     "the wave source data, and the byte buffer contains the audio data.\n"
+    },
+
     {"SDL_FreeWAV",
      (PyCFunction) PyCSDL2_FreeWAV,
      METH_VARARGS | METH_KEYWORDS,
