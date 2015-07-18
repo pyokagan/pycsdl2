@@ -415,6 +415,18 @@ class TestOpenAudio(unittest.TestCase):
         self.assertRaises(ValueError, len, self.data)
 
 
+class TestGetNumAudioDevices(unittest.TestCase):
+    "Tests SDL_GetNumAudioDevices()"
+
+    def setUp(self):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetNumAudioDevices(False)), int)
+
+
 class TestOpenAudioDevice(unittest.TestCase):
     """Tests SDL_OpenAudioDevice()"""
 

@@ -215,6 +215,23 @@ specific need to specify the audio driver.
    Use this function to shut down audio if you initialized it with
    :func:`SDL_AudioInit`.
 
+Audio Device Discovery
+----------------------
+.. function:: SDL_GetNumAudioDevices(iscapture) -> int
+
+   Query the number of audio devices.
+
+   This function may trigger a complete redetection of available hardware,
+   which is an expensive operation.
+
+   :param bool iscapture: False to request playback devices, True to request
+                          recording devices.
+   :returns: The number of available devices exposed by the current driver, or
+             -1 if an explicit list of devices can't be determined.
+
+   .. note:: The `iscapture` parameter is for future expansion and should
+             always be False for now.
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to

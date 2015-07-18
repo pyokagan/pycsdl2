@@ -116,6 +116,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_OpenAudioDevice() instead.\n"
     },
 
+    {"SDL_GetNumAudioDevices",
+     (PyCFunction) PyCSDL2_GetNumAudioDevices,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetNumAudioDevices(iscapture: bool) -> int\n"
+     "\n"
+     "Returns the number of available devices exposed by the current driver,\n"
+     "or -1 if an explicit list of devices cannot be determined.\n"
+     "\n"
+     "The `iscapture` argument is for future expansion and should always be\n"
+     "False for now.\n"
+     "\n"
+     "This function may trigger a complete redetection of available\n"
+     "hardware, which is an expensive operation.\n"
+    },
+
     {"SDL_OpenAudioDevice",
      (PyCFunction) PyCSDL2_OpenAudioDevice,
      METH_VARARGS | METH_KEYWORDS,
