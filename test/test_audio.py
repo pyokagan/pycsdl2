@@ -350,6 +350,75 @@ class TestGetCurrentAudioDriver(unittest.TestCase):
         self.assertTrue(x is None or type(x) is str)
 
 
+class TestOpenAudio(unittest.TestCase):
+    """Tests SDL_OpenAudio()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            self.assertIs(type(length), int)
+            x = memoryview(data)
+            self.assertEqual(x.nbytes, length)
+            self.assertEqual(x.itemsize, 1)
+            self.assertEqual(x.format, 'B')
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+            # we can store a ref to the data object (though not it's buffer)
+            self.data = data
+            with self.cv:
+                self.called = userdata
+                self.cv.notify()
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback, userdata=True)
+        self.obtained = SDL_AudioSpec()
+        self.called = None
+        self.cv = threading.Condition()
+
+    def tearDown(self):
+        try:
+            SDL_CloseAudio()
+        except (RuntimeError, ValueError):
+            pass
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_OpenAudio(self.desired, self.obtained), None)
+
+    def test_fails_no_callback(self):
+        "Fails if callback is None"
+        self.desired.callback = None
+        self.assertRaises(ValueError, SDL_OpenAudio, self.desired,
+                          self.obtained)
+
+    def test_obtained_none(self):
+        "obtained can be None"
+        self.assertIs(SDL_OpenAudio(self.desired, None), None)
+
+    def test_callback(self):
+        "callback is saved in the audio device and called"
+        def wrong_callback(userdata, data, length):
+            with self.cv:
+                self.called = {}
+                self.cv.notify()
+
+        SDL_OpenAudio(self.desired, self.obtained)
+        self.desired.callback = wrong_callback
+        self.desired.userdata = False
+        SDL_PauseAudio(False)
+        with self.cv:
+            self.cv.wait_for(lambda: self.called)
+        self.assertTrue(self.called)
+        # If we save the data buffer provided to the callback, it is still
+        # invalidated.
+        self.assertRaises(ValueError, len, self.data)
+
+
 class TestOpenAudioDevice(unittest.TestCase):
     """Tests SDL_OpenAudioDevice()"""
 
@@ -413,6 +482,46 @@ class TestOpenAudioDevice(unittest.TestCase):
         # If we save the data buffer provided to the callback, it is still
         # invalidated.
         self.assertRaises(ValueError, len, self.data)
+
+
+class TestPauseAudio(unittest.TestCase):
+    """Tests SDL_PauseAudio()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            x = memoryview(data)
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        SDL_OpenAudio(self.desired, self.obtained)
+
+    def tearDown(self):
+        try:
+            SDL_CloseAudio()
+        except (ValueError, RuntimeError):
+            pass
+
+    def test_true(self):
+        "SDL_PauseAudio(True) works"
+        self.assertIs(SDL_PauseAudio(True), None)
+
+    def test_false(self):
+        "SDL_PauseAudio(False) works"
+        self.assertIs(SDL_PauseAudio(False), None)
+
+    def test_closed(self):
+        "Raises ValueError when the audio device is not open"
+        SDL_CloseAudio()
+        self.assertRaises(ValueError, SDL_PauseAudio, False)
 
 
 class TestPauseAudioDevice(unittest.TestCase):
@@ -553,6 +662,36 @@ class TestFreeWAV(unittest.TestCase):
         "When freed, raises ValueError"
         SDL_FreeWAV(self.buf)
         self.assertRaises(ValueError, SDL_FreeWAV, self.buf)
+
+
+class TestCloseAudio(unittest.TestCase):
+    """Tests for SDL_CloseAudio()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            x = memoryview(data)
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        SDL_OpenAudio(self.desired, self.obtained)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_CloseAudio(), None)
+
+    def test_closed(self):
+        "Raises ValueError when the SDL_AudioDevice has been closed"
+        SDL_CloseAudio()
+        self.assertRaises(ValueError, SDL_CloseAudio)
 
 
 class TestCloseAudioDevice(unittest.TestCase):
