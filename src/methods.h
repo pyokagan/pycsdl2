@@ -63,6 +63,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the name of the audio driver at the requested index.\n"
     },
 
+    {"SDL_GetCurrentAudioDriver",
+     (PyCFunction) PyCSDL2_GetCurrentAudioDriver,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetCurrentAudioDriver() -> str or None\n"
+     "\n"
+     "Returns the name of the current audio driver, or None if no driver\n"
+     "has been initialized.\n"
+    },
+
     {"SDL_OpenAudioDevice",
      (PyCFunction) PyCSDL2_OpenAudioDevice,
      METH_VARARGS | METH_KEYWORDS,

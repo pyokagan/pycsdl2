@@ -717,6 +717,29 @@ PyCSDL2_GetAudioDriver(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetCurrentAudioDriver()
+ *
+ * \code{.py}
+ * SDL_GetCurrentAudioDriver() -> str or None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetCurrentAudioDriver(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *driver_name;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    driver_name = SDL_GetCurrentAudioDriver();
+    if (driver_name)
+        return PyUnicode_FromString(driver_name);
+    else
+        Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}
