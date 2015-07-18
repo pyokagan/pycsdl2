@@ -283,6 +283,14 @@ class TestAudioDevice(unittest.TestCase):
         self.assertRaises(TypeError, type, 'testtype', (SDL_AudioDevice,), {})
 
 
+class TestGetNumAudioDrivers(unittest.TestCase):
+    """Tests SDL_GetNumAudioDrivers()"""
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetNumAudioDrivers()), int)
+
+
 class TestOpenAudioDevice(unittest.TestCase):
     """Tests SDL_OpenAudioDevice()"""
 
