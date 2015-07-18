@@ -47,6 +47,114 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* audio.h */
 
+    {"SDL_OpenAudioDevice",
+     (PyCFunction) PyCSDL2_OpenAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_OpenAudioDevice(device: str or None, iscapture: bool,\n"
+     "                    desired: SDL_AudioSpec,\n"
+     "                    obtained: SDL_AudioSpec or None,\n"
+     "                    allowed_changes: int) -> SDL_AudioDevice\n"
+     "\n"
+     "Opens a specific audio device.\n"
+     "\n"
+     "device\n"
+     "    The device name as reported by SDL_GetAudioDeviceName(). If None,\n"
+     "    the default device is used.\n"
+     "\n"
+     "iscapture\n"
+     "    True to specify the device should be obtained for recording, not\n"
+     "    playback.\n"
+     "\n"
+     "desired\n"
+     "    A SDL_AudioSpec specifying the audio callback and desired output\n"
+     "    format.\n"
+     "\n"
+     "obtained\n"
+     "    If a SDL_AudioSpec is provided, it will be filled in with the\n"
+     "    actual output format. Depending on the value of `allowed_changes`,\n"
+     "    this can differ from the `desired` SDL_AudioSpec.\n"
+     "\n"
+     "allowed_changes\n"
+     "    If set to 0, SDL will transparently handle all differences between\n"
+     "    the `desired` output format and the actual hardware. This handling\n"
+     "    can be selectively disabled by specifying zero or more of the\n"
+     "    following flags OR'd together:\n"
+     "\n"
+     "    * SDL_AUDIO_ALLOW_FREQUENCY_CHANGE\n"
+     "    * SDL_AUDIO_ALLOW_FORMAT_CHANGE\n"
+     "    * SDL_AUDIO_ALLOW_CHANNELS_CHANGE\n"
+     "    * SDL_AUDIO_ALLOW_ANY_CHANGE\n"
+     "\n"
+     "    If these flags are set, the corresponding fields in the `obtained`\n"
+     "    SDL_AudioSpec will be set to the values of the actual hardware\n"
+     "    audio output format.\n"
+     "\n"
+     "Newly-opened audio devices start in the paused state. Use\n"
+     "SDL_PauseAudioDevice() to unpause the device and start playing\n"
+     "sound.\n"
+    },
+
+    {"SDL_PauseAudioDevice",
+     (PyCFunction) PyCSDL2_PauseAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PauseAudioDevice(dev: SDL_AudioDevice, pause_on: bool) -> None\n"
+     "\n"
+     "Pause or unpause audio playback on the specified device. If `pause_on`\n"
+     "is True, the device `dev` will be paused, and if `pause_on` is False,\n"
+     "the device `dev` will be unpaused.\n"
+     "\n"
+     "When the device is paused, silence will be written to the audio device\n"
+     "and the audio callback is guaranteed to not be called.\n"
+    },
+
+    {"SDL_LoadWAV_RW",
+     (PyCFunction) PyCSDL2_LoadWAV_RW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadWAV_RW(src: SDL_RWops, freesrc: bool)\n"
+     "    -> (SDL_AudioSpec, buffer, int)\n"
+     "\n"
+     "Loads a WAVE from the SDL_RWops data source. Returns a 3-tuple\n"
+     "containing a SDL_AudioSpec, a byte buffer, and the buffer's size in\n"
+     "bytes as an integer. The SDL_AudioSpec is filled with the audio data\n"
+     "format of the wave source data, and the byte buffer contains the audio\n"
+     "data. If `freesrc` is True, the data source will be freed.\n"
+    },
+
+    {"SDL_LoadWAV",
+     (PyCFunction) PyCSDL2_LoadWAV,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadWAV(file: str) -> (SDL_AudioSpec, buffer, int)\n"
+     "\n"
+     "Loads a WAVE from `file`. Returns a 3-tuple containing a\n"
+     "SDL_AudioSpec, a byte buffer and the buffer's size in bytes as an\n"
+     "integer. The SDL_AudioSpec is filled with the audio data format of\n"
+     "the wave source data, and the byte buffer contains the audio data.\n"
+    },
+
+    {"SDL_FreeWAV",
+     (PyCFunction) PyCSDL2_FreeWAV,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeWAV(audio_buf) -> None\n"
+     "\n"
+     "Frees the wave data buffer allocated by SDL_LoadWAV() or\n"
+     "SDL_LoadWAV_RW().\n"
+     "\n"
+     "There is no need to explicitly call this function. The buffer returned\n"
+     "by SDL_LoadWAV() or SDL_LoadWAV_RW() will automatically call this\n"
+     "function as part of its destructor.\n"
+    },
+
+    {"SDL_CloseAudioDevice",
+     (PyCFunction) PyCSDL2_CloseAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CloseAudioDevice(dev: SDL_AudioDevice) -> None\n"
+     "\n"
+     "Shuts down audio processing and closes the specified device.\n"
+     "\n"
+     "There is no need to explictly call this function. SDL_AudioDevice will\n"
+     "automatically call this function as part of its destructor.\n"
+    },
+
     /* distutils.h */
 
     {"PyCSDL2_GetSystemSDL",

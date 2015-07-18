@@ -3,6 +3,10 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import threading
+import struct
+import io
+import tempfile
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,6 +19,13 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+
+
+try:
+    SDL_Init(SDL_INIT_AUDIO)
+    has_audio = True
+except RuntimeError:
+    has_audio = False
 
 
 class TestAudioConstants(unittest.TestCase):
@@ -121,6 +132,389 @@ class TestAudioConstants(unittest.TestCase):
 
     def test_SDL_MIX_MAXVOLUME(self):
         self.assertEqual(SDL_MIX_MAXVOLUME, 128)
+
+
+class TestAudioSpec(unittest.TestCase):
+    """Tests SDL_AudioSpec"""
+
+    def setUp(self):
+        self.spec = SDL_AudioSpec()
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_AudioSpec,), {})
+
+    def test_init(self):
+        "__init__() with positional arguments"
+        callback = lambda: None
+        userdata = {}
+        self.spec.__init__(1, 2, 3, 4, 5, 6, callback, userdata)
+        self.assertEqual(self.spec.freq, 1)
+        self.assertEqual(self.spec.format, 2)
+        self.assertEqual(self.spec.channels, 3)
+        self.assertEqual(self.spec.silence, 4)
+        self.assertEqual(self.spec.samples, 5)
+        self.assertEqual(self.spec.size, 6)
+        self.assertIs(self.spec.callback, callback)
+        self.assertIs(self.spec.userdata, userdata)
+
+    def test_init_kwds(self):
+        "__init__() with keyword arguments"
+        callback = lambda: None
+        userdata = {}
+        self.spec.__init__(freq=1, format=2, channels=3, silence=4, samples=5,
+                           size=6, callback=callback, userdata=userdata)
+        self.assertEqual(self.spec.freq, 1)
+        self.assertEqual(self.spec.format, 2)
+        self.assertEqual(self.spec.channels, 3)
+        self.assertEqual(self.spec.silence, 4)
+        self.assertEqual(self.spec.samples, 5)
+        self.assertEqual(self.spec.size, 6)
+        self.assertIs(self.spec.callback, callback)
+        self.assertIs(self.spec.userdata, userdata)
+
+    def test_init_default(self):
+        "default arguments of __init__() are 0"
+        callback = lambda: None
+        userdata = {}
+        self.spec.__init__(1, 2, 3, 4, 5, 6, callback, userdata)
+        self.spec.__init__()
+        self.assertEqual(self.spec.freq, 0)
+        self.assertEqual(self.spec.format, 0)
+        self.assertEqual(self.spec.channels, 0)
+        self.assertEqual(self.spec.silence, 0)
+        self.assertEqual(self.spec.samples, 0)
+        self.assertEqual(self.spec.size, 0)
+        self.assertIs(self.spec.callback, None)
+        self.assertIs(self.spec.userdata, None)
+
+    def test_freq(self):
+        "freq is an int"
+        self.assertIs(type(self.spec.freq), int)
+        self.assertEqual(self.spec.freq, 0)
+
+    def test_freq_set(self):
+        "freq can be set to an int"
+        self.spec.freq = 42
+        self.assertEqual(self.spec.freq, 42)
+
+    def test_format(self):
+        "format is an int"
+        self.assertIs(type(self.spec.format), int)
+        self.assertEqual(self.spec.format, 0)
+
+    def test_format_set(self):
+        "format can be set to an int"
+        self.spec.format = 42
+        self.assertEqual(self.spec.format, 42)
+
+    def test_channels(self):
+        "channels is an int"
+        self.assertIs(type(self.spec.channels), int)
+        self.assertEqual(self.spec.channels, 0)
+
+    def test_channels_set(self):
+        "channels can be set to an int"
+        self.spec.channels = 42
+        self.assertEqual(self.spec.channels, 42)
+
+    def test_silence(self):
+        "silence is an int"
+        self.assertIs(type(self.spec.silence), int)
+        self.assertEqual(self.spec.silence, 0)
+
+    def test_silence_set(self):
+        "silence can be set to an int"
+        self.spec.silence = 42
+        self.assertEqual(self.spec.silence, 42)
+
+    def test_samples(self):
+        "samples is an int"
+        self.assertIs(type(self.spec.samples), int)
+        self.assertEqual(self.spec.samples, 0)
+
+    def test_samples_set(self):
+        "samples can be set to an int"
+        self.spec.samples = 42
+        self.assertEqual(self.spec.samples, 42)
+
+    def test_size(self):
+        "size is an int"
+        self.assertIs(type(self.spec.size), int)
+        self.assertEqual(self.spec.size, 0)
+
+    def test_size_set(self):
+        "size can be set to an int"
+        self.spec.size = 42
+        self.assertEqual(self.spec.size, 42)
+
+    def test_callback(self):
+        "callback is an object"
+        self.assertIs(self.spec.callback, None)
+
+    def test_callback_set(self):
+        "callback can be set to a callable"
+        f = lambda x, y, z: None
+        self.spec.callback = f
+        self.assertIs(self.spec.callback, f)
+
+    def test_userdata(self):
+        "userdata is an object"
+        self.assertIs(self.spec.userdata, None)
+
+    def test_userdata_set(self):
+        "userdata can be set to an object"
+        x = {}
+        self.spec.userdata = x
+        self.assertIs(self.spec.userdata, x)
+
+
+class TestAudioDevice(unittest.TestCase):
+    """Tests SDL_AudioDevice class"""
+
+    def test_cannot_create(self):
+        "Cannot create SDL_AudioDevice instances"
+        self.assertRaises(TypeError, SDL_AudioDevice)
+        self.assertRaises(TypeError, SDL_AudioDevice.__new__, SDL_AudioDevice)
+
+    def test_cannot_inherit(self):
+        "Cannot be used as a base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_AudioDevice,), {})
+
+
+class TestOpenAudioDevice(unittest.TestCase):
+    """Tests SDL_OpenAudioDevice()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            self.assertIs(type(length), int)
+            x = memoryview(data)
+            self.assertEqual(x.nbytes, length)
+            self.assertEqual(x.itemsize, 1)
+            self.assertEqual(x.format, 'B')
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+            # we can store a ref to the data object (though not it's buffer)
+            self.data = data
+            with self.cv:
+                self.called = userdata
+                self.cv.notify()
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback, userdata=True)
+        self.obtained = SDL_AudioSpec()
+        self.called = None
+        self.cv = threading.Condition()
+
+    def test_returns_AudioDevice(self):
+        "Returns an SDL_AudioDevice object"
+        x = SDL_OpenAudioDevice(None, False, self.desired, self.obtained,
+                                0)
+        self.assertIs(type(x), SDL_AudioDevice)
+
+    def test_fails_no_callback(self):
+        "Fails if callback is None"
+        self.desired.callback = None
+        self.assertRaises(ValueError, SDL_OpenAudioDevice, None, False,
+                          self.desired, self.obtained, 0)
+
+    def test_obtained_none(self):
+        "obtained can be None"
+        x = SDL_OpenAudioDevice(None, False, self.desired, None, 0)
+
+    def test_callback(self):
+        "callback is saved in the audio device and called"
+        def wrong_callback(userdata, data, length):
+            with self.cv:
+                self.called = {}
+                self.cv.notify()
+
+        dev = SDL_OpenAudioDevice(None, False, self.desired, self.obtained, 0)
+        self.desired.callback = wrong_callback
+        self.desired.userdata = False
+        SDL_PauseAudioDevice(dev, False)
+        with self.cv:
+            self.cv.wait_for(lambda: self.called)
+        self.assertTrue(self.called)
+        # If we save the data buffer provided to the callback, it is still
+        # invalidated.
+        self.assertRaises(ValueError, len, self.data)
+
+
+class TestPauseAudioDevice(unittest.TestCase):
+    """Tests SDL_PauseAudioDevice()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            x = memoryview(data)
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        self.dev = SDL_OpenAudioDevice(None, False, self.desired,
+                                       self.obtained, 0)
+
+    def tearDown(self):
+        del self.dev
+
+    def test_true(self):
+        "SDL_PauseAudioDevice(dev, True) works"
+        self.assertIs(SDL_PauseAudioDevice(self.dev, True), None)
+
+    def test_false(self):
+        "SDL_PauseAudioDevice(dev, False) works"
+        self.assertIs(SDL_PauseAudioDevice(self.dev, False), None)
+
+    def test_closed(self):
+        "Raises ValueError when the SDL_AudioDevice has been closed"
+        SDL_CloseAudioDevice(self.dev)
+        self.assertRaises(ValueError, SDL_PauseAudioDevice, self.dev, False)
+
+
+def sample_wave(num_channels, sample_rate, bits_per_sample):
+    "Generates and returns a sample WAVE file."
+    byte_rate = sample_rate * num_channels * bits_per_sample // 8
+    block_align = num_channels * bits_per_sample // 8
+    fmt_chunk = struct.pack('<4sIHHIIHH', b'fmt ', 16, 1, num_channels,
+                            sample_rate, byte_rate, block_align,
+                            bits_per_sample)
+    data = bytes(1 * num_channels * bits_per_sample // 8)
+    data_chunk = struct.pack('<4sI', b'data', len(data)) + data
+    wave_chunk = b'WAVE' + fmt_chunk + data_chunk
+    riff_chunk = struct.pack('<4sI', b'RIFF', len(wave_chunk)) + wave_chunk
+    return riff_chunk
+
+
+class TestLoadWAVRW(unittest.TestCase):
+    """Tests for SDL_LoadWAV_RW()"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.num_channels = 1
+        cls.sample_rate = 8000
+        cls.bits_per_sample = 8
+
+    def setUp(self):
+        f = io.BytesIO(sample_wave(self.num_channels, self.sample_rate,
+                                   self.bits_per_sample))
+        self.rwops = SDL_AllocRW()
+        self.rwops.size = lambda a: len(f.getbuffer())
+        self.rwops.read = lambda a, b, c, d: f.readinto(b) // c
+        self.rwops.seek = lambda a, b, c: f.seek(b, c)
+        self.rwops.close = lambda a: SDL_FreeRW(a)
+
+    def test_return(self):
+        "Returns a (SDL_AudioSpec, buffer, int) tuple"
+        audiospec, buf, size = SDL_LoadWAV_RW(self.rwops, True)
+        self.assertIs(type(audiospec), SDL_AudioSpec)
+        self.assertEqual(audiospec.freq, self.sample_rate)
+        self.assertEqual(audiospec.format, AUDIO_U8)
+        self.assertEqual(audiospec.channels, self.num_channels)
+        self.assertIs(audiospec.callback, None)
+        self.assertIs(audiospec.userdata, None)
+        self.assertIs(type(size), int)
+
+
+class TestLoadWAV(unittest.TestCase):
+    """Tests for SDL_LoadWAV()"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.num_channels = 1
+        cls.sample_rate = 8000
+        cls.bits_per_sample = 8
+        cls.dir = tempfile.TemporaryDirectory()
+        cls.path = os.path.join(cls.dir.name, 'test.wav')
+        with open(cls.path, 'wb') as f:
+            f.write(sample_wave(cls.num_channels, cls.sample_rate,
+                                cls.bits_per_sample))
+
+    @classmethod
+    def tearDownClass(cls):
+        # Handle "directory not empty" errors on Windows by attempting 3 times
+        for i in range(3):
+            try:
+                cls.dir.cleanup()
+            except OSError:
+                continue
+            break
+
+    def test_return(self):
+        "Returns a (SDL_AudioSpec, buffer, int) tuple"
+        audiospec, buf, size = SDL_LoadWAV(self.path)
+        self.assertIs(type(audiospec), SDL_AudioSpec)
+        self.assertEqual(audiospec.freq, self.sample_rate)
+        self.assertEqual(audiospec.format, AUDIO_U8)
+        self.assertEqual(audiospec.channels, self.num_channels)
+        self.assertIs(audiospec.callback, None)
+        self.assertIs(audiospec.userdata, None)
+        self.assertIs(type(size), int)
+
+
+class TestFreeWAV(unittest.TestCase):
+    """Tests for SDL_FreeWAV()"""
+
+    def setUp(self):
+        f = io.BytesIO(sample_wave(1, 8000, 8))
+        rwops = SDL_AllocRW()
+        rwops.size = lambda a: len(f.getbuffer())
+        rwops.read = lambda a, b, c, d: f.readinto(b) // c
+        rwops.seek = lambda a, b, c: f.seek(b, c)
+        rwops.close = lambda a: SDL_FreeRW(a)
+        self.audiospec, self.buf, self.size = SDL_LoadWAV_RW(rwops, True)
+
+    def test_return(self):
+        "Returns None"
+        self.assertIs(SDL_FreeWAV(self.buf), None)
+
+    def test_freed(self):
+        "When freed, raises ValueError"
+        SDL_FreeWAV(self.buf)
+        self.assertRaises(ValueError, SDL_FreeWAV, self.buf)
+
+
+class TestCloseAudioDevice(unittest.TestCase):
+    """Tests for SDL_CloseAudioDevice()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            x = memoryview(data)
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        self.dev = SDL_OpenAudioDevice(None, False, self.desired,
+                                       self.obtained, 0)
+
+    def tearDown(self):
+        del self.dev
+
+    def test_closed(self):
+        "Raises ValueError when the SDL_AudioDevice has been closed"
+        SDL_CloseAudioDevice(self.dev)
+        self.assertRaises(ValueError, SDL_CloseAudioDevice, self.dev)
 
 
 if __name__ == '__main__':
