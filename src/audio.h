@@ -865,6 +865,29 @@ PyCSDL2_OpenAudio(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetNumAudioDevices()
+ *
+ * \code{.py}
+ * SDL_GetNumAudioDevices(iscapture: bool) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetNumAudioDevices(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int iscapture, ret;
+    static char *kwlist[] = {"iscapture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "p", kwlist, &iscapture))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetNumAudioDevices(iscapture);
+    Py_END_ALLOW_THREADS
+
+    return PyLong_FromLong(ret);
+}
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}
