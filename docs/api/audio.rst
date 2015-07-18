@@ -210,6 +210,11 @@ specific need to specify the audio driver.
    :param driver_name: The name of the desired audio driver.
    :type driver_name: str or None
 
+.. function:: SDL_AudioQuit()
+
+   Use this function to shut down audio if you initialized it with
+   :func:`SDL_AudioInit`.
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to

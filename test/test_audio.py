@@ -323,6 +323,22 @@ class TestAudioInit(unittest.TestCase):
         self.assertIs(SDL_AudioInit(None), None)
 
 
+class TestAudioQuit(unittest.TestCase):
+    "Tests SDL_AudioQuit()"
+
+    def setUp(self):
+        self.driver_name = SDL_GetCurrentAudioDriver()
+        if not self.driver_name:
+            raise unittest.SkipTest('No audio support')
+
+    def tearDown(self):
+        SDL_AudioInit(self.driver_name)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_AudioQuit(), None)
+
+
 class TestGetCurrentAudioDriver(unittest.TestCase):
     "Tests SDL_GetCurrentAudioDriver()"
 

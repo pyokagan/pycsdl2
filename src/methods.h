@@ -76,6 +76,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Use SDL_Init() or SDL_InitSubSystem() instead.\n"
     },
 
+    {"SDL_AudioQuit",
+     (PyCFunction) PyCSDL2_AudioQuit,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AudioQuit() -> None\n"
+     "\n"
+     "Use this function to shut down audio if you initialized it with\n"
+     "SDL_AudioInit()\n"
+     "\n"
+     "This function is used internally, and should not be used unless you\n"
+     "have a specific need to designate the audio driver you want to use.\n"
+     "Use SDL_Init() or SDL_InitSubSystem() instead.\n"
+    },
+
     {"SDL_GetCurrentAudioDriver",
      (PyCFunction) PyCSDL2_GetCurrentAudioDriver,
      METH_VARARGS | METH_KEYWORDS,
