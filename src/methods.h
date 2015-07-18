@@ -131,6 +131,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "hardware, which is an expensive operation.\n"
     },
 
+    {"SDL_GetAudioDeviceName",
+     (PyCFunction) PyCSDL2_GetAudioDeviceName,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioDeviceName(index: int, iscapture: bool) -> str\n"
+     "\n"
+     "Returns the name of the audio device at the requested `index`.\n"
+     "\n"
+     "The values returned by this function reflect the latest call to\n"
+     "SDL_GetNumAudioDevices(). Re-call that function to re-detect\n"
+     "available hardware.\n"
+    },
+
     {"SDL_OpenAudioDevice",
      (PyCFunction) PyCSDL2_OpenAudioDevice,
      METH_VARARGS | METH_KEYWORDS,

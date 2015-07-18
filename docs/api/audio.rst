@@ -232,6 +232,23 @@ Audio Device Discovery
    .. note:: The `iscapture` parameter is for future expansion and should
              always be False for now.
 
+.. function:: SDL_GetAudioDeviceName(index, iscapture) -> str
+
+   Query the name of an audio device.
+
+   :param int index: The index of the audio device. The value ranges from 0 to
+                     ``SDL_GetNumAudioDevices() - 1``
+   :param bool iscapture: True to specify a device that has recording
+                          capability.
+   :returns: The name of the audio device at the requested index.
+
+   .. note::
+
+      This function is only valid after successfully initializing the audio
+      subsystem. The values returned by this function reflect the latest call
+      to :func:`SDL_GetNumAudioDevices`. Re-call that function to re-detect
+      available hardware.
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to
