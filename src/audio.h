@@ -744,6 +744,28 @@ PyCSDL2_AudioInit(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_AudioQuit()
+ *
+ * \code{.py}
+ * SDL_AudioQuit() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AudioQuit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_AudioQuit();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_GetCurrentAudioDriver()
  *
  * \code{.py}
