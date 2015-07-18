@@ -179,6 +179,17 @@ Audio Driver Discovery
    :returns: The number of builtin audio drivers.
    :rtype: int
 
+.. function:: SDL_GetAudioDriver(index: int) -> str
+
+   Use this function to get the name of a builtin audio driver. The presence of
+   a driver in this list does not mean that it will function, it just means SDL
+   is capable of interacting with that interface.
+
+   :param int index: Index of the audio driver. The value ranges from 0 to
+                     ``SDL_GetNumAudioDrivers() - 1``.
+   :returns: The name of the audio driver at the requested index.
+   :rtype: str
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to

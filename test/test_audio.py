@@ -291,6 +291,21 @@ class TestGetNumAudioDrivers(unittest.TestCase):
         self.assertIs(type(SDL_GetNumAudioDrivers()), int)
 
 
+class TestGetAudioDriver(unittest.TestCase):
+    "Tests SDL_GetAudioDriver()"
+
+    def test_returns_str(self):
+        "Returns a str"
+        if not SDL_GetNumAudioDrivers():
+            raise unittest.SkipTest('No audio drivers')
+        self.assertIs(type(SDL_GetAudioDriver(0)), str)
+
+    def test_out_of_range(self):
+        "Raises ValueError when index is out of range"
+        self.assertRaises(ValueError, SDL_GetAudioDriver,
+                          SDL_GetNumAudioDrivers() + 1)
+
+
 class TestOpenAudioDevice(unittest.TestCase):
     """Tests SDL_OpenAudioDevice()"""
 
