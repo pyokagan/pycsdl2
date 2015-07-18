@@ -280,3 +280,38 @@ Controlling Playback
    :type dev: :class:`SDL_AudioDevice`
    :param bool pause_on: If True, the audio device will be paused, otherwise
                          the audio device will be unpaused.
+
+WAVE file format support
+------------------------
+SDL supports loading a Waveform Audio File Format (WAVE) file from a data
+stream.
+
+.. function:: SDL_LoadWAV_RW(src: SDL_RWops, freesrc: bool)
+
+   Loads a WAVE from the data source.
+
+   :param src: Data source for the wave file.
+   :type src: :class:`SDL_RWops`
+   :param bool freesrc: If True, the data source will be freed with
+                        :func:`SDL_RWclose`.
+   :returns: A 3-tuple (:class:`SDL_AudioSpec`, buffer, int):
+
+             * A :class:`SDL_AudioSpec` specifying the audio format of the
+               wave file.
+             * A byte buffer containing the audio data.
+             * An int specifying the size of the audio data buffer in bytes.
+
+.. function:: SDL_FreeWAV(audio_buf) -> None
+
+   Frees the buffer previously allocated with :func:`SDL_LoadWAV` or
+   :func:`SDL_LoadWAV_RW`.
+
+   There is no need to explictly call this function. The buffer returned by
+   :func:`SDL_LoadWAV` or :func:`SDL_LoadWAV_RW` will automatically call this
+   function as part of its destructor.
+
+   :param buffer audio_buf: Buffer created by :func:`SDL_LoadWAV` or
+                            :func:`SDL_LoadWAV_RW`.
+
+   .. warning:: Once freed, do not access the buffer. Doing so may crash the
+                interpreter.

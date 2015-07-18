@@ -107,6 +107,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "and the audio callback is guaranteed to not be called.\n"
     },
 
+    {"SDL_LoadWAV_RW",
+     (PyCFunction) PyCSDL2_LoadWAV_RW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadWAV_RW(src: SDL_RWops, freesrc: bool)\n"
+     "    -> (SDL_AudioSpec, buffer, int)\n"
+     "\n"
+     "Loads a WAVE from the SDL_RWops data source. Returns a 3-tuple\n"
+     "containing a SDL_AudioSpec, a byte buffer, and the buffer's size in\n"
+     "bytes as an integer. The SDL_AudioSpec is filled with the audio data\n"
+     "format of the wave source data, and the byte buffer contains the audio\n"
+     "data. If `freesrc` is True, the data source will be freed.\n"
+    },
+
+    {"SDL_FreeWAV",
+     (PyCFunction) PyCSDL2_FreeWAV,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_FreeWAV(audio_buf) -> None\n"
+     "\n"
+     "Frees the wave data buffer allocated by SDL_LoadWAV() or\n"
+     "SDL_LoadWAV_RW().\n"
+     "\n"
+     "There is no need to explicitly call this function. The buffer returned\n"
+     "by SDL_LoadWAV() or SDL_LoadWAV_RW() will automatically call this\n"
+     "function as part of its destructor.\n"
+    },
+
     {"SDL_CloseAudioDevice",
      (PyCFunction) PyCSDL2_CloseAudioDevice,
      METH_VARARGS | METH_KEYWORDS,

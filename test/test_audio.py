@@ -4,6 +4,8 @@ import os.path
 import sys
 import unittest
 import threading
+import struct
+import io
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -380,6 +382,72 @@ class TestPauseAudioDevice(unittest.TestCase):
         "Raises ValueError when the SDL_AudioDevice has been closed"
         SDL_CloseAudioDevice(self.dev)
         self.assertRaises(ValueError, SDL_PauseAudioDevice, self.dev, False)
+
+
+def sample_wave(num_channels, sample_rate, bits_per_sample):
+    "Generates and returns a sample WAVE file."
+    byte_rate = sample_rate * num_channels * bits_per_sample // 8
+    block_align = num_channels * bits_per_sample // 8
+    fmt_chunk = struct.pack('<4sIHHIIHH', b'fmt ', 16, 1, num_channels,
+                            sample_rate, byte_rate, block_align,
+                            bits_per_sample)
+    data = bytes(1 * num_channels * bits_per_sample // 8)
+    data_chunk = struct.pack('<4sI', b'data', len(data)) + data
+    wave_chunk = b'WAVE' + fmt_chunk + data_chunk
+    riff_chunk = struct.pack('<4sI', b'RIFF', len(wave_chunk)) + wave_chunk
+    return riff_chunk
+
+
+class TestLoadWAVRW(unittest.TestCase):
+    """Tests for SDL_LoadWAV_RW()"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.num_channels = 1
+        cls.sample_rate = 8000
+        cls.bits_per_sample = 8
+
+    def setUp(self):
+        f = io.BytesIO(sample_wave(self.num_channels, self.sample_rate,
+                                   self.bits_per_sample))
+        self.rwops = SDL_AllocRW()
+        self.rwops.size = lambda a: len(f.getbuffer())
+        self.rwops.read = lambda a, b, c, d: f.readinto(b) // c
+        self.rwops.seek = lambda a, b, c: f.seek(b, c)
+        self.rwops.close = lambda a: SDL_FreeRW(a)
+
+    def test_return(self):
+        "Returns a (SDL_AudioSpec, buffer, int) tuple"
+        audiospec, buf, size = SDL_LoadWAV_RW(self.rwops, True)
+        self.assertIs(type(audiospec), SDL_AudioSpec)
+        self.assertEqual(audiospec.freq, self.sample_rate)
+        self.assertEqual(audiospec.format, AUDIO_U8)
+        self.assertEqual(audiospec.channels, self.num_channels)
+        self.assertIs(audiospec.callback, None)
+        self.assertIs(audiospec.userdata, None)
+        self.assertIs(type(size), int)
+
+
+class TestFreeWAV(unittest.TestCase):
+    """Tests for SDL_FreeWAV()"""
+
+    def setUp(self):
+        f = io.BytesIO(sample_wave(1, 8000, 8))
+        rwops = SDL_AllocRW()
+        rwops.size = lambda a: len(f.getbuffer())
+        rwops.read = lambda a, b, c, d: f.readinto(b) // c
+        rwops.seek = lambda a, b, c: f.seek(b, c)
+        rwops.close = lambda a: SDL_FreeRW(a)
+        self.audiospec, self.buf, self.size = SDL_LoadWAV_RW(rwops, True)
+
+    def test_return(self):
+        "Returns None"
+        self.assertIs(SDL_FreeWAV(self.buf), None)
+
+    def test_freed(self):
+        "When freed, raises ValueError"
+        SDL_FreeWAV(self.buf)
+        self.assertRaises(ValueError, SDL_FreeWAV, self.buf)
 
 
 class TestCloseAudioDevice(unittest.TestCase):

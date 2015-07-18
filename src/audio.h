@@ -33,6 +33,7 @@
 #include "../include/pycsdl2.h"
 #include "util.h"
 #include "error.h"
+#include "rwops.h"
 
 /**
  * \defgroup csdl2_SDL_AudioSpec csdl2.SDL_AudioSpec
@@ -423,6 +424,131 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id, PyObject *callback,
 /** @} */
 
 /**
+ * \defgroup csdl2_SDL_WAVBuf csdl2.SDL_WAVBuf
+ *
+ * \brief Manages the buffer returned by SDL_LoadWAV() and SDL_LoadWAV_RW()
+ *
+ * @{
+ */
+
+/** \brief Instance data for PyCSDL2_WAVBufType */
+typedef struct PyCSDL2_WAVBuf {
+    PyCSDL2_BufferHEAD
+    /** \brief Head of weakref list */
+    PyObject *in_weakreflist;
+} PyCSDL2_WAVBuf;
+
+/**
+ * \brief Checks if the PyCSDL2_WAVBuf is valid
+ */
+static int
+PyCSDL2_WAVBufValid(PyCSDL2_WAVBuf *buf)
+{
+    if (!PyCSDL2_Assert(buf))
+        return 0;
+
+    if (!buf->buf) {
+        PyErr_SetString(PyExc_ValueError, "Invalid SDL_WAVBuf");
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
+ * \brief Detaches the buffer from the PyCSDL2_WAVBuf.
+ *
+ * Transfers ownership of the buffer from the PyCSDL2_WAVBuf object to the
+ * caller. The caller will thus now be responsible for freeing the buffer.
+ *
+ * \param self PyCSDL2_WAVBuf object to detach the buffer from
+ * \param[out] len Will be filled with the size of the buffer in bytes
+ * \returns The buffer managed by the PyCSDL2_WAVBuf object, or NULL with an
+ *          exception set on error.
+ */
+static Uint8*
+PyCSDL2_WAVBufDetach(PyCSDL2_WAVBuf *self, Uint32 *len)
+{
+    Uint8 *buf;
+
+    if (!PyCSDL2_WAVBufValid(self))
+        return NULL;
+
+    if (self->num_exports) {
+        PyErr_SetString(PyExc_ValueError, "SDL_WAVBuf is exporting a buffer");
+        return NULL;
+    }
+
+    buf = self->buf;
+    if (len)
+        *len = (Uint32) self->len;
+    self->buf = NULL;
+    return buf;
+}
+
+/** \brief Destructor for PyCSDL2_WAVBufType */
+static void
+PyCSDL2_WAVBufDealloc(PyCSDL2_WAVBuf *self)
+{
+    PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->buf)
+        SDL_FreeWAV(self->buf);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Type definition for csdl2.SDL_WAVBuf */
+static PyTypeObject PyCSDL2_WAVBufType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_WAVBuf",
+    /* tp_basicsize      */ sizeof(PyCSDL2_WAVBuf),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_WAVBufDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_BufferAsBuffer,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "Buffer containing WAVE data.",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_WAVBuf, in_weakreflist)
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_WAVBufType
+ *
+ * \param buf Audio buffer to take ownership of.
+ * \param len Length of the buffer.
+ */
+static PyCSDL2_WAVBuf *
+PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
+{
+    PyCSDL2_WAVBuf *self;
+    PyTypeObject *type = &PyCSDL2_WAVBufType;
+
+    self = (PyCSDL2_WAVBuf*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, buf, len, 0);
+
+    return self;
+}
+
+/** @} */
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}
@@ -516,6 +642,81 @@ PyCSDL2_PauseAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
     Py_BEGIN_ALLOW_THREADS
     SDL_PauseAudioDevice(dev->id, pause_on);
     Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_LoadWAV_RW()
+ *
+ * \code{.py}
+ * SDL_LoadWAV_RW(src: SDL_RWops, freesrc: bool)
+ *     -> (SDL_AudioSpec, SDL_WAVBuf, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LoadWAV_RW(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RWops *rwops;
+    int freesrc;
+    SDL_AudioSpec spec;
+    SDL_AudioSpec *ret;
+    Uint8 *audio_buf;
+    Uint32 audio_len;
+    PyCSDL2_AudioSpec *outspec = NULL;
+    PyCSDL2_WAVBuf *outbuf = NULL;
+    PyObject *out = NULL;
+    static char *kwlist[] = {"src", "freesrc", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!p", kwlist,
+                                     &PyCSDL2_RWopsType, &rwops, &freesrc))
+        return NULL;
+
+    Py_INCREF(rwops);
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_LoadWAV_RW(rwops->rwops, freesrc, &spec, &audio_buf, &audio_len);
+    Py_END_ALLOW_THREADS
+    Py_DECREF(rwops);
+
+    if (!ret)
+        return PyCSDL2_RaiseSDLError();
+
+    outbuf = PyCSDL2_WAVBufCreate(audio_buf, audio_len);
+    if (!outbuf)
+        SDL_FreeWAV(audio_buf);
+
+    outspec = PyCSDL2_AudioSpecCreate(&spec);
+
+    out = Py_BuildValue("OO" Uint32_UNIT, outspec, outbuf, audio_len);
+
+    Py_XDECREF(outspec);
+    Py_XDECREF(outbuf);
+    return out;
+}
+
+/**
+ * \brief Implements csdl2.SDL_FreeWAV()
+ *
+ * \code{.py}
+ * SDL_FreeWAV(audio_buf: SDL_WAVBuf) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_FreeWAV(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint8 *buf;
+    PyCSDL2_WAVBuf *buf_obj;
+    static char *kwlist[] = {"audio_buf", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_WAVBufType, &buf_obj))
+        return NULL;
+
+    buf = PyCSDL2_WAVBufDetach(buf_obj, NULL);
+    if (!buf)
+        return NULL;
+
+    SDL_FreeWAV(buf);
 
     Py_RETURN_NONE;
 }
@@ -624,6 +825,8 @@ PyCSDL2_initaudio(PyObject *module)
     if (PyModule_AddObject(module, "SDL_AudioDevice",
                            (PyObject*) &PyCSDL2_AudioDeviceType))
         return 0;
+
+    if (PyType_Ready(&PyCSDL2_WAVBufType)) { return 0; }
 
     return 1;
 }
