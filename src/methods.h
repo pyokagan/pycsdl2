@@ -98,6 +98,24 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "has been initialized.\n"
     },
 
+    {"SDL_OpenAudio",
+     (PyCFunction) PyCSDL2_OpenAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_OpenAudio(desired: SDL_AudioSpec, obtained: SDL_AudioSpec or None)\n"
+     "    -> None\n"
+     "\n"
+     "Opens the audio device with the `desired` output format, placing the\n"
+     "actual hardware parameters in the `obtained` SDL_AudioSpec.\n"
+     "\n"
+     "If `obtained` is None, the output format of the audio device is\n"
+     "guaranteed to match the `desired` SDL_AudioSpec. SDL will convert\n"
+     "the audio data to the actual hardware audio format if necessary.\n"
+     "If `obtained` is None, `desired` will have fields modified.\n"
+     "\n"
+     "This is a legacy means of opening the audio device. Use\n"
+     "SDL_OpenAudioDevice() instead.\n"
+    },
+
     {"SDL_OpenAudioDevice",
      (PyCFunction) PyCSDL2_OpenAudioDevice,
      METH_VARARGS | METH_KEYWORDS,
@@ -143,6 +161,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Newly-opened audio devices start in the paused state. Use\n"
      "SDL_PauseAudioDevice() to unpause the device and start playing\n"
      "sound.\n"
+    },
+
+    {"SDL_PauseAudio",
+     (PyCFunction) PyCSDL2_PauseAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_PauseAudio(pause_on: bool) -> None\n"
+     "\n"
+     "Pause or unpause audio playback on the audio device. If `pause_on`\n"
+     "is True, the audio device will be paused, and if `pause_on` is False,\n"
+     "the audio device will be unpaused.\n"
+     "\n"
+     "When the audio device is paused, silence will be written to the audio\n"
+     "device and the audio callback is guaranteed to not be called.\n"
     },
 
     {"SDL_PauseAudioDevice",
@@ -193,6 +224,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "There is no need to explicitly call this function. The buffer returned\n"
      "by SDL_LoadWAV() or SDL_LoadWAV_RW() will automatically call this\n"
      "function as part of its destructor.\n"
+    },
+
+    {"SDL_CloseAudio",
+     (PyCFunction) PyCSDL2_CloseAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CloseAudio() -> None\n"
+     "\n"
+     "Shuts down audio processing and closes the audio device.\n"
     },
 
     {"SDL_CloseAudioDevice",
