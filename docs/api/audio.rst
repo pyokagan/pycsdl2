@@ -198,6 +198,18 @@ Audio Driver Discovery
              been initialized.
    :rtype: str or None
 
+Initialization and Cleanup
+--------------------------
+These functions are used internally, and should not be used unless you have a
+specific need to specify the audio driver.
+
+.. function:: SDL_AudioInit(driver_name)
+
+   Initializes a particular audio driver.
+
+   :param driver_name: The name of the desired audio driver.
+   :type driver_name: str or None
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to
