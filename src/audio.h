@@ -888,6 +888,32 @@ PyCSDL2_GetNumAudioDevices(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetAudioDeviceName()
+ *
+ * \code{.py}
+ * SDL_GetAudioDeviceName(index: int, iscapture: bool) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDeviceName(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int index, iscapture;
+    const char *device_name;
+    static char *kwlist[] = {"index", "iscapture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ip", kwlist, &index,
+                                     &iscapture))
+        return NULL;
+
+    device_name = SDL_GetAudioDeviceName(index, iscapture);
+
+    if (!device_name)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyUnicode_FromString(device_name);
+}
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}
