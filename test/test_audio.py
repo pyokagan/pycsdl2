@@ -306,6 +306,15 @@ class TestGetAudioDriver(unittest.TestCase):
                           SDL_GetNumAudioDrivers() + 1)
 
 
+class TestGetCurrentAudioDriver(unittest.TestCase):
+    "Tests SDL_GetCurrentAudioDriver()"
+
+    def test_returns_str_or_none(self):
+        "Returns str or None"
+        x = SDL_GetCurrentAudioDriver()
+        self.assertTrue(x is None or type(x) is str)
+
+
 class TestOpenAudioDevice(unittest.TestCase):
     """Tests SDL_OpenAudioDevice()"""
 

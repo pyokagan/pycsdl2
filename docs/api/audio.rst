@@ -190,6 +190,14 @@ Audio Driver Discovery
    :returns: The name of the audio driver at the requested index.
    :rtype: str
 
+.. function:: SDL_GetCurrentAudioDriver()
+
+   Returns the name of the current audio driver.
+
+   :returns: The name of the current audio driver, or None if no driver has
+             been initialized.
+   :rtype: str or None
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to
