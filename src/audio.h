@@ -691,6 +691,32 @@ PyCSDL2_GetNumAudioDrivers(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetAudioDriver()
+ *
+ * \code{.py}
+ * SDL_GetAudioDriver(index: int) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDriver(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int index;
+    const char *name;
+    static char *kwlist[] = {"index", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &index))
+        return NULL;
+
+    name = SDL_GetAudioDriver(index);
+    if (!name) {
+        PyErr_SetString(PyExc_ValueError, "Index out of range");
+        return NULL;
+    }
+
+    return PyUnicode_FromString(name);
+}
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}
