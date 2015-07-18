@@ -673,6 +673,24 @@ PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
 /** @} */
 
 /**
+ * \brief Implements csdl2.SDL_GetNumAudioDrivers()
+ *
+ * \code{.py}
+ * SDL_GetNumAudioDrivers() -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetNumAudioDrivers(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    return PyLong_FromLong(SDL_GetNumAudioDrivers());
+}
+
+/**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
  *
  * \code{.py}

@@ -170,6 +170,15 @@ The following are thus the possible audio data format values:
 
    Aliased to :const:`AUDIO_F32LSB`.
 
+Audio Driver Discovery
+----------------------
+.. function:: SDL_GetNumAudioDrivers() -> int
+
+   Returns the number of audio drivers that SDL supports.
+
+   :returns: The number of builtin audio drivers.
+   :rtype: int
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to
