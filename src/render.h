@@ -506,7 +506,7 @@ PyCSDL2_TexturePixelsCreate(void *pixels, Py_ssize_t len,
     if (!self)
         return NULL;
 
-    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, pixels, len, 0);
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, CTYPE_UCHAR, pixels, len, 0);
     PyCSDL2_Set(self->texture, texture);
 
     return self;
