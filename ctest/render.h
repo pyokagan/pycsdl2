@@ -65,4 +65,27 @@ PyCSDL2Test_Renderer(PyObject *module, PyObject *args)
     return PyCSDL2_RendererCreate(renderer, deftarget);
 }
 
+/**
+ * \brief Sets the render draw color of the SDL_Renderer to white.
+ *
+ * \code{.py}
+ * renderer_set_draw_color(rdr: SDL_Renderer) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RendererSetDrawColor(PyObject *module, PyObject *args)
+{
+    SDL_Renderer *rdr;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_RendererPtr, &rdr))
+        return NULL;
+
+    if (SDL_SetRenderDrawColor(rdr, 255, 255, 255, 255)) {
+        PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_RENDER_H_ */

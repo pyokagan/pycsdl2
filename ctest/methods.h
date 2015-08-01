@@ -143,6 +143,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "renderer(deftarget: object) -> SDL_Renderer"
     },
 
+    {"renderer_set_draw_color",
+     PyCSDL2Test_RendererSetDrawColor,
+     METH_VARARGS,
+     "renderer_set_draw_color(rdr: SDL_Renderer) -> None"
+    },
+
     /* rwops.h */
 
     {"rwops",
