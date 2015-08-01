@@ -108,4 +108,24 @@ PyCSDL2Test_AudioDevice(PyObject *module, PyObject *args)
     return PyCSDL2_AudioDeviceCreate(dev);
 }
 
+/**
+ * \brief Unpauses a SDL_AudioDeviceID
+ *
+ * \code{.py}
+ * audio_device_unpause(dev: SDL_AudioDevice) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_AudioDeviceUnpause(PyObject *module, PyObject *args)
+{
+    SDL_AudioDeviceID id;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_AudioDeviceID, &id))
+        return NULL;
+
+    SDL_PauseAudioDevice(id, 0);
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_AUDIO_H_ */

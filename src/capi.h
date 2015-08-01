@@ -643,7 +643,8 @@ PyCSDL2_initcapi(PyObject *m)
 /* src/audio.h */
         PyCSDL2_AudioSpecCreate,
         PyCSDL2_AudioSpecPtr,
-        PyCSDL2_AudioDeviceCreate
+        PyCSDL2_AudioDeviceCreate,
+        PyCSDL2_AudioDeviceID
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

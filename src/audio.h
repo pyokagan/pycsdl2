@@ -332,6 +332,8 @@ typedef struct PyCSDL2_AudioDevice {
     PyCSDL2_Buffer *callback_buf;
 } PyCSDL2_AudioDevice;
 
+static PyTypeObject PyCSDL2_AudioDeviceType;
+
 /** \brief Traversal function for PyCSDL2_AudioDeviceType */
 static int
 PyCSDL2_AudioDeviceTraverse(PyCSDL2_AudioDevice *self, visitproc visit,
@@ -363,6 +365,11 @@ PyCSDL2_AudioDeviceValid(PyCSDL2_AudioDevice *dev)
 {
     if (!PyCSDL2_Assert(dev))
         return 0;
+
+    if (Py_TYPE(dev) != &PyCSDL2_AudioDeviceType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_AudioDevice", (PyObject*)dev);
+        return 0;
+    }
 
     if (!dev->id) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_AudioDevice");
@@ -515,6 +522,27 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id)
 
     PyCSDL2_AudioDeviceAttach(self, id, NULL, NULL);
     return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_AudioDeviceID managed by the PyCSDL2_AudioDevice
+ *
+ * \param obj The PyCSDL2_AudioDevice object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_AudioDeviceID(PyObject *obj, SDL_AudioDeviceID *out)
+{
+    PyCSDL2_AudioDevice *self = (PyCSDL2_AudioDevice*)obj;
+
+    if (!PyCSDL2_AudioDeviceValid(self))
+        return 0;
+
+    if (out)
+        *out = self->id;
+
+    return 1;
 }
 
 /** @} */
@@ -729,20 +757,17 @@ fail:
 static PyObject *
 PyCSDL2_PauseAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_AudioDevice *dev;
     int pause_on;
+    SDL_AudioDeviceID id;
     static char *kwlist[] = {"dev", "pause_on", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!p", kwlist,
-                                     &PyCSDL2_AudioDeviceType, &dev,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&p", kwlist,
+                                     PyCSDL2_AudioDeviceID, &id,
                                      &pause_on))
         return NULL;
 
-    if (!PyCSDL2_AudioDeviceValid(dev))
-        return NULL;
-
     Py_BEGIN_ALLOW_THREADS
-    SDL_PauseAudioDevice(dev->id, pause_on);
+    SDL_PauseAudioDevice(id, pause_on);
     Py_END_ALLOW_THREADS
 
     Py_RETURN_NONE;

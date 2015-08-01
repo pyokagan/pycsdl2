@@ -563,5 +563,47 @@ class TestAudioDeviceCreate(unittest.TestCase):
         self.assertIs(type(x), SDL_AudioDevice)
 
 
+class TestAudioDeviceID(unittest.TestCase):
+    "Tests PyCSDL2_AudioDeviceID()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('no audio support')
+
+    def setUp(self):
+        self.cv = threading.Condition()
+        self.called = False
+
+        def callback(a, b, c):
+            with self.cv:
+                self.called = True
+                self.cv.notify()
+
+        spec = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS, channels=1,
+                             samples=4096, callback=callback)
+        self.dev = SDL_OpenAudioDevice(None, False, spec, None, 0)
+
+    def tearDown(self):
+        del self.dev
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        _csdl2test.audio_device_unpause(self.dev)
+        with self.cv:
+            self.cv.wait_for(lambda: self.called, 3)
+        self.assertTrue(self.called)
+
+    def test_closed(self):
+        "Raises ValueError when the SDL_AudioDevice has been closed"
+        SDL_CloseAudioDevice(self.dev)
+        self.assertRaises(ValueError, _csdl2test.audio_device_unpause,
+                          self.dev)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.audio_device_unpause, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

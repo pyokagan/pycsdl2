@@ -56,6 +56,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "audio_device() -> SDL_AudioDevice"
     },
 
+    {"audio_device_unpause",
+     PyCSDL2Test_AudioDeviceUnpause,
+     METH_VARARGS,
+     "audio_device_unpause(dev: SDL_AudioDevice) -> None"
+    },
+
     /* End */
     {0}
 };

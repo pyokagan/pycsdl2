@@ -2028,6 +2028,9 @@ typedef int (*PyCSDL2_AudioSpecPtr_pfn)(PyObject*, SDL_AudioSpec**);
 /** \brief Function pointer type of PyCSDL2_AudioDeviceCreate() */
 typedef PyObject *(*PyCSDL2_AudioDeviceCreate_pfn)(SDL_AudioDeviceID id);
 
+/** \brief Function pointer type of PyCSDL2_AudioDeviceID() */
+typedef int (*PyCSDL2_AudioDeviceID_pfn)(PyObject*, SDL_AudioDeviceID*);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3163,6 +3166,8 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_AudioSpecPtr_pfn _PyCSDL2_AudioSpecPtr;
     /** \brief Pointer to PyCSDL2_AudioDeviceCreate() */
     PyCSDL2_AudioDeviceCreate_pfn _PyCSDL2_AudioDeviceCreate;
+    /** \brief Pointer to PyCSDL2_AudioDeviceID() */
+    PyCSDL2_AudioDeviceID_pfn _PyCSDL2_AudioDeviceID;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5434,6 +5439,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioDeviceCreate) */
 #define PyCSDL2_AudioDeviceCreate(a) PYCSDL2_FUNC(PyCSDL2_AudioDeviceCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioDeviceID) */
+#define PyCSDL2_AudioDeviceID PYCSDL2_FUNC(PyCSDL2_AudioDeviceID)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
