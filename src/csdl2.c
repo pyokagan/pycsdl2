@@ -28,6 +28,7 @@
 #include "../include/pycsdl2.h"
 #include "util.h"
 #include "audio.h"
+#include "blendmode.h"
 #include "capi.h"
 #include "events.h"
 #include "init.h"
@@ -67,6 +68,7 @@ PyInit_csdl2(void)
     if (!m) { return NULL; }
     if (!PyCSDL2_initutil(m)) { goto fail; }
     if (!PyCSDL2_initaudio(m)) { goto fail; }
+    if (!PyCSDL2_initblendmode(m)) { goto fail; }
     if (!PyCSDL2_initcapi(m)) { goto fail; }
     if (!PyCSDL2_initinit(m)) { goto fail; }
     if (!PyCSDL2_initpixels(m)) { goto fail; }
