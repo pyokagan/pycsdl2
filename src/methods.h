@@ -395,6 +395,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "will be created with SDL_TEXTUREACCESS_STATIC.\n"
     },
 
+    {"SDL_QueryTexture",
+     (PyCFunction) PyCSDL2_QueryTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_QueryTexture(texture: SDL_Texture) -> (int, int, int, int)\n"
+     "\n"
+     "Query the attributes of a texture, returning a (int, int, int, int)\n"
+     "tuple with the following:\n"
+     "\n"
+     "* The texture's raw pixel format. One of the SDL_PIXELFORMAT_*\n"
+     "  constants.\n"
+     "* The texture's access. One of the SDL_TEXTUREACCESS_* constants.\n"
+     "* The texture's width, in pixels.\n"
+     "* The texture's height, in pixels.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

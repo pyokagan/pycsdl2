@@ -120,6 +120,20 @@ Textures
    :type surface: class:`SDL_Surface`
    :returns: A new :class:`SDL_Texture` for the rendering context.
 
+.. function:: SDL_QueryTexture(texture) -> tuple
+
+   Query the attributes of a texture. Namely:
+
+   * The texture's raw pixel format, one of the :ref:`pixel-format-constants`.
+   * The texture's access. One of :const:`SDL_TEXTUREACCESS_STATIC`,
+     :const:`SDL_TEXTUREACCESS_STREAMING` or :const:`SDL_TEXTUREACCESS_TARGET`.
+   * The texture's width and height, in pixels.
+
+   :param texture: The texture to be queried.
+   :type texture: :class:`SDL_Texture`
+   :returns: A tuple ``(int, int, int, int)`` with the texture's raw pixel
+             format, access, width and height respectively.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

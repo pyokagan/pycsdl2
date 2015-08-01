@@ -525,6 +525,31 @@ PyCSDL2_CreateTextureFromSurface(PyObject *module, PyObject *args,
 }
 
 /**
+ * \brief Implements csdl2.SDL_QueryTexture()
+ *
+ * \code{.py}
+ * SDL_QueryTexture(texture: SDL_Texture) -> (int, int, int, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_QueryTexture(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Texture *texture;
+    Uint32 format;
+    int access, w, h;
+    static char *kwlist[] = {"texture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_TexturePtr, &texture))
+        return NULL;
+
+    if (SDL_QueryTexture(texture, &format, &access, &w, &h))
+        return PyCSDL2_RaiseSDLError();
+
+    return Py_BuildValue(Uint32_UNIT "iii", format, access, w, h);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
