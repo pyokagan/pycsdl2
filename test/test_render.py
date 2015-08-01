@@ -751,6 +751,61 @@ class TestRenderFillRect(unittest.TestCase):
                           self.rect)
 
 
+class TestRenderCopy(unittest.TestCase):
+    """Tests SDL_RenderCopy()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.sf2 = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rdr2 = SDL_CreateSoftwareRenderer(self.sf2)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        srcrect = dstrect = SDL_Rect(0, 0, 32, 32)
+        x = SDL_RenderCopy(self.rdr, self.tex, srcrect, dstrect)
+        self.assertIs(x, None)
+
+    def test_srcrect_none(self):
+        "srcrect can be None"
+        dstrect = SDL_Rect(0, 0, 32, 32)
+        SDL_RenderCopy(self.rdr, self.tex, None, dstrect)
+
+    def test_dstrect_none(self):
+        "dstrect can be None"
+        srcrect = SDL_Rect(0, 0, 32, 32)
+        SDL_RenderCopy(self.rdr, self.tex, srcrect, None)
+
+    def test_srcrect_dstrect_none(self):
+        "Both srcrect and dstrect can be None"
+        SDL_RenderCopy(self.rdr, self.tex, None, None)
+
+    def test_renderer_mismatch(self):
+        "Raises RuntimeError if the texture's renderer is not `renderer`"
+        self.assertRaises(RuntimeError, SDL_RenderCopy, self.rdr2, self.tex,
+                          None, None)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has already been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_RenderCopy, self.rdr, self.tex, None,
+                          None)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderCopy, self.rdr, self.tex, None,
+                          None)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderCopy, self.rdr, self.tex, None,
+                          None)
+
+
 class TestRenderPresent(unittest.TestCase):
     """Tests SDL_RenderPresent()"""
 

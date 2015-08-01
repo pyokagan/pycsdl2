@@ -318,6 +318,30 @@ Drawing
    :type rect: :class:`SDL_Rect` or None
    :raises RuntimeError: If the rectangle could not be filled.
 
+.. function:: SDL_RenderCopy(renderer, texture, srcrect, dstrect)
+
+   Copies a portion of the texture to the current rendering target.
+
+   The texture is blended with the destination based on its blend mode set with
+   :func:`SDL_SetTextureBlendMode`.
+
+   The texture color is affected based on its color modulation set by
+   :func:`SDL_SetTextureColorMod`.
+
+   The texture alpha is affected based on its alpha modulation set by
+   :func:`SDL_SetTextureAlphaMod`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The source texture.
+   :type texture: :class:`SDL_Texture`
+   :param srcrect: The source rectangle, or None for the entire texture.
+   :type srcrect: :class:`SDL_Rect` buffer or None
+   :param dstrect: The destination rectangle, or None for the entire rendering
+                   target. The texture will be stretched to fill the given
+                   rectangle.
+   :type dstrect: :class:`SDL_Rect` buffer or None
+
 Updating the screen
 -------------------
 SDL's rendering functions operate on a backbuffer. Calling a rendering function

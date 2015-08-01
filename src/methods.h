@@ -581,6 +581,28 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "If `rect` is None, the entire rendering target will be filled.\n"
     },
 
+    {"SDL_RenderCopy",
+     (PyCFunction) PyCSDL2_RenderCopy,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderCopy(renderer: SDL_Renderer, texture: SDL_Texture,\n"
+     "               srcrect: SDL_Rect, dstrect: SDL_Rect) -> None\n"
+     "\n"
+     "Copies a portion of the texture to the current rendering target.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "texture\n"
+     "    The source texture.\n"
+     "\n"
+     "srcrect\n"
+     "    The source rectangle, or None for the entire texture.\n"
+     "\n"
+     "dstrect\n"
+     "    The destination rectangle, or None for the entire rendering target.\n"
+     "    The texture will be stretched to fill the given rectangle.\n"
+    },
+
     {"SDL_RenderPresent",
      (PyCFunction) PyCSDL2_RenderPresent,
      METH_VARARGS | METH_KEYWORDS,

@@ -1142,6 +1142,42 @@ PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderCopy()
+ *
+ * \code{.py}
+ * SDL_RenderCopy(renderer: SDL_Renderer, texture: SDL_Texture,
+ *                srcrect: SDL_Rect, dstrect: SDL_Rect) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderCopy(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    Py_buffer srcrect, dstrect;
+    int ret;
+    static char *kwlist[] = {"renderer", "texture", "srcrect", "dstrect",
+                             NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_TexturePtr, &texture,
+                                     PyCSDL2_ConvertRectRead, &srcrect,
+                                     PyCSDL2_ConvertRectRead, &dstrect))
+        return NULL;
+
+    ret = SDL_RenderCopy(renderer, texture, srcrect.buf, dstrect.buf);
+
+    PyBuffer_Release(&srcrect);
+    PyBuffer_Release(&dstrect);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderPresent()
  *
  * \code{.py}
