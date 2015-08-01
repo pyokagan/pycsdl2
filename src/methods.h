@@ -459,6 +459,33 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "operations. It is within the range 0-255.\n"
     },
 
+    {"SDL_SetTextureBlendMode",
+     (PyCFunction) PyCSDL2_SetTextureBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureBlendMode(texture: SDL_Texture, blendMode: int) -> None\n"
+     "\n"
+     "Sets the blend mode for a texture, where `blendMode` is one of:\n"
+     "\n"
+     "SDL_BLENDMODE_NONE:\n"
+     "    No blending.\n"
+     "    dstRGBA = srcRGBA\n"
+     "\n"
+     "SDL_BLENDMODE_ADD:\n"
+     "    Alpha blending.\n"
+     "    dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))\n"
+     "    dstA = srcA + (dstA * (1-srcA))\n"
+     "\n"
+     "SDL_BLENDMODE_ADD:\n"
+     "    Additive blending.\n"
+     "    dstRGB = (srcRGB * srcA) + dstRGB\n"
+     "    dstA = dstA\n"
+     "\n"
+     "SDL_BLENDMODE_MOD:\n"
+     "    Color modulate.\n"
+     "    dstRGB = srcRGB * dstRGB\n"
+     "    dstA = dstA\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

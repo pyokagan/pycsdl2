@@ -182,6 +182,15 @@ Textures
    :type texture: :class:`SDL_Texture`
    :returns: The current alpha value. It is within the range 0-255.
 
+.. function:: SDL_SetTextureBlendMode(texture, blendMode: int)
+
+   Sets the blend mode for a texture.
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int blendMode: The blend mode to use for texture blending. One of the
+                         :ref:`blend-modes`.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

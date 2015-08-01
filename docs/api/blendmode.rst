@@ -1,3 +1,5 @@
+.. _blend-modes:
+
 Blend modes
 ===========
 .. currentmodule:: csdl2
