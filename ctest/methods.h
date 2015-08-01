@@ -161,6 +161,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "surface_from(pixels: buffer) -> SDL_Surface"
     },
 
+    {"surface_fill",
+     PyCSDL2Test_SurfaceFill,
+     METH_VARARGS,
+     "surface_fill(sf: SDL_Surface) -> None"
+    },
+
     /* End */
     {0}
 };

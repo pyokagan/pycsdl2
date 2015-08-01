@@ -667,7 +667,8 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_RWopsCreate,
         PyCSDL2_RWopsPtr,
 /* src/surface.h */
-        PyCSDL2_SurfaceCreate
+        PyCSDL2_SurfaceCreate,
+        PyCSDL2_SurfacePtr
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

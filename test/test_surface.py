@@ -333,5 +333,26 @@ class TestSurfaceCreate(unittest.TestCase):
         self.assertRaises(BufferError, _csdl2test.surface_from, pixels)
 
 
+class TestSurfacePtr(unittest.TestCase):
+    "Tests PyCSDL2_SurfacePtr()"
+
+    def test_converter(self):
+        "Works as a converter for PyArg_ParseTuple()"
+        sf = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+        self.assertEqual(sf.pixels[0], 0)
+        _csdl2test.surface_fill(sf)
+        self.assertEqual(sf.pixels[0], 255)
+
+    def test_freed(self):
+        "Raises ValueError if surface has been freed"
+        sf = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+        SDL_FreeSurface(sf)
+        self.assertRaises(ValueError, _csdl2test.surface_fill, sf)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.surface_fill, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -81,4 +81,24 @@ PyCSDL2Test_SurfaceFrom(PyObject *module, PyObject *args)
     return out;
 }
 
+/**
+ * \brief Fills the SDL_Surface pixels with white
+ *
+ * \code{.py}
+ * surface_fill(sf: SDL_Surface) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_SurfaceFill(PyObject *module, PyObject *args)
+{
+    SDL_Surface *sf;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_SurfacePtr, &sf))
+        return NULL;
+
+    memset(sf->pixels, 255, sf->pitch * sf->h);
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_SURFACE_H_ */

@@ -368,6 +368,8 @@ typedef struct PyCSDL2_Surface {
     PyCSDL2_SurfaceRect *clip_rect;
 } PyCSDL2_Surface;
 
+static PyTypeObject PyCSDL2_SurfaceType;
+
 /** \brief Traversal function for PyCSDL2_SurfaceType */
 static int
 PyCSDL2_SurfaceTraverse(PyCSDL2_Surface *self, visitproc visit, void *arg)
@@ -424,10 +426,36 @@ PyCSDL2_SurfaceValid(PyCSDL2_Surface *surface)
     if (!PyCSDL2_Assert(surface))
         return 0;
 
+    if (Py_TYPE(surface) != &PyCSDL2_SurfaceType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Surface", (PyObject*)surface);
+        return 0;
+    }
+
     if (!surface->surface) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
         return 0;
     }
+    return 1;
+}
+
+/**
+ * \brief Borrow the SDL_Surface managed by the PyCSDL2_Surface object.
+ *
+ * \param obj The SDL_Surface object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_SurfacePtr(PyObject *obj, SDL_Surface **out)
+{
+    PyCSDL2_Surface *self = (PyCSDL2_Surface*)obj;
+
+    if (!PyCSDL2_SurfaceValid(self))
+        return 0;
+
+    if (out)
+        *out = self->surface;
+
     return 1;
 }
 

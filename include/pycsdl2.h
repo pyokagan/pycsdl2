@@ -2082,6 +2082,9 @@ typedef int (*PyCSDL2_RWopsPtr_pfn)(PyObject*, SDL_RWops**);
 /** \brief Function pointer type of PyCSDL2_SurfaceCreate() */
 typedef PyObject *(*PyCSDL2_SurfaceCreate_pfn)(SDL_Surface*, PyObject*);
 
+/** \brief Function pointer type of PyCSDL2_SurfacePtr() */
+typedef int (*PyCSDL2_SurfacePtr_pfn)(PyObject*, SDL_Surface**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3250,6 +3253,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/surface.h */
     /** \brief Pointer to PyCSDL2_SurfaceCreate */
     PyCSDL2_SurfaceCreate_pfn _PyCSDL2_SurfaceCreate;
+    /** \brief Pointer to \c PyCSDL2_SurfacePtr() */
+    PyCSDL2_SurfacePtr_pfn _PyCSDL2_SurfacePtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5574,6 +5579,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_SurfaceCreate) */
 #define PyCSDL2_SurfaceCreate(a, b) PYCSDL2_FUNC(PyCSDL2_SurfaceCreate)(a, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_SurfacePtr) */
+#define PyCSDL2_SurfacePtr PYCSDL2_FUNC(PyCSDL2_SurfacePtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
