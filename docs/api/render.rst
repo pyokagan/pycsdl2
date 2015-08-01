@@ -191,6 +191,14 @@ Textures
    :param int blendMode: The blend mode to use for texture blending. One of the
                          :ref:`blend-modes`.
 
+.. function:: SDL_GetTextureBlendMode(texture) -> int
+
+   Returns the blend mode used for texture copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: The texture's blend mode. One of the :ref:`blend-modes`.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

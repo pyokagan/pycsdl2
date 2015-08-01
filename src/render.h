@@ -670,6 +670,30 @@ PyCSDL2_SetTextureBlendMode(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetTextureBlendMode()
+ *
+ * \code{.py}
+ * SDL_GetTextureBlendMode(texture: SDL_Texture) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetTextureBlendMode(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Texture *texture;
+    SDL_BlendMode blendMode;
+    static char *kwlist[] = {"texture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_TexturePtr, &texture))
+        return NULL;
+
+    if (SDL_GetTextureBlendMode(texture, &blendMode))
+        return PyCSDL2_RaiseSDLError();
+
+    return PyLong_FromLong(blendMode);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}

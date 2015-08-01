@@ -486,6 +486,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    dstA = dstA\n"
     },
 
+    {"SDL_GetTextureBlendMode",
+     (PyCFunction) PyCSDL2_GetTextureBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureBlendMode(texture: SDL_Texture) -> int\n"
+     "\n"
+     "Returns the blend mode used for texture copy operations. It is one of\n"
+     "the SDL_BLENDMODE_* constants.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

@@ -414,6 +414,35 @@ class TestSetTextureBlendMode(unittest.TestCase):
                           SDL_BLENDMODE_ADD)
 
 
+class TestGetTextureBlendMode(unittest.TestCase):
+    """Tests SDL_GetTextureBlendMode()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetTextureBlendMode(self.tex)), int)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_GetTextureBlendMode, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetTextureBlendMode, self.tex)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetTextureBlendMode, self.tex)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 
