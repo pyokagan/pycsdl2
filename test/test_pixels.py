@@ -721,5 +721,26 @@ class TestPaletteCreate(unittest.TestCase):
         self.assertEqual(x.shape, (2,))
 
 
+class TestPalettePtr(unittest.TestCase):
+    "Tests PyCSDL2_PalettePtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        plt = SDL_AllocPalette(2)
+        self.assertEqual(plt.ncolors, 2)
+        _csdl2test.palette_set_ncolors(plt)
+        self.assertEqual(plt.ncolors, 42)
+
+    def test_freed(self):
+        "Raises ValueError if palette has been freed"
+        plt = SDL_AllocPalette(2)
+        SDL_FreePalette(plt)
+        self.assertRaises(ValueError, _csdl2test.palette_set_ncolors, plt)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.palette_set_ncolors, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -2052,6 +2052,9 @@ typedef int (*PyCSDL2_EventPtr_pfn)(PyObject*, SDL_Event**);
 /** \brief Function pointer type of PyCSDL2_PaletteCreate() */
 typedef PyObject *(*PyCSDL2_PaletteCreate_pfn)(SDL_Palette*);
 
+/** \brief Function pointer type of PyCSDL2_PalettePtr() */
+typedef int (*PyCSDL2_PalettePtr_pfn)(PyObject*, SDL_Palette**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3201,6 +3204,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/pixels.h */
     /** \brief Pointer to PyCSDL2_PaletteCreate() */
     PyCSDL2_PaletteCreate_pfn _PyCSDL2_PaletteCreate;
+    /** \brief Pointer to PyCSDL2_PalettePtr() */
+    PyCSDL2_PalettePtr_pfn _PyCSDL2_PalettePtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5495,6 +5500,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PaletteCreate) */
 #define PyCSDL2_PaletteCreate(a) PYCSDL2_FUNC(PyCSDL2_PaletteCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PalettePtr) */
+#define PyCSDL2_PalettePtr PYCSDL2_FUNC(PyCSDL2_PalettePtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

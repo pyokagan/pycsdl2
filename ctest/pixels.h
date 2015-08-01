@@ -48,4 +48,24 @@ PyCSDL2Test_Palette(PyObject *module, PyObject *args)
     return PyCSDL2_PaletteCreate(plt);
 }
 
+/**
+ * \brief Sets the "ncolors" field of the SDL_Palette to 42.
+ *
+ * \code{.py}
+ * palette_set_ncolors(plt: SDL_Palette) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_PaletteSetNColors(PyObject *module, PyObject *args)
+{
+    SDL_Palette *plt;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_PalettePtr, &plt))
+        return NULL;
+
+    plt->ncolors = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_PIXELS_H_ */

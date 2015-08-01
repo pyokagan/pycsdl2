@@ -188,6 +188,8 @@ typedef struct PyCSDL2_Palette {
     PyCSDL2_PaletteColors *colors;
 } PyCSDL2_Palette;
 
+static PyTypeObject PyCSDL2_PaletteType;
+
 /** \brief GC Traverse function for PyCSDL2_PaletteType */
 static int
 PyCSDL2_PaletteTraverse(PyCSDL2_Palette *self, visitproc visit, void *arg)
@@ -228,6 +230,11 @@ PyCSDL2_PaletteValid(PyCSDL2_Palette *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_PaletteType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Palette", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->palette) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_Palette");
@@ -375,6 +382,27 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
     self->palette = palette;
     self->colors = colors;
     return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_Palette pointer managed by the PyCSDL2_Palette.
+ *
+ * \param obj The PyCSDL2_Palette object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_PalettePtr(PyObject *obj, SDL_Palette **out)
+{
+    PyCSDL2_Palette *self = (PyCSDL2_Palette*)obj;
+
+    if (!PyCSDL2_PaletteValid(self))
+        return 0;
+
+    if (out)
+        *out = self->palette;
+
+    return 1;
 }
 
 /** \brief Instance data for SDL_PixelFormatType */

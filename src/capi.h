@@ -653,7 +653,8 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_EventCreate,
         PyCSDL2_EventPtr,
 /* src/pixels.h */
-        PyCSDL2_PaletteCreate
+        PyCSDL2_PaletteCreate,
+        PyCSDL2_PalettePtr
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

@@ -98,6 +98,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "palette() -> SDL_Palette"
     },
 
+    {"palette_set_ncolors",
+     PyCSDL2Test_PaletteSetNColors,
+     METH_VARARGS,
+     "palette_set_ncolors(plt: SDL_Palette) -> None"
+    },
+
     /* End */
     {0}
 };
