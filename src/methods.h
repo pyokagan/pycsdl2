@@ -47,6 +47,48 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* audio.h */
 
+    {"SDL_AUDIO_BITSIZE",
+     (PyCFunction) PyCSDL2_AUDIO_BITSIZE,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_BITSIZE(x: int) -> int\n"
+    },
+
+    {"SDL_AUDIO_ISFLOAT",
+     (PyCFunction) PyCSDL2_AUDIO_ISFLOAT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISFLOAT(x: int) -> bool\n"
+    },
+
+    {"SDL_AUDIO_ISBIGENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISBIGENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISBIGENDIAN(x: int) -> bool\n"
+    },
+
+    {"SDL_AUDIO_ISSIGNED",
+     (PyCFunction) PyCSDL2_AUDIO_ISSIGNED,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISSIGNED(x: int) -> bool\n"
+    },
+
+    {"SDL_AUDIO_ISINT",
+     (PyCFunction) PyCSDL2_AUDIO_ISINT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISINT(x: int) -> bool\n"
+    },
+
+    {"SDL_AUDIO_ISLITTLEENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISLITTLEENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISLITTLEENDIAN(x: int) -> bool\n"
+    },
+
+    {"SDL_AUDIO_ISUNSIGNED",
+     (PyCFunction) PyCSDL2_AUDIO_ISUNSIGNED,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISUNSIGNED(x: int) -> bool\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,
@@ -190,6 +232,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "sound.\n"
     },
 
+    {"SDL_GetAudioStatus",
+     (PyCFunction) PyCSDL2_GetAudioStatus,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioStatus() -> int\n"
+    },
+
+    {"SDL_GetAudioDeviceStatus",
+     (PyCFunction) PyCSDL2_GetAudioDeviceStatus,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioDeviceStatus(dev: SDL_AudioDevice) -> int\n"
+    },
+
     {"SDL_PauseAudio",
      (PyCFunction) PyCSDL2_PauseAudio,
      METH_VARARGS | METH_KEYWORDS,
@@ -251,6 +305,57 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "There is no need to explicitly call this function. The buffer returned\n"
      "by SDL_LoadWAV() or SDL_LoadWAV_RW() will automatically call this\n"
      "function as part of its destructor.\n"
+    },
+
+    {"SDL_BuildAudioCVT",
+     (PyCFunction) PyCSDL2_BuildAudioCVT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_BuildAudioCVT(cvt: SDL_AudioCVT, src_format: int,\n"
+     "                  src_channels: int, src_rate: int, dst_format: int,\n"
+     "                  dst_channels: int, dst_rate: int) -> bool\n"
+    },
+
+    {"SDL_ConvertAudio",
+     (PyCFunction) PyCSDL2_ConvertAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_ConvertAudio(cvt: SDL_AudioCVT) -> None\n"
+    },
+
+    {"SDL_MixAudio",
+     (PyCFunction) PyCSDL2_MixAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MixAudio(dst: buffer, src: buffer, len: int, volume: int) -> None\n"
+    },
+
+    {"SDL_MixAudioFormat",
+     (PyCFunction) PyCSDL2_MixAudioFormat,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MixAudioFormat(dst: buffer, src: buffer, format: int, len: int,\n"
+     "                   volume: int) -> None\n"
+    },
+
+    {"SDL_LockAudio",
+     (PyCFunction) PyCSDL2_LockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudio() -> None\n"
+    },
+
+    {"SDL_LockAudioDevice",
+     (PyCFunction) PyCSDL2_LockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudioDevice(dev: SDL_AudioDevice) -> None\n"
+    },
+
+    {"SDL_UnlockAudio",
+     (PyCFunction) PyCSDL2_UnlockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudio() -> None\n"
+    },
+
+    {"SDL_UnlockAudioDevice",
+     (PyCFunction) PyCSDL2_UnlockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudioDevice(dev: SDL_AudioDevice) -> None\n"
     },
 
     {"SDL_CloseAudio",

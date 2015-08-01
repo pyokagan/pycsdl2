@@ -312,6 +312,176 @@ PyCSDL2_AudioSpecPtr(PyObject *obj, SDL_AudioSpec **out)
 /** @} */
 
 /**
+ * \defgroup csdl2_SDL_AudioCVT csdl2.SDL_AudioCVT
+ *
+ * @{
+ */
+
+/** \brief Instance data for PyCSDL2_AudioCVTType */
+typedef struct PyCSDL2_AudioCVT {
+    PyObject_HEAD
+    /** \brief Head of weakref list */
+    PyObject *in_weakreflist;
+    /** \brief Internal SDL_AudioCVT data */
+    SDL_AudioCVT cvt;
+    /** \brief Python buffer for the SDL_AudioCVT buf field */
+    Py_buffer buf;
+} PyCSDL2_AudioCVT;
+
+/** \brief tp_new for PyCSDL2_AudioCVTType */
+static PyCSDL2_AudioCVT *
+PyCSDL2_AudioCVTNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *self;
+
+    self = (PyCSDL2_AudioCVT*) type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    return self;
+}
+
+/** \brief tp_traverse for PyCSDL2_AudioCVTType */
+static int
+PyCSDL2_AudioCVTTraverse(PyCSDL2_AudioCVT *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->buf.obj);
+    return 0;
+}
+
+/** \brief tp_clear for PyCSDL2_AudioCVTType */
+static int
+PyCSDL2_AudioCVTClear(PyCSDL2_AudioCVT *self)
+{
+    PyBuffer_Release(&self->buf);
+    return 0;
+}
+
+/** \brief tp_dealloc for PyCSDL2_AudioCVTType */
+static void
+PyCSDL2_AudioCVTDealloc(PyCSDL2_AudioCVT *self)
+{
+    PyCSDL2_AudioCVTClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief tp_members for PyCSDL2_AudioCVTType */
+static PyMemberDef PyCSDL2_AudioCVTMembers[] = {
+    {"src_format", Uint16_TYPE, offsetof(PyCSDL2_AudioCVT, cvt.src_format),
+     READONLY,
+     "(readonly) Source audio format"},
+    {"dst_format", Uint16_TYPE, offsetof(PyCSDL2_AudioCVT, cvt.dst_format),
+     READONLY,
+     "(readonly) Target audio format"},
+    {"rate_incr", T_DOUBLE, offsetof(PyCSDL2_AudioCVT, cvt.rate_incr),
+     READONLY,
+     "(readonly) Rate conversion increment"},
+    {"len", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len), 0,
+     "Length of original audio buffer"},
+    {"len_cvt", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len_cvt), READONLY,
+     "(readonly) Length of converted audio buffer"},
+    {"len_mult", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len_mult), READONLY,
+     "(readonly) Buffer must be len*len_mult big"},
+    {"len_ratio", T_DOUBLE, offsetof(PyCSDL2_AudioCVT, cvt.len_ratio),
+     READONLY,
+     "(readonly) Given len, final size is len*len_ratio"},
+    {NULL}
+};
+
+/** \brief Implements getter for SDL_AudioCVT.needed */
+static PyObject *
+PyCSDL2_AudioCVTGetNeeded(PyCSDL2_AudioCVT *self, void *closure)
+{
+    return PyBool_FromLong(self->cvt.needed);
+}
+
+/** \brief Implements getter for SDL_AudioCVT.buf */
+static PyObject *
+PyCSDL2_AudioCVTGetBuf(PyCSDL2_AudioCVT *self, void *closure)
+{
+    return PyCSDL2_Get(self->buf.obj);
+}
+
+/** \brief Implements setter for SDL_AudioCVT.type */
+static int
+PyCSDL2_AudioCVTSetBuf(PyCSDL2_AudioCVT *self, PyObject *value, void *closure)
+{
+    Py_buffer buf;
+
+    if (PyObject_GetBuffer(value, &buf, PyBUF_CONTIG))
+        return -1;
+
+    PyBuffer_Release(&self->buf);
+    self->buf = buf;
+    self->cvt.buf = buf.buf;
+
+    return 0;
+}
+
+/** \brief tp_getset for PyCSDL2_AudioCVTType */
+static PyGetSetDef PyCSDL2_AudioCVTGetSetters[] = {
+    {"needed",
+     (getter) PyCSDL2_AudioCVTGetNeeded,
+     (setter) NULL,
+     "(readonly) True if conversion is needed"
+    },
+    {"buf",
+     (getter) PyCSDL2_AudioCVTGetBuf,
+     (setter) PyCSDL2_AudioCVTSetBuf,
+     "Buffer to hold entire audio data"
+    },
+    {NULL}
+};
+
+/** \brief Type definition of csdl2.SDL_AudioCVT */
+static PyTypeObject PyCSDL2_AudioCVTType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_AudioCVT",
+    /* tp_basicsize      */ sizeof(PyCSDL2_AudioCVT),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_AudioCVTDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "Describes the audio output format and sets the audio callback.\n"
+    "\n"
+    "This structure is used by SDL_OpenAudioDevice() and SDL_LoadWAV().\n",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_AudioCVTTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_AudioCVTClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_AudioCVT, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ PyCSDL2_AudioCVTMembers,
+    /* tp_getset         */ PyCSDL2_AudioCVTGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc) PyCSDL2_AudioCVTNew
+};
+
+/** @} */
+
+/**
  * \defgroup csdl2_SDL_AudioDevice csdl2.SDL_AudioDevice
  *
  * @{
@@ -683,6 +853,139 @@ static PyCSDL2_AudioDevice *PyCSDL2_GlobalAudioDevice;
 /** @} */
 
 /**
+ * \brief Implements csdl2.SDL_AUDIO_BITSIZE()
+ *
+ * \code{.py}
+ * SDL_AUDIO_BITSIZE(x: int) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_BITSIZE(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyLong_FromUnsignedLong(SDL_AUDIO_BITSIZE(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISFLOAT()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISFLOAT(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISFLOAT(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISFLOAT(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISBIGENDIAN()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISBIGENDIAN(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISBIGENDIAN(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISBIGENDIAN(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISSIGNED()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISSIGNED(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISSIGNED(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISSIGNED(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISINT()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISINT(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISINT(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISINT(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISLITTLEENDIAN()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISLITTLEENDIAN(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISLITTLEENDIAN(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISLITTLEENDIAN(x));
+}
+
+/**
+ * \brief Implements csdl2.SDL_AUDIO_ISUNSIGNED()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISUNSIGNED(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISUNSIGNED(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISUNSIGNED(x));
+}
+
+/**
  * \brief Implements csdl2.SDL_GetNumAudioDrivers()
  *
  * \code{.py}
@@ -989,6 +1292,57 @@ fail:
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetAudioStatus()
+ *
+ * \code{.py}
+ * SDL_GetAudioStatus() -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioStatus(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_AudioStatus ret;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetAudioStatus();
+    Py_END_ALLOW_THREADS
+
+    return PyLong_FromLong(ret);
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetAudioDeviceStatus()
+ *
+ * \code{.py}
+ * SDL_GetAudioDeviceStatus(dev: SDL_AudioDevice) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDeviceStatus(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    SDL_AudioStatus ret;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetAudioDeviceStatus(dev->id);
+    Py_END_ALLOW_THREADS
+
+    return PyLong_FromLong(ret);
+}
+
+/**
  * \brief Implements csdl2.SDL_PauseAudio()
  *
  * \code{.py}
@@ -1002,14 +1356,6 @@ PyCSDL2_PauseAudio(PyObject *module, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {"pause_on", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "p", kwlist, &pause_on))
-        return NULL;
-
-    if (!PyCSDL2_GlobalAudioDevice) {
-        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
-        return NULL;
-    }
-
-    if (!PyCSDL2_AudioDeviceValid(PyCSDL2_GlobalAudioDevice))
         return NULL;
 
     Py_BEGIN_ALLOW_THREADS
@@ -1164,6 +1510,268 @@ PyCSDL2_FreeWAV(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_BuildAudioCVT()
+ *
+ * \code{.py}
+ * SDL_BuildAudioCVT(cvt: SDL_AudioCVT, src_format: int, src_channels: int,
+ *                   src_rate: int, dst_format: int, dst_channels: int,
+ *                   dst_rate: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_BuildAudioCVT(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *cvt;
+    Uint16 src_format, dst_format;
+    Uint8 src_channels, dst_channels;
+    int src_rate, dst_rate, ret;
+    static char *kwlist[] = {"cvt", "src_format", "src_channels", "src_rate",
+                             "dst_format", "dst_channels", "dst_rate", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "O!" Uint16_UNIT "bi" Uint16_UNIT "bi",
+                                     kwlist, &PyCSDL2_AudioCVTType, &cvt,
+                                     &src_format, &src_channels, &src_rate,
+                                     &dst_format, &dst_channels, &dst_rate))
+        return NULL;
+
+    PyCSDL2_AudioCVTClear(cvt);
+
+    ret = SDL_BuildAudioCVT(&cvt->cvt, src_format, src_channels, src_rate,
+                            dst_format, dst_channels, dst_rate);
+    if (ret < 0)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyBool_FromLong(ret);
+}
+
+/**
+ * \brief Implements csdl2.SDL_ConvertAudio()
+ *
+ * \code{.py}
+ * SDL_ConvertAudio(cvt: SDL_AudioCVT) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_ConvertAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *cvt;
+    PyObject *buf_obj = NULL;
+    int ret;
+    static char *kwlist[] = {"cvt", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioCVTType, &cvt))
+        return NULL;
+
+    if (!cvt->buf.obj) {
+        PyErr_SetString(PyExc_ValueError, "SDL_AudioCVT has no buffer");
+        return NULL;
+    }
+
+    if (cvt->buf.len < cvt->cvt.len * cvt->cvt.len_mult) {
+        PyErr_SetString(PyExc_BufferError, "SDL_AudioCVT buffer must be at"
+                        " least len*len_mult bytes");
+        return NULL;
+    }
+
+    cvt->cvt.buf = cvt->buf.buf;
+
+    PyCSDL2_Set(buf_obj, cvt->buf.obj);
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_ConvertAudio(&cvt->cvt);
+    Py_END_ALLOW_THREADS
+    PyCSDL2_Set(buf_obj, NULL);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_MixAudio()
+ *
+ * \code{.py}
+ * SDL_MixAudio(dst: buffer, src: buffer, len: int, volume: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_MixAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Py_buffer dst, src;
+    Uint32 len;
+    int volume;
+    static char *kwlist[] = {"dst", "src", "len", "volume", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "w*y*" Uint32_UNIT "i",
+                                     kwlist, &dst, &src, &len, &volume))
+        return NULL;
+
+    if (src.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("src", len, src.len);
+    }
+
+    if (dst.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("dst", len, dst.len);
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_MixAudio(dst.buf, src.buf, len, volume);
+    Py_END_ALLOW_THREADS
+
+    PyBuffer_Release(&src);
+    PyBuffer_Release(&dst);
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_MixAudioFormat()
+ *
+ * \code{.py}
+ * SDL_MixAudioFormat(dst: buffer, src: buffer, format: int, len: int,
+ *                    volume: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_MixAudioFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Py_buffer dst, src;
+    Uint16 format;
+    Uint32 len;
+    int volume;
+    static char *kwlist[] = {"dst", "src", "format", "len", "volume", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "w*y*" Uint16_UNIT Uint32_UNIT "i",
+                                     kwlist, &dst, &src, &format, &len,
+                                     &volume))
+        return NULL;
+
+    if (src.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("src", len, src.len);
+    }
+
+    if (dst.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("dst", len, dst.len);
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_MixAudioFormat(dst.buf, src.buf, format, len, volume);
+    Py_END_ALLOW_THREADS
+
+    PyBuffer_Release(&src);
+    PyBuffer_Release(&dst);
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_LockAudio()
+ *
+ * \code{.py}
+ * SDL_LockAudio() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LockAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_LockAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_LockAudioDevice()
+ *
+ * \code{.py}
+ * SDL_LockAudioDevice(dev: SDL_AudioDevice) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LockAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_LockAudioDevice(dev->id);
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_UnlockAudio()
+ *
+ * \code{.py}
+ * SDL_UnlockAudio() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UnlockAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_UnlockAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_UnlockAudioDevice()
+ *
+ * \code{.py}
+ * SDL_UnlockAudioDevice(dev: SDL_AudioDevice) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UnlockAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_UnlockAudioDevice(dev->id);
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_CloseAudio()
  *
  * \code{.py}
@@ -1179,10 +1787,8 @@ PyCSDL2_CloseAudio(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
         return NULL;
 
-    if (!PyCSDL2_GlobalAudioDevice) {
-        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
-        return NULL;
-    }
+    if (!PyCSDL2_GlobalAudioDevice)
+        Py_RETURN_NONE;
 
     id = PyCSDL2_AudioDeviceDetach(PyCSDL2_GlobalAudioDevice);
     if (!id)
@@ -1293,6 +1899,12 @@ PyCSDL2_initaudio(PyObject *module)
     Py_INCREF(&PyCSDL2_AudioSpecType);
     if (PyModule_AddObject(module, "SDL_AudioSpec",
                            (PyObject*) &PyCSDL2_AudioSpecType))
+        return 0;
+
+    if (PyType_Ready(&PyCSDL2_AudioCVTType)) { return 0; }
+    Py_INCREF(&PyCSDL2_AudioCVTType);
+    if (PyModule_AddObject(module, "SDL_AudioCVT",
+                           (PyObject*) &PyCSDL2_AudioCVTType))
         return 0;
 
     if (PyType_Ready(&PyCSDL2_AudioDeviceType)) { return 0; }

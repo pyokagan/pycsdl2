@@ -270,6 +270,96 @@ class TestAudioSpec(unittest.TestCase):
         self.assertIs(self.spec.userdata, x)
 
 
+class TestAudioCVT(unittest.TestCase):
+    """Tests SDL_AudioCVT class"""
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_AudioCVT,), {})
+
+    def test_needed(self):
+        "needed is a bool"
+        self.assertIs(type(self.cvt.needed), bool)
+
+    def test_needed_readonly(self):
+        "needed is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'needed', True)
+
+    def test_src_format_int(self):
+        "src_format is an int"
+        self.assertIs(type(self.cvt.src_format), int)
+
+    def test_src_format_readonly(self):
+        "src_format is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'src_format', 42)
+
+    def test_dst_format_int(self):
+        "dst_format is an int"
+        self.assertIs(type(self.cvt.dst_format), int)
+
+    def test_dst_format_readonly(self):
+        "dst_format is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'dst_format', 42)
+
+    def test_rate_incr(self):
+        "rate_incr is a float"
+        self.assertIs(type(self.cvt.rate_incr), float)
+
+    def test_rate_incr_readonly(self):
+        "rate_incr is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'rate_incr', 42)
+
+    def test_buf_none(self):
+        "buf is initialized to None"
+        self.assertIs(self.cvt.buf, None)
+
+    def test_buf_buffer(self):
+        "buf can be set to a buffer"
+        x = bytearray(1)
+        self.cvt.buf = x
+        self.assertIs(self.cvt.buf, x)
+
+    def test_buf_not_buffer(self):
+        "buf raises TypeError when object is not a buffer"
+        self.assertRaises(TypeError, setattr, self.cvt, 'buf', {})
+
+    def test_len_int(self):
+        "len is an int"
+        self.assertIs(type(self.cvt.len), int)
+
+    def test_len_set_int(self):
+        "len can be set to an int"
+        self.cvt.len = 42
+        self.assertEqual(self.cvt.len, 42)
+
+    def test_len_cvt_int(self):
+        "len_cvt is an int"
+        self.assertIs(type(self.cvt.len_cvt), int)
+
+    def test_len_cvt_readonly(self):
+        "len_cvt is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_cvt', 42)
+
+    def test_len_mult_int(self):
+        "len_mult is an int"
+        self.assertIs(type(self.cvt.len_mult), int)
+
+    def test_len_mult_readonly(self):
+        "len_mult is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_mult', 42)
+
+    def test_len_ratio_float(self):
+        "len_ratio is a float"
+        self.assertIs(type(self.cvt.len_ratio), float)
+
+    def test_len_ratio_readonly(self):
+        "len_ratio is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_ratio', 42)
+
+
 class TestAudioDevice(unittest.TestCase):
     """Tests SDL_AudioDevice class"""
 
@@ -281,6 +371,62 @@ class TestAudioDevice(unittest.TestCase):
     def test_cannot_inherit(self):
         "Cannot be used as a base class"
         self.assertRaises(TypeError, type, 'testtype', (SDL_AudioDevice,), {})
+
+
+class TestAUDIO_BITSIZE(unittest.TestCase):
+    """Tests SDL_AUDIO_BITSIZE()"""
+
+    def test_returns_int(self):
+        "Returns int"
+        self.assertIs(type(SDL_AUDIO_BITSIZE(42)), int)
+
+
+class TestAUDIO_ISFLOAT(unittest.TestCase):
+    """Tests SDL_AUDIO_ISFLOAT()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISFLOAT(42)), bool)
+
+
+class TestAUDIO_ISBIGENDIAN(unittest.TestCase):
+    """Tests SDL_AUDIO_ISBIGENDIAN()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISBIGENDIAN(42)), bool)
+
+
+class TestAUDIO_ISSIGNED(unittest.TestCase):
+    """Tests SDL_AUDIO_ISSIGNED()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISSIGNED(42)), bool)
+
+
+class TestAUDIO_ISINT(unittest.TestCase):
+    """Tests SDL_AUDIO_ISINT()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISINT(42)), bool)
+
+
+class TestAUDIO_ISLITTLEENDIAN(unittest.TestCase):
+    """Tests SDL_AUDIO_ISLITTLEENDIAN()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISLITTLEENDIAN(42)), bool)
+
+
+class TestAUDIO_ISUNSIGNED(unittest.TestCase):
+    """Tests SDL_AUDIO_ISUNSIGNED()"""
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISUNSIGNED(42)), bool)
 
 
 class TestGetNumAudioDrivers(unittest.TestCase):
@@ -381,10 +527,7 @@ class TestOpenAudio(unittest.TestCase):
         self.cv = threading.Condition()
 
     def tearDown(self):
-        try:
-            SDL_CloseAudio()
-        except (RuntimeError, ValueError):
-            pass
+        SDL_CloseAudio()
 
     def test_returns_none(self):
         "Returns None"
@@ -512,6 +655,69 @@ class TestOpenAudioDevice(unittest.TestCase):
         self.assertRaises(ValueError, len, self.data)
 
 
+class TestGetAudioStatus(unittest.TestCase):
+    """Tests SDL_GetAudioStatus()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        callback = lambda a, b, c: None
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        SDL_OpenAudio(self.desired, self.obtained)
+
+    def tearDown(self):
+        SDL_CloseAudio()
+
+    def test_returns_int(self):
+        "Returns int"
+        self.assertIs(type(SDL_GetAudioStatus()), int)
+
+    def test_closed(self):
+        "No-op when the audio device is not open"
+        SDL_CloseAudio()
+        self.assertIs(type(SDL_GetAudioStatus()), int)
+
+
+class TestGetAudioDeviceStatus(unittest.TestCase):
+    """Tests SDL_GetAudioDeviceStatus()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+
+    def setUp(self):
+        def callback(userdata, data, length):
+            x = memoryview(data)
+            for i in range(x.nbytes):
+                x[i] = self.obtained.silence
+
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        self.dev = SDL_OpenAudioDevice(None, False, self.desired,
+                                       self.obtained, 0)
+
+    def tearDown(self):
+        del self.dev
+
+    def test_returns_int(self):
+        "Returns int"
+        self.assertIs(type(SDL_GetAudioDeviceStatus(self.dev)), int)
+
+    def test_closed(self):
+        "Raises ValueError if the device has been closed"
+        SDL_CloseAudioDevice(self.dev)
+        self.assertRaises(ValueError, SDL_GetAudioDeviceStatus, self.dev)
+
+
 class TestPauseAudio(unittest.TestCase):
     """Tests SDL_PauseAudio()"""
 
@@ -533,10 +739,7 @@ class TestPauseAudio(unittest.TestCase):
         SDL_OpenAudio(self.desired, self.obtained)
 
     def tearDown(self):
-        try:
-            SDL_CloseAudio()
-        except (ValueError, RuntimeError):
-            pass
+        SDL_CloseAudio()
 
     def test_true(self):
         "SDL_PauseAudio(True) works"
@@ -547,9 +750,9 @@ class TestPauseAudio(unittest.TestCase):
         self.assertIs(SDL_PauseAudio(False), None)
 
     def test_closed(self):
-        "Raises ValueError when the audio device is not open"
+        "No-op when the audio device is not open"
         SDL_CloseAudio()
-        self.assertRaises(ValueError, SDL_PauseAudio, False)
+        self.assertIs(SDL_PauseAudio(False), None)
 
 
 class TestPauseAudioDevice(unittest.TestCase):
@@ -692,6 +895,51 @@ class TestFreeWAV(unittest.TestCase):
         self.assertRaises(ValueError, SDL_FreeWAV, self.buf)
 
 
+class TestBuildAudioCVT(unittest.TestCase):
+    """Tests for SDL_BuildAudioCVT()"""
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_BuildAudioCVT(self.cvt, AUDIO_F32, 2, 48000,
+                                             AUDIO_S16, 2, 48000)), bool)
+
+    def test_clears_buf(self):
+        "Clears the buf field"
+        x = bytearray(1)
+        self.cvt.buf = x
+        self.assertIs(self.cvt.buf, x)
+        SDL_BuildAudioCVT(self.cvt, AUDIO_F32, 2, 48000, AUDIO_S16, 2, 48000)
+        self.assertIs(self.cvt.buf, None)
+
+
+class TestConvertAudio(unittest.TestCase):
+    """Tests for SDL_ConvertAudio()"""
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+        SDL_BuildAudioCVT(self.cvt, AUDIO_S16SYS, 1, 1, AUDIO_S32SYS, 1, 1)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.cvt.len = 2
+        self.cvt.buf = bytearray(self.cvt.len * self.cvt.len_mult)
+        self.assertIs(SDL_ConvertAudio(self.cvt), None)
+
+    def test_no_buf(self):
+        "Raises ValueError if the SDL_AudioCVT has no buf"
+        self.assertIs(self.cvt.buf, None)
+        self.assertRaises(ValueError, SDL_ConvertAudio, self.cvt)
+
+    def test_buf_invalid_size(self):
+        "Raises BufferError if the SDL_AudioCVT buf has wrong size"
+        self.cvt.len = 2
+        self.cvt.buf = bytearray(1)
+        self.assertRaises(BufferError, SDL_ConvertAudio, self.cvt)
+
+
 class TestCloseAudio(unittest.TestCase):
     """Tests for SDL_CloseAudio()"""
 
@@ -712,14 +960,17 @@ class TestCloseAudio(unittest.TestCase):
         self.obtained = SDL_AudioSpec()
         SDL_OpenAudio(self.desired, self.obtained)
 
+    def tearDown(self):
+        SDL_CloseAudio()
+
     def test_returns_none(self):
         "Returns None"
         self.assertIs(SDL_CloseAudio(), None)
 
     def test_closed(self):
-        "Raises ValueError when the SDL_AudioDevice has been closed"
+        "No-op when audio device has been closed"
         SDL_CloseAudio()
-        self.assertRaises(ValueError, SDL_CloseAudio)
+        SDL_CloseAudio()
 
 
 class TestCloseAudioDevice(unittest.TestCase):
