@@ -180,6 +180,47 @@ class TestCreateTexture(unittest.TestCase):
                           32, 32)
 
 
+class TestCreateTextureFromSurface(unittest.TestCase):
+    """Tests SDL_CreateTextureFromSurface()"""
+
+    def setUp(self):
+        self.rdr_sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.rdr_sf)
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+
+    def test_returns_texture(self):
+        "Returns a SDL_Texture instance"
+        tex = SDL_CreateTextureFromSurface(self.rdr, self.sf)
+        self.assertIs(type(tex), SDL_Texture)
+
+    def test_ref_renderer(self):
+        "The returned SDL_Texture references the renderer"
+        x = weakref.ref(self.rdr)
+        tex = SDL_CreateTextureFromSurface(self.rdr, self.sf)
+        del self.rdr
+        del self.rdr_sf
+        del self.sf
+        self.assertIsNotNone(x())
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_CreateTextureFromSurface, self.rdr,
+                          self.sf)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_CreateTextureFromSurface, self.rdr,
+                          self.sf)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has been freed"
+        SDL_FreeSurface(self.rdr_sf)
+        self.assertRaises(ValueError, SDL_CreateTextureFromSurface, self.rdr,
+                          self.sf)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

@@ -486,6 +486,45 @@ PyCSDL2_CreateTexture(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateTextureFromSurface()
+ *
+ * \code{.py}
+ * SDL_CreateTextureFromSurface(renderer: SDL_Renderer, surface: SDL_Surface)
+ *      -> SDL_Texture
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_CreateTextureFromSurface(PyObject *module, PyObject *args,
+                                 PyObject *kwds)
+{
+    PyCSDL2_Renderer *rdr;
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    PyObject *out;
+    static char *kwlist[] = {"renderer", "surface", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O&", kwlist,
+                                     &PyCSDL2_RendererType, &rdr,
+                                     PyCSDL2_SurfacePtr, &surface))
+        return NULL;
+
+    if (!PyCSDL2_RendererValid(rdr))
+        return NULL;
+
+    texture = SDL_CreateTextureFromSurface(rdr->renderer, surface);
+    if (!texture)
+        return PyCSDL2_RaiseSDLError();
+
+    out = PyCSDL2_TextureCreate(texture, (PyObject*)rdr);
+    if (!out) {
+        SDL_DestroyTexture(texture);
+        return NULL;
+    }
+
+    return out;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}

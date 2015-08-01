@@ -382,6 +382,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    Height of the texture in pixels.\n"
     },
 
+    {"SDL_CreateTextureFromSurface",
+     (PyCFunction) PyCSDL2_CreateTextureFromSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateTextureFromSurface(renderer: SDL_Renderer,\n"
+     "                             surface: SDL_Surface) -> SDL_Texture\n"
+     "\n"
+     "Creates a texture for a rendering context with the pixel data of an\n"
+     "existing surface.\n"
+     "\n"
+     "The surface is not modified or freed by this function. The texture\n"
+     "will be created with SDL_TEXTUREACCESS_STATIC.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

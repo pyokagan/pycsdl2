@@ -106,6 +106,20 @@ Textures
 
    Texture can be used as a render target.
 
+.. function:: SDL_CreateTextureFromSurface(renderer, surface) -> SDL_Texture
+
+   Creates a texture for a rendering context with the pixel data of an existing
+   surface.
+
+   The surface is not modified or freed by this function. The texture will be
+   created with :const:`SDL_TEXTUREACCESS_STATIC`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param surface: The surface containing pixel data to fill the texture.
+   :type surface: class:`SDL_Surface`
+   :returns: A new :class:`SDL_Texture` for the rendering context.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.
