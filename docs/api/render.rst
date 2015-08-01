@@ -150,6 +150,15 @@ Textures
    :param int g: The green color value multiplied into copy operations.
    :param int b: The blue color value multiplied into copy operations.
 
+.. function:: SDL_GetTextureColorMod(texture) -> tuple
+
+   Returns the additional color value multiplied into render copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: A tuple ``(int, int, int)`` with the red, green and blue
+             components of the color respectively.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

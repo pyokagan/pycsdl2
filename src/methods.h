@@ -426,6 +426,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    srcC = srcC * (color / 255)\n"
     },
 
+    {"SDL_GetTextureColorMod",
+     (PyCFunction) PyCSDL2_GetTextureColorMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureColorMod(texture: SDL_Texture) -> (int, int, int)\n"
+     "\n"
+     "Returns the additional color value (r, hg, b) multiplied into render\n"
+     "copy operations.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
