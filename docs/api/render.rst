@@ -199,6 +199,28 @@ Textures
    :type texture: :class:`SDL_Texture`
    :returns: The texture's blend mode. One of the :ref:`blend-modes`.
 
+.. function:: SDL_UpdateTexture(texture, rect, pixels, pitch)
+
+   Updates the given texture rectangle with new pixel data.
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param rect: The area to update, or None to update the entire texture.
+   :type rect: :class:`SDL_Rect` buffer, or None
+   :param buffer pixels: The raw pixel data.
+   :param int pitch: The number of bytes in a row of pixel data, including
+                     padding between lines.
+
+   .. note::
+
+      This is a fairly slow function, intended for use with static textures
+      that do not change often.  If the texture is intended to be updated
+      often, it is preferred to create the texture as streaming and use the
+      locking functions :func:`SDL_LockTexture` and :func:`SDL_UnlockTexture`.
+      While this function will work with streaming textures, for optimization
+      reasons you may not get the pixels back if you lock the texture
+      afterward.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

@@ -694,6 +694,91 @@ PyCSDL2_GetTextureBlendMode(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_UpdateTexture()
+ *
+ * \code{.py}
+ * SDL_UpdateTexture(texture: SDL_Texture, rect: SDL_Rect, pixels: buffer,
+ *                   pitch: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UpdateTexture(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Texture *texture;
+    Py_buffer rect, pixels;
+    SDL_Rect r;
+    int pitch, ret, max_w, max_h;
+    Py_ssize_t min_pitch, min_size;
+    Uint32 format;
+    static char *kwlist[] = {"texture", "rect", "pixels", "pitch", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&y*i", kwlist,
+                                     PyCSDL2_TexturePtr, &texture,
+                                     PyCSDL2_ConvertRectRead, &rect,
+                                     &pixels, &pitch))
+        return NULL;
+
+    /* SDL assumes that pitch is positive */
+    if (pitch < 0) {
+        PyBuffer_Release(&rect);
+        PyBuffer_Release(&pixels);
+        PyErr_SetString(PyExc_ValueError, "pitch must be positive");
+        return NULL;
+    }
+
+    if (SDL_QueryTexture(texture, &format, NULL, &max_w, &max_h)) {
+        PyBuffer_Release(&rect);
+        PyBuffer_Release(&pixels);
+        return PyCSDL2_RaiseSDLError();
+    }
+
+    if (rect.buf) {
+        r = *((SDL_Rect*)rect.buf);
+    } else {
+        r.x = 0;
+        r.y = 0;
+        r.w = max_w;
+        r.h = max_h;
+    }
+
+    /* SDL assumes that rect.w and rect.h are positive */
+    if (r.x < 0 || r.y < 0 || r.w < 0 || r.h < 0) {
+        PyBuffer_Release(&rect);
+        PyBuffer_Release(&pixels);
+        PyErr_SetString(PyExc_ValueError,
+                        "components of rect must be positive");
+        return NULL;
+    }
+
+    /* SDL does not check if the rect exceeds texture boundaries */
+    if (r.x + r.w > max_w || r.y + r.h > max_h) {
+        PyBuffer_Release(&rect);
+        PyBuffer_Release(&pixels);
+        PyErr_SetString(PyExc_ValueError, "rect exceeds texture boundaries");
+        return NULL;
+    }
+
+    /* SDL does not check if the pixels buffer is of sufficient size */
+    min_pitch = SDL_BYTESPERPIXEL(format) * r.w;
+    min_size = pitch * (r.h ? r.h - 1 : 0) + min_pitch;
+    if (pixels.len < min_size) {
+        PyBuffer_Release(&rect);
+        PyBuffer_Release(&pixels);
+        return PyCSDL2_RaiseBufferSizeError("pixels", min_size, pixels.len);
+    }
+
+    ret = SDL_UpdateTexture(texture, rect.buf, pixels.buf, pitch);
+
+    PyBuffer_Release(&rect);
+    PyBuffer_Release(&pixels);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}

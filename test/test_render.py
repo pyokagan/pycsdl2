@@ -443,6 +443,86 @@ class TestGetTextureBlendMode(unittest.TestCase):
         self.assertRaises(ValueError, SDL_GetTextureBlendMode, self.tex)
 
 
+class TestUpdateTexture(unittest.TestCase):
+    """Tests SDL_UpdateTexture()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        pixels = bytes(16 * 16 * 4)
+        rect = SDL_Rect(0, 0, 16, 16)
+        x = SDL_UpdateTexture(self.tex, rect, pixels, 16 * 4)
+        self.assertIs(x, None)
+
+    def test_no_rect(self):
+        "rect can be None"
+        pixels = bytes(32 * 32 * 4)
+        SDL_UpdateTexture(self.tex, None, pixels, 32 * 4)
+
+    def test_oversized_rect(self):
+        "Raises ValueError if rect exceeds texture boundaries"
+        rect = SDL_Rect(32, 32, 16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 16 * 4)
+
+    def test_negative_rect(self):
+        "Raises ValueError if rect component(s) are negative"
+        rect = SDL_Rect(0, 0, -16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 16 * 4)
+
+    def test_invalid_buffer_size(self):
+        "Raises BufferError if the buffer is too small"
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(1 * 16 * 4)
+        self.assertRaises(BufferError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 1)
+
+    def test_small_pitch(self):
+        "pitch can be smaller than the format's bytes per pixel * w"
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(1 * 16 + 16 * 4)
+        SDL_UpdateTexture(self.tex, rect, pixels, 1)
+
+    def test_negative_pitch(self):
+        "Raises ValueError if pitch is negative"
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, -16)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has already been destroyed"
+        SDL_DestroyTexture(self.tex)
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 16 * 4)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 16 * 4)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        rect = SDL_Rect(0, 0, 16, 16)
+        pixels = bytes(16 * 16 * 4)
+        self.assertRaises(ValueError, SDL_UpdateTexture, self.tex, rect,
+                          pixels, 16 * 4)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

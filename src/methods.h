@@ -495,6 +495,28 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "the SDL_BLENDMODE_* constants.\n"
     },
 
+    {"SDL_UpdateTexture",
+     (PyCFunction) PyCSDL2_UpdateTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UpdateTexture(texture: SDL_Texture, rect: SDL_Rect, pixels: buffer,\n"
+     "                  pitch: int) -> None\n"
+     "\n"
+     "Updates the given texture rectangle with new pixel data.\n"
+     "\n"
+     "texture\n"
+     "    The texture to update.\n"
+     "\n"
+     "rect\n"
+     "    The area to update, or None to update the entire texture.\n"
+     "\n"
+     "pixels\n"
+     "    The raw pixel data.\n"
+     "\n"
+     "pitch\n"
+     "    The number of bytes in a row of pixel data, including padding\n"
+     "    between lines.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
