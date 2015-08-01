@@ -517,6 +517,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    between lines.\n"
     },
 
+    {"SDL_LockTexture",
+     (PyCFunction) PyCSDL2_LockTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockTexture(texture: SDL_Texture, rect: SDL_Rect) -> (buffer, int)\n"
+     "\n"
+     "Locks a portion of the texture for write-only pixel access.\n"
+     "\n"
+     "texture\n"
+     "    The texture to update.\n"
+     "\n"
+     "rect\n"
+     "    The area to lock for access, or None to lock the entire texture.\n"
+     "\n"
+     "Returns a tuple (pixels, pitch), where `pixels` is a buffer with the\n"
+     "locked pixel data, and `pitch` is the integer length of one row in\n"
+     "bytes.\n"
+    },
+
+    {"SDL_UnlockTexture",
+     (PyCFunction) PyCSDL2_UnlockTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockTexture(texture: SDL_Texture) -> None\n"
+     "\n"
+     "Unlocks a texture, uploading any changes to video memory.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

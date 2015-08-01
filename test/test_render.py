@@ -523,6 +523,113 @@ class TestUpdateTexture(unittest.TestCase):
                           pixels, 16 * 4)
 
 
+class TestLockTexture(unittest.TestCase):
+    """Tests SDL_LockTexture()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STREAMING, 32, 32)
+
+    def test_returns_buffer_int(self):
+        "Returns (buffer, int) tuple"
+        rect = SDL_Rect(0, 0, 16, 16)
+        t = SDL_LockTexture(self.tex, rect)
+        self.assertIs(type(t), tuple)
+        buf, pitch = t
+        self.assertIs(type(pitch), int)
+        m = memoryview(buf)
+        self.assertEqual(m.nbytes, 15 * pitch + 16 * 4)
+
+    def test_no_rect(self):
+        "rect can be None"
+        buf, pitch = SDL_LockTexture(self.tex, None)
+        m = memoryview(buf)
+        self.assertEqual(m.nbytes, 31 * pitch + 32 * 4)
+
+    def test_oversized_rect(self):
+        "Raises ValueError if rect exceeds texture boundaries"
+        rect = SDL_Rect(20, 20, 16, 16)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, rect)
+
+    def test_negative_rect(self):
+        "Raises ValueError if rect component(s) are negative"
+        rect = SDL_Rect(0, 0, -16, 16)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, rect)
+
+    def test_locked_texture(self):
+        "Raises ValueError if texture is locked"
+        SDL_LockTexture(self.tex, None)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, None)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if texture has already been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, None)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, None)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the renderer surface has already been destroyed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_LockTexture, self.tex, None)
+
+
+class TestUnlockTexture(unittest.TestCase):
+    """Tests SDL_UnlockTexture()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STREAMING, 32, 32)
+        self.buf, _ = SDL_LockTexture(self.tex, None)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_UnlockTexture(self.tex), None)
+
+    def test_invalidates_buffer(self):
+        "Invalidates the pixel buffer"
+        SDL_UnlockTexture(self.tex)
+        self.assertRaises(ValueError, memoryview, self.buf)
+
+    def test_no_ref_buffer(self):
+        "Works even if we do not have a reference to the pixel buffer"
+        del self.buf
+        SDL_UnlockTexture(self.tex)
+
+    def test_exported_buffer(self):
+        "Raises ValueError if the pixel buffer is exported"
+        m = memoryview(self.buf)
+        self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
+
+    def test_unlocked_texture(self):
+        "Raises ValueError if the texture is unlocked"
+        SDL_UnlockTexture(self.tex)
+        self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if texture is destroyed"
+        SDL_UnlockTexture(self.tex)
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer is destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
+
+    def test_freed_surface(self):
+        "Raises ValueError if renderer surface is destroyed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

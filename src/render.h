@@ -217,6 +217,8 @@ typedef struct PyCSDL2_Texture {
     SDL_Texture *texture;
     /** \brief Reference to PyCSDL2_Renderer of this texture */
     PyCSDL2_Renderer *renderer;
+    /** \brief weakref to PyCSDL2_TexturePixels when the texture is locked */
+    PyObject *pixels;
 } PyCSDL2_Texture;
 
 static PyTypeObject PyCSDL2_TextureType;
@@ -225,6 +227,7 @@ static PyTypeObject PyCSDL2_TextureType;
 static void
 PyCSDL2_TextureDealloc(PyCSDL2_Texture *self)
 {
+    Py_CLEAR(self->pixels);
     PyObject_ClearWeakRefs((PyObject*) self);
     if (self->texture)
         SDL_DestroyTexture(self->texture);
@@ -245,7 +248,7 @@ PyCSDL2_TextureDealloc(PyCSDL2_Texture *self)
  * \returns 1 if the object is valid, 0 with an exception set otherwise.
  */
 static int
-PyCSDL2_TextureValid(PyCSDL2_Texture *self)
+PyCSDL2_TextureValid(PyCSDL2_Texture *self, int allow_locked)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
@@ -262,6 +265,11 @@ PyCSDL2_TextureValid(PyCSDL2_Texture *self)
 
     if (!PyCSDL2_RendererValid(self->renderer))
         return 0;
+
+    if (!allow_locked && self->pixels) {
+        PyErr_SetString(PyExc_ValueError, "texture is locked");
+        return 0;
+    }
 
     return 1;
 }
@@ -342,7 +350,7 @@ PyCSDL2_TexturePtr(PyObject *obj, SDL_Texture **out)
 {
     PyCSDL2_Texture *self = (PyCSDL2_Texture*)obj;
 
-    if (!PyCSDL2_TextureValid(self))
+    if (!PyCSDL2_TextureValid(self, 0))
         return 0;
 
     if (out)
@@ -361,7 +369,7 @@ static int
 PyCSDL2_TextureDetach(PyCSDL2_Texture *self, SDL_Texture **texture,
                       PyCSDL2_Renderer **renderer)
 {
-    if (!PyCSDL2_TextureValid(self))
+    if (!PyCSDL2_TextureValid(self, 0))
         return 0;
 
     if (texture)
@@ -376,6 +384,132 @@ PyCSDL2_TextureDetach(PyCSDL2_Texture *self, SDL_Texture **texture,
     self->renderer = NULL;
 
     return 1;
+}
+
+/** @} */
+
+/**
+ * \defgroup csadl2_SDL_TexturePixels csdl2.SDL_TexturePixels
+ *
+ * \brief Manages the pixels buffer returned by SDL_LockTexture().
+ *
+ * @{
+ */
+
+/** \brief Instance data of PyCSDL2_TexturePixelsType */
+typedef struct PyCSDL2_TexturePixels {
+    PyCSDL2_BufferHEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief Owner of the pixels buffer */
+    PyCSDL2_Texture *texture;
+} PyCSDL2_TexturePixels;
+
+static PyTypeObject PyCSDL2_TexturePixelsType;
+
+/** \brief Destructor for PyCSDL2_TexturePixelsType */
+static void
+PyCSDL2_TexturePixelsDealloc(PyCSDL2_TexturePixels *self)
+{
+    Py_CLEAR(self->texture);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief Validates the PyCSDL2_TexturePixels object */
+static int
+PyCSDL2_TexturePixelsValid(PyCSDL2_TexturePixels *self)
+{
+    if (!PyCSDL2_Assert(self))
+        return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_TexturePixelsType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_TexturePixels", (PyObject*)self);
+        return 0;
+    }
+
+    if (!PyCSDL2_BufferValid((PyCSDL2_Buffer*)self))
+        return 0;
+
+    if (!PyCSDL2_Assert(self->texture))
+        return 0;
+
+    if (!PyCSDL2_TextureValid(self->texture, 1))
+        return 0;
+
+    return 1;
+}
+
+/** \brief getbufferproc implementation for PyCSDL2_TexturePixelsType */
+static int
+PyCSDL2_TexturePixelsGetBuffer(PyCSDL2_TexturePixels *self, Py_buffer *view,
+                               int flags)
+{
+    if (!PyCSDL2_TexturePixelsValid(self))
+        return -1;
+
+    return PyCSDL2_BufferGetBuffer((PyCSDL2_Buffer*) self, view, flags);
+}
+
+/** \brief tp_as_buffer for PyCSDL2_TexturePixelsType */
+static PyBufferProcs PyCSDL2_TexturePixelsBufferProcs = {
+    (getbufferproc) PyCSDL2_TexturePixelsGetBuffer,
+    (releasebufferproc) PyCSDL2_BufferReleaseBuffer
+};
+
+/** \brief Type definition for csdl2.SDL_TexturePixels */
+static PyTypeObject PyCSDL2_TexturePixelsType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_TexturePixels",
+    /* tp_basicsize      */ sizeof(PyCSDL2_TexturePixels),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_TexturePixelsDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ &PyCSDL2_BufferAsSequence,
+    /* tp_as_mapping     */ &PyCSDL2_BufferAsMapping,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_TexturePixelsBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "Provides access to the texture's pixels",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_TexturePixels, in_weakreflist)
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_TexturePixelsType
+ */
+static PyCSDL2_TexturePixels *
+PyCSDL2_TexturePixelsCreate(void *pixels, Py_ssize_t len,
+                            PyCSDL2_Texture *texture)
+{
+    PyCSDL2_TexturePixels *self;
+    PyTypeObject *type = &PyCSDL2_TexturePixelsType;
+
+    if (!PyCSDL2_Assert(pixels))
+        return NULL;
+
+    if (!PyCSDL2_Assert(texture))
+        return NULL;
+
+    self = (PyCSDL2_TexturePixels*) type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, pixels, len, 0);
+    PyCSDL2_Set(self->texture, texture);
+
+    return self;
 }
 
 /** @} */
@@ -779,6 +913,141 @@ PyCSDL2_UpdateTexture(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_LockTexture()
+ *
+ * \code{.py}
+ * SDL_LockTexture(texture: SDL_Texture, rect: SDL_Rect)
+ *     -> (SDL_TexturePixels, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LockTexture(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Texture *texture;
+    Py_buffer rect;
+    SDL_Rect r;
+    void *pixels = NULL;
+    int pitch = -1, ret, max_w, max_h;
+    Py_ssize_t len;
+    Uint32 format;
+    PyCSDL2_TexturePixels *out_pixels;
+    static char *kwlist[] = {"texture", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O&", kwlist,
+                                     &PyCSDL2_TextureType, &texture,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    if (!PyCSDL2_TextureValid(texture, 0)) {
+        PyBuffer_Release(&rect);
+        return NULL;
+    }
+
+    if (SDL_QueryTexture(texture->texture, &format, NULL, &max_w, &max_h)) {
+        PyBuffer_Release(&rect);
+        return PyCSDL2_RaiseSDLError();
+    }
+
+    if (rect.buf) {
+        r = *((SDL_Rect*)rect.buf);
+    } else {
+        r.x = 0;
+        r.y = 0;
+        r.w = max_w;
+        r.h = max_h;
+    }
+
+    /* SDL assumes that rect.w and rect.h are positive */
+    if (r.x < 0 || r.y < 0 || r.w < 0 || r.h < 0) {
+        PyBuffer_Release(&rect);
+        PyErr_SetString(PyExc_ValueError,
+                        "components of rect must be positive");
+        return NULL;
+    }
+
+    /* SDL does not check if the rect exceeds texture boundaries */
+    if (r.x + r.w > max_w || r.y + r.h > max_h) {
+        PyBuffer_Release(&rect);
+        PyErr_SetString(PyExc_ValueError, "rect exceeds texture boundaries");
+        return NULL;
+    }
+
+    ret = SDL_LockTexture(texture->texture, rect.buf, &pixels, &pitch);
+    PyBuffer_Release(&rect);
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    if (!PyCSDL2_Assert(pitch >= 0) || !PyCSDL2_Assert(pixels) ||
+        !PyCSDL2_Assert(!texture->pixels)) {
+        SDL_UnlockTexture(texture->texture);
+        return NULL;
+    }
+
+    len = (r.h ? r.h-1 : 0) * pitch + r.w * SDL_BYTESPERPIXEL(format);
+    out_pixels = PyCSDL2_TexturePixelsCreate(pixels, len, texture);
+    if (!out_pixels) {
+        SDL_UnlockTexture(texture->texture);
+        return NULL;
+    }
+
+    texture->pixels = PyWeakref_NewRef((PyObject*) out_pixels, NULL);
+    if (!texture->pixels) {
+        Py_CLEAR(out_pixels);
+        SDL_UnlockTexture(texture->texture);
+        return NULL;
+    }
+
+    return Py_BuildValue("Ni", out_pixels, pitch);
+}
+
+/**
+ * \brief Implements csdl2.SDL_UnlockTexture()
+ *
+ * \code{.py}
+ * SDL_UnlockTexture(texture: SDL_Texture) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UnlockTexture(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Texture *texture;
+    PyCSDL2_TexturePixels *pixels;
+    static char *kwlist[] = {"texture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_TextureType, &texture))
+        return NULL;
+
+    if (!PyCSDL2_TextureValid(texture, 1))
+        return NULL;
+
+    if (!texture->pixels) {
+        PyErr_SetString(PyExc_ValueError, "texture is not locked");
+        return NULL;
+    }
+
+    pixels = (PyCSDL2_TexturePixels*) PyWeakref_GetObject(texture->pixels);
+    if (pixels && (PyObject*) pixels != Py_None) {
+        if (!PyCSDL2_Assert(Py_TYPE(pixels) == &PyCSDL2_TexturePixelsType))
+            return NULL;
+
+        if (pixels->num_exports) {
+            PyErr_SetString(PyExc_ValueError, "texture pixels buffer is "
+                            "exported");
+            return NULL;
+        }
+
+        pixels->buf = NULL;
+    }
+
+    Py_CLEAR(texture->pixels);
+
+    SDL_UnlockTexture(texture->texture);
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
@@ -990,6 +1259,8 @@ PyCSDL2_initrender(PyObject *module)
     if (PyModule_AddObject(module, "SDL_Texture",
                            (PyObject*) &PyCSDL2_TextureType))
         return 0;
+
+    if (PyType_Ready(&PyCSDL2_TexturePixelsType)) { return 0; }
 
     return 1;
 }

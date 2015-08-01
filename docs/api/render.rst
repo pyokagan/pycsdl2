@@ -221,6 +221,43 @@ Textures
       reasons you may not get the pixels back if you lock the texture
       afterward.
 
+.. function:: SDL_LockTexture(texture, rect) -> tuple
+
+   Locks a portion of the texture for write-only pixel access.
+
+   :param texture: The texture to lock for access, which was created with
+                   :const:`SDL_TEXTUREACCESS_STREAMING`.
+   :type texture: :class:`SDL_Texture`
+   :param rect: The area to lock for access, or None to lock the entire
+                texture.
+   :type rect: :class:`SDL_Rect` buffer or None
+   :returns: A tuple ``(pixels, pitch)``. `pixels` is a buffer containing the
+             locked pixels, and `pitch` is the integer length of one row in
+             bytes.
+
+   .. note::
+
+      After modifying the pixels, you must use :func:`SDL_UnlockTexture` to
+      unlock the pixels and apply any changes.
+
+   .. note::
+
+      This is a write-only operation. As an optimization, the pixels made
+      available for editing don't necessarily contain the old texture data.
+
+.. function:: SDL_UnlockTexture(texture)
+
+   Unlocks a texture, uploading any changes to video memory.
+
+   :param texture: A texture locked by :func:`SDL_LockTexture`.
+   :type texture: :class:`SDL_Texture`
+
+   .. note::
+
+      The pixels buffer returned by :func:`SDL_LockTexture` may contain junk
+      data. For consistent results, ensure that you have overwritten the pixel
+      buffer fully before calling this function.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.
