@@ -354,6 +354,32 @@ class TestGetRendererInfo(unittest.TestCase):
         self.assertRaises(ValueError, SDL_GetRendererInfo, self.rdr)
 
 
+class TestGetRendererOutputSize(unittest.TestCase):
+    "Tests SDL_GetRendererOutputSize()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_int_int(self):
+        "Returns an (int, int) tuple"
+        t = SDL_GetRendererOutputSize(self.rdr)
+        self.assertIs(type(t), tuple)
+        a, b = t
+        self.assertIs(type(a), int)
+        self.assertIs(type(b), int)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetRendererOutputSize, self.rdr)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetRendererOutputSize, self.rdr)
+
+
 class TestCreateTexture(unittest.TestCase):
     "Tests SDL_CreateTexture()"
 

@@ -115,6 +115,15 @@ Renderers
    :returns: A new :class:`SDL_RendererInfo` filled with information about the
              renderer.
 
+.. function:: SDL_GetRendererOutputSize(renderer) -> tuple
+
+   Get the output size of a rendering context.
+
+   :param renderer: The rendering context to query.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A 2-tuple ``(width, height)`` with the output width and height of
+             the rendering context respectively.
+
 .. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
 
    Destroys `renderer`, freeing up its associated textures and resources.

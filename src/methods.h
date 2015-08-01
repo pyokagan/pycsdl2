@@ -408,6 +408,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Gets information about a rendering context.\n"
     },
 
+    {"SDL_GetRendererOutputSize",
+     (PyCFunction) PyCSDL2_GetRendererOutputSize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRendererOutputSize(renderer: SDL_Renderer) -> (int, int)\n"
+     "\n"
+     "Get the output size of a rendering context.\n"
+    },
+
     {"SDL_CreateTexture",
      (PyCFunction) PyCSDL2_CreateTexture,
      METH_VARARGS | METH_KEYWORDS,

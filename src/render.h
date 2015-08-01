@@ -1289,6 +1289,31 @@ PyCSDL2_GetRendererInfo(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetRendererOutputSize()
+ *
+ * \code{.py}
+ * SDL_GetRendererOutputSize(renderer: SDL_Renderer) -> (int, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRendererOutputSize(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *rdr;
+    int ret, w, h;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &rdr))
+        return NULL;
+
+    ret = SDL_GetRendererOutputSize(rdr, &w, &h);
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    return Py_BuildValue("ii", w, h);
+}
+
+/**
  * \brief Implements csdl2.SDL_CreateTexture()
  *
  * \code{.py}
