@@ -240,6 +240,23 @@ class TestGetRenderDriverInfo(unittest.TestCase):
         self.assertIs(type(SDL_GetRenderDriverInfo(0)), SDL_RendererInfo)
 
 
+class TestCreateWindowAndRenderer(unittest.TestCase):
+    """Tests SDL_CreateWindowAndRenderer()"""
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+
+    def test_returns_Window_Renderer(self):
+        "Returns a (SDL_Window, SDL_Renderer) tuple"
+        t = SDL_CreateWindowAndRenderer(32, 32, SDL_WINDOW_HIDDEN)
+        self.assertIs(type(t), tuple)
+        a, b = t
+        self.assertIs(type(a), SDL_Window)
+        self.assertIs(type(b), SDL_Renderer)
+
+
 class TestCreateRenderer(unittest.TestCase):
     """Tests SDL_CreateRenderer()"""
 

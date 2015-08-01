@@ -352,6 +352,26 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "be within the range 0 to SDL_GetNumRenderDrivers()-1.\n"
     },
 
+    {"SDL_CreateWindowAndRenderer",
+     (PyCFunction) PyCSDL2_CreateWindowAndRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateWindowAndRenderer(width: int, height: int,\n"
+     "                            window_flags: int)\n"
+     "    -> (SDL_Window, SDL_Renderer)\n"
+     "\n"
+     "Creates a window and a default renderer.\n"
+     "\n"
+     "`width` and `height` specifies the width and height of the window.\n"
+     "\n"
+     "`flags` must be 0, or one or more of the following OR'd together:\n"
+     "`SDL_WINDOW_FULLSCREEN`, `SDL_WINDOW_OPENGL`, `SDL_WINDOW_SHOWN`,\n"
+     "`SDL_WINDOW_HIDDEN`, `SDL_WINDOW_BORDERLESS`, `SDL_WINDOW_RESIZABLE`,\n"
+     "`SDL_WINDOW_RESIZABLE`, `SDL_WINDOW_MINIMIZED`,\n"
+     "`SDL_WINDOW_MAXIMIZED`, `SDL_WINDOW_INPUT_GRABBED`,\n"
+     "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
+     "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"
+    },
+
     {"SDL_CreateRenderer",
      (PyCFunction) PyCSDL2_CreateRenderer,
      METH_VARARGS | METH_KEYWORDS,

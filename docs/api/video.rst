@@ -45,6 +45,10 @@ Window creation
 
    Used to indicate that the window position should be centered in any display.
 
+.. _window-flags:
+
+Window flags
+------------
 .. data:: SDL_WINDOW_FULLSCREEN
 
    The window is fullscreen.

@@ -1044,6 +1044,52 @@ PyCSDL2_GetRenderDriverInfo(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_CreateWindowAndRenderer()
+ *
+ * \code{.py}
+ * SDL_CreateWindowAndRenderer(width: int, height: int, window_flags: int)
+ *     -> (SDL_Window, SDL_Renderer)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_CreateWindowAndRenderer(PyObject *module, PyObject *args,
+                                PyObject *kwds)
+{
+    int width, height;
+    Uint32 window_flags;
+    int ret;
+    SDL_Window *ret_win;
+    SDL_Renderer *ret_rdr;
+    PyObject *out_win, *out_rdr;
+    static char *kwlist[] = {"width", "height", "window_flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii" Uint32_UNIT, kwlist,
+                                     &width, &height, &window_flags))
+        return NULL;
+
+    ret = SDL_CreateWindowAndRenderer(width, height, window_flags, &ret_win,
+                                      &ret_rdr);
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    out_win = PyCSDL2_WindowCreate(ret_win);
+    if (!out_win) {
+        SDL_DestroyRenderer(ret_rdr);
+        SDL_DestroyWindow(ret_win);
+        return NULL;
+    }
+
+    out_rdr = PyCSDL2_RendererCreate(ret_rdr, out_win);
+    if (!out_rdr) {
+        SDL_DestroyRenderer(ret_rdr);
+        Py_CLEAR(out_win);
+        return NULL;
+    }
+
+    return Py_BuildValue("NN", out_win, out_rdr);
+}
+
+/**
  * \brief Implements csdl2.SDL_CreateRenderer()
  *
  * \code{.py}

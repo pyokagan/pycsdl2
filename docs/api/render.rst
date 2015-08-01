@@ -63,6 +63,18 @@ Renderers
    This is an opaque handle that cannot be directly constructed. Instead, use
    :func:`SDL_CreateRenderer` or :func:`SDL_CreateSoftwareRenderer`.
 
+.. function:: SDL_CreateWindowAndRenderer(width, height, window_flags) -> tuple
+
+   Creates a window and a default renderer.
+
+   :param int width: The width of the window.
+   :param int height: The height of the window.
+   :param int window_flags: 0, or one or more of the :ref:`window-flags` OR'd
+                            together.
+   :returns: A 2-tuple ``(window, renderer)``, where `window` is the created
+             :class:`SDL_Window` and `renderer` is the created
+             :class:`SDL_Renderer`.
+
 .. function:: SDL_CreateRenderer(window: SDL_Window, index: int, flags: int) -> SDL_Renderer
 
    Creates a :class:`SDL_Renderer` for `window`.
