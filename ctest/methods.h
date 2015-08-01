@@ -110,6 +110,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "pixel_format() -> SDL_PixelFormat"
     },
 
+    {"pixel_format_set_bpp",
+     PyCSDL2Test_PixelFormatSetBPP,
+     METH_VARARGS,
+     "pixel_format_set_bpp(pfmt: SDL_PixelFormat) -> None"
+    },
+
     /* End */
     {0}
 };

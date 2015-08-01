@@ -2058,6 +2058,9 @@ typedef int (*PyCSDL2_PalettePtr_pfn)(PyObject*, SDL_Palette**);
 /** \brief Function pointer type of PyCSDL2_PixelFormatCreate() */
 typedef PyObject *(*PyCSDL2_PixelFormatCreate_pfn)(SDL_PixelFormat*);
 
+/** \brief Function pointer type of PyCSDL2_PixelFormatPtr() */
+typedef int (*PyCSDL2_PixelFormatPtr_pfn)(PyObject*, SDL_PixelFormat**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3211,6 +3214,8 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_PalettePtr_pfn _PyCSDL2_PalettePtr;
     /** \brief Pointer to PyCSDL2_PixelFormatCreate() */
     PyCSDL2_PixelFormatCreate_pfn _PyCSDL2_PixelFormatCreate;
+    /** \brief Pointer to PyCSDL2_PixelFormatPtr() */
+    PyCSDL2_PixelFormatPtr_pfn _PyCSDL2_PixelFormatPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5511,6 +5516,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PixelFormatCreate) */
 #define PyCSDL2_PixelFormatCreate(a) PYCSDL2_FUNC(PyCSDL2_PixelFormatCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PixelFormatPtr) */
+#define PyCSDL2_PixelFormatPtr PYCSDL2_FUNC(PyCSDL2_PixelFormatPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

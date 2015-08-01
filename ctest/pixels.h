@@ -91,4 +91,24 @@ PyCSDL2Test_PixelFormat(PyObject *module, PyObject *args)
     return PyCSDL2_PixelFormatCreate(pfmt);
 }
 
+/**
+ * \brief Sets the "BitsPerPixel" field of a SDL_PixelFormat to 42.
+ *
+ * \code{.py}
+ * pixel_format_set_bpp(pfmt: SDL_PixelFormat) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_PixelFormatSetBPP(PyObject *module, PyObject *args)
+{
+    SDL_PixelFormat *pfmt;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_PixelFormatPtr, &pfmt))
+        return NULL;
+
+    pfmt->BitsPerPixel = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_PIXELS_H_ */

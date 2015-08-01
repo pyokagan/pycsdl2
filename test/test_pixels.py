@@ -755,5 +755,28 @@ class TestPixelFormatCreate(unittest.TestCase):
         self.assertEqual(pfmt.BytesPerPixel, 1)
 
 
+class TestPixelFormatPtr(unittest.TestCase):
+    "Tests PyCSDL2_PixelFormatPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        # We use an indexed format to ensure that it is not shared with other
+        # callers.
+        pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8)
+        self.assertEqual(pfmt.BitsPerPixel, 8)
+        _csdl2test.pixel_format_set_bpp(pfmt)
+        self.assertEqual(pfmt.BitsPerPixel, 42)
+
+    def test_freed(self):
+        "Raises ValueError if pixel format has been freed"
+        pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8)
+        SDL_FreeFormat(pfmt)
+        self.assertRaises(ValueError, _csdl2test.pixel_format_set_bpp, pfmt)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.pixel_format_set_bpp, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

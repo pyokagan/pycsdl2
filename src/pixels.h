@@ -416,6 +416,8 @@ typedef struct PyCSDL2_PixelFormat {
     PyCSDL2_Palette *palette;
 } PyCSDL2_PixelFormat;
 
+static PyTypeObject PyCSDL2_PixelFormatType;
+
 /** \brief GC traverse function for PyCSDL2_PixelFormatType */
 static int
 PyCSDL2_PixelFormatTraverse(PyCSDL2_PixelFormat *self, visitproc visit,
@@ -456,6 +458,11 @@ PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_PixelFormatType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_PixelFormat", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->pfmt) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_PixelFormat");
@@ -787,6 +794,28 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
     }
     self->pfmt = pfmt;
     return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_PixelFormat pointer managed by the PyCSDL2_PixelFormat
+ *        object.
+ *
+ * \param obj The PyCSDL2_PixelFormat object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_PixelFormatPtr(PyObject *obj, SDL_PixelFormat **out)
+{
+    PyCSDL2_PixelFormat *self = (PyCSDL2_PixelFormat*)obj;
+
+    if (!PyCSDL2_PixelFormatValid(self))
+        return 0;
+
+    if (out)
+        *out = self->pfmt;
+
+    return 1;
 }
 
 /**
