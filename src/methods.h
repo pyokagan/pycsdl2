@@ -450,6 +450,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    srcA - srcA * (alpha / 255)\n"
     },
 
+    {"SDL_GetTextureAlphaMod",
+     (PyCFunction) PyCSDL2_GetTextureAlphaMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureAlphaMod(texture: SDL_Texture) -> int\n"
+     "\n"
+     "Returns the additional alpha value multiplied into render copy\n"
+     "operations. It is within the range 0-255.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

@@ -174,6 +174,14 @@ Textures
    :param int alpha: The source alpha value multiplied into copy operations. It
                      must be within the range 0-255.
 
+.. function:: SDL_GetTextureAlphaMod(texture) -> int
+
+   Returns the additional alpha value multiplied into render copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: The current alpha value. It is within the range 0-255.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.
