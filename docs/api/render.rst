@@ -69,6 +69,53 @@ Destroying a renderer
    .. warning:: Once destroyed, do not access the renderer. Doing so will at
                 best raise errors and at worse crash the interpreter.
 
+Textures
+--------
+.. class:: SDL_Texture
+
+   An efficient driver-specific representation of pixel data.
+
+   This is an opaque handle that cannot be directly constructed. Instead, use
+   :func:`SDL_CreateTexture` or :func:`SDL_CreateTextureFromSurface`.
+
+.. function:: SDL_CreateTexture(renderer, format, access, w, h) -> SDL_Texture
+
+   Creates a texture for a rendering context with the specified properties.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param int format: The texture pixel format. One of the
+                      :ref:`pixel-format-constants`.
+   :param int access: Specifies whether the texture data can be modified. One
+                      of :const:`SDL_TEXTUREACCESS_STATIC`,
+                      :const:`SDL_TEXTUREACCESS_STREAMING`
+                      or :const:`SDL_TEXTUREACCESS_TARGET`.
+   :param int w: Width of the texture in pixels.
+   :param int h: Height of the texture in pixels.
+   :returns: A new :class:`SDL_Texture` for the rendering context.
+
+.. data:: SDL_TEXTUREACCESS_STATIC
+
+   Texture changes rarely, not lockable.
+
+.. data:: SDL_TEXTUREACCESS_STREAMING
+
+   Texture changes frequently, lockable.
+
+.. data:: SDL_TEXTUREACCESS_TARGET
+
+   Texture can be used as a render target.
+
+.. function:: SDL_DestroyTexture(texture)
+
+   Destroys the specified texture, freeing its resources.
+
+   There is no need to explictly call this function. :class:`SDL_Texture` will
+   automatically call it upon cleanup.
+
+   :param texture: Texture to destroy.
+   :type texture: :class:`SDL_Texture`
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
@@ -142,18 +189,6 @@ screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
              will exist between frames. You are strongly encouraged to call
              :func:`SDL_RenderClear` to initialize the backbuffer before
              drawing each frame.
-
-.. data:: SDL_TEXTUREACCESS_STATIC
-
-   Texture changes rarely, not lockable.
-
-.. data:: SDL_TEXTUREACCESS_STREAMING
-
-   Texture changes frequently, lockable.
-
-.. data:: SDL_TEXTUREACCESS_TARGET
-
-   Texture can be used as a render target.
 
 .. data:: SDL_FLIP_NONE
 

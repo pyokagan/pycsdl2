@@ -351,6 +351,37 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Creates a SDL_Renderer for `surface`.\n"
     },
 
+    {"SDL_CreateTexture",
+     (PyCFunction) PyCSDL2_CreateTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateTexture(renderer: SDL_Renderer, format: int, access: int,\n"
+     "                  w: int, h: int) -> SDL_Texture\n"
+     "\n"
+     "Creates a texture for a rendering context with the specified\n"
+     "properties:\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "format\n"
+     "    One of the SDL_PIXELFORMAT_* constants. Defines the pixel format\n"
+     "    of the texture.\n"
+     "\n"
+     "access\n"
+     "    One of the SDL_TEXTUREACCESS_* constants. Defines how the texture\n"
+     "    can be accessed:\n"
+     "\n"
+     "    * SDL_TEXTUREACCESS_STATIC -- changes rarely, not lockable.\n"
+     "    * SDL_TEXTUREACCESS_STREAMING -- changes frequently, lockable.\n"
+     "    * SDL_TEXTUREACCESS_TARGET -- can be used as a render target.\n"
+     "\n"
+     "w\n"
+     "    Width of the texture in pixels.\n"
+     "\n"
+     "h\n"
+     "    Height of the texture in pixels.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
@@ -396,6 +427,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "Updates the screen with any rendering performed since the previous\n"
      "call.\n"
+    },
+
+    {"SDL_DestroyTexture",
+     (PyCFunction) PyCSDL2_DestroyTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_DestroyTexture(texture: SDL_Texture) -> None\n"
+     "\n"
+     "Destroys the specified texture, freeing its resources.\n"
+     "\n"
+     "There is no need to explictly call this function. SDL_Texture will\n"
+     "automatically call it upon cleanup.\n"
     },
 
     {"SDL_DestroyRenderer",

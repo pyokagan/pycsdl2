@@ -88,4 +88,77 @@ PyCSDL2Test_RendererSetDrawColor(PyObject *module, PyObject *args)
     Py_RETURN_NONE;
 }
 
+/**
+ * \brief Creates a PyCSDL2_Texture object.
+ *
+ * \code{.py}
+ * texture(renderer: SDL_Renderer) -> SDL_Texture
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_Texture(PyObject *module, PyObject *args)
+{
+    SDL_Surface *surface;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    PyObject *rdr_obj;
+
+    if (!PyArg_ParseTuple(args, "O", &rdr_obj))
+        return NULL;
+
+    /*
+     * NOTE: Since we allow the caller to specify the renderer object, we will
+     * leak the surface and renderer we create here. It's all for science
+     * though!
+     */
+
+    surface = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
+    if (!surface)
+        goto fail;
+
+    renderer = SDL_CreateSoftwareRenderer(surface);
+    if (!renderer) {
+        SDL_FreeSurface(surface);
+        goto fail;
+    }
+
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                                SDL_TEXTUREACCESS_STATIC, 32, 32);
+    if (!texture) {
+        SDL_DestroyRenderer(renderer);
+        SDL_FreeSurface(surface);
+        goto fail;
+    }
+
+    return PyCSDL2_TextureCreate(texture, rdr_obj);
+
+fail:
+    PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+    return NULL;
+}
+
+/**
+ * \brief Returns the SDL_Texture format
+ *
+ * \code{.py}
+ * texture_get_format(texture: SDL_Texture) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_TextureGetFormat(PyObject *module, PyObject *args)
+{
+    SDL_Texture *texture;
+    Uint32 format;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_TexturePtr, &texture))
+        return NULL;
+
+    if (SDL_QueryTexture(texture, &format, NULL, NULL, NULL)) {
+        PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+        return NULL;
+    }
+
+    return PyLong_FromUnsignedLong(format);
+}
+
 #endif /* _PYCSDL2TEST_RENDER_H_ */

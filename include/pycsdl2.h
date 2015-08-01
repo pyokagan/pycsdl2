@@ -2083,6 +2083,12 @@ typedef PyObject *(*PyCSDL2_RendererCreate_pfn)(SDL_Renderer*, PyObject*);
 /** \brief Function pointer type of PyCSDL2_RendererPtr() */
 typedef int (*PyCSDL2_RendererPtr_pfn)(PyObject*, SDL_Renderer**);
 
+/** \brief Function pointer type of PyCSDL2_TextureCreate() */
+typedef PyObject *(*PyCSDL2_TextureCreate_pfn)(SDL_Texture*, PyObject*);
+
+/** \brief Function pointer type of PyCSDL2_TexturePtr() */
+typedef int (*PyCSDL2_TexturePtr_pfn)(PyObject*, SDL_Texture**);
+
 /* src/rwops.h */
 
 /** \brief Function pointer type of PyCSDL2_RWopsCreate() */
@@ -3276,6 +3282,10 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_RendererCreate_pfn _PyCSDL2_RendererCreate;
     /** \brief Pointer to \c PyCSDL2_RendererPtr() */
     PyCSDL2_RendererPtr_pfn _PyCSDL2_RendererPtr;
+    /** \brief Pointer to PyCSDL2_TextureCreate() */
+    PyCSDL2_TextureCreate_pfn _PyCSDL2_TextureCreate;
+    /** \brief Pointer to PyCSDL2_TexturePtr() */
+    PyCSDL2_TexturePtr_pfn _PyCSDL2_TexturePtr;
 /* src/rwops.h */
     /** \brief Pointer to PyCSDL2_RWopsCreate() */
     PyCSDL2_RWopsCreate_pfn _PyCSDL2_RWopsCreate;
@@ -5616,6 +5626,12 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererPtr) */
 #define PyCSDL2_RendererPtr PYCSDL2_FUNC(PyCSDL2_RendererPtr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_TextureCreate) */
+#define PyCSDL2_TextureCreate(a, b) PYCSDL2_FUNC(PyCSDL2_TextureCreate)(a, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_TexturePtr) */
+#define PyCSDL2_TexturePtr PYCSDL2_FUNC(PyCSDL2_TexturePtr)
 
 /* src/rwops.h */
 

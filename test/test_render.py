@@ -3,6 +3,7 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import weakref
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -84,6 +85,19 @@ class TestRenderer(unittest.TestCase):
         self.assertRaises(TypeError, type, "testtype", (SDL_Renderer,), {})
 
 
+class TestTexture(unittest.TestCase):
+    "Tests SDL_Texture"
+
+    def test_cannot_create(self):
+        "Cannot directly create SDL_Texture instances"
+        self.assertRaises(TypeError, SDL_Texture)
+        self.assertRaises(TypeError, SDL_Texture.__new__, SDL_Texture)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_Texture,), {})
+
+
 class TestCreateRenderer(unittest.TestCase):
     """Tests SDL_CreateRenderer()"""
 
@@ -127,6 +141,43 @@ class TestCreateSoftwareRenderer(unittest.TestCase):
         "Raises AssertionError if the surface has already been freed"
         SDL_FreeSurface(self.sf)
         self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
+
+
+class TestCreateTexture(unittest.TestCase):
+    "Tests SDL_CreateTexture()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_texture(self):
+        "Returns a SDL_Texture instance"
+        tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                SDL_TEXTUREACCESS_STATIC, 32, 32)
+        self.assertIs(type(tex), SDL_Texture)
+
+    def test_ref_renderer(self):
+        "The returned SDL_Texture references the renderer"
+        x = weakref.ref(self.rdr)
+        tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                SDL_TEXTUREACCESS_STATIC, 32, 32)
+        del self.rdr
+        del self.sf
+        self.assertIsNotNone(x())
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_CreateTexture, self.rdr,
+                          SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
+                          32, 32)
+
+    def test_freed_surface(self):
+        "Raises ValueError if renderer surface has already been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_CreateTexture, self.rdr,
+                          SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC,
+                          32, 32)
 
 
 class TestSetRenderDrawColor(unittest.TestCase):
@@ -272,6 +323,35 @@ class TestRenderPresent(unittest.TestCase):
         self.assertRaises(ValueError, SDL_RenderPresent, self.rdr)
 
 
+class TestDestroyTexture(unittest.TestCase):
+    "Tests SDL_DestroyTexture()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_DestroyTexture(self.tex), None)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_DestroyTexture, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_DestroyTexture, self.tex)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_DestroyTexture, self.tex)
+
+
 class TestDestroyRenderer(unittest.TestCase):
     """Tests SDL_DestroyRenderer()"""
 
@@ -341,6 +421,68 @@ class TestRendererPtr(unittest.TestCase):
     def test_invalid_type(self):
         "Raises TypeError if the type is invalid"
         self.assertRaises(TypeError, _csdl2test.renderer_set_draw_color, 42)
+
+
+class TestTextureCreate(unittest.TestCase):
+    "Tests PyCSDL2_TextureCreate()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_texture(self):
+        "Returns a new SDL_Texture"
+        tex = _csdl2test.texture(self.rdr)
+        self.assertIs(type(tex), SDL_Texture)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, _csdl2test.texture, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, _csdl2test.texture, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError if the type is invalid"
+        self.assertRaises(TypeError, _csdl2test.texture, 42)
+
+
+class TestTexturePtr(unittest.TestCase):
+    "Tests PyCSDL2_Texture"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        x = _csdl2test.texture_get_format(self.tex)
+        self.assertIs(type(x), int)
+        self.assertEqual(x, SDL_PIXELFORMAT_RGBA8888)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, _csdl2test.texture_get_format, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, _csdl2test.texture_get_format, self.tex)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, _csdl2test.texture_get_format, self.tex)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.texture_get_format, 42)
 
 
 if __name__ == '__main__':
