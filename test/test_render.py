@@ -220,6 +220,14 @@ class TestTexture(unittest.TestCase):
         self.assertRaises(TypeError, type, 'testtype', (SDL_Texture,), {})
 
 
+class TestGetNumRenderDrivers(unittest.TestCase):
+    """Tests SDL_GetNumRenderDrivers()"""
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetNumRenderDrivers()), int)
+
+
 class TestCreateRenderer(unittest.TestCase):
     """Tests SDL_CreateRenderer()"""
 

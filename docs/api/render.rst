@@ -39,6 +39,10 @@ on a particular display.
 
       Maximum texture height
 
+.. function:: SDL_GetNumRenderDrivers() -> int
+
+   Get the number of 2D rendering drivers available for the current display.
+
 Renderers
 ---------
 .. class:: SDL_Renderer

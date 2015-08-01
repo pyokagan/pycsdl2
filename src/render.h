@@ -1003,6 +1003,24 @@ PyCSDL2_TexturePixelsCreate(void *pixels, Py_ssize_t len,
 /** @} */
 
 /**
+ * \brief Implements csdl2.SDL_GetNumRenderDrivers()
+ *
+ * \code{.py}
+ * SDL_GetNumRenderDrivers() -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetNumRenderDrivers(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    return PyLong_FromLong(SDL_GetNumRenderDrivers());
+}
+
+/**
  * \brief Implements csdl2.SDL_CreateRenderer()
  *
  * \code{.py}

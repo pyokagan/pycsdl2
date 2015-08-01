@@ -331,6 +331,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* render.h */
 
+    {"SDL_GetNumRenderDrivers",
+     (PyCFunction) PyCSDL2_GetNumRenderDrivers,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetNumRenderDrivers() -> int\n"
+     "\n"
+     "Gets the number of 2D rendering drivers available for the current\n"
+     "display.\n"
+    },
+
     {"SDL_CreateRenderer",
      (PyCFunction) PyCSDL2_CreateRenderer,
      METH_VARARGS | METH_KEYWORDS,
