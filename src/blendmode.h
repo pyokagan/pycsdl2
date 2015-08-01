@@ -41,6 +41,20 @@
 static int
 PyCSDL2_initblendmode(PyObject *module)
 {
+    static const PyCSDL2_Constant constants[] = {
+        {"SDL_BLENDMODE_NONE", SDL_BLENDMODE_NONE},
+        {"SDL_BLENDMODE_BLEND", SDL_BLENDMODE_BLEND},
+        {"SDL_BLENDMODE_ADD", SDL_BLENDMODE_ADD},
+        {"SDL_BLENDMODE_MOD", SDL_BLENDMODE_MOD},
+
+        {NULL, 0}
+    };
+    const PyCSDL2_Constant *c;
+
+    for (c = constants; c->name; c++)
+        if (PyModule_AddIntConstant(module, c->name, c->value))
+            return 0;
+
     return 1;
 }
 

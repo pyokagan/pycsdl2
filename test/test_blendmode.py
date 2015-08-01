@@ -17,5 +17,21 @@ if __name__ == '__main__':
 from csdl2 import *
 
 
+class TestBlendmodeConstants(unittest.TestCase):
+    """Test value of constants defined in SDL_blendmode.h"""
+
+    def test_SDL_BLENDMODE_NONE(self):
+        self.assertEqual(SDL_BLENDMODE_NONE, 0x00)
+
+    def test_SDL_BLENDMODE_BLEND(self):
+        self.assertEqual(SDL_BLENDMODE_BLEND, 0x01)
+
+    def test_SDL_BLENDMODE_ADD(self):
+        self.assertEqual(SDL_BLENDMODE_ADD, 0x02)
+
+    def test_SDL_BLENDMODE_MOD(self):
+        self.assertEqual(SDL_BLENDMODE_MOD, 0x04)
+
+
 if __name__ == '__main__':
     unittest.main()
