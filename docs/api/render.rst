@@ -134,6 +134,22 @@ Textures
    :returns: A tuple ``(int, int, int, int)`` with the texture's raw pixel
              format, access, width and height respectively.
 
+.. function:: SDL_SetTextureColorMod(texture, r, g, b)
+
+   Sets an additional color value used in render copy operations.
+
+   When the texture is rendered, during the copy operation each source color
+   channel is modulated by the appropriate color value according to the
+   following formula::
+
+      srcC = srcC * (color / 255)
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int r: The red color value multiplied into copy operations.
+   :param int g: The green color value multiplied into copy operations.
+   :param int b: The blue color value multiplied into copy operations.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.

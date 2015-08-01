@@ -410,6 +410,22 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "* The texture's height, in pixels.\n"
     },
 
+    {"SDL_SetTextureColorMod",
+     (PyCFunction) PyCSDL2_SetTextureColorMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureColorMod(texture: SDL_Texture, r: int, g: int, b: int)\n"
+     "    -> None\n"
+     "\n"
+     "Sets an additional color value (r, g, b) used in render copy\n"
+     "operations.\n"
+     "\n"
+     "When the texture is rendered, during the copy operation each source\n"
+     "color channel is modulated by the appropriate color value according\n"
+     "to the following formula:\n"
+     "\n"
+     "    srcC = srcC * (color / 255)\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
