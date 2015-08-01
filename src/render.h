@@ -598,6 +598,30 @@ PyCSDL2_GetTextureColorMod(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_SetTextureAlphaMod()
+ *
+ * \code{.py}
+ * SDL_SetTextureAlphaMod(texture: SDL_Texture, alpha: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_SetTextureAlphaMod(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Texture *texture;
+    unsigned char alpha;
+    static char *kwlist[] = {"texture", "alpha", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&b", kwlist,
+                                     PyCSDL2_TexturePtr, &texture, &alpha))
+        return NULL;
+
+    if (SDL_SetTextureAlphaMod(texture, alpha))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}

@@ -322,6 +322,35 @@ class TestGetTextureColorMod(unittest.TestCase):
         self.assertRaises(ValueError, SDL_GetTextureColorMod, self.tex)
 
 
+class TestSetTextureAlphaMod(unittest.TestCase):
+    """Tests SDL_SetTextureAlphaMod()"""
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.tex = SDL_CreateTexture(self.rdr, SDL_PIXELFORMAT_RGBA8888,
+                                     SDL_TEXTUREACCESS_STATIC, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIs(SDL_SetTextureAlphaMod(self.tex, 255), None)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if the texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_SetTextureAlphaMod, self.tex, 255)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_SetTextureAlphaMod, self.tex, 255)
+
+    def test_freed_renderer_surface(self):
+        "Raises ValueError if the renderer surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_SetTextureAlphaMod, self.tex, 255)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

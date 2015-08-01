@@ -435,6 +435,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "copy operations.\n"
     },
 
+    {"SDL_SetTextureAlphaMod",
+     (PyCFunction) PyCSDL2_SetTextureAlphaMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureAlphaMod(texture: SDL_Texture, alpha: int) -> None\n"
+     "\n"
+     "Sets an additional alpha value multiplied into render copy operations.\n"
+     "The alpha value must be within the range 0-255.\n"
+     "\n"
+     "When the texture is rendered, during the copy operation the source\n"
+     "alpha value would be modulated by this alpha value according to the\n"
+     "following formula:\n"
+     "\n"
+     "    srcA - srcA * (alpha / 255)\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

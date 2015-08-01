@@ -159,6 +159,21 @@ Textures
    :returns: A tuple ``(int, int, int)`` with the red, green and blue
              components of the color respectively.
 
+.. function:: SDL_SetTextureAlphaMod(texture, alpha)
+
+   Sets an additional alpha value multiplied into render copy operations.
+
+   When the texture is rendered, during the copy operation the source alpha
+   value would be modulated by this alpha value according to the following
+   formula::
+
+      srcA = srcA * (alpha / 255)
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int alpha: The source alpha value multiplied into copy operations. It
+                     must be within the range 0-255.
+
 .. function:: SDL_DestroyTexture(texture)
 
    Destroys the specified texture, freeing its resources.
