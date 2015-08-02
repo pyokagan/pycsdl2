@@ -33,6 +33,7 @@
 #include "rect.h"
 #include "rwops.h"
 #include "surface.h"
+#include "video.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -165,6 +166,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_SurfaceFill,
      METH_VARARGS,
      "surface_fill(sf: SDL_Surface) -> None"
+    },
+
+    /* video.h */
+
+    {"window",
+     PyCSDL2Test_Window,
+     METH_VARARGS,
+     "window() -> SDL_Window"
     },
 
     /* End */

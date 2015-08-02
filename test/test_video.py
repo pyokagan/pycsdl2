@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 try:
@@ -279,6 +280,21 @@ class TestDestroyWindow(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_DestroyWindow(self.win)
         self.assertRaises(ValueError, SDL_DestroyWindow, self.win)
+
+
+class TestWindowCreate(unittest.TestCase):
+    "Tests PyCSDL2_WindowCreate()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('No video support')
+
+    def test_returns_window(self):
+        "Returns a new SDL_Window"
+        win = _csdl2test.window()
+        self.assertIs(type(win), SDL_Window)
+        self.assertEqual(SDL_GetWindowTitle(win), 'foo')
 
 
 if __name__ == '__main__':

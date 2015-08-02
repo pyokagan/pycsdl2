@@ -36,6 +36,7 @@
 #include "rect.h"
 #include "rwops.h"
 #include "surface.h"
+#include "video.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -668,7 +669,9 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_RWopsPtr,
 /* src/surface.h */
         PyCSDL2_SurfaceCreate,
-        PyCSDL2_SurfacePtr
+        PyCSDL2_SurfacePtr,
+/* src/video.h */
+        PyCSDL2_WindowCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }
