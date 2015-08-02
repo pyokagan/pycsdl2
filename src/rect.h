@@ -159,6 +159,27 @@ static PyTypeObject PyCSDL2_RectType = {
     /* tp_new            */ (newfunc) PyCSDL2_RectNew
 };
 
+/**
+ * \brief Creates a new PyCSDL2_Rect instance
+ *
+ * \param rect SDL_Rect to initialize the PyCSDL_Rect with
+ * \returns The new PyCSDL_Rect object, or NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_RectCreate(const SDL_Rect *rect)
+{
+    PyCSDL2_Rect *self;
+
+    self = PyCSDL2_RectNew(&PyCSDL2_RectType, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    if (rect)
+        self->rect = *rect;
+
+    return (PyObject*)self;
+}
+
 /** \brief converter for a readonly SDL_Rect exporting object */
 static int
 PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)

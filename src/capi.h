@@ -33,6 +33,7 @@
 #include "audio.h"
 #include "events.h"
 #include "pixels.h"
+#include "rect.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -656,7 +657,9 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_PaletteCreate,
         PyCSDL2_PalettePtr,
         PyCSDL2_PixelFormatCreate,
-        PyCSDL2_PixelFormatPtr
+        PyCSDL2_PixelFormatPtr,
+/* src/rect.h */
+        PyCSDL2_RectCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

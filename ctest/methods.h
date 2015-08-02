@@ -30,6 +30,7 @@
 #include "audio.h"
 #include "events.h"
 #include "pixels.h"
+#include "rect.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -114,6 +115,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_PixelFormatSetBPP,
      METH_VARARGS,
      "pixel_format_set_bpp(pfmt: SDL_PixelFormat) -> None"
+    },
+
+    /* rect.h */
+
+    {"rect",
+     PyCSDL2Test_Rect,
+     METH_VARARGS,
+     "rect() -> SDL_Rect"
     },
 
     /* End */
