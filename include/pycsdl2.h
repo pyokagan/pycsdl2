@@ -2074,6 +2074,9 @@ typedef int (*PyCSDL2_RectPtr_pfn)(PyObject*, SDL_Rect**);
 /** \brief Function pointer type of PyCSDL2_RWopsCreate() */
 typedef PyObject *(*PyCSDL2_RWopsCreate_pfn)(SDL_RWops*);
 
+/** \brief Function pointer type of PyCSDL2_RWopsPtr() */
+typedef int (*PyCSDL2_RWopsPtr_pfn)(PyObject*, SDL_RWops**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3237,6 +3240,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/rwops.h */
     /** \brief Pointer to PyCSDL2_RWopsCreate() */
     PyCSDL2_RWopsCreate_pfn _PyCSDL2_RWopsCreate;
+    /** \brief Pointer to PyCSDL2_RWopsPtr() */
+    PyCSDL2_RWopsPtr_pfn _PyCSDL2_RWopsPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5553,6 +5558,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RWopsCreate) */
 #define PyCSDL2_RWopsCreate(a) PYCSDL2_FUNC(PyCSDL2_RWopsCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RWopsPtr) */
+#define PyCSDL2_RWopsPtr PYCSDL2_FUNC(PyCSDL2_RWopsPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

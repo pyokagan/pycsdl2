@@ -140,6 +140,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "rwops() -> SDL_RWops"
     },
 
+    {"rwops_set_type",
+     PyCSDL2Test_RWopsSetType,
+     METH_VARARGS,
+     "rwops_set_type(rw: SDL_RWops) -> None"
+    },
+
     /* End */
     {0}
 };

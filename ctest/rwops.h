@@ -56,4 +56,24 @@ PyCSDL2Test_RWops(PyObject *module, PyObject *args)
     return PyCSDL2_RWopsCreate(rw);
 }
 
+/**
+ * \brief Sets the "type" field of the SDL_RWops to 42.
+ *
+ * \code{.py}
+ * rwops_set_type(rw: SDL_RWops) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RWopsSetType(PyObject *module, PyObject *args)
+{
+    SDL_RWops *rw;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_RWopsPtr, &rw))
+        return NULL;
+
+    rw->type = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_RWOPS_H_ */

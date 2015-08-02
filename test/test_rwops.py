@@ -439,5 +439,26 @@ class TestRWopsCreate(unittest.TestCase):
         self.assertEqual(rw.type, 42)
 
 
+class TestRWopsPtr(unittest.TestCase):
+    "Tests PyCSDL2_RWopsPtr"
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        rw = SDL_AllocRW()
+        self.assertEqual(rw.type, 0)
+        _csdl2test.rwops_set_type(rw)
+        self.assertEqual(rw.type, 42)
+
+    def test_freed(self):
+        "Raises ValueError if rwops has been freed"
+        rw = SDL_AllocRW()
+        SDL_FreeRW(rw)
+        self.assertRaises(ValueError, _csdl2test.rwops_set_type, rw)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.rwops_set_type, 42)
+
+
 if __name__ == '__main__':
     unittest.main()
