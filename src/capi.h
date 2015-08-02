@@ -31,6 +31,7 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 #include "audio.h"
+#include "events.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -644,7 +645,9 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_AudioSpecCreate,
         PyCSDL2_AudioSpecPtr,
         PyCSDL2_AudioDeviceCreate,
-        PyCSDL2_AudioDeviceID
+        PyCSDL2_AudioDeviceID,
+/* src/events.h */
+        PyCSDL2_MouseMotionEventCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

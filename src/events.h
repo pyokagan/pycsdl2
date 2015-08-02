@@ -404,23 +404,25 @@ static PyTypeObject PyCSDL2_MouseMotionEventType = {
 /**
  * \brief Creates an instance of PyCSDL2_MouseMotionEventType
  *
- * \param ev_mem PyCSDL2_EventMem providing the backing storage for SDL_Event.
  * \returns A new PyCSDL2_MouseMotionEvent on success, NULL if an exception
  *          occurred.
  */
-static PyCSDL2_MouseMotionEvent *
-PyCSDL2_MouseMotionEventCreate(PyCSDL2_EventMem *ev_mem)
+static PyObject *
+PyCSDL2_MouseMotionEventCreate(const SDL_MouseMotionEvent *ev)
 {
     PyCSDL2_MouseMotionEvent *self;
     PyTypeObject *type = &PyCSDL2_MouseMotionEventType;
 
-    if (!PyCSDL2_Assert(ev_mem))
+    if (!PyCSDL2_Assert(ev))
         return NULL;
 
-    if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
+    self = PyCSDL2_MouseMotionEventNew(type, NULL, NULL);
+    if (!self)
         return NULL;
-    PyCSDL2_Set(self->ev_mem, ev_mem);
-    return self;
+
+    self->ev_mem->ev.motion = *ev;
+
+    return (PyObject*)self;
 }
 
 /**
@@ -445,6 +447,7 @@ static PyCSDL2_Event *
 PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_Event *self;
+    PyTypeObject *t;
 
     if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
         return NULL;
@@ -452,11 +455,18 @@ PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
         Py_DECREF(self);
         return NULL;
     }
-    if (!(self->motion = PyCSDL2_MouseMotionEventCreate(self->ev_mem))) {
-        Py_DECREF(self);
-        return NULL;
-    }
+
+    t = &PyCSDL2_MouseMotionEventType;
+    self->motion = PyCSDL2_MouseMotionEventNew(t, NULL, NULL);
+    if (!self->motion)
+        goto fail;
+    PyCSDL2_Set(self->motion->ev_mem, self->ev_mem);
+
     return self;
+
+fail:
+    Py_DECREF(self);
+    return NULL;
 }
 
 /**

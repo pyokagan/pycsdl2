@@ -28,6 +28,7 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 #include "audio.h"
+#include "events.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -60,6 +61,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_AudioDeviceUnpause,
      METH_VARARGS,
      "audio_device_unpause(dev: SDL_AudioDevice) -> None"
+    },
+
+    /* events.h */
+
+    {"mouse_motion_event",
+     PyCSDL2Test_MouseMotionEvent,
+     METH_VARARGS,
+     "mouse_motion_event() -> SDL_MouseMotionEvent"
     },
 
     /* End */
