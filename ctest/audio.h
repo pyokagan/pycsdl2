@@ -60,4 +60,24 @@ PyCSDL2Test_AudioSpec(PyObject *module, PyObject *args)
     return PyCSDL2_AudioSpecCreate(&spec);
 }
 
+/**
+ * \brief Sets the "freq" field of a SDL_AudioSpec to 42.
+ *
+ * \code{.py}
+ * audio_spec_set_freq(spec: SDL_AudioSpec) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_AudioSpecSetFreq(PyObject *module, PyObject *args)
+{
+    SDL_AudioSpec *spec;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_AudioSpecPtr, &spec))
+        return NULL;
+
+    spec->freq = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_AUDIO_H_ */

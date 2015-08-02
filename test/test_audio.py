@@ -534,5 +534,20 @@ class TestAudioSpecCreate(unittest.TestCase):
         self.assertIsNotNone(x.userdata)
 
 
+class TestAudioSpecPtr(unittest.TestCase):
+    "Tests PyCSDL2_AudioSpecPtr()"
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        spec = SDL_AudioSpec()
+        self.assertEqual(spec.freq, 0)
+        _csdl2test.audio_spec_set_freq(spec)
+        self.assertEqual(spec.freq, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.audio_spec_set_freq, None)
+
+
 if __name__ == '__main__':
     unittest.main()

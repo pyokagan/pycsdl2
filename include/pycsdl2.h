@@ -2022,6 +2022,9 @@ typedef void (SDLCALL *SDL_GL_DeleteContext_pfn)(SDL_GLContext context);
 /** \brief Function pointer type of PyCSDL2_AudioSpecCreate() */
 typedef PyObject *(*PyCSDL2_AudioSpecCreate_pfn)(const SDL_AudioSpec*);
 
+/** \brief Function pointer type of PyCSDL2_AudioSpecPtr() */
+typedef int (*PyCSDL2_AudioSpecPtr_pfn)(PyObject*, SDL_AudioSpec**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3153,6 +3156,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/audio.h */
     /** \brief Pointer to PyCSDL2_AudioSpecCreate() */
     PyCSDL2_AudioSpecCreate_pfn _PyCSDL2_AudioSpecCreate;
+    /** \brief Pointer to PyCSDL2_AudioSpecPtr() */
+    PyCSDL2_AudioSpecPtr_pfn _PyCSDL2_AudioSpecPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5418,6 +5423,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate) */
 #define PyCSDL2_AudioSpecCreate(a) PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioSpecPtr) */
+#define PyCSDL2_AudioSpecPtr PYCSDL2_FUNC(PyCSDL2_AudioSpecPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

@@ -284,6 +284,31 @@ PyCSDL2_AudioSpecCreate(const SDL_AudioSpec *spec)
     return (PyObject*)self;
 }
 
+/**
+ * \brief Borrows the SDL_AudioSpec managed by the PyCSDL2_AudioSpec
+ *
+ * \param obj The PyCSDL2_AudioSpec object
+ * \param[out] out Output field
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_AudioSpecPtr(PyObject *obj, SDL_AudioSpec **out)
+{
+    PyCSDL2_AudioSpec *self = (PyCSDL2_AudioSpec*)obj;
+
+    if (!PyCSDL2_Assert(obj) || !PyCSDL2_Assert(out))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_AudioSpecType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_AudioSpec", obj);
+        return 0;
+    }
+
+    *out = &self->spec;
+
+    return 1;
+}
+
 /** @} */
 
 /**

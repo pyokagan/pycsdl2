@@ -641,7 +641,8 @@ PyCSDL2_initcapi(PyObject *m)
         SDL_GL_SwapWindow,
         SDL_GL_DeleteContext,
 /* src/audio.h */
-        PyCSDL2_AudioSpecCreate
+        PyCSDL2_AudioSpecCreate,
+        PyCSDL2_AudioSpecPtr
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }
