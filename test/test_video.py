@@ -297,5 +297,31 @@ class TestWindowCreate(unittest.TestCase):
         self.assertEqual(SDL_GetWindowTitle(win), 'foo')
 
 
+class TestWindowPtr(unittest.TestCase):
+    "Tests PyCSDL2_WindowPtr()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('No video support')
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        self.assertEqual(SDL_GetWindowTitle(win), 'foo')
+        _csdl2test.window_set_title(win)
+        self.assertEqual(SDL_GetWindowTitle(win), 'bar')
+
+    def test_destroyed(self):
+        "Raises ValueError if the window is already destroyed"
+        win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        SDL_DestroyWindow(win)
+        self.assertRaises(ValueError, _csdl2test.window_set_title, win)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.window_set_title, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

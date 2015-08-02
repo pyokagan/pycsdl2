@@ -53,4 +53,24 @@ PyCSDL2Test_Window(PyObject *module, PyObject *args)
     return PyCSDL2_WindowCreate(window);
 }
 
+/**
+ * \brief Sets the title of the SDL_Window to "bar"
+ *
+ * \code{.py}
+ * window_set_title(win: SDL_Window) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_WindowSetTitle(PyObject *module, PyObject *args)
+{
+    SDL_Window *window;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_WindowPtr, &window))
+        return NULL;
+
+    SDL_SetWindowTitle(window, "bar");
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_VIDEO_H_ */

@@ -176,6 +176,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "window() -> SDL_Window"
     },
 
+    {"window_set_title",
+     PyCSDL2Test_WindowSetTitle,
+     METH_VARARGS,
+     "window_set_title(win: SDL_Window) -> None"
+    },
+
     /* End */
     {0}
 };

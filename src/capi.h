@@ -671,7 +671,8 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_SurfaceCreate,
         PyCSDL2_SurfacePtr,
 /* src/video.h */
-        PyCSDL2_WindowCreate
+        PyCSDL2_WindowCreate,
+        PyCSDL2_WindowPtr
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

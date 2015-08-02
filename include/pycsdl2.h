@@ -2090,6 +2090,9 @@ typedef int (*PyCSDL2_SurfacePtr_pfn)(PyObject*, SDL_Surface**);
 /** \brief Function pointer type of PyCSDL2_WindowCreate() */
 typedef PyObject *(*PyCSDL2_WindowCreate_pfn)(SDL_Window *window);
 
+/** \brief Function pointer type of PyCSDL2_WindowPtr() */
+typedef int (*PyCSDL2_WindowPtr_pfn)(PyObject*, SDL_Window**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3263,6 +3266,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/video.h */
     /** \brief Pointer to PyCSDL2_WindowCreate() */
     PyCSDL2_WindowCreate_pfn _PyCSDL2_WindowCreate;
+    /** \brief Pointer to PyCSDL2_WindowPtr() */
+    PyCSDL2_WindowPtr_pfn _PyCSDL2_WindowPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5595,6 +5600,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_WindowCreate) */
 #define PyCSDL2_WindowCreate(a) PYCSDL2_FUNC(PyCSDL2_WindowCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_WindowPtr) */
+#define PyCSDL2_WindowPtr PYCSDL2_FUNC(PyCSDL2_WindowPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
