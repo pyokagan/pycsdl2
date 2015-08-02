@@ -648,7 +648,8 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_AudioDeviceID,
 /* src/events.h */
         PyCSDL2_MouseMotionEventCreate,
-        PyCSDL2_MouseMotionEventPtr
+        PyCSDL2_MouseMotionEventPtr,
+        PyCSDL2_EventCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

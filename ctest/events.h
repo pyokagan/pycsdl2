@@ -74,4 +74,21 @@ PyCSDL2Test_MouseMotionEventSetType(PyObject *module, PyObject *args)
     Py_RETURN_NONE;
 }
 
+/**
+ * \brief Creates a PyCSDL2_Event object.
+ *
+ * \code{.py}
+ * event() -> SDL_Event
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_Event(PyObject *module, PyObject *args)
+{
+    SDL_Event ev;
+
+    ev.type = 1;
+
+    return PyCSDL2_EventCreate(&ev);
+}
+
 #endif /* _PYCSDL2TEST_EVENTS_H_ */

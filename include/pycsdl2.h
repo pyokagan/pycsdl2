@@ -2041,6 +2041,9 @@ typedef PyObject *(*PyCSDL2_MouseMotionEventCreate_pfn)(const
 typedef int (*PyCSDL2_MouseMotionEventPtr_pfn)(PyObject*,
                                                SDL_MouseMotionEvent**);
 
+/** \brief Function pointer type of PyCSDL2_EventCreate() */
+typedef PyObject *(*PyCSDL2_EventCreate_pfn)(const SDL_Event*);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3183,6 +3186,8 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_MouseMotionEventCreate_pfn _PyCSDL2_MouseMotionEventCreate;
     /** \brief Pointer to PyCSDL2_MouseMotionEventPtr() */
     PyCSDL2_MouseMotionEventPtr_pfn _PyCSDL2_MouseMotionEventPtr;
+    /** \brief Pointer to PyCSDL2_EventCreate() */
+    PyCSDL2_EventCreate_pfn _PyCSDL2_EventCreate;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5466,6 +5471,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr) */
 #define PyCSDL2_MouseMotionEventPtr PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_EventCreate) */
+#define PyCSDL2_EventCreate(a) PYCSDL2_FUNC(PyCSDL2_EventCreate)(a)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

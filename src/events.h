@@ -650,6 +650,28 @@ static PyTypeObject PyCSDL2_EventType = {
 };
 
 /**
+ * \brief Creates an instance of PyCSDL2_Event.
+ *
+ * \param ev SDL_Event to initialize the object with
+ * \returns A new PyCSDL2_Event PyObject on success, NULL with an exception set
+ *          on failure.
+ */
+static PyObject *
+PyCSDL2_EventCreate(const SDL_Event *ev)
+{
+    PyTypeObject *type = &PyCSDL2_EventType;
+    PyCSDL2_Event *self;
+
+    self = PyCSDL2_EventNew(type, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    self->ev_mem->ev = *ev;
+
+    return (PyObject*)self;
+}
+
+/**
  * \brief Checks for and retrieves a SDL_Event Py_buffer from obj.
  *
  * \param[out] buf The Py_buffer struct to fill up with buffer info

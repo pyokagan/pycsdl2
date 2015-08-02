@@ -691,5 +691,15 @@ class TestMouseMotionEventPtr(unittest.TestCase):
                           42)
 
 
+class TestEventCreate(unittest.TestCase):
+    "Tests PyCSDL2_EventCreate()"
+
+    def test_returns_Event(self):
+        "Returns SDL_Event"
+        ev = _csdl2test.event()
+        self.assertIs(type(ev), SDL_Event)
+        self.assertEqual(ev.type, 1)
+
+
 if __name__ == '__main__':
     unittest.main()
