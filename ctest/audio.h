@@ -20,32 +20,44 @@
  *        distribution.
  */
 /**
- * \file methods.h
- * \brief _csdl2test list of module methods.
+ * \file audio.h
+ * \brief Tests for csdl2's SDL_audio bindings.
  */
-#ifndef _PYCSDL2TEST_METHODS_H_
-#define _PYCSDL2TEST_METHODS_H_
+#ifndef _PYCSDL2TEST_AUDIO_H_
+#define _PYCSDL2TEST_AUDIO_H_
 #include <Python.h>
+#include <SDL_audio.h>
 #include "../include/pycsdl2.h"
-#include "audio.h"
 
 /**
- * \brief _csdl2test methods definitions.
- *
- * \sa PyCSDL2Test_Module
+ * \brief SDL Audio callback for PyCSDL2Test_AudioSpec()
  */
-static PyMethodDef PyCSDL2Test_Methods[] = {
+static void SDLCALL
+PyCSDL2Test_AudioSpecCallback(void *userdata, Uint8 *stream, int len)
+{
+    /* do nothing */
+}
 
-    /* audio.h */
+/**
+ * \brief Creates and returns a PyCSDL2_AudioSpec object.
+ *
+ * \code{.py}
+ * audio_spec() -> SDL_AudioSpec
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_AudioSpec(PyObject *module, PyObject *args)
+{
+    SDL_AudioSpec spec;
 
-    {"audio_spec",
-     PyCSDL2Test_AudioSpec,
-     METH_VARARGS,
-     "audio_spec() -> SDL_AudioSpec"
-    },
+    spec.freq = 1;
+    spec.format = 2;
+    spec.channels = 3;
+    spec.silence = 4;
+    spec.samples = 5;
+    spec.size = 6;
+    spec.callback = PyCSDL2Test_AudioSpecCallback;
+    return PyCSDL2_AudioSpecCreate(&spec);
+}
 
-    /* End */
-    {0}
-};
-
-#endif /* _PYCSDL2TEST_METHODS_H_ */
+#endif /* _PYCSDL2TEST_AUDIO_H_ */

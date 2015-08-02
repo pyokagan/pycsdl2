@@ -266,7 +266,7 @@ static PyTypeObject PyCSDL2_AudioSpecType = {
  * \returns A new PyCSDL2_AudioSpec on success, or NULL with an exception set
  *          on failure.
  */
-static PyCSDL2_AudioSpec *
+static PyObject *
 PyCSDL2_AudioSpecCreate(const SDL_AudioSpec *spec)
 {
     PyCSDL2_AudioSpec *self;
@@ -280,7 +280,8 @@ PyCSDL2_AudioSpecCreate(const SDL_AudioSpec *spec)
         return NULL;
 
     self->spec = *spec;
-    return self;
+
+    return (PyObject*)self;
 }
 
 /** @} */
@@ -740,7 +741,7 @@ PyCSDL2_LoadWAV_RW(PyObject *module, PyObject *args, PyObject *kwds)
     SDL_AudioSpec *ret;
     Uint8 *audio_buf;
     Uint32 audio_len;
-    PyCSDL2_AudioSpec *outspec = NULL;
+    PyObject *outspec = NULL;
     PyCSDL2_WAVBuf *outbuf = NULL;
     PyObject *out = NULL;
     static char *kwlist[] = {"src", "freesrc", NULL};
@@ -786,7 +787,7 @@ PyCSDL2_LoadWAV(PyObject *module, PyObject *args, PyObject *kwds)
     SDL_AudioSpec *ret;
     Uint8 *audio_buf;
     Uint32 audio_len;
-    PyCSDL2_AudioSpec *outspec = NULL;
+    PyObject *outspec = NULL;
     PyCSDL2_WAVBuf *outbuf = NULL;
     PyObject *out = NULL;
     static char *kwlist[] = {"file", NULL};

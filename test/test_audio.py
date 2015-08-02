@@ -19,6 +19,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 try:
@@ -515,6 +516,22 @@ class TestCloseAudioDevice(unittest.TestCase):
         "Raises ValueError when the SDL_AudioDevice has been closed"
         SDL_CloseAudioDevice(self.dev)
         self.assertRaises(ValueError, SDL_CloseAudioDevice, self.dev)
+
+
+class TestAudioSpecCreate(unittest.TestCase):
+    "Tests PyCSDL2_AudioSpecCreate()"
+
+    def test_returns_AudioSpec(self):
+        x = _csdl2test.audio_spec()
+        self.assertIs(type(x), SDL_AudioSpec)
+        self.assertEqual(x.freq, 1)
+        self.assertEqual(x.format, 2)
+        self.assertEqual(x.channels, 3)
+        self.assertEqual(x.silence, 4)
+        self.assertEqual(x.samples, 5)
+        self.assertEqual(x.size, 6)
+        self.assertIsNotNone(x.callback)
+        self.assertIsNotNone(x.userdata)
 
 
 if __name__ == '__main__':

@@ -2017,6 +2017,11 @@ typedef void (SDLCALL *SDL_GL_SwapWindow_pfn)(SDL_Window *window);
 /** \brief Function pointer type of \c SDL_GL_DeleteContext() */
 typedef void (SDLCALL *SDL_GL_DeleteContext_pfn)(SDL_GLContext context);
 
+/* src/audio.h */
+
+/** \brief Function pointer type of PyCSDL2_AudioSpecCreate() */
+typedef PyObject *(*PyCSDL2_AudioSpecCreate_pfn)(const SDL_AudioSpec*);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3145,6 +3150,9 @@ typedef struct PyCSDL2_CAPI {
     SDL_GL_SwapWindow_pfn _SDL_GL_SwapWindow;
     /** \brief Pointer to \c SDL_GL_DeleteContext() */
     SDL_GL_DeleteContext_pfn _SDL_GL_DeleteContext;
+/* src/audio.h */
+    /** \brief Pointer to PyCSDL2_AudioSpecCreate() */
+    PyCSDL2_AudioSpecCreate_pfn _PyCSDL2_AudioSpecCreate;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5405,6 +5413,11 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 /** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_DeleteContext) */
 #define SDL_GL_DeleteContext(context) \
     PYCSDL2_FUNC(SDL_GL_DeleteContext)(context)
+
+/* src/audio.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate) */
+#define PyCSDL2_AudioSpecCreate(a) PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate)(a)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

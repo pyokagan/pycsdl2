@@ -30,6 +30,7 @@
 #define _PYCSDL2_CAPI_H_
 #include <Python.h>
 #include "../include/pycsdl2.h"
+#include "audio.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -638,7 +639,9 @@ PyCSDL2_initcapi(PyObject *m)
         SDL_GL_SetSwapInterval,
         SDL_GL_GetSwapInterval,
         SDL_GL_SwapWindow,
-        SDL_GL_DeleteContext
+        SDL_GL_DeleteContext,
+/* src/audio.h */
+        PyCSDL2_AudioSpecCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }
