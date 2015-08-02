@@ -91,4 +91,24 @@ PyCSDL2Test_Event(PyObject *module, PyObject *args)
     return PyCSDL2_EventCreate(&ev);
 }
 
+/**
+ * \brief Sets the "type" field of a SDL_Event to 42.
+ *
+ * \code{.py}
+ * event_set_type(ev: SDL_Event) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_EventSetType(PyObject *module, PyObject *args)
+{
+    SDL_Event *ev;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_EventPtr, &ev))
+        return NULL;
+
+    ev->type = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_EVENTS_H_ */

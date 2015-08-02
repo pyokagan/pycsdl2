@@ -83,6 +83,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "event() -> SDL_Event"
     },
 
+    {"event_set_type",
+     PyCSDL2Test_EventSetType,
+     METH_VARARGS,
+     "event_set_type(ev: SDL_Event) -> None"
+    },
+
     /* End */
     {0}
 };

@@ -672,6 +672,31 @@ PyCSDL2_EventCreate(const SDL_Event *ev)
 }
 
 /**
+ * \brief Borrows the SDL_Event from a PyCSDL2_Event object.
+ *
+ * \param obj The PyCSDL2_Event object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_EventPtr(PyObject *obj, SDL_Event **out)
+{
+    PyCSDL2_Event *self = (PyCSDL2_Event*)obj;
+
+    if (!PyCSDL2_Assert(obj) || !PyCSDL2_Assert(out))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_EventType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Event", obj);
+        return 0;
+    }
+
+    *out = &self->ev_mem->ev;
+
+    return 1;
+}
+
+/**
  * \brief Checks for and retrieves a SDL_Event Py_buffer from obj.
  *
  * \param[out] buf The Py_buffer struct to fill up with buffer info

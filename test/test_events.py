@@ -701,5 +701,20 @@ class TestEventCreate(unittest.TestCase):
         self.assertEqual(ev.type, 1)
 
 
+class TestEventPtr(unittest.TestCase):
+    "Tests PyCSDL2_EventPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        ev = SDL_Event()
+        self.assertEqual(ev.type, 0)
+        _csdl2test.event_set_type(ev)
+        self.assertEqual(ev.type, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.event_set_type, 42)
+
+
 if __name__ == '__main__':
     unittest.main()
