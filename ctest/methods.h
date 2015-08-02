@@ -50,6 +50,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "audio_spec_set_freq(spec: SDL_AudioSpec) -> None"
     },
 
+    {"audio_device",
+     PyCSDL2Test_AudioDevice,
+     METH_VARARGS,
+     "audio_device() -> SDL_AudioDevice"
+    },
+
     /* End */
     {0}
 };

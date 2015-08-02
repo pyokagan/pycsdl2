@@ -549,5 +549,19 @@ class TestAudioSpecPtr(unittest.TestCase):
         self.assertRaises(TypeError, _csdl2test.audio_spec_set_freq, None)
 
 
+class TestAudioDeviceCreate(unittest.TestCase):
+    "Tests PyCSDL2_AudioDeviceCreate()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_audio:
+            raise unittest.SkipTest('no audio support')
+
+    def test_returns_AudioDevice(self):
+        "Returns SDL_AudioDevice"
+        x = _csdl2test.audio_device()
+        self.assertIs(type(x), SDL_AudioDevice)
+
+
 if __name__ == '__main__':
     unittest.main()

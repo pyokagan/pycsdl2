@@ -497,9 +497,8 @@ static PyTypeObject PyCSDL2_AudioDeviceType = {
 /**
  * \brief Creates an instance of PyCSDL2_AudioDeviceType
  */
-static PyCSDL2_AudioDevice *
-PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id, PyObject *callback,
-                          PyObject *userdata)
+static PyObject *
+PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id)
 {
     PyCSDL2_AudioDevice *self;
     PyTypeObject *type = &PyCSDL2_AudioDeviceType;
@@ -514,8 +513,8 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id, PyObject *callback,
         return NULL;
     }
 
-    PyCSDL2_AudioDeviceAttach(self, id, callback, userdata);
-    return self;
+    PyCSDL2_AudioDeviceAttach(self, id, NULL, NULL);
+    return (PyObject*)self;
 }
 
 /** @} */
@@ -654,7 +653,7 @@ PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
  *      -> SDL_AudioDevice
  * \endcode
  */
-static PyCSDL2_AudioDevice *
+static PyObject *
 PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Py_buffer device;
@@ -663,8 +662,7 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
     PyCSDL2_AudioSpec *desired_obj, *obtained;
     int allowed_changes;
     SDL_AudioDeviceID id;
-    PyCSDL2_AudioDevice *out;
-    PyObject *callback = NULL, *userdata = NULL;
+    PyObject *out = NULL, *callback = NULL, *userdata = NULL;
     static char *kwlist[] = {"device", "iscapture", "desired", "obtained",
                              "allowed_changes", NULL};
 
@@ -681,7 +679,7 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
         goto fail;
     }
 
-    out = PyCSDL2_AudioDeviceCreate(0, NULL, NULL);
+    out = PyCSDL2_AudioDeviceCreate(0);
     if (!out)
         goto fail;
 
@@ -710,7 +708,8 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
         goto fail;
     }
 
-    PyCSDL2_AudioDeviceAttach(out, id, callback, userdata);
+    PyCSDL2_AudioDeviceAttach((PyCSDL2_AudioDevice*)out, id, callback,
+                              userdata);
     PyBuffer_Release(&device);
     return out;
 

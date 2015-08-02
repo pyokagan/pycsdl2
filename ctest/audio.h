@@ -80,4 +80,32 @@ PyCSDL2Test_AudioSpecSetFreq(PyObject *module, PyObject *args)
     Py_RETURN_NONE;
 }
 
+/**
+ * \brief Creates and returns a PyCSDL2_AudioDevice object.
+ *
+ * \code{.py}
+ * audio_device() -> SDL_AudioDevice
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_AudioDevice(PyObject *module, PyObject *args)
+{
+    SDL_AudioSpec spec;
+    SDL_AudioDeviceID dev;
+
+    spec.freq = 44100;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = 1;
+    spec.samples = 4096;
+    spec.callback = PyCSDL2Test_AudioSpecCallback;
+
+    dev = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    if (dev <= 0) {
+        PyErr_SetString(PyExc_RuntimeError, "SDL_OpenAudioDevice failed");
+        return NULL;
+    }
+
+    return PyCSDL2_AudioDeviceCreate(dev);
+}
+
 #endif /* _PYCSDL2TEST_AUDIO_H_ */
