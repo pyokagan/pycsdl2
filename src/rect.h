@@ -180,6 +180,32 @@ PyCSDL2_RectCreate(const SDL_Rect *rect)
     return (PyObject*)self;
 }
 
+/**
+ * \brief Borrows a pointer to the SDL_Rect managed by the PyCSDL2_Rect.
+ *
+ * \param obj The PyCSDL2_Rect object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_RectPtr(PyObject *obj, SDL_Rect **out)
+{
+    PyCSDL2_Rect *self = (PyCSDL2_Rect*)obj;
+
+    if (!PyCSDL2_Assert(obj))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_RectType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Rect", obj);
+        return 0;
+    }
+
+    if (out)
+        *out = &self->rect;
+
+    return 1;
+}
+
 /** \brief converter for a readonly SDL_Rect exporting object */
 static int
 PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)

@@ -44,4 +44,24 @@ PyCSDL2Test_Rect(PyObject *module, PyObject *args)
     return PyCSDL2_RectCreate(&r);
 }
 
+/**
+ * \brief Sets the "x" field of the SDL_Rect to 42.
+ *
+ * \code{.py}
+ * rect_set_x(rect: SDL_Rect) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RectSetX(PyObject *module, PyObject *args)
+{
+    SDL_Rect *r;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_RectPtr, &r))
+        return NULL;
+
+    r->x = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_EVENTS_H_ */

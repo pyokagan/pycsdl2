@@ -137,5 +137,20 @@ class TestRectCreate(unittest.TestCase):
         self.assertEqual(r.h, 4)
 
 
+class TestRectPtr(unittest.TestCase):
+    "Tests PyCSDL2_RectPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter for PyArg_ParseTuple()"
+        r = SDL_Rect()
+        self.assertEqual(r.x, 0)
+        _csdl2test.rect_set_x(r)
+        self.assertEqual(r.x, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.rect_set_x, 42)
+
+
 if __name__ == '__main__':
     unittest.main()

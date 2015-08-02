@@ -125,6 +125,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "rect() -> SDL_Rect"
     },
 
+    {"rect_set_x",
+     PyCSDL2Test_RectSetX,
+     METH_VARARGS,
+     "rect_set_x(rect: SDL_Rect) -> None"
+    },
+
     /* End */
     {0}
 };

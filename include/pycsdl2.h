@@ -2066,6 +2066,9 @@ typedef int (*PyCSDL2_PixelFormatPtr_pfn)(PyObject*, SDL_PixelFormat**);
 /** \brief Function pointer type of PyCSDL2_RectCreate() */
 typedef PyObject *(*PyCSDL2_RectCreate_pfn)(const SDL_Rect*);
 
+/** \brief Function pointer type of PyCSDL2_RectPtr() */
+typedef int (*PyCSDL2_RectPtr_pfn)(PyObject*, SDL_Rect**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3224,6 +3227,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/rect.h */
     /** \brief Pointer to PyCSDL2_RectCreate() */
     PyCSDL2_RectCreate_pfn _PyCSDL2_RectCreate;
+    /** \brief Pointer to PyCSDL2_RectPtr() */
+    PyCSDL2_RectPtr_pfn _PyCSDL2_RectPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5532,6 +5537,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectCreate) */
 #define PyCSDL2_RectCreate(a) PYCSDL2_FUNC(PyCSDL2_RectCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectPtr) */
+#define PyCSDL2_RectPtr PYCSDL2_FUNC(PyCSDL2_RectPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
