@@ -657,7 +657,8 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
     if (!(self = (PyCSDL2_Surface*)type->tp_alloc(type, 0)))
         return NULL;
     surface->format->refcount += 1;
-    if (!(self->format = PyCSDL2_PixelFormatCreate(surface->format))) {
+    self->format = (PyCSDL2_PixelFormat*)PyCSDL2_PixelFormatCreate(surface->format);
+    if (!self->format) {
         surface->format->refcount -= 1;
         Py_DECREF(self);
         return NULL;

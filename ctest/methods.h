@@ -104,6 +104,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "palette_set_ncolors(plt: SDL_Palette) -> None"
     },
 
+    {"pixel_format",
+     PyCSDL2Test_PixelFormat,
+     METH_VARARGS,
+     "pixel_format() -> SDL_PixelFormat"
+    },
+
     /* End */
     {0}
 };

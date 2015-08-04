@@ -742,5 +742,18 @@ class TestPalettePtr(unittest.TestCase):
         self.assertRaises(TypeError, _csdl2test.palette_set_ncolors, 42)
 
 
+class TestPixelFormatCreate(unittest.TestCase):
+    "Tests PyCSDL2_PixelFormatCreate()"
+
+    def test_returns_PixelFormat(self):
+        "Returns a new SDL_PixelFormat"
+        pfmt = _csdl2test.pixel_format()
+        self.assertIs(type(pfmt), SDL_PixelFormat)
+        self.assertEqual(pfmt.format, SDL_PIXELFORMAT_INDEX8)
+        self.assertIsNone(pfmt.palette)
+        self.assertEqual(pfmt.BitsPerPixel, 8)
+        self.assertEqual(pfmt.BytesPerPixel, 1)
+
+
 if __name__ == '__main__':
     unittest.main()

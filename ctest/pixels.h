@@ -68,4 +68,27 @@ PyCSDL2Test_PaletteSetNColors(PyObject *module, PyObject *args)
     Py_RETURN_NONE;
 }
 
+/**
+ * \brief Creates a PyCSDL2_PixelFormat object.
+ *
+ * \code{.py}
+ * pixel_format() -> SDL_PixelFormat
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_PixelFormat(PyObject *module, PyObject *args)
+{
+    SDL_PixelFormat *pfmt;
+
+    /*
+     * We use an indexed format to ensure that it is not shared with other
+     * callers. (SDL shares pixel formats that are not indexed)
+     */
+    pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
+    if (!pfmt)
+        return PyErr_NoMemory();
+
+    return PyCSDL2_PixelFormatCreate(pfmt);
+}
+
 #endif /* _PYCSDL2TEST_PIXELS_H_ */

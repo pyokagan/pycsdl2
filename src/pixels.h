@@ -762,7 +762,7 @@ static PyTypeObject PyCSDL2_PixelFormatType = {
  *
  * \param pfmt The SDL_PixelFormat to manage. Will steal the reference to it.
  */
-static PyCSDL2_PixelFormat *
+static PyObject *
 PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
 {
     PyCSDL2_PixelFormat *self;
@@ -786,7 +786,7 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
         self->palette = palette;
     }
     self->pfmt = pfmt;
-    return self;
+    return (PyObject*)self;
 }
 
 /**
@@ -796,12 +796,12 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
  * SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat
  * \endcode
  */
-static PyCSDL2_PixelFormat *
+static PyObject *
 PyCSDL2_AllocFormat(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Uint32 pixel_format;
     SDL_PixelFormat *pfmt;
-    PyCSDL2_PixelFormat *out;
+    PyObject *out;
     static char *kwlist[] = {"pixel_format", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist,
                                      &pixel_format))
