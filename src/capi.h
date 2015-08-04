@@ -32,6 +32,7 @@
 #include "../include/pycsdl2.h"
 #include "audio.h"
 #include "events.h"
+#include "pixels.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -650,7 +651,9 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_MouseMotionEventCreate,
         PyCSDL2_MouseMotionEventPtr,
         PyCSDL2_EventCreate,
-        PyCSDL2_EventPtr
+        PyCSDL2_EventPtr,
+/* src/pixels.h */
+        PyCSDL2_PaletteCreate
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

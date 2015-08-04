@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class TestPixelsConstants(unittest.TestCase):
@@ -706,6 +707,18 @@ class Test_SDL_FreePalette(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_FreePalette(self.plt)
         self.assertRaises(ValueError, SDL_FreePalette, self.plt)
+
+
+class TestPaletteCreate(unittest.TestCase):
+    "Tests PyCSDL2_PaletteCreate()"
+
+    def test_returns_Palette(self):
+        "Returns a new SDL_Palette"
+        plt = _csdl2test.palette()
+        self.assertIs(type(plt), SDL_Palette)
+        self.assertEqual(plt.ncolors, 2)
+        x = memoryview(plt.colors)
+        self.assertEqual(x.shape, (2,))
 
 
 if __name__ == '__main__':

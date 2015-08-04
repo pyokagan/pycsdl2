@@ -351,7 +351,7 @@ static PyTypeObject PyCSDL2_PaletteType = {
  *
  * \param palette SDL_Palette to manage. Steals the reference.
  */
-static PyCSDL2_Palette *
+static PyObject *
 PyCSDL2_PaletteCreate(SDL_Palette *palette)
 {
     PyCSDL2_Palette *self;
@@ -374,7 +374,7 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
     }
     self->palette = palette;
     self->colors = colors;
-    return self;
+    return (PyObject*)self;
 }
 
 /** \brief Instance data for SDL_PixelFormatType */
@@ -749,7 +749,8 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
         PyCSDL2_Palette *palette;
 
         pfmt->palette->refcount += 1;
-        if (!(palette = PyCSDL2_PaletteCreate(pfmt->palette))) {
+        palette = (PyCSDL2_Palette*)PyCSDL2_PaletteCreate(pfmt->palette);
+        if (!palette) {
             pfmt->palette->refcount -= 1;
             Py_DECREF(self);
             return NULL;
@@ -818,12 +819,12 @@ PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
 * SDL_AllocPalette(ncolors: int) -> SDL_Palette
 * \endcode
 */
-static PyCSDL2_Palette *
+static PyObject *
 PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
 {
     int ncolors;
     SDL_Palette *palette;
-    PyCSDL2_Palette *out;
+    PyObject *out;
     static char *kwlist[] = {"ncolors", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &ncolors))
         return NULL;

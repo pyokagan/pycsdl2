@@ -29,6 +29,7 @@
 #include "../include/pycsdl2.h"
 #include "audio.h"
 #include "events.h"
+#include "pixels.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -87,6 +88,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_EventSetType,
      METH_VARARGS,
      "event_set_type(ev: SDL_Event) -> None"
+    },
+
+    /* pixels.h */
+
+    {"palette",
+     PyCSDL2Test_Palette,
+     METH_VARARGS,
+     "palette() -> SDL_Palette"
     },
 
     /* End */
