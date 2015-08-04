@@ -1246,7 +1246,7 @@ static PyTypeObject PyCSDL2_RWopsType = {
 /**
  * \brief Creates a new instance of PyCSDL2_RWopsType
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_RWopsCreate(SDL_RWops *rwops)
 {
     PyCSDL2_RWops *self;
@@ -1264,7 +1264,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
 
     self->rwops = rwops;
 
-    return self;
+    return (PyObject*)self;
 }
 
 /**
@@ -1274,7 +1274,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
  * SDL_RWFromFile(file: str, mode: str) -> SDL_RWops
  * \endcode
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
 {
     const char *file, *mode;
@@ -1295,11 +1295,11 @@ PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
  * SDL_AllocRW() -> SDL_RWops
  * \endcode
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
 {
     SDL_RWops *rwops;
-    PyCSDL2_RWops *ret;
+    PyObject *ret;
     static char *kwlist[] = {NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))

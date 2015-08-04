@@ -31,6 +31,7 @@
 #include "events.h"
 #include "pixels.h"
 #include "rect.h"
+#include "rwops.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -129,6 +130,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_RectSetX,
      METH_VARARGS,
      "rect_set_x(rect: SDL_Rect) -> None"
+    },
+
+    /* rwops.h */
+
+    {"rwops",
+     PyCSDL2Test_RWops,
+     METH_VARARGS,
+     "rwops() -> SDL_RWops"
     },
 
     /* End */
