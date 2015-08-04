@@ -675,5 +675,21 @@ class TestMouseMotionEventCreate(unittest.TestCase):
         self.assertEqual(x.yrel, 9)
 
 
+class TestMouseMotionEventPtr(unittest.TestCase):
+    "Tests PyCSDL2_MouseMotionEventPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        ev = SDL_MouseMotionEvent()
+        self.assertEqual(ev.type, 0)
+        _csdl2test.mouse_motion_event_set_type(ev)
+        self.assertEqual(ev.type, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.mouse_motion_event_set_type,
+                          42)
+
+
 if __name__ == '__main__':
     unittest.main()

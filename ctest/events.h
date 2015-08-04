@@ -54,4 +54,24 @@ PyCSDL2Test_MouseMotionEvent(PyObject *module, PyObject *args)
     return PyCSDL2_MouseMotionEventCreate(&motion);
 }
 
+/**
+ * \brief Sets the "type" of a SDL_MouseMotionEvent to 42.
+ *
+ * \code{.py}
+ * mouse_motion_event_set_type(ev: SDL_MouseMotionEvent) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_MouseMotionEventSetType(PyObject *module, PyObject *args)
+{
+    SDL_MouseMotionEvent *ev;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_MouseMotionEventPtr, &ev))
+        return NULL;
+
+    ev->type = 42;
+
+    Py_RETURN_NONE;
+}
+
 #endif /* _PYCSDL2TEST_EVENTS_H_ */

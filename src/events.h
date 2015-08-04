@@ -72,6 +72,8 @@ typedef struct PyCSDL2_MouseMotionEvent {
     PyCSDL2_EventMem *ev_mem;
 } PyCSDL2_MouseMotionEvent;
 
+static PyTypeObject PyCSDL2_MouseMotionEventType;
+
 /** \brief newfunc for PyCSDL2_MouseMotionEventType */
 static PyCSDL2_MouseMotionEvent *
 PyCSDL2_MouseMotionEventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -107,6 +109,11 @@ PyCSDL2_MouseMotionEventValid(PyCSDL2_MouseMotionEvent *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_MouseMotionEventType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_MouseMotionEvent", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->ev_mem) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_MouseMotionEvent");
@@ -423,6 +430,28 @@ PyCSDL2_MouseMotionEventCreate(const SDL_MouseMotionEvent *ev)
     self->ev_mem->ev.motion = *ev;
 
     return (PyObject*)self;
+}
+
+/**
+ * \brief Borrows the SDL_MouseMotionEvent managed by the
+ *        PyCSDL2_MouseMotionEvent object.
+ *
+ * \param obj The PyCSDL2_MouseMotionEvent object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_MouseMotionEventPtr(PyObject *obj, SDL_MouseMotionEvent **out)
+{
+    PyCSDL2_MouseMotionEvent *self = (PyCSDL2_MouseMotionEvent*)obj;
+
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return 0;
+
+    if (out)
+        *out = &self->ev_mem->ev.motion;
+
+    return 1;
 }
 
 /**

@@ -71,6 +71,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "mouse_motion_event() -> SDL_MouseMotionEvent"
     },
 
+    {"mouse_motion_event_set_type",
+     PyCSDL2Test_MouseMotionEventSetType,
+     METH_VARARGS,
+     "mouse_motion_event_set_type(ev: SDL_MouseMotionEvent) -> None"
+    },
+
     /* End */
     {0}
 };

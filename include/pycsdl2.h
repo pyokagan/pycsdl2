@@ -2037,6 +2037,10 @@ typedef int (*PyCSDL2_AudioDeviceID_pfn)(PyObject*, SDL_AudioDeviceID*);
 typedef PyObject *(*PyCSDL2_MouseMotionEventCreate_pfn)(const
                                                         SDL_MouseMotionEvent*);
 
+/** \brief Function pointer type of PyCSDL2_MouseMotionEventPtr() */
+typedef int (*PyCSDL2_MouseMotionEventPtr_pfn)(PyObject*,
+                                               SDL_MouseMotionEvent**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3177,6 +3181,8 @@ typedef struct PyCSDL2_CAPI {
 /* src/events.h */
     /** \brief Pointer to PyCSDL2_MouseMotionEventCreate() */
     PyCSDL2_MouseMotionEventCreate_pfn _PyCSDL2_MouseMotionEventCreate;
+    /** \brief Pointer to PyCSDL2_MouseMotionEventPtr() */
+    PyCSDL2_MouseMotionEventPtr_pfn _PyCSDL2_MouseMotionEventPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -5457,6 +5463,9 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_MouseMotionEventCreate) */
 #define PyCSDL2_MouseMotionEventCreate(a) \
     PYCSDL2_FUNC(PyCSDL2_MouseMotionEventCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr) */
+#define PyCSDL2_MouseMotionEventPtr PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
