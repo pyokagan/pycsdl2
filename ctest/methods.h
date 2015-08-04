@@ -32,6 +32,7 @@
 #include "pixels.h"
 #include "rect.h"
 #include "rwops.h"
+#include "surface.h"
 
 /**
  * \brief _csdl2test methods definitions.
@@ -144,6 +145,20 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_RWopsSetType,
      METH_VARARGS,
      "rwops_set_type(rw: SDL_RWops) -> None"
+    },
+
+    /* surface.h */
+
+    {"surface",
+     PyCSDL2Test_Surface,
+     METH_VARARGS,
+     "surface() -> SDL_Surface"
+    },
+
+    {"surface_from",
+     PyCSDL2Test_SurfaceFrom,
+     METH_VARARGS,
+     "surface_from(pixels: buffer) -> SDL_Surface"
     },
 
     /* End */

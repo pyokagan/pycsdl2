@@ -2077,6 +2077,11 @@ typedef PyObject *(*PyCSDL2_RWopsCreate_pfn)(SDL_RWops*);
 /** \brief Function pointer type of PyCSDL2_RWopsPtr() */
 typedef int (*PyCSDL2_RWopsPtr_pfn)(PyObject*, SDL_RWops**);
 
+/* src/surface.h */
+
+/** \brief Function pointer type of PyCSDL2_SurfaceCreate() */
+typedef PyObject *(*PyCSDL2_SurfaceCreate_pfn)(SDL_Surface*, PyObject*);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3242,6 +3247,9 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_RWopsCreate_pfn _PyCSDL2_RWopsCreate;
     /** \brief Pointer to PyCSDL2_RWopsPtr() */
     PyCSDL2_RWopsPtr_pfn _PyCSDL2_RWopsPtr;
+/* src/surface.h */
+    /** \brief Pointer to PyCSDL2_SurfaceCreate */
+    PyCSDL2_SurfaceCreate_pfn _PyCSDL2_SurfaceCreate;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -4955,7 +4963,7 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 #define SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, \
                                  Gmask, Bmask, Amask) \
     PYCSDL2_FUNC(SDL_CreateRGBSurfaceFrom)(pixels, width, height, depth, \
-                                           pitch, Rmask, Gmask, Amask)
+                                           pitch, Rmask, Gmask, Bmask, Amask)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeSurface) */
 #define SDL_FreeSurface(surface) \
@@ -5561,6 +5569,11 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RWopsPtr) */
 #define PyCSDL2_RWopsPtr PYCSDL2_FUNC(PyCSDL2_RWopsPtr)
+
+/* src/surface.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_SurfaceCreate) */
+#define PyCSDL2_SurfaceCreate(a, b) PYCSDL2_FUNC(PyCSDL2_SurfaceCreate)(a, b)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */
