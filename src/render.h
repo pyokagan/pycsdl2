@@ -148,7 +148,7 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
  * \param deftarget The PyCSDL2_Window or PyCSDL2_Surface which is the default
  *                  target for the renderer.
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
 {
     PyCSDL2_Renderer *self;
@@ -168,7 +168,7 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
         return NULL;
     self->renderer = renderer;
     PyCSDL2_Set(self->deftarget, deftarget);
-    return self;
+    return (PyObject*)self;
 }
 
 /**
@@ -179,14 +179,14 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
  *                   -> SDL_Renderer
  * \endcode
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 {
     SDL_Renderer *renderer;
     PyCSDL2_Window *window;
     int index;
     Uint32 flags;
-    PyCSDL2_Renderer *out;
+    PyObject *out;
     static char *kwlist[] = {"window", "index", "flags", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!i" Uint32_UNIT, kwlist,
                                      &PyCSDL2_WindowType, &window, &index,
@@ -212,13 +212,13 @@ PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
  * SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer
  * \endcode
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
                                PyObject *kwds)
 {
     PyCSDL2_Surface *surface;
     SDL_Renderer *renderer;
-    PyCSDL2_Renderer *out;
+    PyObject *out;
     static char *kwlist[] = {"surface", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))

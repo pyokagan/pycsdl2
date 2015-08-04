@@ -2069,6 +2069,11 @@ typedef PyObject *(*PyCSDL2_RectCreate_pfn)(const SDL_Rect*);
 /** \brief Function pointer type of PyCSDL2_RectPtr() */
 typedef int (*PyCSDL2_RectPtr_pfn)(PyObject*, SDL_Rect**);
 
+/* src/render.h */
+
+/** \brief Function pointer type of PyCSDL2_RendererCreate() */
+typedef PyObject *(*PyCSDL2_RendererCreate_pfn)(SDL_Renderer*, PyObject*);
+
 /* src/rwops.h */
 
 /** \brief Function pointer type of PyCSDL2_RWopsCreate() */
@@ -3253,6 +3258,9 @@ typedef struct PyCSDL2_CAPI {
     PyCSDL2_RectCreate_pfn _PyCSDL2_RectCreate;
     /** \brief Pointer to PyCSDL2_RectPtr() */
     PyCSDL2_RectPtr_pfn _PyCSDL2_RectPtr;
+/* src/render.h */
+    /** \brief Pointer to PyCSDL2_RendererCreate() */
+    PyCSDL2_RendererCreate_pfn _PyCSDL2_RendererCreate;
 /* src/rwops.h */
     /** \brief Pointer to PyCSDL2_RWopsCreate() */
     PyCSDL2_RWopsCreate_pfn _PyCSDL2_RWopsCreate;
@@ -5579,6 +5587,11 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectPtr) */
 #define PyCSDL2_RectPtr PYCSDL2_FUNC(PyCSDL2_RectPtr)
+
+/* src/render.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererCreate) */
+#define PyCSDL2_RendererCreate(a, b) PYCSDL2_FUNC(PyCSDL2_RendererCreate)(a, b)
 
 /* src/rwops.h */
 

@@ -34,6 +34,7 @@
 #include "events.h"
 #include "pixels.h"
 #include "rect.h"
+#include "render.h"
 #include "rwops.h"
 #include "surface.h"
 #include "video.h"
@@ -664,6 +665,8 @@ PyCSDL2_initcapi(PyObject *m)
 /* src/rect.h */
         PyCSDL2_RectCreate,
         PyCSDL2_RectPtr,
+/* src/render.h */
+        PyCSDL2_RendererCreate,
 /* src/rwops.h */
         PyCSDL2_RWopsCreate,
         PyCSDL2_RWopsPtr,

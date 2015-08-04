@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 try:
@@ -286,6 +287,28 @@ class TestDestroyRenderer(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_DestroyRenderer(self.rdr)
         self.assertRaises(ValueError, SDL_DestroyRenderer, self.rdr)
+
+
+class TestRendererCreate(unittest.TestCase):
+    "Tests PyCSDL2_RendererCreate()"
+
+    def test_deftarget_surface(self):
+        "Returns SDL_Renderer with a SDL_Surface deftarget"
+        sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        rdr = _csdl2test.renderer(sf)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_deftarget_window(self):
+        "Returns SDL_Renderer with a SDL_Window deftarget"
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        win = SDL_CreateWindow(self.id(), -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        rdr = _csdl2test.renderer(win)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_deftarget_invalid(self):
+        "Raises AssertionError if the deftarget has invalid type"
+        self.assertRaises(AssertionError, _csdl2test.renderer, 42)
 
 
 if __name__ == '__main__':

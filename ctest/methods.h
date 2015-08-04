@@ -31,6 +31,7 @@
 #include "events.h"
 #include "pixels.h"
 #include "rect.h"
+#include "render.h"
 #include "rwops.h"
 #include "surface.h"
 #include "video.h"
@@ -132,6 +133,14 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      PyCSDL2Test_RectSetX,
      METH_VARARGS,
      "rect_set_x(rect: SDL_Rect) -> None"
+    },
+
+    /* render.h */
+
+    {"renderer",
+     PyCSDL2Test_Renderer,
+     METH_VARARGS,
+     "renderer(deftarget: object) -> SDL_Renderer"
     },
 
     /* rwops.h */
