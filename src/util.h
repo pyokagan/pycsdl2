@@ -328,6 +328,22 @@ PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
 }
 
 /**
+ * \brief Set "invalid type" exception.
+ *
+ * \param arg Argument Name (if any)
+ * \param expected Expected type name
+ * \param actual Actual object
+ * \returns NULL
+ */
+static void *
+PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
+{
+    return PyErr_Format(PyExc_TypeError, "%.50s%smust be %.50s, not %.50s",
+                        arg ? arg : "", arg ? ": " : "", expected,
+                        actual == Py_None ? "None" : Py_TYPE(actual)->tp_name);
+}
+
+/**
  * \brief Base instance struct members for PyCSDL2_Buffer-based types
  *
  * This macro will insert the required field members required for a type to use
