@@ -371,6 +371,22 @@ def get_csdl2_ext(platform):
         raise ValueError('Unknown PYCSDL2_LIB value {0!r}'.format(PYCSDL2_LIB))
 
 
+def get_csdl2test_ext(csdl2_ext):
+    """Returns an appropriate _csdl2test Extension for csdl2_ext
+
+    :param csdl2_ext: The csdl2 Extension returned from get_csdl2_ext().
+    :type csdl2_ext: distutils.extension.Extension
+    """
+    ext = Extension(name='_csdl2test',
+                    sources=[join('ctest', '_csdl2test.c')])
+    # Copy C flags from csdl2_ext to ext
+    update_ext(ext, include_dirs=csdl2_ext.include_dirs,
+               define_macros=csdl2_ext.define_macros,
+               undef_macros=csdl2_ext.undef_macros,
+               extra_compile_args=csdl2_ext.extra_compile_args)
+    return ext
+
+
 extension, headers = get_csdl2_ext(distutils.util.get_platform())
 
 
@@ -408,5 +424,5 @@ setup(name='pycsdl2',
           'Topic :: Software Development :: Libraries :: Python Modules'
       ],
       keywords='sdl sdl2 opengl opengles opengles2',
-      ext_modules=[extension],
+      ext_modules=[extension, get_csdl2test_ext(extension)],
       headers=headers)
