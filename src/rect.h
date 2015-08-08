@@ -34,6 +34,195 @@
 #include "util.h"
 #include "error.h"
 
+/**
+ * \defgroup csdl2_SDL_Point csdl2.SDL_Point
+ *
+ * @{
+ */
+
+/** \brief Instance data for PyCSDL2_PointType */
+typedef struct PyCSDL2_Point {
+    PyObject_HEAD
+    /** \brief Head of weak ref list */
+    PyObject *in_weakreflist;
+    /** \brief SDL_Point this instance wraps */
+    SDL_Point point;
+} PyCSDL2_Point;
+
+static PyTypeObject PyCSDL2_PointType;
+
+/** \brief tp_new for PyCSDL2_PointType */
+static PyObject *
+PyCSDL2_PointNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Point *self;
+
+    self = (PyCSDL2_Point*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    return (PyObject*)self;
+}
+
+/** \brief tp_dealloc for PyCSDL2_PointType */
+static void
+PyCSDL2_PointDealloc(PyCSDL2_Point *self)
+{
+    PyObject_ClearWeakRefs((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+/** \brief tp_init for PyCSDL2_PointType */
+static int
+PyCSDL2_PointInit(PyObject *obj, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Point *self = (PyCSDL2_Point*)obj;
+    int x = 0, y = 0;
+    static char *kwlist[] = {"x", "y", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|ii", kwlist, &x, &y))
+        return -1;
+
+    self->point.x = x;
+    self->point.y = y;
+    return 0;
+}
+
+/** \brief getbufferproc for PyCSDL2_PointType */
+static int
+PyCSDL2_PointGetBuffer(PyCSDL2_Point *self, Py_buffer *view, int flags)
+{
+    static Py_ssize_t shape[1] = {1};
+    static Py_ssize_t strides[1] = {sizeof(SDL_Point)};
+
+    view->buf = &self->point;
+    Py_INCREF(self);
+    view->obj = (PyObject*)self;
+    view->len = sizeof(SDL_Point);
+    view->readonly = 0;
+    view->itemsize = sizeof(SDL_Point);
+    view->format = NULL;
+    if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
+        view->format = "ii";
+    view->ndim = 1;
+    view->shape = NULL;
+    if ((flags & PyBUF_ND) == PyBUF_ND)
+        view->shape = shape;
+    view->strides = NULL;
+    if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
+        view->strides = strides;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
+}
+
+/** \brief Buffer protocol definition for PyCSDL2_PointType */
+static PyBufferProcs PyCSDL2_PointBufferProcs = {
+    (getbufferproc) PyCSDL2_PointGetBuffer,
+    (releasebufferproc) NULL
+};
+
+/** \brief List of members in PyCSDL2_PointType */
+static PyMemberDef PyCSDL2_PointMembers[] = {
+    {"x", T_INT, offsetof(PyCSDL2_Point, point.x), 0,
+     "The x location of the point."},
+    {"y", T_INT, offsetof(PyCSDL2_Point, point.y), 0,
+     "The y location of the point."},
+    {NULL}
+};
+
+/** \brief Type definition for csdl2.SDL_Rect */
+static PyTypeObject PyCSDL2_PointType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_Point",
+    /* tp_basicsize      */ sizeof(PyCSDL2_Point),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_PointDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ &PyCSDL2_PointBufferProcs,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "A two dimensional point.",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_Point, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ PyCSDL2_PointMembers,
+    /* tp_getset         */ 0,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ PyCSDL2_PointInit,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ PyCSDL2_PointNew
+};
+
+/**
+ * \brief Creates a new PyCSDL2_Point instance
+ *
+ * \param point SDL_Point to initialize the PyCSDL2_Point with
+ * \returns The new PyCSDL2_Point object, or NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_PointCreate(const SDL_Point *point)
+{
+    PyCSDL2_Point *self;
+
+    self = (PyCSDL2_Point*)PyCSDL2_PointNew(&PyCSDL2_PointType, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    if (point)
+        self->point = *point;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrows a pointer to the SDL_Point managed by the PyCSDL2_Point.
+ *
+ * \param obj The PyCSDL2_Point object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_PointPtr(PyObject *obj, SDL_Point **out)
+{
+    PyCSDL2_Point *self = (PyCSDL2_Point*)obj;
+
+    if (!PyCSDL2_Assert(obj))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_PointType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Point", obj);
+        return 0;
+    }
+
+    if (out)
+        *out = &self->point;
+
+    return 1;
+}
+
+/** @} */
+
 /** \brief Instance data for PyCSDL2_RectType */
 typedef struct PyCSDL2_Rect {
     PyObject_HEAD
@@ -270,6 +459,11 @@ PyCSDL2_HasIntersection(PyObject *module, PyObject *args, PyObject *kwds)
 static int
 PyCSDL2_initrect(PyObject *module)
 {
+    if (PyType_Ready(&PyCSDL2_PointType) < 0) return 0;
+    Py_INCREF(&PyCSDL2_PointType);
+    if (PyModule_AddObject(module, "SDL_Point", (PyObject*)&PyCSDL2_PointType))
+        return 0;
+
     if (PyType_Ready(&PyCSDL2_RectType) < 0) return 0;
     Py_INCREF(&PyCSDL2_RectType);
     if (PyModule_AddObject(module, "SDL_Rect", (PyObject*) &PyCSDL2_RectType))

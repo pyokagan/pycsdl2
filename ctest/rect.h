@@ -30,6 +30,41 @@
 #include "../include/pycsdl2.h"
 
 /**
+ * \brief Create a new PyCSDL2_Point object.
+ *
+ * \code{.py}
+ * point() -> SDL_Point
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_Point(PyObject *module, PyObject *args)
+{
+    SDL_Point p = {3, 4};
+
+    return PyCSDL2_PointCreate(&p);
+}
+
+/**
+ * \brief Sets the "x" field of the SDL_Point to 42.
+ *
+ * \code{.py}
+ * point_set_x(point: SDL_Point) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_PointSetX(PyObject *module, PyObject *args)
+{
+    SDL_Point *p;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_PointPtr, &p))
+        return NULL;
+
+    p->x = 42;
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Create a new PyCSDL2_Rect object.
  *
  * \code{.py}

@@ -123,6 +123,18 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
 
     /* rect.h */
 
+    {"point",
+     PyCSDL2Test_Point,
+     METH_VARARGS,
+     "point() -> SDL_Point"
+    },
+
+    {"point_set_x",
+     PyCSDL2Test_PointSetX,
+     METH_VARARGS,
+     "point_set_x(point: SDL_Point) -> None"
+    },
+
     {"rect",
      PyCSDL2Test_Rect,
      METH_VARARGS,
