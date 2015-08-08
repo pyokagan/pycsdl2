@@ -88,6 +88,15 @@ Drawing
                  specify how the alpha channel is used.
    :raises RuntimeError: If the drawing color could not be set.
 
+.. function:: SDL_GetRenderDrawColor(renderer: SDL_Renderer) -> tuple
+
+   Returns the color used for drawing operations.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: The (r, g, b, a) components of the drawing color.
+   :rtype: (int, int, int, int) tuple
+
 .. function:: SDL_RenderClear(renderer: SDL_Renderer) -> None
 
    Clears the current rendering target with the current drawing color.

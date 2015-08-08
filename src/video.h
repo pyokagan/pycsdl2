@@ -101,6 +101,11 @@ PyCSDL2_WindowValid(PyCSDL2_Window *window)
     if (!PyCSDL2_Assert(window))
         return 0;
 
+    if (Py_TYPE(window) != &PyCSDL2_WindowType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Window", (PyObject*)window);
+        return 0;
+    }
+
     if (!window->window) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Window");
         return 0;
@@ -116,7 +121,7 @@ PyCSDL2_WindowValid(PyCSDL2_Window *window)
  * \returns Pointer to PyCSDL2_Window on success, NULL if an exception
  *          occurred.
  */
-static PyCSDL2_Window *
+static PyObject *
 PyCSDL2_WindowCreate(SDL_Window *window)
 {
     PyCSDL2_Window *self;
@@ -128,7 +133,28 @@ PyCSDL2_WindowCreate(SDL_Window *window)
     if (!(self = (PyCSDL2_Window*) type->tp_alloc(type, 0)))
         return NULL;
     self->window = window;
-    return self;
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_Window pointer managed by the PyCSDL2_Window.
+ *
+ * \param obj The PyCSDL2_Window object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_WindowPtr(PyObject *obj, SDL_Window **out)
+{
+    PyCSDL2_Window *self = (PyCSDL2_Window*)obj;
+
+    if (!PyCSDL2_WindowValid(self))
+        return 0;
+
+    if (out)
+        *out = self->window;
+
+    return 1;
 }
 
 /**
@@ -142,7 +168,7 @@ PyCSDL2_WindowCreate(SDL_Window *window)
  * \returns New instance of PyCSDL2_Window* on success, or NULL if an exception
  *          occurred.
  */
-static PyCSDL2_Window *
+static PyObject *
 PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
 {
     const char *title;
@@ -150,18 +176,46 @@ PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
     Uint32 flags;
     static char *kwlist[] = {"title", "x", "y", "w", "h", "flags", NULL};
     SDL_Window *window;
-    PyCSDL2_Window *out;
+    PyObject *out;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "siiii" Uint32_UNIT, kwlist,
         &title, &x, &y, &w, &h, &flags))
         return NULL;
     if (!(window = SDL_CreateWindow(title, x, y, w, h, flags)))
         return PyCSDL2_RaiseSDLError();
-    if (!(out = PyCSDL2_WindowCreate(window))) {
+
+    out = PyCSDL2_WindowCreate(window);
+    if (!out) {
         SDL_DestroyWindow(window);
         return NULL;
     }
+
     return out;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetWindowTitle()
+ *
+ * \code{.py}
+ * SDL_GetWindowTitle(window: SDL_Window) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetWindowTitle(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Window *window;
+    const char *title;
+    static char *kwlist[] = {"window", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_WindowPtr, &window))
+        return NULL;
+
+    title = SDL_GetWindowTitle(window);
+    if (!PyCSDL2_Assert(title))
+        return NULL;
+
+    return PyUnicode_FromString(title);
 }
 
 /**

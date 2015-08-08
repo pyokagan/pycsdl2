@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class TestEventsConstants(unittest.TestCase):
@@ -654,6 +655,65 @@ class Test_SDL_PollEvent(unittest.TestCase):
         ev_src.type = SDL_USEREVENT
         SDL_PushEvent(ev_src)
         self.assertRaises(BufferError, SDL_PollEvent, ev_dst)
+
+
+class TestMouseMotionEventCreate(unittest.TestCase):
+    "Tests PyCSDL2_MouseMotionEventCreate()"
+
+    def test_returns_MouseMotionEvent(self):
+        "Returns SDL_MouseMotionEvent"
+        x = _csdl2test.mouse_motion_event()
+        self.assertIs(type(x), SDL_MouseMotionEvent)
+        self.assertEqual(x.type, 1)
+        self.assertEqual(x.timestamp, 2)
+        self.assertEqual(x.windowID, 3)
+        self.assertEqual(x.which, 4)
+        self.assertEqual(x.state, 5)
+        self.assertEqual(x.x, 6)
+        self.assertEqual(x.y, 7)
+        self.assertEqual(x.xrel, 8)
+        self.assertEqual(x.yrel, 9)
+
+
+class TestMouseMotionEventPtr(unittest.TestCase):
+    "Tests PyCSDL2_MouseMotionEventPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        ev = SDL_MouseMotionEvent()
+        self.assertEqual(ev.type, 0)
+        _csdl2test.mouse_motion_event_set_type(ev)
+        self.assertEqual(ev.type, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.mouse_motion_event_set_type,
+                          42)
+
+
+class TestEventCreate(unittest.TestCase):
+    "Tests PyCSDL2_EventCreate()"
+
+    def test_returns_Event(self):
+        "Returns SDL_Event"
+        ev = _csdl2test.event()
+        self.assertIs(type(ev), SDL_Event)
+        self.assertEqual(ev.type, 1)
+
+
+class TestEventPtr(unittest.TestCase):
+    "Tests PyCSDL2_EventPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        ev = SDL_Event()
+        self.assertEqual(ev.type, 0)
+        _csdl2test.event_set_type(ev)
+        self.assertEqual(ev.type, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.event_set_type, 42)
 
 
 if __name__ == '__main__':

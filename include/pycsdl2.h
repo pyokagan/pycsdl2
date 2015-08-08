@@ -2017,6 +2017,90 @@ typedef void (SDLCALL *SDL_GL_SwapWindow_pfn)(SDL_Window *window);
 /** \brief Function pointer type of \c SDL_GL_DeleteContext() */
 typedef void (SDLCALL *SDL_GL_DeleteContext_pfn)(SDL_GLContext context);
 
+/* src/audio.h */
+
+/** \brief Function pointer type of PyCSDL2_AudioSpecCreate() */
+typedef PyObject *(*PyCSDL2_AudioSpecCreate_pfn)(const SDL_AudioSpec*);
+
+/** \brief Function pointer type of PyCSDL2_AudioSpecPtr() */
+typedef int (*PyCSDL2_AudioSpecPtr_pfn)(PyObject*, SDL_AudioSpec**);
+
+/** \brief Function pointer type of PyCSDL2_AudioDeviceCreate() */
+typedef PyObject *(*PyCSDL2_AudioDeviceCreate_pfn)(SDL_AudioDeviceID id);
+
+/** \brief Function pointer type of PyCSDL2_AudioDeviceID() */
+typedef int (*PyCSDL2_AudioDeviceID_pfn)(PyObject*, SDL_AudioDeviceID*);
+
+/* src/events.h */
+
+/** \brief Function pointer type of PyCSDL2_MouseMotionEventCreate() */
+typedef PyObject *(*PyCSDL2_MouseMotionEventCreate_pfn)(const
+                                                        SDL_MouseMotionEvent*);
+
+/** \brief Function pointer type of PyCSDL2_MouseMotionEventPtr() */
+typedef int (*PyCSDL2_MouseMotionEventPtr_pfn)(PyObject*,
+                                               SDL_MouseMotionEvent**);
+
+/** \brief Function pointer type of PyCSDL2_EventCreate() */
+typedef PyObject *(*PyCSDL2_EventCreate_pfn)(const SDL_Event*);
+
+/** \brief Function pointer type of PyCSDL2_EventPtr() */
+typedef int (*PyCSDL2_EventPtr_pfn)(PyObject*, SDL_Event**);
+
+/* src/pixels.h */
+
+/** \brief Function pointer type of PyCSDL2_PaletteCreate() */
+typedef PyObject *(*PyCSDL2_PaletteCreate_pfn)(SDL_Palette*);
+
+/** \brief Function pointer type of PyCSDL2_PalettePtr() */
+typedef int (*PyCSDL2_PalettePtr_pfn)(PyObject*, SDL_Palette**);
+
+/** \brief Function pointer type of PyCSDL2_PixelFormatCreate() */
+typedef PyObject *(*PyCSDL2_PixelFormatCreate_pfn)(SDL_PixelFormat*);
+
+/** \brief Function pointer type of PyCSDL2_PixelFormatPtr() */
+typedef int (*PyCSDL2_PixelFormatPtr_pfn)(PyObject*, SDL_PixelFormat**);
+
+/* src/rect.h */
+
+/** \brief Function pointer type of PyCSDL2_RectCreate() */
+typedef PyObject *(*PyCSDL2_RectCreate_pfn)(const SDL_Rect*);
+
+/** \brief Function pointer type of PyCSDL2_RectPtr() */
+typedef int (*PyCSDL2_RectPtr_pfn)(PyObject*, SDL_Rect**);
+
+/* src/render.h */
+
+/** \brief Function pointer type of PyCSDL2_RendererCreate() */
+typedef PyObject *(*PyCSDL2_RendererCreate_pfn)(SDL_Renderer*, PyObject*);
+
+/** \brief Function pointer type of PyCSDL2_RendererPtr() */
+typedef int (*PyCSDL2_RendererPtr_pfn)(PyObject*, SDL_Renderer**);
+
+/* src/rwops.h */
+
+/** \brief Function pointer type of PyCSDL2_RWopsCreate() */
+typedef PyObject *(*PyCSDL2_RWopsCreate_pfn)(SDL_RWops*);
+
+/** \brief Function pointer type of PyCSDL2_RWopsPtr() */
+typedef int (*PyCSDL2_RWopsPtr_pfn)(PyObject*, SDL_RWops**);
+
+/* src/surface.h */
+
+/** \brief Function pointer type of PyCSDL2_SurfaceCreate() */
+typedef PyObject *(*PyCSDL2_SurfaceCreate_pfn)(SDL_Surface*, PyObject*);
+
+/** \brief Function pointer type of PyCSDL2_SurfacePtr() */
+typedef int (*PyCSDL2_SurfacePtr_pfn)(PyObject*, SDL_Surface**);
+
+/* src/video.h */
+
+/** \brief Function pointer type of PyCSDL2_WindowCreate() */
+typedef PyObject *(*PyCSDL2_WindowCreate_pfn)(SDL_Window *window);
+
+/** \brief Function pointer type of PyCSDL2_WindowPtr() */
+typedef int (*PyCSDL2_WindowPtr_pfn)(PyObject*, SDL_Window**);
+
 /**
  * \brief pycsdl2's C API
  *
@@ -3145,6 +3229,58 @@ typedef struct PyCSDL2_CAPI {
     SDL_GL_SwapWindow_pfn _SDL_GL_SwapWindow;
     /** \brief Pointer to \c SDL_GL_DeleteContext() */
     SDL_GL_DeleteContext_pfn _SDL_GL_DeleteContext;
+/* src/audio.h */
+    /** \brief Pointer to PyCSDL2_AudioSpecCreate() */
+    PyCSDL2_AudioSpecCreate_pfn _PyCSDL2_AudioSpecCreate;
+    /** \brief Pointer to PyCSDL2_AudioSpecPtr() */
+    PyCSDL2_AudioSpecPtr_pfn _PyCSDL2_AudioSpecPtr;
+    /** \brief Pointer to PyCSDL2_AudioDeviceCreate() */
+    PyCSDL2_AudioDeviceCreate_pfn _PyCSDL2_AudioDeviceCreate;
+    /** \brief Pointer to PyCSDL2_AudioDeviceID() */
+    PyCSDL2_AudioDeviceID_pfn _PyCSDL2_AudioDeviceID;
+/* src/events.h */
+    /** \brief Pointer to PyCSDL2_MouseMotionEventCreate() */
+    PyCSDL2_MouseMotionEventCreate_pfn _PyCSDL2_MouseMotionEventCreate;
+    /** \brief Pointer to PyCSDL2_MouseMotionEventPtr() */
+    PyCSDL2_MouseMotionEventPtr_pfn _PyCSDL2_MouseMotionEventPtr;
+    /** \brief Pointer to PyCSDL2_EventCreate() */
+    PyCSDL2_EventCreate_pfn _PyCSDL2_EventCreate;
+    /** \brief Pointer to PyCSDL2_EventPtr() */
+    PyCSDL2_EventPtr_pfn _PyCSDL2_EventPtr;
+/* src/pixels.h */
+    /** \brief Pointer to PyCSDL2_PaletteCreate() */
+    PyCSDL2_PaletteCreate_pfn _PyCSDL2_PaletteCreate;
+    /** \brief Pointer to PyCSDL2_PalettePtr() */
+    PyCSDL2_PalettePtr_pfn _PyCSDL2_PalettePtr;
+    /** \brief Pointer to PyCSDL2_PixelFormatCreate() */
+    PyCSDL2_PixelFormatCreate_pfn _PyCSDL2_PixelFormatCreate;
+    /** \brief Pointer to PyCSDL2_PixelFormatPtr() */
+    PyCSDL2_PixelFormatPtr_pfn _PyCSDL2_PixelFormatPtr;
+/* src/rect.h */
+    /** \brief Pointer to PyCSDL2_RectCreate() */
+    PyCSDL2_RectCreate_pfn _PyCSDL2_RectCreate;
+    /** \brief Pointer to PyCSDL2_RectPtr() */
+    PyCSDL2_RectPtr_pfn _PyCSDL2_RectPtr;
+/* src/render.h */
+    /** \brief Pointer to PyCSDL2_RendererCreate() */
+    PyCSDL2_RendererCreate_pfn _PyCSDL2_RendererCreate;
+    /** \brief Pointer to \c PyCSDL2_RendererPtr() */
+    PyCSDL2_RendererPtr_pfn _PyCSDL2_RendererPtr;
+/* src/rwops.h */
+    /** \brief Pointer to PyCSDL2_RWopsCreate() */
+    PyCSDL2_RWopsCreate_pfn _PyCSDL2_RWopsCreate;
+    /** \brief Pointer to PyCSDL2_RWopsPtr() */
+    PyCSDL2_RWopsPtr_pfn _PyCSDL2_RWopsPtr;
+/* src/surface.h */
+    /** \brief Pointer to PyCSDL2_SurfaceCreate */
+    PyCSDL2_SurfaceCreate_pfn _PyCSDL2_SurfaceCreate;
+    /** \brief Pointer to \c PyCSDL2_SurfacePtr() */
+    PyCSDL2_SurfacePtr_pfn _PyCSDL2_SurfacePtr;
+/* src/video.h */
+    /** \brief Pointer to PyCSDL2_WindowCreate() */
+    PyCSDL2_WindowCreate_pfn _PyCSDL2_WindowCreate;
+    /** \brief Pointer to PyCSDL2_WindowPtr() */
+    PyCSDL2_WindowPtr_pfn _PyCSDL2_WindowPtr;
 } PyCSDL2_CAPI;
 
 #ifndef PYCSDL2_MODULE
@@ -4858,7 +4994,7 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 #define SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, \
                                  Gmask, Bmask, Amask) \
     PYCSDL2_FUNC(SDL_CreateRGBSurfaceFrom)(pixels, width, height, depth, \
-                                           pitch, Rmask, Gmask, Amask)
+                                           pitch, Rmask, Gmask, Bmask, Amask)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(SDL_FreeSurface) */
 #define SDL_FreeSurface(surface) \
@@ -5405,6 +5541,89 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 /** \brief Redirects calls to PYCSDL2_FUNC(SDL_GL_DeleteContext) */
 #define SDL_GL_DeleteContext(context) \
     PYCSDL2_FUNC(SDL_GL_DeleteContext)(context)
+
+/* src/audio.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate) */
+#define PyCSDL2_AudioSpecCreate(a) PYCSDL2_FUNC(PyCSDL2_AudioSpecCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioSpecPtr) */
+#define PyCSDL2_AudioSpecPtr PYCSDL2_FUNC(PyCSDL2_AudioSpecPtr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioDeviceCreate) */
+#define PyCSDL2_AudioDeviceCreate(a) PYCSDL2_FUNC(PyCSDL2_AudioDeviceCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_AudioDeviceID) */
+#define PyCSDL2_AudioDeviceID PYCSDL2_FUNC(PyCSDL2_AudioDeviceID)
+
+/* src/events.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_MouseMotionEventCreate) */
+#define PyCSDL2_MouseMotionEventCreate(a) \
+    PYCSDL2_FUNC(PyCSDL2_MouseMotionEventCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr) */
+#define PyCSDL2_MouseMotionEventPtr PYCSDL2_FUNC(PyCSDL2_MouseMotionEventPtr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_EventCreate) */
+#define PyCSDL2_EventCreate(a) PYCSDL2_FUNC(PyCSDL2_EventCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_EventPtr) */
+#define PyCSDL2_EventPtr PYCSDL2_FUNC(PyCSDL2_EventPtr)
+
+/* src/pixels.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PaletteCreate) */
+#define PyCSDL2_PaletteCreate(a) PYCSDL2_FUNC(PyCSDL2_PaletteCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PalettePtr) */
+#define PyCSDL2_PalettePtr PYCSDL2_FUNC(PyCSDL2_PalettePtr)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PixelFormatCreate) */
+#define PyCSDL2_PixelFormatCreate(a) PYCSDL2_FUNC(PyCSDL2_PixelFormatCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PixelFormatPtr) */
+#define PyCSDL2_PixelFormatPtr PYCSDL2_FUNC(PyCSDL2_PixelFormatPtr)
+
+/* src/rect.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectCreate) */
+#define PyCSDL2_RectCreate(a) PYCSDL2_FUNC(PyCSDL2_RectCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectPtr) */
+#define PyCSDL2_RectPtr PYCSDL2_FUNC(PyCSDL2_RectPtr)
+
+/* src/render.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererCreate) */
+#define PyCSDL2_RendererCreate(a, b) PYCSDL2_FUNC(PyCSDL2_RendererCreate)(a, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererPtr) */
+#define PyCSDL2_RendererPtr PYCSDL2_FUNC(PyCSDL2_RendererPtr)
+
+/* src/rwops.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RWopsCreate) */
+#define PyCSDL2_RWopsCreate(a) PYCSDL2_FUNC(PyCSDL2_RWopsCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RWopsPtr) */
+#define PyCSDL2_RWopsPtr PYCSDL2_FUNC(PyCSDL2_RWopsPtr)
+
+/* src/surface.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_SurfaceCreate) */
+#define PyCSDL2_SurfaceCreate(a, b) PYCSDL2_FUNC(PyCSDL2_SurfaceCreate)(a, b)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_SurfacePtr) */
+#define PyCSDL2_SurfacePtr PYCSDL2_FUNC(PyCSDL2_SurfacePtr)
+
+/* src/video.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_WindowCreate) */
+#define PyCSDL2_WindowCreate(a) PYCSDL2_FUNC(PyCSDL2_WindowCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_WindowPtr) */
+#define PyCSDL2_WindowPtr PYCSDL2_FUNC(PyCSDL2_WindowPtr)
 
 #endif /* PYCSDL2_NO_REDIRECT */
 /** @} */ /* \defgroup SDLAPI */

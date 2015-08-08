@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class TestPixelsConstants(unittest.TestCase):
@@ -706,6 +707,75 @@ class Test_SDL_FreePalette(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_FreePalette(self.plt)
         self.assertRaises(ValueError, SDL_FreePalette, self.plt)
+
+
+class TestPaletteCreate(unittest.TestCase):
+    "Tests PyCSDL2_PaletteCreate()"
+
+    def test_returns_Palette(self):
+        "Returns a new SDL_Palette"
+        plt = _csdl2test.palette()
+        self.assertIs(type(plt), SDL_Palette)
+        self.assertEqual(plt.ncolors, 2)
+        x = memoryview(plt.colors)
+        self.assertEqual(x.shape, (2,))
+
+
+class TestPalettePtr(unittest.TestCase):
+    "Tests PyCSDL2_PalettePtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        plt = SDL_AllocPalette(2)
+        self.assertEqual(plt.ncolors, 2)
+        _csdl2test.palette_set_ncolors(plt)
+        self.assertEqual(plt.ncolors, 42)
+
+    def test_freed(self):
+        "Raises ValueError if palette has been freed"
+        plt = SDL_AllocPalette(2)
+        SDL_FreePalette(plt)
+        self.assertRaises(ValueError, _csdl2test.palette_set_ncolors, plt)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.palette_set_ncolors, 42)
+
+
+class TestPixelFormatCreate(unittest.TestCase):
+    "Tests PyCSDL2_PixelFormatCreate()"
+
+    def test_returns_PixelFormat(self):
+        "Returns a new SDL_PixelFormat"
+        pfmt = _csdl2test.pixel_format()
+        self.assertIs(type(pfmt), SDL_PixelFormat)
+        self.assertEqual(pfmt.format, SDL_PIXELFORMAT_INDEX8)
+        self.assertIsNone(pfmt.palette)
+        self.assertEqual(pfmt.BitsPerPixel, 8)
+        self.assertEqual(pfmt.BytesPerPixel, 1)
+
+
+class TestPixelFormatPtr(unittest.TestCase):
+    "Tests PyCSDL2_PixelFormatPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter"
+        # We use an indexed format to ensure that it is not shared with other
+        # callers.
+        pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8)
+        self.assertEqual(pfmt.BitsPerPixel, 8)
+        _csdl2test.pixel_format_set_bpp(pfmt)
+        self.assertEqual(pfmt.BitsPerPixel, 42)
+
+    def test_freed(self):
+        "Raises ValueError if pixel format has been freed"
+        pfmt = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8)
+        SDL_FreeFormat(pfmt)
+        self.assertRaises(ValueError, _csdl2test.pixel_format_set_bpp, pfmt)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.pixel_format_set_bpp, 42)
 
 
 if __name__ == '__main__':

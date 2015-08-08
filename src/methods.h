@@ -360,6 +360,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Sets the color used for drawing primitives and for SDL_RenderClear()\n"
     },
 
+    {"SDL_GetRenderDrawColor",
+     (PyCFunction) PyCSDL2_GetRenderDrawColor,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderDrawColor(renderer: SDL_Renderer) -> (int, int, int, int)\n"
+     "\n"
+     "Returns the color (r, g, b, a) used for drawing operations.\n"
+    },
+
     {"SDL_RenderClear",
      (PyCFunction) PyCSDL2_RenderClear,
      METH_VARARGS | METH_KEYWORDS,
@@ -610,6 +618,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "`SDL_WINDOW_MAXIMIZED`, `SDL_WINDOW_INPUT_GRABBED`,\n"
      "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
      "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"},
+
+    {"SDL_GetWindowTitle",
+     (PyCFunction) PyCSDL2_GetWindowTitle,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetWindowTitle(window: SDL_Window) -> str\n"
+     "\n"
+     "Returns the title of the window, or an empty string if there is no\n"
+     "title.\n"
+    },
 
     {"SDL_DestroyWindow",
      (PyCFunction) PyCSDL2_DestroyWindow,

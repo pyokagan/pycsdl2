@@ -117,8 +117,10 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
     if (!PyCSDL2_Assert(self))
         return 0;
 
-    if (!PyCSDL2_Assert(Py_TYPE(self) == &PyCSDL2_RWopsType))
+    if (Py_TYPE(self) != &PyCSDL2_RWopsType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_RWops", (PyObject*)self);
         return 0;
+    }
 
     if (!self->rwops) {
         PyErr_SetString(PyExc_ValueError, "SDL_RWops has been freed");
@@ -143,6 +145,27 @@ PyCSDL2_RWopsValid(PyCSDL2_RWops *self)
         if (!PyCSDL2_Assert(self->rwops->hidden.unknown.data1 == self))
             return 0;
     }
+
+    return 1;
+}
+
+/**
+ * \brief Borrow the SDL_RWops pointer managed by the PyCSDL2_RWops.
+ *
+ * \param obj The PyCSDL2_RWops object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_RWopsPtr(PyObject *obj, SDL_RWops **out)
+{
+    PyCSDL2_RWops *self = (PyCSDL2_RWops*)obj;
+
+    if (!PyCSDL2_RWopsValid(self))
+        return 0;
+
+    if (out)
+        *out = self->rwops;
 
     return 1;
 }
@@ -399,20 +422,14 @@ static PyTypeObject PyCSDL2_RWSizeFuncType;
 static PyObject *
 PyCSDL2_RWsize(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_RWops *rwops_obj;
     Sint64 ret;
     SDL_RWops *rwops;
     rwsizefunc callback;
     static char *kwlist[] = {"context", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
-                                     &PyCSDL2_RWopsType, &rwops_obj))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RWopsPtr, &rwops))
         return NULL;
-
-    if (!PyCSDL2_RWopsValid(rwops_obj))
-        return NULL;
-
-    rwops = rwops_obj->rwops;
 
     if (Py_TYPE(self) == &PyCSDL2_RWSizeFuncType)
         callback = ((PyCSDL2_RWSizeFunc*)self)->func;
@@ -502,22 +519,16 @@ static PyTypeObject PyCSDL2_RWSeekFuncType;
 static PyObject *
 PyCSDL2_RWseek(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_RWops *rwops_obj;
     Sint64 offset, ret;
     int whence;
     SDL_RWops *rwops;
     rwseekfunc callback;
     static char *kwlist[] = {"context", "offset", "whence", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!" Sint64_UNIT "i", kwlist,
-                                     &PyCSDL2_RWopsType, &rwops_obj, &offset,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&" Sint64_UNIT "i", kwlist,
+                                     PyCSDL2_RWopsPtr, &rwops, &offset,
                                      &whence))
         return NULL;
-
-    if (!PyCSDL2_RWopsValid(rwops_obj))
-        return NULL;
-
-    rwops = rwops_obj->rwops;
 
     if (Py_TYPE(self) == &PyCSDL2_RWSeekFuncType)
         callback = ((PyCSDL2_RWSeekFunc*)self)->func;
@@ -605,7 +616,6 @@ static PyTypeObject PyCSDL2_RWReadFuncType;
 static PyObject *
 PyCSDL2_RWread(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_RWops *rwops_obj;
     size_t ret, size, maxnum;
     Py_buffer buf;
     SDL_RWops *rwops;
@@ -614,22 +624,15 @@ PyCSDL2_RWread(PyObject *self, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {"context", "ptr", "size", "maxnum", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O!w*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
-                                     &PyCSDL2_RWopsType, &rwops_obj,
-                                     &buf, &size, &maxnum))
+                                     "O&w*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
+                                     PyCSDL2_RWopsPtr, &rwops, &buf, &size,
+                                     &maxnum))
         return NULL;
 
     if (buf.len != size * maxnum) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
     }
-
-    if (!PyCSDL2_RWopsValid(rwops_obj)) {
-        PyBuffer_Release(&buf);
-        return NULL;
-    }
-
-    rwops = rwops_obj->rwops;
 
     if (Py_TYPE(self) == &PyCSDL2_RWReadFuncType)
         callback = ((PyCSDL2_RWReadFunc*)self)->func;
@@ -718,7 +721,6 @@ static PyTypeObject PyCSDL2_RWWriteFuncType;
 static PyObject *
 PyCSDL2_RWwrite(PyObject *self, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_RWops *rwops_obj;
     Py_buffer buf;
     size_t ret, size, num;
     SDL_RWops *rwops;
@@ -727,22 +729,15 @@ PyCSDL2_RWwrite(PyObject *self, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {"context", "ptr", "size", "num", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "O!y*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
-                                     &PyCSDL2_RWopsType, &rwops_obj,
-                                     &buf, &size, &num))
+                                     "O&y*" SIZE_T_UNIT SIZE_T_UNIT, kwlist,
+                                     PyCSDL2_RWopsPtr, &rwops, &buf, &size,
+                                     &num))
         return NULL;
 
     if (buf.len != size * num) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
     }
-
-    if (!PyCSDL2_RWopsValid(rwops_obj)) {
-        PyBuffer_Release(&buf);
-        return NULL;
-    }
-
-    rwops = rwops_obj->rwops;
 
     if (Py_TYPE(self) == &PyCSDL2_RWWriteFuncType)
         callback = ((PyCSDL2_RWWriteFunc*)self)->func;
@@ -1246,7 +1241,7 @@ static PyTypeObject PyCSDL2_RWopsType = {
 /**
  * \brief Creates a new instance of PyCSDL2_RWopsType
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_RWopsCreate(SDL_RWops *rwops)
 {
     PyCSDL2_RWops *self;
@@ -1264,7 +1259,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
 
     self->rwops = rwops;
 
-    return self;
+    return (PyObject*)self;
 }
 
 /**
@@ -1274,7 +1269,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
  * SDL_RWFromFile(file: str, mode: str) -> SDL_RWops
  * \endcode
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
 {
     const char *file, *mode;
@@ -1295,11 +1290,11 @@ PyCSDL2_RWFromFile(PyObject *module, PyObject *args, PyObject *kwds)
  * SDL_AllocRW() -> SDL_RWops
  * \endcode
  */
-static PyCSDL2_RWops *
+static PyObject *
 PyCSDL2_AllocRW(PyObject *module, PyObject *args, PyObject *kwds)
 {
     SDL_RWops *rwops;
-    PyCSDL2_RWops *ret;
+    PyObject *ret;
     static char *kwlist[] = {NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))

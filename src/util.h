@@ -328,6 +328,22 @@ PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
 }
 
 /**
+ * \brief Set "invalid type" exception.
+ *
+ * \param arg Argument Name (if any)
+ * \param expected Expected type name
+ * \param actual Actual object
+ * \returns NULL
+ */
+static void *
+PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
+{
+    return PyErr_Format(PyExc_TypeError, "%.50s%smust be %.50s, not %.50s",
+                        arg ? arg : "", arg ? ": " : "", expected,
+                        actual == Py_None ? "None" : Py_TYPE(actual)->tp_name);
+}
+
+/**
  * \brief Base instance struct members for PyCSDL2_Buffer-based types
  *
  * This macro will insert the required field members required for a type to use
@@ -615,6 +631,110 @@ PyCSDL2_BufferCreate(void *buf, Py_ssize_t len, char readonly)
 }
 
 /**
+ * \defgroup csdl2_PyCSDL2_VoidPtr csdl2.PyCSDL2_VoidPtr
+ *
+ * A generic object that holds a void pointer. This is mainly used to represent
+ * a foreign pointer which has an unknown type and is not managed by csdl2.
+ *
+ * @{
+ */
+
+/** \brief Instance data for PyCSDL2_VoidPtrType */
+typedef struct PyCSDL2_VoidPtr {
+    PyObject_HEAD
+    /** \brief Head of weakref list */
+    PyObject *in_weakreflist;
+    /** \brief Internal void* pointer */
+    void *ptr;
+} PyCSDL2_VoidPtr;
+
+static PyTypeObject PyCSDL2_VoidPtrType;
+
+/** \brief Destructor for PyCSDL2_VoidPtrType */
+static void
+PyCSDL2_VoidPtrDealloc(PyCSDL2_VoidPtr *self)
+{
+    PyObject_ClearWeakRefs((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+/** \brief Type definition of csdl2.PyCSDL2_VoidPtr */
+static PyTypeObject PyCSDL2_VoidPtrType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.PyCSDL2_VoidPtr",
+    /* tp_basicsize      */ sizeof(PyCSDL2_VoidPtr),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_VoidPtrDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */ "A foreign pointer of unknown type.",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_VoidPtr, in_weakreflist)
+};
+
+/**
+ * \brief Creates a new PyCSDL2_VoidPtr instance.
+ *
+ * \param ptr The pointer to wrap.
+ * \returns The new PyCSDL2_VoidPtr object on success, NULL if an exception
+ *          occurred.
+ */
+static PyObject *
+PyCSDL2_VoidPtrCreate(void *ptr)
+{
+    PyCSDL2_VoidPtr *self;
+    PyTypeObject *type = &PyCSDL2_VoidPtrType;
+
+    self = (PyCSDL2_VoidPtr*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    self->ptr = ptr;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Checks the pointer value of the PyCSDL2_VoidPtr.
+ *
+ * \param obj PyObject to check
+ * \param ptr Pointer value which the PyCSDL2_VoidPtr must have.
+ * \returns 1 if the PyObject is a PyCSDL2_VoidPtr and has the pointer value of
+ *          ptr, 0 otherwise.
+ */
+static int
+PyCSDL2_VoidPtrCheckPtr(PyObject *obj, void *ptr)
+{
+    if (!obj)
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_VoidPtrType)
+        return 0;
+
+    if (((PyCSDL2_VoidPtr*)obj)->ptr != ptr)
+        return 0;
+
+    return 1;
+}
+
+/** @} */
+
+/**
  * \brief Initializes csdl2's utility types
  *
  * \param module csdl2 module object
@@ -624,6 +744,7 @@ static int
 PyCSDL2_initutil(PyObject *module)
 {
     if (PyType_Ready(&PyCSDL2_BufferType)) { return 0; }
+    if (PyType_Ready(&PyCSDL2_VoidPtrType)) { return 0; }
 
     return 1;
 }

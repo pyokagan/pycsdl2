@@ -136,10 +136,81 @@ static PyMemberDef PyCSDL2_AudioSpecMembers[] = {
      "Audio buffer size in samples"},
     {"size", Uint32_TYPE, offsetof(PyCSDL2_AudioSpec, spec.size), 0,
      "Audio buffer size in bytes."},
-    {"callback", T_OBJECT, offsetof(PyCSDL2_AudioSpec, callback), 0,
-     "The function to call when the audio device needs more data."},
-    {"userdata", T_OBJECT, offsetof(PyCSDL2_AudioSpec, userdata), 0,
-     "The object that is passed to callback."},
+    {NULL}
+};
+
+/** \brief Getter for SDL_AudioSpec.callback */
+static PyObject *
+PyCSDL2_AudioSpecGetCallback(PyCSDL2_AudioSpec *self, void *closure)
+{
+    PyObject *callback;
+
+    if (!self->spec.callback)
+        return PyCSDL2_Get(self->callback);
+
+    if (PyCSDL2_VoidPtrCheckPtr(self->callback, self->spec.callback))
+        return PyCSDL2_Get(self->callback);
+
+    callback = PyCSDL2_VoidPtrCreate(self->spec.callback);
+    if (!callback)
+        return NULL;
+
+    PyCSDL2_Set(self->callback, callback);
+    return callback;
+}
+
+/** \brief Setter for SDL_AudioSpec.callback */
+static int
+PyCSDL2_AudioSpecSetCallback(PyCSDL2_AudioSpec *self, PyObject *value,
+                             void *closure)
+{
+    PyCSDL2_Set(self->callback, value);
+    self->spec.callback = NULL;
+    return 0;
+}
+
+/** \brief Getter for SDL_AudioSpec.userdata */
+static PyObject *
+PyCSDL2_AudioSpecGetUserdata(PyCSDL2_AudioSpec *self, void *closure)
+{
+    PyObject *userdata;
+
+    if (!self->spec.userdata)
+        return PyCSDL2_Get(self->userdata);
+
+    if (PyCSDL2_VoidPtrCheckPtr(self->userdata, self->spec.userdata))
+        return PyCSDL2_Get(self->userdata);
+
+    userdata = PyCSDL2_VoidPtrCreate(self->spec.userdata);
+    if (!userdata)
+        return NULL;
+
+    PyCSDL2_Set(self->userdata, userdata);
+    return userdata;
+}
+
+/** \brief Setter for SDL_AudioSpec.userdata */
+static int
+PyCSDL2_AudioSpecSetUserdata(PyCSDL2_AudioSpec *self, PyObject *value,
+                             void *closure)
+{
+    PyCSDL2_Set(self->userdata, value);
+    self->spec.userdata = NULL;
+    return 0;
+}
+
+/** \brief List of get-setters for PyCSDL2_AudioSpecType */
+static PyGetSetDef PyCSDL2_AudioSpecGetSetters[] = {
+    {"callback",
+     (getter) PyCSDL2_AudioSpecGetCallback,
+     (setter) PyCSDL2_AudioSpecSetCallback,
+     "The function to call when the audio device needs more data.",
+     NULL},
+    {"userdata",
+     (getter) PyCSDL2_AudioSpecGetUserdata,
+     (setter) PyCSDL2_AudioSpecSetUserdata,
+     "The object that is passed to callback.",
+     NULL},
     {NULL}
 };
 
@@ -177,7 +248,7 @@ static PyTypeObject PyCSDL2_AudioSpecType = {
     /* tp_iternext       */ 0,
     /* tp_methods        */ 0,
     /* tp_members        */ PyCSDL2_AudioSpecMembers,
-    /* tp_getset         */ 0,
+    /* tp_getset         */ PyCSDL2_AudioSpecGetSetters,
     /* tp_base           */ 0,
     /* tp_dict           */ 0,
     /* tp_descr_get      */ 0,
@@ -195,7 +266,7 @@ static PyTypeObject PyCSDL2_AudioSpecType = {
  * \returns A new PyCSDL2_AudioSpec on success, or NULL with an exception set
  *          on failure.
  */
-static PyCSDL2_AudioSpec *
+static PyObject *
 PyCSDL2_AudioSpecCreate(const SDL_AudioSpec *spec)
 {
     PyCSDL2_AudioSpec *self;
@@ -209,7 +280,33 @@ PyCSDL2_AudioSpecCreate(const SDL_AudioSpec *spec)
         return NULL;
 
     self->spec = *spec;
-    return self;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrows the SDL_AudioSpec managed by the PyCSDL2_AudioSpec
+ *
+ * \param obj The PyCSDL2_AudioSpec object
+ * \param[out] out Output field
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_AudioSpecPtr(PyObject *obj, SDL_AudioSpec **out)
+{
+    PyCSDL2_AudioSpec *self = (PyCSDL2_AudioSpec*)obj;
+
+    if (!PyCSDL2_Assert(obj) || !PyCSDL2_Assert(out))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_AudioSpecType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_AudioSpec", obj);
+        return 0;
+    }
+
+    *out = &self->spec;
+
+    return 1;
 }
 
 /** @} */
@@ -234,6 +331,8 @@ typedef struct PyCSDL2_AudioDevice {
     /** \brief buffer object used for passing stream data in callbacks */
     PyCSDL2_Buffer *callback_buf;
 } PyCSDL2_AudioDevice;
+
+static PyTypeObject PyCSDL2_AudioDeviceType;
 
 /** \brief Traversal function for PyCSDL2_AudioDeviceType */
 static int
@@ -266,6 +365,11 @@ PyCSDL2_AudioDeviceValid(PyCSDL2_AudioDevice *dev)
 {
     if (!PyCSDL2_Assert(dev))
         return 0;
+
+    if (Py_TYPE(dev) != &PyCSDL2_AudioDeviceType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_AudioDevice", (PyObject*)dev);
+        return 0;
+    }
 
     if (!dev->id) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_AudioDevice");
@@ -400,9 +504,8 @@ static PyTypeObject PyCSDL2_AudioDeviceType = {
 /**
  * \brief Creates an instance of PyCSDL2_AudioDeviceType
  */
-static PyCSDL2_AudioDevice *
-PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id, PyObject *callback,
-                          PyObject *userdata)
+static PyObject *
+PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id)
 {
     PyCSDL2_AudioDevice *self;
     PyTypeObject *type = &PyCSDL2_AudioDeviceType;
@@ -417,8 +520,29 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id, PyObject *callback,
         return NULL;
     }
 
-    PyCSDL2_AudioDeviceAttach(self, id, callback, userdata);
-    return self;
+    PyCSDL2_AudioDeviceAttach(self, id, NULL, NULL);
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_AudioDeviceID managed by the PyCSDL2_AudioDevice
+ *
+ * \param obj The PyCSDL2_AudioDevice object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_AudioDeviceID(PyObject *obj, SDL_AudioDeviceID *out)
+{
+    PyCSDL2_AudioDevice *self = (PyCSDL2_AudioDevice*)obj;
+
+    if (!PyCSDL2_AudioDeviceValid(self))
+        return 0;
+
+    if (out)
+        *out = self->id;
+
+    return 1;
 }
 
 /** @} */
@@ -557,7 +681,7 @@ PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
  *      -> SDL_AudioDevice
  * \endcode
  */
-static PyCSDL2_AudioDevice *
+static PyObject *
 PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Py_buffer device;
@@ -566,7 +690,7 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
     PyCSDL2_AudioSpec *desired_obj, *obtained;
     int allowed_changes;
     SDL_AudioDeviceID id;
-    PyCSDL2_AudioDevice *out;
+    PyObject *out = NULL, *callback = NULL, *userdata = NULL;
     static char *kwlist[] = {"device", "iscapture", "desired", "obtained",
                              "allowed_changes", NULL};
 
@@ -578,27 +702,29 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 
     if ((PyObject*) obtained != Py_None &&
             Py_TYPE(obtained) != &PyCSDL2_AudioSpecType) {
-        PyBuffer_Release(&device);
         PyErr_SetString(PyExc_TypeError, "\"obtained\" must be either a "
                         "SDL_AudioSpec or None");
-        return NULL;
+        goto fail;
     }
 
-    if (!desired_obj->callback || desired_obj->callback == Py_None) {
-        PyBuffer_Release(&device);
-        PyErr_SetString(PyExc_ValueError, "\"callback\" is None");
-        return NULL;
-    }
-
-    out = PyCSDL2_AudioDeviceCreate(0, NULL, NULL);
-    if (!out) {
-        PyBuffer_Release(&device);
-        return NULL;
-    }
+    out = PyCSDL2_AudioDeviceCreate(0);
+    if (!out)
+        goto fail;
 
     desired = desired_obj->spec;
-    desired.callback = PyCSDL2_AudioDeviceCallback;
-    desired.userdata = out;
+
+    /* If callback is NULL, install our Python bridge callback. */
+    if (!desired.callback) {
+        desired.callback = PyCSDL2_AudioDeviceCallback;
+        desired.userdata = out;
+        callback = desired_obj->callback;
+        userdata = desired_obj->userdata;
+
+        if (!callback || callback == Py_None) {
+            PyErr_SetString(PyExc_ValueError, "\"callback\" is None");
+            goto fail;
+        }
+    }
 
     PyEval_InitThreads();
 
@@ -606,15 +732,19 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
                              (PyObject*) obtained == Py_None ? NULL : &obtained->spec,
                              allowed_changes);
     if (!id) {
-        Py_DECREF(out);
-        PyBuffer_Release(&device);
-        return PyCSDL2_RaiseSDLError();
+        PyCSDL2_RaiseSDLError();
+        goto fail;
     }
 
-    PyCSDL2_AudioDeviceAttach(out, id, desired_obj->callback,
-                              desired_obj->userdata);
+    PyCSDL2_AudioDeviceAttach((PyCSDL2_AudioDevice*)out, id, callback,
+                              userdata);
     PyBuffer_Release(&device);
     return out;
+
+fail:
+    PyBuffer_Release(&device);
+    Py_XDECREF(out);
+    return NULL;
 }
 
 /**
@@ -627,20 +757,17 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 static PyObject *
 PyCSDL2_PauseAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_AudioDevice *dev;
     int pause_on;
+    SDL_AudioDeviceID id;
     static char *kwlist[] = {"dev", "pause_on", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!p", kwlist,
-                                     &PyCSDL2_AudioDeviceType, &dev,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&p", kwlist,
+                                     PyCSDL2_AudioDeviceID, &id,
                                      &pause_on))
         return NULL;
 
-    if (!PyCSDL2_AudioDeviceValid(dev))
-        return NULL;
-
     Py_BEGIN_ALLOW_THREADS
-    SDL_PauseAudioDevice(dev->id, pause_on);
+    SDL_PauseAudioDevice(id, pause_on);
     Py_END_ALLOW_THREADS
 
     Py_RETURN_NONE;
@@ -663,7 +790,7 @@ PyCSDL2_LoadWAV_RW(PyObject *module, PyObject *args, PyObject *kwds)
     SDL_AudioSpec *ret;
     Uint8 *audio_buf;
     Uint32 audio_len;
-    PyCSDL2_AudioSpec *outspec = NULL;
+    PyObject *outspec = NULL;
     PyCSDL2_WAVBuf *outbuf = NULL;
     PyObject *out = NULL;
     static char *kwlist[] = {"src", "freesrc", NULL};
@@ -709,7 +836,7 @@ PyCSDL2_LoadWAV(PyObject *module, PyObject *args, PyObject *kwds)
     SDL_AudioSpec *ret;
     Uint8 *audio_buf;
     Uint32 audio_len;
-    PyCSDL2_AudioSpec *outspec = NULL;
+    PyObject *outspec = NULL;
     PyCSDL2_WAVBuf *outbuf = NULL;
     PyObject *out = NULL;
     static char *kwlist[] = {"file", NULL};

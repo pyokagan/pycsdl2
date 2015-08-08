@@ -112,6 +112,16 @@ Window destruction
    .. warning:: Once destroyed, do not access the window. Doing so will at best
                 raise errors and at worse crash the interpreter.
 
+Window Properties
+-----------------
+.. function:: SDL_GetWindowTitle(window: SDL_Window) -> str
+
+   Returns the title of the window.
+
+   :param window: The window.
+   :type window: :class:`SDL_Window`
+   :returns: The title of the window.
+
 Window Events
 -------------
 .. data:: SDL_WINDOWEVENT_NONE

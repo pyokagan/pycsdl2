@@ -120,6 +120,14 @@ static PyTypeObject PyCSDL2_RendererType = {
 static int
 PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
 {
+    if (!PyCSDL2_Assert(renderer))
+        return 0;
+
+    if (Py_TYPE(renderer) != &PyCSDL2_RendererType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Renderer", (PyObject*) renderer);
+        return 0;
+    }
+
     if (!renderer->renderer) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Renderer");
         return 0;
@@ -148,7 +156,7 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
  * \param deftarget The PyCSDL2_Window or PyCSDL2_Surface which is the default
  *                  target for the renderer.
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
 {
     PyCSDL2_Renderer *self;
@@ -168,7 +176,28 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
         return NULL;
     self->renderer = renderer;
     PyCSDL2_Set(self->deftarget, deftarget);
-    return self;
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_Renderer pointer managed by the PyCSDL2_Renderer.
+ *
+ * \param obj The PyCSDL2_Renderer object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_RendererPtr(PyObject *obj, SDL_Renderer **out)
+{
+    PyCSDL2_Renderer *self = (PyCSDL2_Renderer*)obj;
+
+    if (!PyCSDL2_RendererValid(self))
+        return 0;
+
+    if (out)
+        *out = self->renderer;
+
+    return 1;
 }
 
 /**
@@ -179,14 +208,14 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
  *                   -> SDL_Renderer
  * \endcode
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 {
     SDL_Renderer *renderer;
     PyCSDL2_Window *window;
     int index;
     Uint32 flags;
-    PyCSDL2_Renderer *out;
+    PyObject *out;
     static char *kwlist[] = {"window", "index", "flags", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!i" Uint32_UNIT, kwlist,
                                      &PyCSDL2_WindowType, &window, &index,
@@ -212,13 +241,13 @@ PyCSDL2_CreateRenderer(PyObject *module, PyObject *args, PyObject *kwds)
  * SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer
  * \endcode
  */
-static PyCSDL2_Renderer *
+static PyObject *
 PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
                                PyObject *kwds)
 {
     PyCSDL2_Surface *surface;
     SDL_Renderer *renderer;
-    PyCSDL2_Renderer *out;
+    PyObject *out;
     static char *kwlist[] = {"surface", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
                                      &PyCSDL2_SurfaceType, &surface))
@@ -247,18 +276,43 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
 static PyObject *
 PyCSDL2_SetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_Renderer *renderer;
+    SDL_Renderer *renderer;
     unsigned char r, g, b, a;
     static char *kwlist[] = {"renderer", "r", "g", "b", "a", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!bbbb", kwlist,
-                                     &PyCSDL2_RendererType, &renderer,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&bbbb", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
                                      &r, &g, &b, &a))
         return NULL;
-    if (!PyCSDL2_RendererValid(renderer))
-        return NULL;
-    if (SDL_SetRenderDrawColor(renderer->renderer, r, g, b, a))
+    if (SDL_SetRenderDrawColor(renderer, r, g, b, a))
         return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetRenderDrawColor()
+ *
+ * \code{.py}
+ * SDL_GetRenderDrawColor(renderer: SDL_Renderer) -> (int, int, int, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer;
+    unsigned char r, g, b, a;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_RendererType, &renderer))
+        return NULL;
+
+    if (!PyCSDL2_RendererValid(renderer))
+        return NULL;
+
+    if (SDL_GetRenderDrawColor(renderer->renderer, &r, &g, &b, &a))
+        return PyCSDL2_RaiseSDLError();
+
+    return Py_BuildValue("BBBB", r, g, b, a);
 }
 
 /**
@@ -271,14 +325,12 @@ PyCSDL2_SetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
 static PyObject *
 PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_Renderer *renderer;
+    SDL_Renderer *renderer;
     static char *kwlist[] = {"renderer", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
-                                     &PyCSDL2_RendererType, &renderer))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
         return NULL;
-    if (!PyCSDL2_RendererValid(renderer))
-        return NULL;
-    if (SDL_RenderClear(renderer->renderer))
+    if (SDL_RenderClear(renderer))
         return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
 }
@@ -293,19 +345,15 @@ PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
 static PyObject *
 PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_Renderer *renderer;
+    SDL_Renderer *renderer;
     Py_buffer rect;
     int ret;
     static char *kwlist[] = {"renderer", "rect", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O&", kwlist,
-                                     &PyCSDL2_RendererType, &renderer,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
                                      PyCSDL2_ConvertRectRead, &rect))
         return NULL;
-    if (!PyCSDL2_RendererValid(renderer)) {
-        PyBuffer_Release(&rect);
-        return NULL;
-    }
-    ret = SDL_RenderFillRect(renderer->renderer, rect.buf);
+    ret = SDL_RenderFillRect(renderer, rect.buf);
     PyBuffer_Release(&rect);
     if (ret) return PyCSDL2_RaiseSDLError();
     Py_RETURN_NONE;
@@ -321,14 +369,12 @@ PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
 static PyObject *
 PyCSDL2_RenderPresent(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_Renderer *renderer;
+    SDL_Renderer *renderer;
     static char *kwlist[] = {"renderer", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
-                                     &PyCSDL2_RendererType, &renderer))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
         return NULL;
-    if (!PyCSDL2_RendererValid(renderer))
-        return NULL;
-    SDL_RenderPresent(renderer->renderer);
+    SDL_RenderPresent(renderer);
     Py_RETURN_NONE;
 }
 

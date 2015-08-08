@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class Test_Rect(unittest.TestCase):
@@ -121,6 +122,34 @@ class TestHasIntersection(unittest.TestCase):
         "Raise BufferError if B has an invalid buffer size"
         b = bytes(1)
         self.assertRaises(BufferError, SDL_HasIntersection, self.a, b)
+
+
+class TestRectCreate(unittest.TestCase):
+    "Tests PyCSDL2_RectCreate()"
+
+    def test_returns_Rect(self):
+        "Returns a new SDL_Rect"
+        r = _csdl2test.rect()
+        self.assertIs(type(r), SDL_Rect)
+        self.assertEqual(r.x, 1)
+        self.assertEqual(r.y, 2)
+        self.assertEqual(r.w, 3)
+        self.assertEqual(r.h, 4)
+
+
+class TestRectPtr(unittest.TestCase):
+    "Tests PyCSDL2_RectPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter for PyArg_ParseTuple()"
+        r = SDL_Rect()
+        self.assertEqual(r.x, 0)
+        _csdl2test.rect_set_x(r)
+        self.assertEqual(r.x, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.rect_set_x, 42)
 
 
 if __name__ == '__main__':

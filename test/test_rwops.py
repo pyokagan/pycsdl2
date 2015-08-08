@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class TestRwopsConstants(unittest.TestCase):
@@ -426,6 +427,37 @@ class TestRWFromFile_Write(unittest.TestCase):
         del self.rw
         with open(self.path, 'rb') as f:
             self.assertEqual(f.read(), b'TEST')
+
+
+class TestRWopsCreate(unittest.TestCase):
+    "Tests PyCSDL2_RWopsCreate"
+
+    def test_returns_RWops(self):
+        "Returns a new SDL_RWops"
+        rw = _csdl2test.rwops()
+        self.assertIs(type(rw), SDL_RWops)
+        self.assertEqual(rw.type, 42)
+
+
+class TestRWopsPtr(unittest.TestCase):
+    "Tests PyCSDL2_RWopsPtr"
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        rw = SDL_AllocRW()
+        self.assertEqual(rw.type, 0)
+        _csdl2test.rwops_set_type(rw)
+        self.assertEqual(rw.type, 42)
+
+    def test_freed(self):
+        "Raises ValueError if rwops has been freed"
+        rw = SDL_AllocRW()
+        SDL_FreeRW(rw)
+        self.assertRaises(ValueError, _csdl2test.rwops_set_type, rw)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.rwops_set_type, 42)
 
 
 if __name__ == '__main__':

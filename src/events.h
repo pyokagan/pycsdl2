@@ -72,6 +72,8 @@ typedef struct PyCSDL2_MouseMotionEvent {
     PyCSDL2_EventMem *ev_mem;
 } PyCSDL2_MouseMotionEvent;
 
+static PyTypeObject PyCSDL2_MouseMotionEventType;
+
 /** \brief newfunc for PyCSDL2_MouseMotionEventType */
 static PyCSDL2_MouseMotionEvent *
 PyCSDL2_MouseMotionEventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -107,6 +109,11 @@ PyCSDL2_MouseMotionEventValid(PyCSDL2_MouseMotionEvent *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_MouseMotionEventType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_MouseMotionEvent", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->ev_mem) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_MouseMotionEvent");
@@ -404,23 +411,47 @@ static PyTypeObject PyCSDL2_MouseMotionEventType = {
 /**
  * \brief Creates an instance of PyCSDL2_MouseMotionEventType
  *
- * \param ev_mem PyCSDL2_EventMem providing the backing storage for SDL_Event.
  * \returns A new PyCSDL2_MouseMotionEvent on success, NULL if an exception
  *          occurred.
  */
-static PyCSDL2_MouseMotionEvent *
-PyCSDL2_MouseMotionEventCreate(PyCSDL2_EventMem *ev_mem)
+static PyObject *
+PyCSDL2_MouseMotionEventCreate(const SDL_MouseMotionEvent *ev)
 {
     PyCSDL2_MouseMotionEvent *self;
     PyTypeObject *type = &PyCSDL2_MouseMotionEventType;
 
-    if (!PyCSDL2_Assert(ev_mem))
+    if (!PyCSDL2_Assert(ev))
         return NULL;
 
-    if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
+    self = PyCSDL2_MouseMotionEventNew(type, NULL, NULL);
+    if (!self)
         return NULL;
-    PyCSDL2_Set(self->ev_mem, ev_mem);
-    return self;
+
+    self->ev_mem->ev.motion = *ev;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrows the SDL_MouseMotionEvent managed by the
+ *        PyCSDL2_MouseMotionEvent object.
+ *
+ * \param obj The PyCSDL2_MouseMotionEvent object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_MouseMotionEventPtr(PyObject *obj, SDL_MouseMotionEvent **out)
+{
+    PyCSDL2_MouseMotionEvent *self = (PyCSDL2_MouseMotionEvent*)obj;
+
+    if (!PyCSDL2_MouseMotionEventValid(self))
+        return 0;
+
+    if (out)
+        *out = &self->ev_mem->ev.motion;
+
+    return 1;
 }
 
 /**
@@ -445,6 +476,7 @@ static PyCSDL2_Event *
 PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_Event *self;
+    PyTypeObject *t;
 
     if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
         return NULL;
@@ -452,11 +484,18 @@ PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
         Py_DECREF(self);
         return NULL;
     }
-    if (!(self->motion = PyCSDL2_MouseMotionEventCreate(self->ev_mem))) {
-        Py_DECREF(self);
-        return NULL;
-    }
+
+    t = &PyCSDL2_MouseMotionEventType;
+    self->motion = PyCSDL2_MouseMotionEventNew(t, NULL, NULL);
+    if (!self->motion)
+        goto fail;
+    PyCSDL2_Set(self->motion->ev_mem, self->ev_mem);
+
     return self;
+
+fail:
+    Py_DECREF(self);
+    return NULL;
 }
 
 /**
@@ -609,6 +648,53 @@ static PyTypeObject PyCSDL2_EventType = {
     /* tp_alloc          */ 0,
     /* tp_new            */ (newfunc) PyCSDL2_EventNew,
 };
+
+/**
+ * \brief Creates an instance of PyCSDL2_Event.
+ *
+ * \param ev SDL_Event to initialize the object with
+ * \returns A new PyCSDL2_Event PyObject on success, NULL with an exception set
+ *          on failure.
+ */
+static PyObject *
+PyCSDL2_EventCreate(const SDL_Event *ev)
+{
+    PyTypeObject *type = &PyCSDL2_EventType;
+    PyCSDL2_Event *self;
+
+    self = PyCSDL2_EventNew(type, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    self->ev_mem->ev = *ev;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrows the SDL_Event from a PyCSDL2_Event object.
+ *
+ * \param obj The PyCSDL2_Event object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_EventPtr(PyObject *obj, SDL_Event **out)
+{
+    PyCSDL2_Event *self = (PyCSDL2_Event*)obj;
+
+    if (!PyCSDL2_Assert(obj) || !PyCSDL2_Assert(out))
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_EventType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Event", obj);
+        return 0;
+    }
+
+    *out = &self->ev_mem->ev;
+
+    return 1;
+}
 
 /**
  * \brief Checks for and retrieves a SDL_Event Py_buffer from obj.

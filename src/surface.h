@@ -368,6 +368,8 @@ typedef struct PyCSDL2_Surface {
     PyCSDL2_SurfaceRect *clip_rect;
 } PyCSDL2_Surface;
 
+static PyTypeObject PyCSDL2_SurfaceType;
+
 /** \brief Traversal function for PyCSDL2_SurfaceType */
 static int
 PyCSDL2_SurfaceTraverse(PyCSDL2_Surface *self, visitproc visit, void *arg)
@@ -424,10 +426,36 @@ PyCSDL2_SurfaceValid(PyCSDL2_Surface *surface)
     if (!PyCSDL2_Assert(surface))
         return 0;
 
+    if (Py_TYPE(surface) != &PyCSDL2_SurfaceType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Surface", (PyObject*)surface);
+        return 0;
+    }
+
     if (!surface->surface) {
         PyErr_SetString(PyExc_ValueError, "Invalid SDL_Surface");
         return 0;
     }
+    return 1;
+}
+
+/**
+ * \brief Borrow the SDL_Surface managed by the PyCSDL2_Surface object.
+ *
+ * \param obj The SDL_Surface object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_SurfacePtr(PyObject *obj, SDL_Surface **out)
+{
+    PyCSDL2_Surface *self = (PyCSDL2_Surface*)obj;
+
+    if (!PyCSDL2_SurfaceValid(self))
+        return 0;
+
+    if (out)
+        *out = self->surface;
+
     return 1;
 }
 
@@ -642,7 +670,7 @@ static PyTypeObject PyCSDL2_SurfaceType = {
  *               SDL surface owns the pixel buffer, and a memoryview will be
  *               created.
  */
-static PyCSDL2_Surface *
+static PyObject *
 PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
 {
     PyCSDL2_Surface *self;
@@ -657,7 +685,8 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
     if (!(self = (PyCSDL2_Surface*)type->tp_alloc(type, 0)))
         return NULL;
     surface->format->refcount += 1;
-    if (!(self->format = PyCSDL2_PixelFormatCreate(surface->format))) {
+    self->format = (PyCSDL2_PixelFormat*)PyCSDL2_PixelFormatCreate(surface->format);
+    if (!self->format) {
         surface->format->refcount -= 1;
         Py_DECREF(self);
         return NULL;
@@ -686,7 +715,7 @@ PyCSDL2_SurfaceCreate(SDL_Surface *surface, PyObject *pixels)
         return NULL;
     }
     self->surface = surface;
-    return self;
+    return (PyObject*)self;
 }
 
 /**
@@ -718,13 +747,13 @@ PyCSDL2_MUSTLOCK(PyObject *module, PyObject *args, PyObject *kwds)
  *                      -> SDL_Surface
  * \endcode
  */
-static PyCSDL2_Surface *
+static PyObject *
 PyCSDL2_CreateRGBSurface(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Uint32 flags, Rmask, Gmask, Bmask, Amask;
     int width, height, depth;
     SDL_Surface *ret;
-    PyCSDL2_Surface *out;
+    PyObject *out;
     static char *kwlist[] = {"flags", "width", "height", "depth", "Rmask",
                              "Gmask", "Bmask", "Amask", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT "iii" Uint32_UNIT
@@ -751,7 +780,7 @@ PyCSDL2_CreateRGBSurface(PyObject *module, PyObject *args, PyObject *kwds)
  *                          Bmask: int, Amask: int) -> SDL_Surface
  * \endcode
  */
-static PyCSDL2_Surface *
+static PyObject *
 PyCSDL2_CreateRGBSurfaceFrom(PyObject *module, PyObject *args, PyObject *kwds)
 {
     int width, height, depth, pitch;
@@ -759,7 +788,7 @@ PyCSDL2_CreateRGBSurfaceFrom(PyObject *module, PyObject *args, PyObject *kwds)
     PyObject *pixels;
     Py_buffer buf;
     SDL_Surface *surface;
-    PyCSDL2_Surface *out;
+    PyObject *out;
     static char *kwlist[] = {"pixels", "width", "height", "depth", "pitch",
                              "Rmask", "Gmask", "Bmask", "Amask", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "Oiiii" Uint32_UNIT

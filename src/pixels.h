@@ -188,6 +188,8 @@ typedef struct PyCSDL2_Palette {
     PyCSDL2_PaletteColors *colors;
 } PyCSDL2_Palette;
 
+static PyTypeObject PyCSDL2_PaletteType;
+
 /** \brief GC Traverse function for PyCSDL2_PaletteType */
 static int
 PyCSDL2_PaletteTraverse(PyCSDL2_Palette *self, visitproc visit, void *arg)
@@ -228,6 +230,11 @@ PyCSDL2_PaletteValid(PyCSDL2_Palette *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_PaletteType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Palette", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->palette) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_Palette");
@@ -351,7 +358,7 @@ static PyTypeObject PyCSDL2_PaletteType = {
  *
  * \param palette SDL_Palette to manage. Steals the reference.
  */
-static PyCSDL2_Palette *
+static PyObject *
 PyCSDL2_PaletteCreate(SDL_Palette *palette)
 {
     PyCSDL2_Palette *self;
@@ -374,7 +381,28 @@ PyCSDL2_PaletteCreate(SDL_Palette *palette)
     }
     self->palette = palette;
     self->colors = colors;
-    return self;
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_Palette pointer managed by the PyCSDL2_Palette.
+ *
+ * \param obj The PyCSDL2_Palette object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_PalettePtr(PyObject *obj, SDL_Palette **out)
+{
+    PyCSDL2_Palette *self = (PyCSDL2_Palette*)obj;
+
+    if (!PyCSDL2_PaletteValid(self))
+        return 0;
+
+    if (out)
+        *out = self->palette;
+
+    return 1;
 }
 
 /** \brief Instance data for SDL_PixelFormatType */
@@ -387,6 +415,8 @@ typedef struct PyCSDL2_PixelFormat {
     /** \brief Palette attribute */
     PyCSDL2_Palette *palette;
 } PyCSDL2_PixelFormat;
+
+static PyTypeObject PyCSDL2_PixelFormatType;
 
 /** \brief GC traverse function for PyCSDL2_PixelFormatType */
 static int
@@ -428,6 +458,11 @@ PyCSDL2_PixelFormatValid(PyCSDL2_PixelFormat *self)
 {
     if (!PyCSDL2_Assert(self))
         return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_PixelFormatType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_PixelFormat", (PyObject*)self);
+        return 0;
+    }
 
     if (!self->pfmt) {
         PyErr_SetString(PyExc_ValueError, "invalid SDL_PixelFormat");
@@ -734,7 +769,7 @@ static PyTypeObject PyCSDL2_PixelFormatType = {
  *
  * \param pfmt The SDL_PixelFormat to manage. Will steal the reference to it.
  */
-static PyCSDL2_PixelFormat *
+static PyObject *
 PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
 {
     PyCSDL2_PixelFormat *self;
@@ -749,7 +784,8 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
         PyCSDL2_Palette *palette;
 
         pfmt->palette->refcount += 1;
-        if (!(palette = PyCSDL2_PaletteCreate(pfmt->palette))) {
+        palette = (PyCSDL2_Palette*)PyCSDL2_PaletteCreate(pfmt->palette);
+        if (!palette) {
             pfmt->palette->refcount -= 1;
             Py_DECREF(self);
             return NULL;
@@ -757,7 +793,29 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
         self->palette = palette;
     }
     self->pfmt = pfmt;
-    return self;
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_PixelFormat pointer managed by the PyCSDL2_PixelFormat
+ *        object.
+ *
+ * \param obj The PyCSDL2_PixelFormat object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_PixelFormatPtr(PyObject *obj, SDL_PixelFormat **out)
+{
+    PyCSDL2_PixelFormat *self = (PyCSDL2_PixelFormat*)obj;
+
+    if (!PyCSDL2_PixelFormatValid(self))
+        return 0;
+
+    if (out)
+        *out = self->pfmt;
+
+    return 1;
 }
 
 /**
@@ -767,12 +825,12 @@ PyCSDL2_PixelFormatCreate(SDL_PixelFormat *pfmt)
  * SDL_AllocFormat(pixel_format: int) -> SDL_PixelFormat
  * \endcode
  */
-static PyCSDL2_PixelFormat *
+static PyObject *
 PyCSDL2_AllocFormat(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Uint32 pixel_format;
     SDL_PixelFormat *pfmt;
-    PyCSDL2_PixelFormat *out;
+    PyObject *out;
     static char *kwlist[] = {"pixel_format", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist,
                                      &pixel_format))
@@ -818,12 +876,12 @@ PyCSDL2_FreeFormat(PyObject *module, PyObject *args, PyObject *kwds)
 * SDL_AllocPalette(ncolors: int) -> SDL_Palette
 * \endcode
 */
-static PyCSDL2_Palette *
+static PyObject *
 PyCSDL2_AllocPalette(PyObject *module, PyObject *args, PyObject *kwds)
 {
     int ncolors;
     SDL_Palette *palette;
-    PyCSDL2_Palette *out;
+    PyObject *out;
     static char *kwlist[] = {"ncolors", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &ncolors))
         return NULL;

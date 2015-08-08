@@ -5,6 +5,7 @@ import os.path
 import struct
 import sys
 import unittest
+import array
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +18,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 class TestSurfaceConstants(unittest.TestCase):
@@ -303,6 +305,53 @@ class Test_FreeSurface(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_FreeSurface(self.surface)
         self.assertRaises(ValueError, SDL_FreeSurface, self.surface)
+
+
+class TestSurfaceCreate(unittest.TestCase):
+    "Tests PyCSDL2_SurfaceCreate()"
+
+    def test_returns_Surface(self):
+        "Returns a new SDL_Surface"
+        sf = _csdl2test.surface()
+        self.assertIs(type(sf), SDL_Surface)
+        self.assertEqual(sf.w, 32)
+        self.assertEqual(sf.h, 32)
+
+    def test_pixels_buffer(self):
+        "Keeps a reference to a provided pixels buffer"
+        pixels = array.array('B', [0] * 32 * 32 * 4)
+        sf = _csdl2test.surface_from(pixels)
+        self.assertIs(type(sf), SDL_Surface)
+        self.assertIs(sf.pixels, pixels)
+        # Attempting to append an element to the pixels buffer will fail as the
+        # SDL_Surface object keeps a reference to the pixels buffer
+        self.assertRaises(BufferError, pixels.append, 0)
+
+    def test_pixels_buffer_readonly(self):
+        "Raises BufferError if the pixels buffer is readonly"
+        pixels = bytes(32 * 32 * 4)
+        self.assertRaises(BufferError, _csdl2test.surface_from, pixels)
+
+
+class TestSurfacePtr(unittest.TestCase):
+    "Tests PyCSDL2_SurfacePtr()"
+
+    def test_converter(self):
+        "Works as a converter for PyArg_ParseTuple()"
+        sf = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+        self.assertEqual(sf.pixels[0], 0)
+        _csdl2test.surface_fill(sf)
+        self.assertEqual(sf.pixels[0], 255)
+
+    def test_freed(self):
+        "Raises ValueError if surface has been freed"
+        sf = SDL_CreateRGBSurface(0, 32, 16, 32, 0, 0, 0, 0)
+        SDL_FreeSurface(sf)
+        self.assertRaises(ValueError, _csdl2test.surface_fill, sf)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.surface_fill, 42)
 
 
 if __name__ == '__main__':

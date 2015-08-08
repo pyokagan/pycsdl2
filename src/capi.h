@@ -30,6 +30,14 @@
 #define _PYCSDL2_CAPI_H_
 #include <Python.h>
 #include "../include/pycsdl2.h"
+#include "audio.h"
+#include "events.h"
+#include "pixels.h"
+#include "rect.h"
+#include "render.h"
+#include "rwops.h"
+#include "surface.h"
+#include "video.h"
 
 /**
  * \brief Initializes csdl2's PyCSDL2_CAPI PyCapsule
@@ -638,7 +646,37 @@ PyCSDL2_initcapi(PyObject *m)
         SDL_GL_SetSwapInterval,
         SDL_GL_GetSwapInterval,
         SDL_GL_SwapWindow,
-        SDL_GL_DeleteContext
+        SDL_GL_DeleteContext,
+/* src/audio.h */
+        PyCSDL2_AudioSpecCreate,
+        PyCSDL2_AudioSpecPtr,
+        PyCSDL2_AudioDeviceCreate,
+        PyCSDL2_AudioDeviceID,
+/* src/events.h */
+        PyCSDL2_MouseMotionEventCreate,
+        PyCSDL2_MouseMotionEventPtr,
+        PyCSDL2_EventCreate,
+        PyCSDL2_EventPtr,
+/* src/pixels.h */
+        PyCSDL2_PaletteCreate,
+        PyCSDL2_PalettePtr,
+        PyCSDL2_PixelFormatCreate,
+        PyCSDL2_PixelFormatPtr,
+/* src/rect.h */
+        PyCSDL2_RectCreate,
+        PyCSDL2_RectPtr,
+/* src/render.h */
+        PyCSDL2_RendererCreate,
+        PyCSDL2_RendererPtr,
+/* src/rwops.h */
+        PyCSDL2_RWopsCreate,
+        PyCSDL2_RWopsPtr,
+/* src/surface.h */
+        PyCSDL2_SurfaceCreate,
+        PyCSDL2_SurfacePtr,
+/* src/video.h */
+        PyCSDL2_WindowCreate,
+        PyCSDL2_WindowPtr
     };
     PyObject *capsule = PyCapsule_New((void*) &api, "csdl2._C_API", NULL);
     if (!capsule) { return 0; }

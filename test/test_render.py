@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 try:
@@ -156,6 +157,38 @@ class TestSetRenderDrawColor(unittest.TestCase):
                           0, 0, 0, 0)
 
 
+class TestGetRenderDrawColor(unittest.TestCase):
+    "Tests SDL_GetRenderDrawColor()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_tuple(self):
+        "Returns an (int, int, int, int) tuple"
+        t = SDL_GetRenderDrawColor(self.rdr)
+        self.assertIs(type(t), tuple)
+        a, b, c, d = t
+        self.assertIs(type(a), int)
+        self.assertIs(type(b), int)
+        self.assertIs(type(c), int)
+        self.assertIs(type(d), int)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetRenderDrawColor, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetRenderDrawColor, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetRenderDrawColor, 42)
+
+
 class TestRenderClear(unittest.TestCase):
     """Tests SDL_RenderClear()"""
 
@@ -254,6 +287,60 @@ class TestDestroyRenderer(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_DestroyRenderer(self.rdr)
         self.assertRaises(ValueError, SDL_DestroyRenderer, self.rdr)
+
+
+class TestRendererCreate(unittest.TestCase):
+    "Tests PyCSDL2_RendererCreate()"
+
+    def test_deftarget_surface(self):
+        "Returns SDL_Renderer with a SDL_Surface deftarget"
+        sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        rdr = _csdl2test.renderer(sf)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_deftarget_window(self):
+        "Returns SDL_Renderer with a SDL_Window deftarget"
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        win = SDL_CreateWindow(self.id(), -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        rdr = _csdl2test.renderer(win)
+        self.assertIs(type(rdr), SDL_Renderer)
+
+    def test_deftarget_invalid(self):
+        "Raises AssertionError if the deftarget has invalid type"
+        self.assertRaises(AssertionError, _csdl2test.renderer, 42)
+
+
+class TestRendererPtr(unittest.TestCase):
+    "Tests PyCSDL2_RendererPtr()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        SDL_SetRenderDrawColor(self.rdr, 0, 0, 0, 0)
+        self.assertEqual(SDL_GetRenderDrawColor(self.rdr), (0, 0, 0, 0))
+        _csdl2test.renderer_set_draw_color(self.rdr)
+        self.assertEqual(SDL_GetRenderDrawColor(self.rdr),
+                         (255, 255, 255, 255))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, _csdl2test.renderer_set_draw_color,
+                          self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, _csdl2test.renderer_set_draw_color,
+                          self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError if the type is invalid"
+        self.assertRaises(TypeError, _csdl2test.renderer_set_draw_color, 42)
 
 
 if __name__ == '__main__':

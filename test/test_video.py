@@ -16,6 +16,7 @@ if __name__ == '__main__':
 
 
 from csdl2 import *
+import _csdl2test
 
 
 try:
@@ -242,6 +243,28 @@ class TestCreateWindow(unittest.TestCase):
         self.assertIs(type(win), SDL_Window)
 
 
+class TestGetWindowTitle(unittest.TestCase):
+    "Tests SDL_GetWindowTitle"
+
+    def setUp(self):
+        self.win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+
+    def test_returns_str(self):
+        "Returns a string"
+        x = SDL_GetWindowTitle(self.win)
+        self.assertIs(type(x), str)
+        self.assertEqual(x, 'foo')
+
+    def test_destroyed(self):
+        "Raises ValueError if the window has been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(ValueError, SDL_GetWindowTitle, self.win)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetWindowTitle, 42)
+
+
 class TestDestroyWindow(unittest.TestCase):
     """Tests SDL_DestroyWindow()"""
 
@@ -257,6 +280,47 @@ class TestDestroyWindow(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_DestroyWindow(self.win)
         self.assertRaises(ValueError, SDL_DestroyWindow, self.win)
+
+
+class TestWindowCreate(unittest.TestCase):
+    "Tests PyCSDL2_WindowCreate()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('No video support')
+
+    def test_returns_window(self):
+        "Returns a new SDL_Window"
+        win = _csdl2test.window()
+        self.assertIs(type(win), SDL_Window)
+        self.assertEqual(SDL_GetWindowTitle(win), 'foo')
+
+
+class TestWindowPtr(unittest.TestCase):
+    "Tests PyCSDL2_WindowPtr()"
+
+    @classmethod
+    def setUpClass(cls):
+        if not has_video:
+            raise unittest.SkipTest('No video support')
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        self.assertEqual(SDL_GetWindowTitle(win), 'foo')
+        _csdl2test.window_set_title(win)
+        self.assertEqual(SDL_GetWindowTitle(win), 'bar')
+
+    def test_destroyed(self):
+        "Raises ValueError if the window is already destroyed"
+        win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+        SDL_DestroyWindow(win)
+        self.assertRaises(ValueError, _csdl2test.window_set_title, win)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.window_set_title, 42)
 
 
 if __name__ == '__main__':
