@@ -82,8 +82,13 @@ PyCSDL2_MouseMotionEventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
     if (!(self = (PyCSDL2_MouseMotionEvent*) type->tp_alloc(type, 0)))
         return NULL;
-    if (!(self->ev_mem = PyCSDL2_EventMemCreate()))
+
+    self->ev_mem = PyCSDL2_EventMemCreate();
+    if (!self->ev_mem) {
+        Py_DECREF(self);
         return NULL;
+    }
+
     return self;
 }
 
