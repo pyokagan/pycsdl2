@@ -6,6 +6,7 @@ API Reference
 
    init
    video
+   blendmode
    surface
    render
    pixels
