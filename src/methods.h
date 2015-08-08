@@ -611,6 +611,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
      "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"},
 
+    {"SDL_GetWindowTitle",
+     (PyCFunction) PyCSDL2_GetWindowTitle,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetWindowTitle(window: SDL_Window) -> str\n"
+     "\n"
+     "Returns the title of the window, or an empty string if there is no\n"
+     "title.\n"
+    },
+
     {"SDL_DestroyWindow",
      (PyCFunction) PyCSDL2_DestroyWindow,
      METH_VARARGS | METH_KEYWORDS,

@@ -242,6 +242,28 @@ class TestCreateWindow(unittest.TestCase):
         self.assertIs(type(win), SDL_Window)
 
 
+class TestGetWindowTitle(unittest.TestCase):
+    "Tests SDL_GetWindowTitle"
+
+    def setUp(self):
+        self.win = SDL_CreateWindow('foo', -32, -32, 32, 32, SDL_WINDOW_HIDDEN)
+
+    def test_returns_str(self):
+        "Returns a string"
+        x = SDL_GetWindowTitle(self.win)
+        self.assertIs(type(x), str)
+        self.assertEqual(x, 'foo')
+
+    def test_destroyed(self):
+        "Raises ValueError if the window has been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(ValueError, SDL_GetWindowTitle, self.win)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetWindowTitle, 42)
+
+
 class TestDestroyWindow(unittest.TestCase):
     """Tests SDL_DestroyWindow()"""
 

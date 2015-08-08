@@ -165,6 +165,34 @@ PyCSDL2_CreateWindow(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetWindowTitle()
+ *
+ * \code{.py}
+ * SDL_GetWindowTitle(window: SDL_Window) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetWindowTitle(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Window *window;
+    const char *title;
+    static char *kwlist[] = {"window", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_WindowType, &window))
+        return NULL;
+
+    if (!PyCSDL2_WindowValid(window))
+        return NULL;
+
+    title = SDL_GetWindowTitle(window->window);
+    if (!PyCSDL2_Assert(title))
+        return NULL;
+
+    return PyUnicode_FromString(title);
+}
+
+/**
  * \brief Implements csdl2.SDL_DestroyWindow()
  *
  * \code{.py}
