@@ -709,6 +709,29 @@ PyCSDL2_VoidPtrCreate(void *ptr)
     return (PyObject*)self;
 }
 
+/**
+ * \brief Checks the pointer value of the PyCSDL2_VoidPtr.
+ *
+ * \param obj PyObject to check
+ * \param ptr Pointer value which the PyCSDL2_VoidPtr must have.
+ * \returns 1 if the PyObject is a PyCSDL2_VoidPtr and has the pointer value of
+ *          ptr, 0 otherwise.
+ */
+static int
+PyCSDL2_VoidPtrCheckPtr(PyObject *obj, void *ptr)
+{
+    if (!obj)
+        return 0;
+
+    if (Py_TYPE(obj) != &PyCSDL2_VoidPtrType)
+        return 0;
+
+    if (((PyCSDL2_VoidPtr*)obj)->ptr != ptr)
+        return 0;
+
+    return 1;
+}
+
 /** @} */
 
 /**

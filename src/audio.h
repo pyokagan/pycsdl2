@@ -136,10 +136,81 @@ static PyMemberDef PyCSDL2_AudioSpecMembers[] = {
      "Audio buffer size in samples"},
     {"size", Uint32_TYPE, offsetof(PyCSDL2_AudioSpec, spec.size), 0,
      "Audio buffer size in bytes."},
-    {"callback", T_OBJECT, offsetof(PyCSDL2_AudioSpec, callback), 0,
-     "The function to call when the audio device needs more data."},
-    {"userdata", T_OBJECT, offsetof(PyCSDL2_AudioSpec, userdata), 0,
-     "The object that is passed to callback."},
+    {NULL}
+};
+
+/** \brief Getter for SDL_AudioSpec.callback */
+static PyObject *
+PyCSDL2_AudioSpecGetCallback(PyCSDL2_AudioSpec *self, void *closure)
+{
+    PyObject *callback;
+
+    if (!self->spec.callback)
+        return PyCSDL2_Get(self->callback);
+
+    if (PyCSDL2_VoidPtrCheckPtr(self->callback, self->spec.callback))
+        return PyCSDL2_Get(self->callback);
+
+    callback = PyCSDL2_VoidPtrCreate(self->spec.callback);
+    if (!callback)
+        return NULL;
+
+    PyCSDL2_Set(self->callback, callback);
+    return callback;
+}
+
+/** \brief Setter for SDL_AudioSpec.callback */
+static int
+PyCSDL2_AudioSpecSetCallback(PyCSDL2_AudioSpec *self, PyObject *value,
+                             void *closure)
+{
+    PyCSDL2_Set(self->callback, value);
+    self->spec.callback = NULL;
+    return 0;
+}
+
+/** \brief Getter for SDL_AudioSpec.userdata */
+static PyObject *
+PyCSDL2_AudioSpecGetUserdata(PyCSDL2_AudioSpec *self, void *closure)
+{
+    PyObject *userdata;
+
+    if (!self->spec.userdata)
+        return PyCSDL2_Get(self->userdata);
+
+    if (PyCSDL2_VoidPtrCheckPtr(self->userdata, self->spec.userdata))
+        return PyCSDL2_Get(self->userdata);
+
+    userdata = PyCSDL2_VoidPtrCreate(self->spec.userdata);
+    if (!userdata)
+        return NULL;
+
+    PyCSDL2_Set(self->userdata, userdata);
+    return userdata;
+}
+
+/** \brief Setter for SDL_AudioSpec.userdata */
+static int
+PyCSDL2_AudioSpecSetUserdata(PyCSDL2_AudioSpec *self, PyObject *value,
+                             void *closure)
+{
+    PyCSDL2_Set(self->userdata, value);
+    self->spec.userdata = NULL;
+    return 0;
+}
+
+/** \brief List of get-setters for PyCSDL2_AudioSpecType */
+static PyGetSetDef PyCSDL2_AudioSpecGetSetters[] = {
+    {"callback",
+     (getter) PyCSDL2_AudioSpecGetCallback,
+     (setter) PyCSDL2_AudioSpecSetCallback,
+     "The function to call when the audio device needs more data.",
+     NULL},
+    {"userdata",
+     (getter) PyCSDL2_AudioSpecGetUserdata,
+     (setter) PyCSDL2_AudioSpecSetUserdata,
+     "The object that is passed to callback.",
+     NULL},
     {NULL}
 };
 
@@ -177,7 +248,7 @@ static PyTypeObject PyCSDL2_AudioSpecType = {
     /* tp_iternext       */ 0,
     /* tp_methods        */ 0,
     /* tp_members        */ PyCSDL2_AudioSpecMembers,
-    /* tp_getset         */ 0,
+    /* tp_getset         */ PyCSDL2_AudioSpecGetSetters,
     /* tp_base           */ 0,
     /* tp_dict           */ 0,
     /* tp_descr_get      */ 0,
@@ -567,6 +638,7 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
     int allowed_changes;
     SDL_AudioDeviceID id;
     PyCSDL2_AudioDevice *out;
+    PyObject *callback = NULL, *userdata = NULL;
     static char *kwlist[] = {"device", "iscapture", "desired", "obtained",
                              "allowed_changes", NULL};
 
@@ -578,27 +650,29 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
 
     if ((PyObject*) obtained != Py_None &&
             Py_TYPE(obtained) != &PyCSDL2_AudioSpecType) {
-        PyBuffer_Release(&device);
         PyErr_SetString(PyExc_TypeError, "\"obtained\" must be either a "
                         "SDL_AudioSpec or None");
-        return NULL;
-    }
-
-    if (!desired_obj->callback || desired_obj->callback == Py_None) {
-        PyBuffer_Release(&device);
-        PyErr_SetString(PyExc_ValueError, "\"callback\" is None");
-        return NULL;
+        goto fail;
     }
 
     out = PyCSDL2_AudioDeviceCreate(0, NULL, NULL);
-    if (!out) {
-        PyBuffer_Release(&device);
-        return NULL;
-    }
+    if (!out)
+        goto fail;
 
     desired = desired_obj->spec;
-    desired.callback = PyCSDL2_AudioDeviceCallback;
-    desired.userdata = out;
+
+    /* If callback is NULL, install our Python bridge callback. */
+    if (!desired.callback) {
+        desired.callback = PyCSDL2_AudioDeviceCallback;
+        desired.userdata = out;
+        callback = desired_obj->callback;
+        userdata = desired_obj->userdata;
+
+        if (!callback || callback == Py_None) {
+            PyErr_SetString(PyExc_ValueError, "\"callback\" is None");
+            goto fail;
+        }
+    }
 
     PyEval_InitThreads();
 
@@ -606,15 +680,18 @@ PyCSDL2_OpenAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
                              (PyObject*) obtained == Py_None ? NULL : &obtained->spec,
                              allowed_changes);
     if (!id) {
-        Py_DECREF(out);
-        PyBuffer_Release(&device);
-        return PyCSDL2_RaiseSDLError();
+        PyCSDL2_RaiseSDLError();
+        goto fail;
     }
 
-    PyCSDL2_AudioDeviceAttach(out, id, desired_obj->callback,
-                              desired_obj->userdata);
+    PyCSDL2_AudioDeviceAttach(out, id, callback, userdata);
     PyBuffer_Release(&device);
     return out;
+
+fail:
+    PyBuffer_Release(&device);
+    Py_XDECREF(out);
+    return NULL;
 }
 
 /**
