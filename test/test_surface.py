@@ -6,6 +6,7 @@ import struct
 import sys
 import unittest
 import array
+import io
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -305,6 +306,61 @@ class Test_FreeSurface(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_FreeSurface(self.surface)
         self.assertRaises(ValueError, SDL_FreeSurface, self.surface)
+
+
+def sample_bmp():
+    "Returns a 4x4 white bitmap"
+    # Size of bitmap in bytes
+    size = 14 + 12 + 2 + 16
+    # Location of pixel data
+    offset = 28
+    # Bitmap file header (14 bytes)
+    header = struct.pack('<2sIHHI', b'BM', size, 0, 0, offset)
+    # BITMAPCOREHEADER (12 bytes)
+    # (size, width, height, planes, bpp)
+    dib = struct.pack('<IHHHH', 12, 4, 4, 1, 8)
+    # padding to 4-byte boundary (2 bytes)
+    padding = b'\x00\x00'
+    # 4x4 8bpp pixels (16 bytes)
+    pixels = b'\xFF' * 4 * 4
+    return header + dib + padding + pixels
+
+
+class TestLoadBMP_RW(unittest.TestCase):
+    "Tests SDL_LoadBMP_RW()"
+
+    def setUp(self):
+        f = io.BytesIO(sample_bmp())
+        self.rwops = SDL_AllocRW()
+        self.rwops.size = lambda a: len(f.getbuffer())
+        self.rwops.read = lambda a, b, c, d: f.readinto(b) // c
+        self.rwops.seek = lambda a, b, c: f.seek(b, c)
+        self.rwops.close = lambda a: SDL_FreeRW(a)
+
+    def test_returns_surface(self):
+        "Returns a SDL_Surface"
+        surface = SDL_LoadBMP_RW(self.rwops, True)
+        self.assertIs(type(surface), SDL_Surface)
+        self.assertEqual(surface.pixels[0], 255)
+
+    def test_freesrc_true(self):
+        "Frees the SDL_RWops if freesrc is True"
+        SDL_LoadBMP_RW(self.rwops, True)
+        self.assertRaises(ValueError, getattr, self.rwops, 'type')
+
+    def test_freesrc_false(self):
+        "Does not free the SDL_RWops if freesrc is False"
+        SDL_LoadBMP_RW(self.rwops, False)
+        getattr(self.rwops, 'type')
+
+    def test_freed_rwops(self):
+        "Raises ValueError if the SDL_RWops has been freed"
+        SDL_FreeRW(self.rwops)
+        self.assertRaises(ValueError, SDL_LoadBMP_RW, self.rwops, True)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_LoadBMP_RW, 42, True)
 
 
 class TestSurfaceCreate(unittest.TestCase):

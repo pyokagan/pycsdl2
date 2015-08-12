@@ -1000,6 +1000,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "errors and at worse crash the interpreter.\n"
     },
 
+
+    {"SDL_LoadBMP_RW",
+     (PyCFunction) PyCSDL2_LoadBMP_RW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadBMP_RW(src: SDL_RWops, freesrc: bool) -> SDL_Surface\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
