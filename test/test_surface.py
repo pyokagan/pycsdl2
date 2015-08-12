@@ -7,6 +7,7 @@ import sys
 import unittest
 import array
 import io
+import tempfile
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -361,6 +362,33 @@ class TestLoadBMP_RW(unittest.TestCase):
     def test_invalid_type(self):
         "Raises TypeError on invalid type"
         self.assertRaises(TypeError, SDL_LoadBMP_RW, 42, True)
+
+
+class TestLoadBMP(unittest.TestCase):
+    "Tests SDL_LoadBMP"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dir = tempfile.TemporaryDirectory()
+        cls.path = os.path.join(cls.dir.name, 'test.bmp')
+        with open(cls.path, 'wb') as f:
+            f.write(sample_bmp())
+
+    @classmethod
+    def tearDownClass(cls):
+        # Handle "directory not empty" errors on Windows by attempting 3 times
+        for i in range(3):
+            try:
+                cls.dir.cleanup()
+            except OSError:
+                continue
+            break
+
+    def test_returns_surface(self):
+        "Returns a SDL_Surface"
+        surface = SDL_LoadBMP(self.path)
+        self.assertIs(type(surface), SDL_Surface)
+        self.assertEqual(surface.pixels[0], 255)
 
 
 class TestSurfaceCreate(unittest.TestCase):

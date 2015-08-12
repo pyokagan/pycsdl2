@@ -136,6 +136,13 @@ Surface Creation and Simple Drawing
    :param bool freesrc: True to close the stream after being read.
    :returns: :class:`SDL_Surface` with the image data.
 
+.. function:: SDL_LoadBMP(file) -> SDL_Surface
+
+   Load a surface from a BMP file on the filesystem.
+
+   :param str file: The path to the file containing a BMP image.
+   :returns: :class:`SDL_Surface` with the image data.
+
 .. function:: SDL_FreeSurface(surface: SDL_Surface)
 
    Frees the surface.

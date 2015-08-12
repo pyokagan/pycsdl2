@@ -1126,6 +1126,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "If `freesrc` is True, the stream will be closed after being read.\n"
     },
 
+    {"SDL_LoadBMP",
+     (PyCFunction) PyCSDL2_LoadBMP,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadBMP(file: str) -> SDL_Surface)\n"
+     "\n"
+     "Load a surface from a BMP file.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
