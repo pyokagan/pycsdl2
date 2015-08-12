@@ -1007,6 +1007,12 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_LoadBMP_RW(src: SDL_RWops, freesrc: bool) -> SDL_Surface\n"
     },
 
+    {"SDL_LoadBMP",
+     (PyCFunction) PyCSDL2_LoadBMP,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadBMP(file: str) -> SDL_Surface)\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",

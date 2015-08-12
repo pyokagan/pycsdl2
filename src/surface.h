@@ -895,6 +895,43 @@ PyCSDL2_LoadBMP_RW(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_LoadBMP()
+ *
+ * \code{.py}
+ * SDL_LoadBMP(file: str) -> SDL_Surface
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LoadBMP(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyObject *file_obj;
+    const char *file;
+    SDL_Surface *ret;
+    static char *kwlist[] = {"file", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyUnicode_FSConverter, &file_obj))
+        return NULL;
+
+    file = PyBytes_AsString(file_obj);
+    if (!file) {
+        Py_DECREF(file_obj);
+        return NULL;
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_LoadBMP(file);
+    Py_END_ALLOW_THREADS
+
+    Py_DECREF(file_obj);
+
+    if (!ret)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyCSDL2_SurfaceCreate(ret, NULL);
+}
+
+/**
  * \brief Initializes bindings to SDL_surface.h
  *
  * Adds constants defined in SDL_surface.h to module.
