@@ -127,6 +127,15 @@ Surface Creation and Simple Drawing
                        `width`.
    :raises RuntimeError: If the surface could not be created.
 
+.. function:: SDL_LoadBMP_RW(src, freesrc) -> SDL_Surface
+
+   Load a BMP image from a seekable SDL data stream. (memory or file).
+
+   :param src: The data stream for the surface.
+   :type src: :class:`SDL_RWops`
+   :param bool freesrc: True to close the stream after being read.
+   :returns: :class:`SDL_Surface` with the image data.
+
 .. function:: SDL_FreeSurface(surface: SDL_Surface)
 
    Frees the surface.

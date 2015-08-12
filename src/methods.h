@@ -1117,6 +1117,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "errors and at worse crash the interpreter.\n"
     },
 
+    {"SDL_LoadBMP_RW",
+     (PyCFunction) PyCSDL2_LoadBMP_RW,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LoadBMP_RW(src: SDL_RWops, freesrc: bool) -> SDL_Surface\n"
+     "\n"
+     "Load a BMP image from a seekable SDL data stream. (memory or file).\n"
+     "If `freesrc` is True, the stream will be closed after being read.\n"
+    },
+
     /* video.h */
 
     {"SDL_CreateWindow",
