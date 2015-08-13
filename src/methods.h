@@ -603,6 +603,44 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    The texture will be stretched to fill the given rectangle.\n"
     },
 
+    {"SDL_RenderCopyEx",
+     (PyCFunction) PyCSDL2_RenderCopyEx,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderCopyEx(renderer: SDL_Renderer, texture: SDL_Texture,\n"
+     "                 srcrect: SDL_Rect, dstrect: SDL_Rect, angle: float,\n"
+     "                 center: SDL_Point, flip: int) -> None\n"
+     "\n"
+     "Copies a portion of the texture to the current rendering target,\n"
+     "optionally rotating it by an angle around the given center and also\n"
+     "flipping it top-bottom and/or left-right.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "texture\n"
+     "    The source texture.\n"
+     "\n"
+     "srcrect\n"
+     "    The source rectangle, or None for the entire texture.\n"
+     "\n"
+     "dstrect\n"
+     "    The destination rectangle, or None for the entire rendering\n"
+     "    target. The texture will be stretched to fill the given rectangle.\n"
+     "\n"
+     "angle\n"
+     "    An angle in degrees that indicates the rotation that will be\n"
+     "    applied to `dstrect`.\n"
+     "\n"
+     "center\n"
+     "    The point around which `dstrect` will be rotated. If None,\n"
+     "    rotation will be done around ``(dstrect.w/2, dstrect.h/2)``.\n"
+     "\n"
+     "flip\n"
+     "    Indicates which flipping actions should be performed on the\n"
+     "    texture. One or more of SDL_FLIP_NONE, SDL_FLIP_HORIZONTAL and/or\n"
+     "    SDL_FLIP_VERTICAL OR'd together.\n"
+    },
+
     {"SDL_RenderPresent",
      (PyCFunction) PyCSDL2_RenderPresent,
      METH_VARARGS | METH_KEYWORDS,

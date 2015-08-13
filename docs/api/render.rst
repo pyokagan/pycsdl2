@@ -342,6 +342,53 @@ Drawing
                    rectangle.
    :type dstrect: :class:`SDL_Rect` buffer or None
 
+.. function:: SDL_RenderCopyEx(renderer, texture, srcrect, dstrect, angle, center, flip)
+
+   Copies a portion of the texture to the current rendering target, optionally
+   rotating it by an angle around the given center and also flipping it
+   top-bottom and/or left-right.
+
+   The texture is blended with the destination based on its blend mode set with
+   :func:`SDL_SetTextureBlendMode`.
+
+   The texture color is affected based on its color modulation set by
+   :func:`SDL_SetTextureColorMod`.
+
+   The texture alpha is affected based on its alpha modulation set by
+   :func:`SDL_SetTextureAlphaMod`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The source texture.
+   :type texture: :class:`SDL_Texture`
+   :param srcrect: The source rectangle, or None for the entire texture.
+   :type srcrect: :class:`SDL_Rect` or None
+   :param dstrect: The destination rectangle, or None for the entire rendering
+                   target. The texture will be stretched to fill the given
+                   rectangle.
+   :type dstrect: :class:`SDL_Rect` or None
+   :param float angle: An angle in degrees that indicates the rotation that
+                       will be applied to `dstrect`.
+   :param center: The point around which `dstrect` will be rotated. If None,
+                  rotation will be done around ``(dstrect.w/2, dstrect.h/2)``.
+   :type center: :class:`SDL_Point` or None
+   :param int flip: Indicates which flipping actions should be performed on the
+                    texture. One or more of :const:`SDL_FLIP_NONE`,
+                    :const:`SDL_FLIP_HORIZONTAL` and/or
+                    :const:`SDL_FLIP_VERTICAL` OR'd together.
+
+.. data:: SDL_FLIP_NONE
+
+   Do not flip.
+
+.. data:: SDL_FLIP_HORIZONTAL
+
+   Flip horizontally.
+
+.. data:: SDL_FLIP_VERTICAL
+
+   Flip vertically.
+
 Updating the screen
 -------------------
 SDL's rendering functions operate on a backbuffer. Calling a rendering function

@@ -1178,6 +1178,49 @@ PyCSDL2_RenderCopy(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderCopyEx()
+ *
+ * \code{.py}
+ * SDL_RenderCopyEx(renderer: SDL_Renderer, texture: SDL_Texture,
+ *                  srcrect: SDL_Rect, dstrect: SDL_Rect, angle: float,
+ *                  center: SDL_Point, flip: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderCopyEx(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    Py_buffer srcrect, dstrect, center;
+    double angle;
+    int flip, ret;
+    static char *kwlist[] = {"renderer", "texture", "srcrect", "dstrect",
+                             "angle", "center", "flip", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&O&O&dO&i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_TexturePtr, &texture,
+                                     PyCSDL2_ConvertRectRead, &srcrect,
+                                     PyCSDL2_ConvertRectRead, &dstrect,
+                                     &angle,
+                                     PyCSDL2_ConvertPointRead, &center,
+                                     &flip))
+        return NULL;
+
+    ret = SDL_RenderCopyEx(renderer, texture, srcrect.buf, dstrect.buf, angle,
+                           center.buf, flip);
+
+    PyBuffer_Release(&srcrect);
+    PyBuffer_Release(&dstrect);
+    PyBuffer_Release(&center);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderPresent()
  *
  * \code{.py}

@@ -221,6 +221,40 @@ PyCSDL2_PointPtr(PyObject *obj, SDL_Point **out)
     return 1;
 }
 
+/**
+ * \brief converter for a readonly SDL_Point exporting object
+ */
+static int
+PyCSDL2_ConvertPointRead(PyObject *object, Py_buffer *view)
+{
+    if (!object) {
+        PyBuffer_Release(view);
+        return 1;
+    }
+    if (object == Py_None) {
+        view->obj = NULL;
+        view->buf = NULL;
+        view->len = 0;
+        return 1;
+    }
+    if (PyObject_GetBuffer(object, view, PyBUF_SIMPLE))
+        return 0;
+    if (!PyBuffer_IsContiguous(view, 'C')) {
+        PyErr_SetString(PyExc_BufferError,
+                        "SDL_Point buffer must be C-contiguous");
+        PyBuffer_Release(view);
+        return 0;
+    }
+    if (view->len != sizeof(SDL_Point)) {
+        size_t expected = sizeof(SDL_Point);
+        PyErr_Format(PyExc_BufferError, "Invalid SDL_Point buffer size. "
+                     "Expected: %zu. Got: %zd", expected, view->len);
+        PyBuffer_Release(view);
+        return 0;
+    }
+    return Py_CLEANUP_SUPPORTED;
+}
+
 /** @} */
 
 /** \brief Instance data for PyCSDL2_RectType */
