@@ -6,8 +6,11 @@ import subprocess
 from os.path import join
 from glob import glob
 import distutils.util
-from distutils.core import setup
-from distutils.extension import Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup
+    from distutils.extension import Extension
 
 
 def pkg_config(packages, cflags=False, libs=False):
