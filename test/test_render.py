@@ -4,6 +4,7 @@ import os.path
 import sys
 import unittest
 import weakref
+import array
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -70,6 +71,127 @@ class TestRenderConstants(unittest.TestCase):
 
     def test_SDL_FLIP_VERTICAL(self):
         self.assertEqual(SDL_FLIP_VERTICAL, 0x02)
+
+
+class TestRendererInfo(unittest.TestCase):
+    "Tests SDL_RendererInfo"
+
+    def setUp(self):
+        self.info = SDL_RendererInfo()
+
+    def test_cannot_subclass(self):
+        "Cannot be subclassed"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_RendererInfo,), {})
+
+    def test_name(self):
+        "name is initalized to None"
+        self.assertIsNone(self.info.name)
+
+    def test_name_set_str(self):
+        "name can be set to a str"
+        self.info.name = 'name'
+        self.assertEqual(self.info.name, 'name')
+
+    def test_name_set_invalid_type(self):
+        "Raises TypeError if name is set to a not str value"
+        self.assertRaises(TypeError, setattr, self.info, 'name', 42)
+
+    def test_flags(self):
+        "flags is an int"
+        self.assertIs(type(self.info.flags), int)
+        self.assertEqual(self.info.flags, 0)
+
+    def test_flags_set(self):
+        "flags can be set to an int"
+        self.info.flags = 42
+        self.assertEqual(self.info.flags, 42)
+
+    def test_num_texture_formats(self):
+        "num_texture_formats is an int"
+        self.assertIs(type(self.info.num_texture_formats), int)
+        self.assertEqual(self.info.num_texture_formats, 0)
+
+    def test_num_texture_formats_set_int(self):
+        "num_texture_formats can be set to an int"
+        self.info.num_texture_formats = 42
+        self.assertEqual(self.info.num_texture_formats, 42)
+
+    def test_texture_formats(self):
+        "texture_formats is a buffer with 16 32-bit ints"
+        x = self.info.texture_formats
+        y = memoryview(x)
+        self.assertEqual(y.shape, (16,))
+        self.assertEqual(y.itemsize, 4)
+        self.assertTrue(y.c_contiguous)
+        self.assertFalse(y.readonly)
+        self.assertEqual(y.tolist(), [0] * 16)
+        z = array.array(y.format, range(16))
+        y[:] = z
+        self.assertEqual(y.tolist(), z.tolist())
+
+    def test_texture_formats_readonly(self):
+        "texture_formats is readonly"
+        self.assertRaises(AttributeError, setattr, self.info,
+                          'texture_formats', {})
+
+    def test_texture_formats_ref(self):
+        "texture_formats can be independently referenced"
+        x = self.info.texture_formats
+        y = memoryview(x)
+        z = array.array(y.format, range(16))
+        y[:] = z
+        del y
+        del self.info
+        y = memoryview(x)
+        self.assertEqual(y.tolist(), z.tolist())
+
+    def test_max_texture_width(self):
+        "max_texture_width is an int"
+        self.assertIs(type(self.info.max_texture_width), int)
+        self.assertEqual(self.info.max_texture_width, 0)
+
+    def test_max_texture_width_set_int(self):
+        "max_texture_width can be set to an int"
+        self.info.max_texture_width = 42
+        self.assertEqual(self.info.max_texture_width, 42)
+
+    def test_max_texture_height(self):
+        "max_texture_height is an int"
+        self.assertIs(type(self.info.max_texture_height), int)
+        self.assertEqual(self.info.max_texture_height, 0)
+
+    def test_max_texture_height_set_int(self):
+        "max_texture_height can be set to an int"
+        self.info.max_texture_height = 42
+        self.assertEqual(self.info.max_texture_height, 42)
+
+    def test_init(self):
+        "Initialize values via init"
+        x = array.array(memoryview(self.info.texture_formats).format,
+                        range(16))
+        self.info.__init__('name', 1, 2, x, 3, 4)
+        self.assertEqual(self.info.name, 'name')
+        self.assertEqual(self.info.flags, 1)
+        self.assertEqual(self.info.num_texture_formats, 2)
+        y = memoryview(self.info.texture_formats)
+        self.assertEqual(y.tolist(), x.tolist())
+        self.assertEqual(self.info.max_texture_width, 3)
+        self.assertEqual(self.info.max_texture_height, 4)
+
+    def test_init_kwds(self):
+        "Initialize values via init with keyword arguments"
+        x = array.array(memoryview(self.info.texture_formats).format,
+                        range(16))
+        self.info.__init__(name='name', flags=1, num_texture_formats=2,
+                           texture_formats=x, max_texture_width=3,
+                           max_texture_height=4)
+        self.assertEqual(self.info.name, 'name')
+        self.assertEqual(self.info.flags, 1)
+        self.assertEqual(self.info.num_texture_formats, 2)
+        y = memoryview(self.info.texture_formats)
+        self.assertEqual(y.tolist(), x.tolist())
+        self.assertEqual(self.info.max_texture_width, 3)
+        self.assertEqual(self.info.max_texture_height, 4)
 
 
 class TestRenderer(unittest.TestCase):
@@ -940,6 +1062,39 @@ class TestDestroyRenderer(unittest.TestCase):
         "Raises ValueError on double free"
         SDL_DestroyRenderer(self.rdr)
         self.assertRaises(ValueError, SDL_DestroyRenderer, self.rdr)
+
+
+class TestRendererInfoCreate(unittest.TestCase):
+    "Tests PyCSDL2_RendererInfoCreate()"
+
+    def test_returns_rendererinfo(self):
+        "Returns a new SDL_RendererInfo"
+        x = _csdl2test.rendererinfo()
+        self.assertIs(type(x), SDL_RendererInfo)
+        self.assertEqual(x.name, 'name')
+        self.assertEqual(x.flags, 1)
+        self.assertEqual(x.num_texture_formats, 2)
+        self.assertEqual(memoryview(x.texture_formats).tolist(),
+                         list(range(16)))
+        self.assertEqual(x.max_texture_width, 3)
+        self.assertEqual(x.max_texture_height, 4)
+
+
+class TestRendererInfoPtr(unittest.TestCase):
+    "Tests PyCSDL2_RendererInfoPtr()"
+
+    def setUp(self):
+        self.info = SDL_RendererInfo()
+
+    def test_converter(self):
+        "Works as a converter with PyArg_ParseTuple()"
+        self.assertEqual(self.info.name, None)
+        _csdl2test.rendererinfo_set_name(self.info)
+        self.assertEqual(self.info.name, 'name')
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, _csdl2test.rendererinfo_set_name, 42)
 
 
 class TestRendererCreate(unittest.TestCase):

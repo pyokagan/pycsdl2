@@ -232,6 +232,26 @@ PyCSDL2_Get(PyObject *var)
         Py_XDECREF((PyObject*) tmp); \
     } while(0)
 
+/**
+ * \brief Returns a int representation of obj.
+ *
+ * \returns 0 on success, -1 if an exception occurred.
+ */
+static int
+PyCSDL2_LongAsInt(PyObject *obj, int *out)
+{
+    long x = PyLong_AsLong(obj);
+    if (PyErr_Occurred())
+        return -1;
+    if (x < INT_MIN || x > INT_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int too large to convert to C int");
+        return -1;
+    }
+    *out = (int)x;
+    return 0;
+}
+
 #ifndef INT32_MAX
 /** \brief Maximum value a Sint32 can hold */
 #define INT32_MAX 2147483647

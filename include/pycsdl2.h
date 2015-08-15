@@ -2077,6 +2077,12 @@ typedef int (*PyCSDL2_RectPtr_pfn)(PyObject*, SDL_Rect**);
 
 /* src/render.h */
 
+/** \brief Function pointer type of PyCSDL2_RendererInfoCreate() */
+typedef PyObject *(*PyCSDL2_RendererInfoCreate_pfn)(const SDL_RendererInfo*);
+
+/** \brief Function pointer type of PyCSDL2_RendererInfoPtr() */
+typedef int (*PyCSDL2_RendererInfoPtr_pfn)(PyObject*, SDL_RendererInfo**);
+
 /** \brief Function pointer type of PyCSDL2_RendererCreate() */
 typedef PyObject *(*PyCSDL2_RendererCreate_pfn)(SDL_Renderer*, PyObject*);
 
@@ -3278,6 +3284,10 @@ typedef struct PyCSDL2_CAPI {
     /** \brief Pointer to PyCSDL2_RectPtr() */
     PyCSDL2_RectPtr_pfn _PyCSDL2_RectPtr;
 /* src/render.h */
+    /** \brief Pointer to PyCSDL2_RendererInfoCreate */
+    PyCSDL2_RendererInfoCreate_pfn _PyCSDL2_RendererInfoCreate;
+    /** \brief Pointer to PyCSDL2_RendererInfoPtr */
+    PyCSDL2_RendererInfoPtr_pfn _PyCSDL2_RendererInfoPtr;
     /** \brief Pointer to PyCSDL2_RendererCreate() */
     PyCSDL2_RendererCreate_pfn _PyCSDL2_RendererCreate;
     /** \brief Pointer to \c PyCSDL2_RendererPtr() */
@@ -5620,6 +5630,13 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 #define PyCSDL2_RectPtr PYCSDL2_FUNC(PyCSDL2_RectPtr)
 
 /* src/render.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererInfoCreate) */
+#define PyCSDL2_RendererInfoCreate(a) \
+    PYCSDL2_FUNC(PyCSDL2_RendererInfoCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererInfoPtr) */
+#define PyCSDL2_RendererInfoPtr PYCSDL2_FUNC(PyCSDL2_RendererInfoPtr)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RendererCreate) */
 #define PyCSDL2_RendererCreate(a, b) PYCSDL2_FUNC(PyCSDL2_RendererCreate)(a, b)

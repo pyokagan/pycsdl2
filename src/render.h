@@ -36,6 +36,494 @@
 #include "surface.h"
 #include "rect.h"
 
+/**
+ * \defgroup csdl2_PyCSDL2_RendererInfoMem csdl2.PyCSDL2_RendererInfoMem
+ *
+ * \brief Manages the SDL_RendererInfo buffer
+ *
+ * @{
+ */
+
+/** \brief Instance data of PyCSDL2_RendererInfoMemType */
+typedef struct PyCSDL2_RendererInfoMem {
+    PyObject_HEAD
+    /** \brief The wrapped SDL_RendererInfo struct */
+    SDL_RendererInfo info;
+    /** \brief Associated "name" str object */
+    PyObject *name;
+} PyCSDL2_RendererInfoMem;
+
+static PyTypeObject PyCSDL2_RendererInfoMemType;
+
+/** \brief tp_dealloc for PyCSDL2_RendererInfoMemType */
+static void
+PyCSDL2_RendererInfoMemDealloc(PyCSDL2_RendererInfoMem *self)
+{
+    Py_CLEAR(self->name);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+/** \brief Validates the PyCSDL2_RendererInfoMem */
+static int
+PyCSDL2_RendererInfoMemValid(PyCSDL2_RendererInfoMem *self)
+{
+    if (!PyCSDL2_Assert(self))
+        return 0;
+
+    if (!PyCSDL2_Assert(Py_TYPE(self) == &PyCSDL2_RendererInfoMemType))
+        return 0;
+
+    if (self->name && !PyCSDL2_Assert(PyUnicode_CheckExact(self->name)))
+        return 0;
+
+    return 1;
+}
+
+/** \brief Type definition for csdl2.PyCSDL2_RendererInfoMem */
+static PyTypeObject PyCSDL2_RendererInfoMemType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.PyCSDL2_RendererInfoMem",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RendererInfoMem),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RendererInfoMemDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT
+};
+
+/**
+ * \brief Creates a new PyCSDL2_RendererInfoMem.
+ */
+static PyCSDL2_RendererInfoMem *
+PyCSDL2_RendererInfoMemCreate(const SDL_RendererInfo *info)
+{
+    PyCSDL2_RendererInfoMem *self;
+    PyTypeObject *type = &PyCSDL2_RendererInfoMemType;
+
+    self = (PyCSDL2_RendererInfoMem*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    if (info)
+        self->info = *info;
+
+    return self;
+}
+
+/** @} */
+
+/**
+ * \defgroup csdl2_SDL_RendererInfo csdl2.SDL_RendererInfo
+ *
+ * \brief Bindings for SDL_RendererInfo struct.
+ *
+ * @{
+ */
+
+/** \brief Instance data of PyCSDL2_RendererInfoType */
+typedef struct PyCSDL2_RendererInfo {
+    PyObject_HEAD
+    /** \brief Head of weak reference list */
+    PyObject *in_weakreflist;
+    /** \brief Underlying SDL_RendererInfo buffer */
+    PyCSDL2_RendererInfoMem *info_mem;
+    /** \brief Buffer to expose the "texture_formats" array */
+    PyCSDL2_Buffer *texture_formats;
+} PyCSDL2_RendererInfo;
+
+static PyTypeObject PyCSDL2_RendererInfoType;
+
+/** \brief Destructor for PyCSDL2_RendererInfoType */
+static void
+PyCSDL2_RendererInfoDealloc(PyCSDL2_RendererInfo *self)
+{
+    Py_CLEAR(self->texture_formats);
+    Py_CLEAR(self->info_mem);
+    PyObject_ClearWeakRefs((PyObject*)self);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+/** \brief tp_new for PyCSDL2_RendererInfoType */
+static PyCSDL2_RendererInfo *
+PyCSDL2_RendererInfoNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RendererInfo *self;
+    PyCSDL2_Buffer *buf;
+
+    self = (PyCSDL2_RendererInfo*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    self->info_mem = PyCSDL2_RendererInfoMemCreate(NULL);
+    if (!self->info_mem) {
+        Py_DECREF(self);
+        return NULL;
+    }
+
+    buf = PyCSDL2_BufferCreate(CTYPE_UINT32,
+                               self->info_mem->info.texture_formats,
+                               SDL_arraysize(self->info_mem->info.texture_formats),
+                               0, (PyObject*)self->info_mem);
+    if (!buf) {
+        Py_DECREF(self);
+        return NULL;
+    }
+
+    self->texture_formats = buf;
+
+    return self;
+}
+
+/** \brief Validates the PyCSDL2_RendererInfo object */
+static int
+PyCSDL2_RendererInfoValid(PyCSDL2_RendererInfo *self)
+{
+    if (!PyCSDL2_Assert(self))
+        return 0;
+
+    if (Py_TYPE(self) != &PyCSDL2_RendererInfoType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_RendererInfo", (PyObject*)self);
+        return 0;
+    }
+
+    if (!PyCSDL2_Assert(self->info_mem) ||
+        !PyCSDL2_Assert(self->texture_formats))
+        return 0;
+
+    if (!PyCSDL2_RendererInfoMemValid(self->info_mem))
+        return 0;
+
+    return 1;
+}
+
+/** \brief Getter for SDL_RendererInfo.name */
+static PyObject *
+PyCSDL2_RendererInfoGetName(PyCSDL2_RendererInfo *self, void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    if (self->info_mem->info.name)
+        return PyUnicode_FromString(self->info_mem->info.name);
+    else
+        Py_RETURN_NONE;
+}
+
+/** \brief Setter for SDL_RendererInfo.name */
+static int
+PyCSDL2_RendererInfoSetName(PyCSDL2_RendererInfo *self, PyObject *value,
+                            void *closure)
+{
+    const char *name;
+
+    if (!PyCSDL2_RendererInfoValid(self))
+        return -1;
+
+    if (!PyUnicode_CheckExact(value)) {
+        PyCSDL2_RaiseTypeError("name", "str", value);
+        return -1;
+    }
+
+    name = PyUnicode_AsUTF8(value);
+    if (!name)
+        return -1;
+
+    self->info_mem->info.name = name;
+    PyCSDL2_Set(self->info_mem->name, value);
+    return 0;
+}
+
+/** \brief Getter for SDL_RendererInfo.flags */
+static PyObject *
+PyCSDL2_RendererInfoGetFlags(PyCSDL2_RendererInfo *self, void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    return PyLong_FromUnsignedLong(self->info_mem->info.flags);
+}
+
+/** \brief Setter for SDL_RendererInfo.flags */
+static int
+PyCSDL2_RendererInfoSetFlags(PyCSDL2_RendererInfo *self, PyObject *value,
+                             void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return -1;
+    return PyCSDL2_LongAsUint32(value, &self->info_mem->info.flags);
+}
+
+/** \brief Getter for SDL_RendererInfo.num_texture_formats */
+static PyObject *
+PyCSDL2_RendererInfoGetNumTextureFormats(PyCSDL2_RendererInfo *self,
+                                         void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    return PyLong_FromUnsignedLong(self->info_mem->info.num_texture_formats);
+}
+
+/** \brief Setter for SDL_RendererInfo.num_texture_formats */
+static int
+PyCSDL2_RendererInfoSetNumTextureFormats(PyCSDL2_RendererInfo *self,
+                                         PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return -1;
+    return PyCSDL2_LongAsUint32(value,
+                                &self->info_mem->info.num_texture_formats);
+}
+
+/** \brief Getter for SDL_RendererInfo.texture_formats */
+static PyObject *
+PyCSDL2_RendererInfoGetTextureFormats(PyCSDL2_RendererInfo *self,
+                                      void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    return PyCSDL2_Get((PyObject*)self->texture_formats);
+}
+
+/** \brief Getter for SDL_RendererInfo.max_texture_width */
+static PyObject *
+PyCSDL2_RendererInfoGetMaxTextureWidth(PyCSDL2_RendererInfo *self,
+                                       void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    return PyLong_FromLong(self->info_mem->info.max_texture_width);
+}
+
+/** \brief Setter for SDL_RendererInfo.max_texture_width */
+static int
+PyCSDL2_RendererInfoSetMaxTextureWidth(PyCSDL2_RendererInfo *self,
+                                       PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return -1;
+    return PyCSDL2_LongAsInt(value, &self->info_mem->info.max_texture_width);
+}
+
+/** \brief Getter for SDL_RendererInfo.max_texture_height */
+static PyObject *
+PyCSDL2_RendererInfoGetMaxTextureHeight(PyCSDL2_RendererInfo *self,
+                                        void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return NULL;
+    return PyLong_FromLong(self->info_mem->info.max_texture_height);
+}
+
+/** \brief Setter for SDL_RendererInfo.max_texture_height */
+static int
+PyCSDL2_RendererInfoSetMaxTextureHeight(PyCSDL2_RendererInfo *self,
+                                        PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RendererInfoValid(self))
+        return -1;
+    return PyCSDL2_LongAsInt(value, &self->info_mem->info.max_texture_height);
+}
+
+/** \brief List of attributes for PyCSDL2_RendererInfoType */
+static PyGetSetDef PyCSDL2_RendererInfoGetSetters[] = {
+    {"name",
+     (getter)PyCSDL2_RendererInfoGetName,
+     (setter)PyCSDL2_RendererInfoSetName,
+     "Name of the renderer.",
+     NULL},
+    {"flags",
+     (getter)PyCSDL2_RendererInfoGetFlags,
+     (setter)PyCSDL2_RendererInfoSetFlags,
+     "A mask of supported renderer flags. 0 or one or more of the following\n"
+     "flags OR'd together:\n"
+     "\n"
+     "* SDL_RENDERER_SOFTWARE -- The renderer is a software fallback.\n"
+     "* SDL_RENDERER_ACCELERATED -- The renderer uses hardware acceleration.\n"
+     "* SDL_RENDERER_PRESENTVSYNC -- The renderer is synchronized with the\n"
+     "                               refresh rate.\n"
+     "* SDL_RENDERER_TARGETTEXTURE -- The renderer supports rendering to\n"
+     "                                texture.\n",
+     NULL},
+    {"num_texture_formats",
+     (getter)PyCSDL2_RendererInfoGetNumTextureFormats,
+     (setter)PyCSDL2_RendererInfoSetNumTextureFormats,
+     "The number of available texture formats.",
+     NULL},
+    {"texture_formats",
+     (getter)PyCSDL2_RendererInfoGetTextureFormats,
+     (setter)NULL,
+     "The available texture formats as an array of SDL_PIXELFORMAT_* ints.",
+     NULL},
+    {"max_texture_width",
+     (getter)PyCSDL2_RendererInfoGetMaxTextureWidth,
+     (setter)PyCSDL2_RendererInfoSetMaxTextureWidth,
+     "The maximum texture width.",
+     NULL},
+    {"max_texture_height",
+     (getter)PyCSDL2_RendererInfoGetMaxTextureHeight,
+     (setter)PyCSDL2_RendererInfoSetMaxTextureHeight,
+     "The maximum texture height.",
+     NULL},
+    {NULL}
+};
+
+/** \brief tp_init for PyCSDL2_RendererInfoType */
+static int
+PyCSDL2_RendererInfoInit(PyObject *obj, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RendererInfo *self = (PyCSDL2_RendererInfo*)obj;
+    PyObject *name = NULL;
+    Py_buffer texture_formats = {0};
+    Uint32 flags = 0, num_texture_formats = 0;
+    int max_texture_width = 0, max_texture_height = 0;
+    Py_ssize_t x = sizeof(self->info_mem->info.texture_formats);
+    static char *kwlist[] = {"name", "flags", "num_texture_formats",
+                             "texture_formats", "max_texture_width",
+                             "max_texture_height", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "|O" Uint32_UNIT Uint32_UNIT "y*ii",
+                                     kwlist, &name, &flags,
+                                     &num_texture_formats, &texture_formats,
+                                     &max_texture_width, &max_texture_height))
+        return -1;
+
+    if (!PyCSDL2_RendererInfoValid(self))
+        goto fail;
+
+    if (texture_formats.buf && texture_formats.len < x) {
+        PyCSDL2_RaiseBufferSizeError("texture_formats", x, texture_formats.len);
+        goto fail;
+    }
+
+    if (name) {
+        if (PyCSDL2_RendererInfoSetName(self, name, NULL) < 0)
+            goto fail;
+    } else {
+        self->info_mem->info.name = NULL;
+        Py_CLEAR(self->info_mem->name);
+    }
+
+    if (name && PyCSDL2_RendererInfoSetName(self, name, NULL) < 0)
+        goto fail;
+
+    self->info_mem->info.flags = flags;
+    self->info_mem->info.num_texture_formats = num_texture_formats;
+
+    if (texture_formats.buf)
+        memcpy(self->info_mem->info.texture_formats, texture_formats.buf, x);
+    else
+        memset(self->info_mem->info.texture_formats, 0, x);
+
+    self->info_mem->info.max_texture_width = max_texture_width;
+    self->info_mem->info.max_texture_height = max_texture_height;
+
+    PyBuffer_Release(&texture_formats);
+    return 0;
+
+fail:
+    PyBuffer_Release(&texture_formats);
+    return -1;
+}
+
+/** \brief Type definition for csdl2.SDL_RendererInfo */
+static PyTypeObject PyCSDL2_RendererInfoType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_RendererInfo",
+    /* tp_basicsize      */ sizeof(PyCSDL2_RendererInfo),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_RendererInfoDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT,
+    /* tp_doc            */
+    "Information on the capabilities of a render driver or context.\n",
+    /* tp_traverse       */ 0,
+    /* tp_clear          */ 0,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_RendererInfo, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_RendererInfoGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ PyCSDL2_RendererInfoInit,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc)PyCSDL2_RendererInfoNew
+};
+
+/**
+ * \brief Creates an instance of PyCSDL2_RendererInfoType.
+ *
+ * \param info SDL_RendererInfo data to initialize the object with, or NULL to
+ *             zero it.
+ */
+static PyObject *
+PyCSDL2_RendererInfoCreate(const SDL_RendererInfo *info)
+{
+    PyCSDL2_RendererInfo *self;
+    PyTypeObject *type = &PyCSDL2_RendererInfoType;
+
+    self = PyCSDL2_RendererInfoNew(type, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    if (info)
+        self->info_mem->info = *info;
+
+    return (PyObject*)self;
+}
+
+/**
+ * \brief Borrow the SDL_RendererInfo managed by the PyCSDL2_RendererInfo.
+ *
+ * \param obj The PyCSDL2_RendererInfo object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_RendererInfoPtr(PyObject *obj, SDL_RendererInfo **out)
+{
+    PyCSDL2_RendererInfo *self = (PyCSDL2_RendererInfo*)obj;
+
+    if (!PyCSDL2_RendererInfoValid(self))
+        return 0;
+
+    if (out)
+        *out = &self->info_mem->info;
+
+    return 1;
+}
+
+/** @} */
+
 /** \brief Instance data of PyCSDL2_RendererType */
 typedef struct PyCSDL2_Renderer {
     PyObject_HEAD
@@ -1326,6 +1814,14 @@ PyCSDL2_initrender(PyObject *module)
     for (c = constants; c->name; c++)
         if (PyModule_AddIntConstant(module, c->name, c->value))
             return 0;
+
+    if (PyType_Ready(&PyCSDL2_RendererInfoMemType)) { return 0; }
+
+    if (PyType_Ready(&PyCSDL2_RendererInfoType)) { return 0; }
+    Py_INCREF(&PyCSDL2_RendererInfoType);
+    if (PyModule_AddObject(module, "SDL_RendererInfo",
+                           (PyObject*)&PyCSDL2_RendererInfoType))
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_RendererType)) { return 0; }
     Py_INCREF(&PyCSDL2_RendererType);

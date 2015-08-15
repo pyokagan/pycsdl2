@@ -2,6 +2,43 @@
 ========================
 .. currentmodule:: csdl2
 
+Render drivers
+--------------
+A render driver is a set of code that handles rendering and texture management
+on a particular display.
+
+.. class:: SDL_RendererInfo(name=None, flags=0, num_texture_formats=0, texture_formats=0, max_texture_width=0, max_texture_height=0)
+
+   Information on the capabilities of a render driver or context.
+
+   .. attribute:: name
+
+      Name of the renderer.
+
+   .. attribute:: flags
+
+      A mask of supported `Renderer creation flags`_.
+
+   .. attribute:: num_texture_formats
+
+      The number of available texture formats.
+
+   .. attribute:: texture_formats
+
+      The available texture formats as an array of
+      :ref:`pixel-format-constants` ints.
+
+      Note that the size of the array is always 16. However, only the first
+      ``num_texture_formats`` values are valid.
+
+   .. attribute:: max_texture_width
+
+      Maximum texture width.
+
+   .. attribute:: max_texture_height
+
+      Maximum texture height
+
 Renderers
 ---------
 .. class:: SDL_Renderer
