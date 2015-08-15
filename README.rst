@@ -11,6 +11,8 @@ such as automatic memory management, bounds checking and exceptions.
 
 Documentation
 =============
+Documentation is hosted online at https://pycsdl2.readthedocs.org/.
+
 The Python API is documented with `Sphinx`_ in the ``docs/`` directory. If you
 have `GNU Make`_ and Sphinx installed, run the following in the ``docs/``
 directory to generate the HTML documentation in ``docs/build/html/``::
