@@ -147,7 +147,7 @@ class TestAudioSpec(unittest.TestCase):
 
     def test_init(self):
         "__init__() with positional arguments"
-        callback = lambda: None
+        def callback(): return None
         userdata = {}
         self.spec.__init__(1, 2, 3, 4, 5, 6, callback, userdata)
         self.assertEqual(self.spec.freq, 1)
@@ -161,7 +161,7 @@ class TestAudioSpec(unittest.TestCase):
 
     def test_init_kwds(self):
         "__init__() with keyword arguments"
-        callback = lambda: None
+        def callback(): return None
         userdata = {}
         self.spec.__init__(freq=1, format=2, channels=3, silence=4, samples=5,
                            size=6, callback=callback, userdata=userdata)
@@ -176,7 +176,7 @@ class TestAudioSpec(unittest.TestCase):
 
     def test_init_default(self):
         "default arguments of __init__() are 0"
-        callback = lambda: None
+        def callback(): return None
         userdata = {}
         self.spec.__init__(1, 2, 3, 4, 5, 6, callback, userdata)
         self.spec.__init__()
@@ -255,7 +255,7 @@ class TestAudioSpec(unittest.TestCase):
 
     def test_callback_set(self):
         "callback can be set to a callable"
-        f = lambda x, y, z: None
+        def f(x, y, z): return None
         self.spec.callback = f
         self.assertIs(self.spec.callback, f)
 
