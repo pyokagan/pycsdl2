@@ -2063,6 +2063,12 @@ typedef int (*PyCSDL2_PixelFormatPtr_pfn)(PyObject*, SDL_PixelFormat**);
 
 /* src/rect.h */
 
+/** \brief Function pointer type of PyCSDL2_PointCreate() */
+typedef PyObject *(*PyCSDL2_PointCreate_pfn)(const SDL_Point*);
+
+/** \brief Function pointer type of PyCSDL2_PointPtr() */
+typedef int (*PyCSDL2_PointPtr_pfn)(PyObject*, SDL_Point**);
+
 /** \brief Function pointer type of PyCSDL2_RectCreate() */
 typedef PyObject *(*PyCSDL2_RectCreate_pfn)(const SDL_Rect*);
 
@@ -3257,6 +3263,10 @@ typedef struct PyCSDL2_CAPI {
     /** \brief Pointer to PyCSDL2_PixelFormatPtr() */
     PyCSDL2_PixelFormatPtr_pfn _PyCSDL2_PixelFormatPtr;
 /* src/rect.h */
+    /** \brief Pointer to PyCSDL2_PointCreate() */
+    PyCSDL2_PointCreate_pfn _PyCSDL2_PointCreate;
+    /** \brief Pointer to PyCSDL2_PointPtr() */
+    PyCSDL2_PointPtr_pfn _PyCSDL2_PointPtr;
     /** \brief Pointer to PyCSDL2_RectCreate() */
     PyCSDL2_RectCreate_pfn _PyCSDL2_RectCreate;
     /** \brief Pointer to PyCSDL2_RectPtr() */
@@ -5586,6 +5596,12 @@ static const PyCSDL2_CAPI *PyCSDL2_Import(void)
 #define PyCSDL2_PixelFormatPtr PYCSDL2_FUNC(PyCSDL2_PixelFormatPtr)
 
 /* src/rect.h */
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PointCreate) */
+#define PyCSDL2_PointCreate(a) PYCSDL2_FUNC(PyCSDL2_PointCreate)(a)
+
+/** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_PointPtr) */
+#define PyCSDL2_PointPtr PYCSDL2_FUNC(PyCSDL2_PointPtr)
 
 /** \brief Redirects calls to PYCSDL2_FUNC(PyCSDL2_RectCreate) */
 #define PyCSDL2_RectCreate(a) PYCSDL2_FUNC(PyCSDL2_RectCreate)(a)

@@ -19,6 +19,50 @@ from csdl2 import *  # noqa
 import _csdl2test  # noqa
 
 
+class TestPoint(unittest.TestCase):
+    "Tests SDL_Point"
+
+    def setUp(self):
+        self.p = SDL_Point(1, 2)
+
+    def test_create(self):
+        "Can create instances directly"
+        self.assertIs(type(SDL_Point()), SDL_Point)
+        self.assertIs(type(SDL_Point.__new__(SDL_Point)), SDL_Point)
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_Point,), {})
+
+    def test_x(self):
+        "x has the correct int value"
+        self.assertIs(type(self.p.x), int)
+        self.assertEqual(self.p.x, 1)
+
+    def test_x_set(self):
+        "x can be set to an int"
+        self.p.x = 42
+        self.assertEqual(self.p.x, 42)
+
+    def test_y(self):
+        "y has the correct int value"
+        self.assertIs(type(self.p.y), int)
+        self.assertIs(self.p.y, 2)
+
+    def test_y_set(self):
+        "y can be set to an int"
+        self.p.y = 42
+        self.assertEqual(self.p.y, 42)
+
+    def test_buffer(self):
+        "supports the buffer protocol"
+        mem = memoryview(self.p)
+        self.assertFalse(mem.readonly)
+        self.assertEqual(mem.format, 'ii')
+        self.assertEqual(mem.ndim, 1)
+        self.assertEqual(struct.unpack('ii', mem.tobytes()), (1, 2))
+
+
 class Test_Rect(unittest.TestCase):
     """Tests SDL_Rect"""
 
@@ -122,6 +166,32 @@ class TestHasIntersection(unittest.TestCase):
         "Raise BufferError if B has an invalid buffer size"
         b = bytes(1)
         self.assertRaises(BufferError, SDL_HasIntersection, self.a, b)
+
+
+class TestPointCreate(unittest.TestCase):
+    "Tests PyCSDL2_PointCreate()"
+
+    def test_returns_Point(self):
+        "Returns a new SDL_Point"
+        p = _csdl2test.point()
+        self.assertIs(type(p), SDL_Point)
+        self.assertEqual(p.x, 3)
+        self.assertEqual(p.y, 4)
+
+
+class TestPointPtr(unittest.TestCase):
+    "Tests PyCSDL2_PointPtr()"
+
+    def test_converter(self):
+        "Can be used as a converter for PyArg_ParseTuple()"
+        p = SDL_Point()
+        self.assertEqual(p.x, 0)
+        _csdl2test.point_set_x(p)
+        self.assertEqual(p.x, 42)
+
+    def test_invalid_type(self):
+        "Raises TypeError in invalid type"
+        self.assertRaises(TypeError, _csdl2test.point_set_x, 42)
 
 
 class TestRectCreate(unittest.TestCase):

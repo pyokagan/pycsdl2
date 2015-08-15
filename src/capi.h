@@ -663,6 +663,8 @@ PyCSDL2_initcapi(PyObject *m)
         PyCSDL2_PixelFormatCreate,
         PyCSDL2_PixelFormatPtr,
 /* src/rect.h */
+        PyCSDL2_PointCreate,
+        PyCSDL2_PointPtr,
         PyCSDL2_RectCreate,
         PyCSDL2_RectPtr,
 /* src/render.h */
