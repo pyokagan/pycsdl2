@@ -193,6 +193,8 @@ Pixel Formats
                 freed. Doing so will at best raise AssertionErrors and at worse
                 crash the interpreter.
 
+.. _pixel-format-constants:
+
 Pixel format constants
 ~~~~~~~~~~~~~~~~~~~~~~
 .. data:: SDL_PIXELFORMAT_UNKNOWN

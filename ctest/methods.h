@@ -161,6 +161,18 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "renderer_set_draw_color(rdr: SDL_Renderer) -> None"
     },
 
+    {"texture",
+     PyCSDL2Test_Texture,
+     METH_VARARGS,
+     "texture(renderer: SDL_Renderer) -> SDL_Texture"
+    },
+
+    {"texture_get_format",
+     PyCSDL2Test_TextureGetFormat,
+     METH_VARARGS,
+     "texture_get_format(texture: SDL_Texture) -> int"
+    },
+
     /* rwops.h */
 
     {"rwops",

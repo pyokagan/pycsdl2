@@ -328,6 +328,23 @@ PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
 }
 
 /**
+ * \brief Set "invalid buffer size" exception.
+ *
+ * \param arg Argument name (if any)
+ * \param expected Expected minimum size, in bytes.
+ * \param actual Actual size, in bytes.
+ * \returns NULL
+ */
+static void *
+PyCSDL2_RaiseBufferSizeError(const char *arg, Py_ssize_t expected,
+                             Py_ssize_t actual)
+{
+    return PyErr_Format(PyExc_BufferError, "%s%sInvalid buffer size. "
+                        "Expected at least: %zd. Got: %zd.", arg ? arg : "",
+                        arg ? ": " : "", expected, actual);
+}
+
+/**
  * \brief Set "invalid type" exception.
  *
  * \param arg Argument Name (if any)

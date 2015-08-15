@@ -69,6 +69,205 @@ Destroying a renderer
    .. warning:: Once destroyed, do not access the renderer. Doing so will at
                 best raise errors and at worse crash the interpreter.
 
+Textures
+--------
+.. class:: SDL_Texture
+
+   An efficient driver-specific representation of pixel data.
+
+   This is an opaque handle that cannot be directly constructed. Instead, use
+   :func:`SDL_CreateTexture` or :func:`SDL_CreateTextureFromSurface`.
+
+.. function:: SDL_CreateTexture(renderer, format, access, w, h) -> SDL_Texture
+
+   Creates a texture for a rendering context with the specified properties.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param int format: The texture pixel format. One of the
+                      :ref:`pixel-format-constants`.
+   :param int access: Specifies whether the texture data can be modified. One
+                      of :const:`SDL_TEXTUREACCESS_STATIC`,
+                      :const:`SDL_TEXTUREACCESS_STREAMING`
+                      or :const:`SDL_TEXTUREACCESS_TARGET`.
+   :param int w: Width of the texture in pixels.
+   :param int h: Height of the texture in pixels.
+   :returns: A new :class:`SDL_Texture` for the rendering context.
+
+.. data:: SDL_TEXTUREACCESS_STATIC
+
+   Texture changes rarely, not lockable.
+
+.. data:: SDL_TEXTUREACCESS_STREAMING
+
+   Texture changes frequently, lockable.
+
+.. data:: SDL_TEXTUREACCESS_TARGET
+
+   Texture can be used as a render target.
+
+.. function:: SDL_CreateTextureFromSurface(renderer, surface) -> SDL_Texture
+
+   Creates a texture for a rendering context with the pixel data of an existing
+   surface.
+
+   The surface is not modified or freed by this function. The texture will be
+   created with :const:`SDL_TEXTUREACCESS_STATIC`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param surface: The surface containing pixel data to fill the texture.
+   :type surface: class:`SDL_Surface`
+   :returns: A new :class:`SDL_Texture` for the rendering context.
+
+.. function:: SDL_QueryTexture(texture) -> tuple
+
+   Query the attributes of a texture. Namely:
+
+   * The texture's raw pixel format, one of the :ref:`pixel-format-constants`.
+   * The texture's access. One of :const:`SDL_TEXTUREACCESS_STATIC`,
+     :const:`SDL_TEXTUREACCESS_STREAMING` or :const:`SDL_TEXTUREACCESS_TARGET`.
+   * The texture's width and height, in pixels.
+
+   :param texture: The texture to be queried.
+   :type texture: :class:`SDL_Texture`
+   :returns: A tuple ``(int, int, int, int)`` with the texture's raw pixel
+             format, access, width and height respectively.
+
+.. function:: SDL_SetTextureColorMod(texture, r, g, b)
+
+   Sets an additional color value used in render copy operations.
+
+   When the texture is rendered, during the copy operation each source color
+   channel is modulated by the appropriate color value according to the
+   following formula::
+
+      srcC = srcC * (color / 255)
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int r: The red color value multiplied into copy operations.
+   :param int g: The green color value multiplied into copy operations.
+   :param int b: The blue color value multiplied into copy operations.
+
+.. function:: SDL_GetTextureColorMod(texture) -> tuple
+
+   Returns the additional color value multiplied into render copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: A tuple ``(int, int, int)`` with the red, green and blue
+             components of the color respectively.
+
+.. function:: SDL_SetTextureAlphaMod(texture, alpha)
+
+   Sets an additional alpha value multiplied into render copy operations.
+
+   When the texture is rendered, during the copy operation the source alpha
+   value would be modulated by this alpha value according to the following
+   formula::
+
+      srcA = srcA * (alpha / 255)
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int alpha: The source alpha value multiplied into copy operations. It
+                     must be within the range 0-255.
+
+.. function:: SDL_GetTextureAlphaMod(texture) -> int
+
+   Returns the additional alpha value multiplied into render copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: The current alpha value. It is within the range 0-255.
+
+.. function:: SDL_SetTextureBlendMode(texture, blendMode: int)
+
+   Sets the blend mode for a texture.
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param int blendMode: The blend mode to use for texture blending. One of the
+                         :ref:`blend-modes`.
+
+.. function:: SDL_GetTextureBlendMode(texture) -> int
+
+   Returns the blend mode used for texture copy operations.
+
+   :param texture: The texture to query.
+   :type texture: :class:`SDL_Texture`
+   :returns: The texture's blend mode. One of the :ref:`blend-modes`.
+
+.. function:: SDL_UpdateTexture(texture, rect, pixels, pitch)
+
+   Updates the given texture rectangle with new pixel data.
+
+   :param texture: The texture to update.
+   :type texture: :class:`SDL_Texture`
+   :param rect: The area to update, or None to update the entire texture.
+   :type rect: :class:`SDL_Rect` buffer, or None
+   :param buffer pixels: The raw pixel data.
+   :param int pitch: The number of bytes in a row of pixel data, including
+                     padding between lines.
+
+   .. note::
+
+      This is a fairly slow function, intended for use with static textures
+      that do not change often.  If the texture is intended to be updated
+      often, it is preferred to create the texture as streaming and use the
+      locking functions :func:`SDL_LockTexture` and :func:`SDL_UnlockTexture`.
+      While this function will work with streaming textures, for optimization
+      reasons you may not get the pixels back if you lock the texture
+      afterward.
+
+.. function:: SDL_LockTexture(texture, rect) -> tuple
+
+   Locks a portion of the texture for write-only pixel access.
+
+   :param texture: The texture to lock for access, which was created with
+                   :const:`SDL_TEXTUREACCESS_STREAMING`.
+   :type texture: :class:`SDL_Texture`
+   :param rect: The area to lock for access, or None to lock the entire
+                texture.
+   :type rect: :class:`SDL_Rect` buffer or None
+   :returns: A tuple ``(pixels, pitch)``. `pixels` is a buffer containing the
+             locked pixels, and `pitch` is the integer length of one row in
+             bytes.
+
+   .. note::
+
+      After modifying the pixels, you must use :func:`SDL_UnlockTexture` to
+      unlock the pixels and apply any changes.
+
+   .. note::
+
+      This is a write-only operation. As an optimization, the pixels made
+      available for editing don't necessarily contain the old texture data.
+
+.. function:: SDL_UnlockTexture(texture)
+
+   Unlocks a texture, uploading any changes to video memory.
+
+   :param texture: A texture locked by :func:`SDL_LockTexture`.
+   :type texture: :class:`SDL_Texture`
+
+   .. note::
+
+      The pixels buffer returned by :func:`SDL_LockTexture` may contain junk
+      data. For consistent results, ensure that you have overwritten the pixel
+      buffer fully before calling this function.
+
+.. function:: SDL_DestroyTexture(texture)
+
+   Destroys the specified texture, freeing its resources.
+
+   There is no need to explictly call this function. :class:`SDL_Texture` will
+   automatically call it upon cleanup.
+
+   :param texture: Texture to destroy.
+   :type texture: :class:`SDL_Texture`
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
@@ -119,6 +318,77 @@ Drawing
    :type rect: :class:`SDL_Rect` or None
    :raises RuntimeError: If the rectangle could not be filled.
 
+.. function:: SDL_RenderCopy(renderer, texture, srcrect, dstrect)
+
+   Copies a portion of the texture to the current rendering target.
+
+   The texture is blended with the destination based on its blend mode set with
+   :func:`SDL_SetTextureBlendMode`.
+
+   The texture color is affected based on its color modulation set by
+   :func:`SDL_SetTextureColorMod`.
+
+   The texture alpha is affected based on its alpha modulation set by
+   :func:`SDL_SetTextureAlphaMod`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The source texture.
+   :type texture: :class:`SDL_Texture`
+   :param srcrect: The source rectangle, or None for the entire texture.
+   :type srcrect: :class:`SDL_Rect` buffer or None
+   :param dstrect: The destination rectangle, or None for the entire rendering
+                   target. The texture will be stretched to fill the given
+                   rectangle.
+   :type dstrect: :class:`SDL_Rect` buffer or None
+
+.. function:: SDL_RenderCopyEx(renderer, texture, srcrect, dstrect, angle, center, flip)
+
+   Copies a portion of the texture to the current rendering target, optionally
+   rotating it by an angle around the given center and also flipping it
+   top-bottom and/or left-right.
+
+   The texture is blended with the destination based on its blend mode set with
+   :func:`SDL_SetTextureBlendMode`.
+
+   The texture color is affected based on its color modulation set by
+   :func:`SDL_SetTextureColorMod`.
+
+   The texture alpha is affected based on its alpha modulation set by
+   :func:`SDL_SetTextureAlphaMod`.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The source texture.
+   :type texture: :class:`SDL_Texture`
+   :param srcrect: The source rectangle, or None for the entire texture.
+   :type srcrect: :class:`SDL_Rect` or None
+   :param dstrect: The destination rectangle, or None for the entire rendering
+                   target. The texture will be stretched to fill the given
+                   rectangle.
+   :type dstrect: :class:`SDL_Rect` or None
+   :param float angle: An angle in degrees that indicates the rotation that
+                       will be applied to `dstrect`.
+   :param center: The point around which `dstrect` will be rotated. If None,
+                  rotation will be done around ``(dstrect.w/2, dstrect.h/2)``.
+   :type center: :class:`SDL_Point` or None
+   :param int flip: Indicates which flipping actions should be performed on the
+                    texture. One or more of :const:`SDL_FLIP_NONE`,
+                    :const:`SDL_FLIP_HORIZONTAL` and/or
+                    :const:`SDL_FLIP_VERTICAL` OR'd together.
+
+.. data:: SDL_FLIP_NONE
+
+   Do not flip.
+
+.. data:: SDL_FLIP_HORIZONTAL
+
+   Flip horizontally.
+
+.. data:: SDL_FLIP_VERTICAL
+
+   Flip vertically.
+
 Updating the screen
 -------------------
 SDL's rendering functions operate on a backbuffer. Calling a rendering function
@@ -142,18 +412,6 @@ screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
              will exist between frames. You are strongly encouraged to call
              :func:`SDL_RenderClear` to initialize the backbuffer before
              drawing each frame.
-
-.. data:: SDL_TEXTUREACCESS_STATIC
-
-   Texture changes rarely, not lockable.
-
-.. data:: SDL_TEXTUREACCESS_STREAMING
-
-   Texture changes frequently, lockable.
-
-.. data:: SDL_TEXTUREACCESS_TARGET
-
-   Texture can be used as a render target.
 
 .. data:: SDL_FLIP_NONE
 

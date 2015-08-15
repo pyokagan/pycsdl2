@@ -670,6 +670,8 @@ PyCSDL2_initcapi(PyObject *m)
 /* src/render.h */
         PyCSDL2_RendererCreate,
         PyCSDL2_RendererPtr,
+        PyCSDL2_TextureCreate,
+        PyCSDL2_TexturePtr,
 /* src/rwops.h */
         PyCSDL2_RWopsCreate,
         PyCSDL2_RWopsPtr,

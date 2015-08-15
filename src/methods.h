@@ -351,6 +351,198 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Creates a SDL_Renderer for `surface`.\n"
     },
 
+    {"SDL_CreateTexture",
+     (PyCFunction) PyCSDL2_CreateTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateTexture(renderer: SDL_Renderer, format: int, access: int,\n"
+     "                  w: int, h: int) -> SDL_Texture\n"
+     "\n"
+     "Creates a texture for a rendering context with the specified\n"
+     "properties:\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "format\n"
+     "    One of the SDL_PIXELFORMAT_* constants. Defines the pixel format\n"
+     "    of the texture.\n"
+     "\n"
+     "access\n"
+     "    One of the SDL_TEXTUREACCESS_* constants. Defines how the texture\n"
+     "    can be accessed:\n"
+     "\n"
+     "    * SDL_TEXTUREACCESS_STATIC -- changes rarely, not lockable.\n"
+     "    * SDL_TEXTUREACCESS_STREAMING -- changes frequently, lockable.\n"
+     "    * SDL_TEXTUREACCESS_TARGET -- can be used as a render target.\n"
+     "\n"
+     "w\n"
+     "    Width of the texture in pixels.\n"
+     "\n"
+     "h\n"
+     "    Height of the texture in pixels.\n"
+    },
+
+    {"SDL_CreateTextureFromSurface",
+     (PyCFunction) PyCSDL2_CreateTextureFromSurface,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateTextureFromSurface(renderer: SDL_Renderer,\n"
+     "                             surface: SDL_Surface) -> SDL_Texture\n"
+     "\n"
+     "Creates a texture for a rendering context with the pixel data of an\n"
+     "existing surface.\n"
+     "\n"
+     "The surface is not modified or freed by this function. The texture\n"
+     "will be created with SDL_TEXTUREACCESS_STATIC.\n"
+    },
+
+    {"SDL_QueryTexture",
+     (PyCFunction) PyCSDL2_QueryTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_QueryTexture(texture: SDL_Texture) -> (int, int, int, int)\n"
+     "\n"
+     "Query the attributes of a texture, returning a (int, int, int, int)\n"
+     "tuple with the following:\n"
+     "\n"
+     "* The texture's raw pixel format. One of the SDL_PIXELFORMAT_*\n"
+     "  constants.\n"
+     "* The texture's access. One of the SDL_TEXTUREACCESS_* constants.\n"
+     "* The texture's width, in pixels.\n"
+     "* The texture's height, in pixels.\n"
+    },
+
+    {"SDL_SetTextureColorMod",
+     (PyCFunction) PyCSDL2_SetTextureColorMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureColorMod(texture: SDL_Texture, r: int, g: int, b: int)\n"
+     "    -> None\n"
+     "\n"
+     "Sets an additional color value (r, g, b) used in render copy\n"
+     "operations.\n"
+     "\n"
+     "When the texture is rendered, during the copy operation each source\n"
+     "color channel is modulated by the appropriate color value according\n"
+     "to the following formula:\n"
+     "\n"
+     "    srcC = srcC * (color / 255)\n"
+    },
+
+    {"SDL_GetTextureColorMod",
+     (PyCFunction) PyCSDL2_GetTextureColorMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureColorMod(texture: SDL_Texture) -> (int, int, int)\n"
+     "\n"
+     "Returns the additional color value (r, hg, b) multiplied into render\n"
+     "copy operations.\n"
+    },
+
+    {"SDL_SetTextureAlphaMod",
+     (PyCFunction) PyCSDL2_SetTextureAlphaMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureAlphaMod(texture: SDL_Texture, alpha: int) -> None\n"
+     "\n"
+     "Sets an additional alpha value multiplied into render copy operations.\n"
+     "The alpha value must be within the range 0-255.\n"
+     "\n"
+     "When the texture is rendered, during the copy operation the source\n"
+     "alpha value would be modulated by this alpha value according to the\n"
+     "following formula:\n"
+     "\n"
+     "    srcA - srcA * (alpha / 255)\n"
+    },
+
+    {"SDL_GetTextureAlphaMod",
+     (PyCFunction) PyCSDL2_GetTextureAlphaMod,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureAlphaMod(texture: SDL_Texture) -> int\n"
+     "\n"
+     "Returns the additional alpha value multiplied into render copy\n"
+     "operations. It is within the range 0-255.\n"
+    },
+
+    {"SDL_SetTextureBlendMode",
+     (PyCFunction) PyCSDL2_SetTextureBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetTextureBlendMode(texture: SDL_Texture, blendMode: int) -> None\n"
+     "\n"
+     "Sets the blend mode for a texture, where `blendMode` is one of:\n"
+     "\n"
+     "SDL_BLENDMODE_NONE:\n"
+     "    No blending.\n"
+     "    dstRGBA = srcRGBA\n"
+     "\n"
+     "SDL_BLENDMODE_ADD:\n"
+     "    Alpha blending.\n"
+     "    dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))\n"
+     "    dstA = srcA + (dstA * (1-srcA))\n"
+     "\n"
+     "SDL_BLENDMODE_ADD:\n"
+     "    Additive blending.\n"
+     "    dstRGB = (srcRGB * srcA) + dstRGB\n"
+     "    dstA = dstA\n"
+     "\n"
+     "SDL_BLENDMODE_MOD:\n"
+     "    Color modulate.\n"
+     "    dstRGB = srcRGB * dstRGB\n"
+     "    dstA = dstA\n"
+    },
+
+    {"SDL_GetTextureBlendMode",
+     (PyCFunction) PyCSDL2_GetTextureBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetTextureBlendMode(texture: SDL_Texture) -> int\n"
+     "\n"
+     "Returns the blend mode used for texture copy operations. It is one of\n"
+     "the SDL_BLENDMODE_* constants.\n"
+    },
+
+    {"SDL_UpdateTexture",
+     (PyCFunction) PyCSDL2_UpdateTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UpdateTexture(texture: SDL_Texture, rect: SDL_Rect, pixels: buffer,\n"
+     "                  pitch: int) -> None\n"
+     "\n"
+     "Updates the given texture rectangle with new pixel data.\n"
+     "\n"
+     "texture\n"
+     "    The texture to update.\n"
+     "\n"
+     "rect\n"
+     "    The area to update, or None to update the entire texture.\n"
+     "\n"
+     "pixels\n"
+     "    The raw pixel data.\n"
+     "\n"
+     "pitch\n"
+     "    The number of bytes in a row of pixel data, including padding\n"
+     "    between lines.\n"
+    },
+
+    {"SDL_LockTexture",
+     (PyCFunction) PyCSDL2_LockTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockTexture(texture: SDL_Texture, rect: SDL_Rect) -> (buffer, int)\n"
+     "\n"
+     "Locks a portion of the texture for write-only pixel access.\n"
+     "\n"
+     "texture\n"
+     "    The texture to update.\n"
+     "\n"
+     "rect\n"
+     "    The area to lock for access, or None to lock the entire texture.\n"
+     "\n"
+     "Returns a tuple (pixels, pitch), where `pixels` is a buffer with the\n"
+     "locked pixel data, and `pitch` is the integer length of one row in\n"
+     "bytes.\n"
+    },
+
+    {"SDL_UnlockTexture",
+     (PyCFunction) PyCSDL2_UnlockTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockTexture(texture: SDL_Texture) -> None\n"
+     "\n"
+     "Unlocks a texture, uploading any changes to video memory.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
@@ -389,6 +581,66 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "If `rect` is None, the entire rendering target will be filled.\n"
     },
 
+    {"SDL_RenderCopy",
+     (PyCFunction) PyCSDL2_RenderCopy,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderCopy(renderer: SDL_Renderer, texture: SDL_Texture,\n"
+     "               srcrect: SDL_Rect, dstrect: SDL_Rect) -> None\n"
+     "\n"
+     "Copies a portion of the texture to the current rendering target.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "texture\n"
+     "    The source texture.\n"
+     "\n"
+     "srcrect\n"
+     "    The source rectangle, or None for the entire texture.\n"
+     "\n"
+     "dstrect\n"
+     "    The destination rectangle, or None for the entire rendering target.\n"
+     "    The texture will be stretched to fill the given rectangle.\n"
+    },
+
+    {"SDL_RenderCopyEx",
+     (PyCFunction) PyCSDL2_RenderCopyEx,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderCopyEx(renderer: SDL_Renderer, texture: SDL_Texture,\n"
+     "                 srcrect: SDL_Rect, dstrect: SDL_Rect, angle: float,\n"
+     "                 center: SDL_Point, flip: int) -> None\n"
+     "\n"
+     "Copies a portion of the texture to the current rendering target,\n"
+     "optionally rotating it by an angle around the given center and also\n"
+     "flipping it top-bottom and/or left-right.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "texture\n"
+     "    The source texture.\n"
+     "\n"
+     "srcrect\n"
+     "    The source rectangle, or None for the entire texture.\n"
+     "\n"
+     "dstrect\n"
+     "    The destination rectangle, or None for the entire rendering\n"
+     "    target. The texture will be stretched to fill the given rectangle.\n"
+     "\n"
+     "angle\n"
+     "    An angle in degrees that indicates the rotation that will be\n"
+     "    applied to `dstrect`.\n"
+     "\n"
+     "center\n"
+     "    The point around which `dstrect` will be rotated. If None,\n"
+     "    rotation will be done around ``(dstrect.w/2, dstrect.h/2)``.\n"
+     "\n"
+     "flip\n"
+     "    Indicates which flipping actions should be performed on the\n"
+     "    texture. One or more of SDL_FLIP_NONE, SDL_FLIP_HORIZONTAL and/or\n"
+     "    SDL_FLIP_VERTICAL OR'd together.\n"
+    },
+
     {"SDL_RenderPresent",
      (PyCFunction) PyCSDL2_RenderPresent,
      METH_VARARGS | METH_KEYWORDS,
@@ -396,6 +648,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "Updates the screen with any rendering performed since the previous\n"
      "call.\n"
+    },
+
+    {"SDL_DestroyTexture",
+     (PyCFunction) PyCSDL2_DestroyTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_DestroyTexture(texture: SDL_Texture) -> None\n"
+     "\n"
+     "Destroys the specified texture, freeing its resources.\n"
+     "\n"
+     "There is no need to explictly call this function. SDL_Texture will\n"
+     "automatically call it upon cleanup.\n"
     },
 
     {"SDL_DestroyRenderer",
