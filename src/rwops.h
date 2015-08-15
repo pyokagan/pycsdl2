@@ -1252,7 +1252,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
     if (!self)
         return NULL;
 
-    self->buffer = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0);
+    self->buffer = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0, NULL);
     if (!self->buffer) {
         Py_DECREF(self);
         return NULL;

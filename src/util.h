@@ -683,6 +683,8 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
  */
 typedef struct PyCSDL2_Buffer {
     PyCSDL2_BufferHEAD
+    /** \brief Optional reference to an object managing the buffer. */
+    PyObject *obj;
 } PyCSDL2_Buffer;
 
 /**
@@ -979,7 +981,7 @@ PyCSDL2_BufferInit(PyCSDL2_Buffer *self, enum PyCSDL2_CType itemtype,
  */
 static PyCSDL2_Buffer *
 PyCSDL2_BufferCreate(enum PyCSDL2_CType itemtype, void *buf, Py_ssize_t len,
-                     char readonly)
+                     char readonly, PyObject *obj)
 {
     PyCSDL2_Buffer *self;
     PyTypeObject *type = &PyCSDL2_BufferType;
@@ -989,6 +991,8 @@ PyCSDL2_BufferCreate(enum PyCSDL2_CType itemtype, void *buf, Py_ssize_t len,
         return NULL;
 
     PyCSDL2_BufferInit(self, itemtype, buf, len, readonly);
+
+    PyCSDL2_Set(self->obj, obj);
 
     return self;
 }

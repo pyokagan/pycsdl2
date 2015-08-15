@@ -514,7 +514,7 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id)
     if (!self)
         return NULL;
 
-    self->callback_buf = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0);
+    self->callback_buf = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0, NULL);
     if (!self->callback_buf) {
         Py_DECREF(self);
         return NULL;
