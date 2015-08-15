@@ -8,5 +8,5 @@ graft docs/source
 include docs/Makefile
 include docs/make.bat
 graft test
-recursive-exclude test *.pyc *.pyo
 prune test/__pycache__
+global-exclude *.pyc *.pyo *.o *.so *.pyd *.swp

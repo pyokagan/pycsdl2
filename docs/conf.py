@@ -21,11 +21,11 @@ copyright = '2015, Paul Tan'
 
 
 # The short X.Y.Z version.
-version = '2.0.0'
+version = '2.0.0.0'
 
 
 # The full version, including alpha/beta/rc tags.
-release = '2.0.0a1'
+release = '2.0.0.0.dev0'
 
 
 language = 'en'

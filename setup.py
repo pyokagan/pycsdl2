@@ -6,8 +6,11 @@ import subprocess
 from os.path import join
 from glob import glob
 import distutils.util
-from distutils.core import setup
-from distutils.extension import Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup
+    from distutils.extension import Extension
 
 
 def pkg_config(packages, cflags=False, libs=False):
@@ -391,7 +394,7 @@ extension, headers = get_csdl2_ext(distutils.util.get_platform())
 
 
 setup(name='pycsdl2',
-      version='2.0.0a1',
+      version='2.0.0.0.dev0',
       description='Simple DirectMedia Layer',
       long_description=open('README.rst').read(),
       url='https://github.com/pyokagan/pycsdl2',
@@ -413,7 +416,6 @@ setup(name='pycsdl2',
           'Programming Language :: C',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: 3 :: Only',
-          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Topic :: Games/Entertainment',
           'Topic :: Multimedia :: Graphics',
