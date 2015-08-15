@@ -18,7 +18,7 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.join(tests_dir, '..', 'build', plat_specifier))
 
 
-from csdl2 import *
+from csdl2 import *  # noqa
 
 
 class TestGetSystemSDL(unittest.TestCase):
