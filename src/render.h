@@ -1021,6 +1021,29 @@ PyCSDL2_GetNumRenderDrivers(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetRenderDriverInfo()
+ *
+ * \code{.py}
+ * SDL_GetRenderDriverInfo(index: int) -> SDL_RendererInfo
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRenderDriverInfo(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int index;
+    struct SDL_RendererInfo info;
+    static char *kwlist[] = {"index", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &index))
+        return NULL;
+
+    if (SDL_GetRenderDriverInfo(index, &info))
+        return PyCSDL2_RaiseSDLError();
+
+    return PyCSDL2_RendererInfoCreate(&info);
+}
+
+/**
  * \brief Implements csdl2.SDL_CreateRenderer()
  *
  * \code{.py}

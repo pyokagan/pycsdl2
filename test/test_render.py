@@ -228,6 +228,18 @@ class TestGetNumRenderDrivers(unittest.TestCase):
         self.assertIs(type(SDL_GetNumRenderDrivers()), int)
 
 
+class TestGetRenderDriverInfo(unittest.TestCase):
+    "Tests SDL_GetRenderDriverInfo()"
+
+    def setUp(self):
+        if not SDL_GetNumRenderDrivers():
+            raise unittest.SkipTest('No render drivers')
+
+    def test_returns_renderer_info(self):
+        "Returns a SDL_RendererInfo"
+        self.assertIs(type(SDL_GetRenderDriverInfo(0)), SDL_RendererInfo)
+
+
 class TestCreateRenderer(unittest.TestCase):
     """Tests SDL_CreateRenderer()"""
 

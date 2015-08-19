@@ -340,6 +340,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "display.\n"
     },
 
+    {"SDL_GetRenderDriverInfo",
+     (PyCFunction) PyCSDL2_GetRenderDriverInfo,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderDriverInfo(index: int) -> SDL_RendererInfo\n"
+     "\n"
+     "Gets information about a specific 2D rendering driver for the current\n"
+     "display.\n"
+     "\n"
+     "`index` is the index of the driver to query information about. It must\n"
+     "be within the range 0 to SDL_GetNumRenderDrivers()-1.\n"
+    },
+
     {"SDL_CreateRenderer",
      (PyCFunction) PyCSDL2_CreateRenderer,
      METH_VARARGS | METH_KEYWORDS,

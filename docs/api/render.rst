@@ -43,6 +43,17 @@ on a particular display.
 
    Get the number of 2D rendering drivers available for the current display.
 
+.. function:: SDL_GetRenderDriverInfo(index) -> SDL_RendererInfo
+
+   Gets information about a specific 2D rendering driver for the current
+   display.
+
+   :param int index: The index of the driver to query information about. It
+                     must be in the range 0 to
+                     ``SDL_GetNumRenderDrivers() - 1``.
+   :returns: A new :class:`SDL_RendererInfo` filled with information about the
+             render driver.
+
 Renderers
 ---------
 .. class:: SDL_Renderer
