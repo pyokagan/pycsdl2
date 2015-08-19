@@ -332,6 +332,28 @@ class TestGetRenderer(unittest.TestCase):
         self.assertRaises(ValueError, SDL_GetRenderer, self.win)
 
 
+class TestGetRendererInfo(unittest.TestCase):
+    "Tests SDL_GetRendererInfo()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_renderer_info(self):
+        "Returns a SDL_RendererInfo"
+        self.assertIs(type(SDL_GetRendererInfo(self.rdr)), SDL_RendererInfo)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetRendererInfo, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetRendererInfo, self.rdr)
+
+
 class TestCreateTexture(unittest.TestCase):
     "Tests SDL_CreateTexture()"
 

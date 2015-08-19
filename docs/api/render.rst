@@ -106,6 +106,15 @@ Renderers
    :returns: The :class:`SDL_Renderer` associated with the window, or None if
              there is no renderer associated with the window.
 
+.. function:: SDL_GetRendererInfo(renderer) -> SDL_RendererInfo
+
+   Get information about a rendering context.
+
+   :param renderer: The rendering context to query.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A new :class:`SDL_RendererInfo` filled with information about the
+             renderer.
+
 .. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
 
    Destroys `renderer`, freeing up its associated textures and resources.

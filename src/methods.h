@@ -400,6 +400,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the renderer associated with a window.\n"
     },
 
+    {"SDL_GetRendererInfo",
+     (PyCFunction) PyCSDL2_GetRendererInfo,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRendererInfo(renderer: SDL_Renderer) -> SDL_RendererInfo\n"
+     "\n"
+     "Gets information about a rendering context.\n"
+    },
+
     {"SDL_CreateTexture",
      (PyCFunction) PyCSDL2_CreateTexture,
      METH_VARARGS | METH_KEYWORDS,

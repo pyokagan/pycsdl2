@@ -1265,6 +1265,30 @@ PyCSDL2_GetRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetRendererInfo()
+ *
+ * \code{.py}
+ * SDL_GetRendererInfo(renderer: SDL_Renderer) -> SDL_RendererInfo
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRendererInfo(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_RendererInfo info;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    if (SDL_GetRendererInfo(renderer, &info))
+        return PyCSDL2_RaiseSDLError();
+
+    return PyCSDL2_RendererInfoCreate(&info);
+}
+
+/**
  * \brief Implements csdl2.SDL_CreateTexture()
  *
  * \code{.py}
