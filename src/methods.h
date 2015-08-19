@@ -392,6 +392,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Creates a SDL_Renderer for `surface`.\n"
     },
 
+    {"SDL_GetRenderer",
+     (PyCFunction) PyCSDL2_GetRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderer(window: SDL_Window) -> SDL_Renderer or None\n"
+     "\n"
+     "Returns the renderer associated with a window.\n"
+    },
+
     {"SDL_CreateTexture",
      (PyCFunction) PyCSDL2_CreateTexture,
      METH_VARARGS | METH_KEYWORDS,

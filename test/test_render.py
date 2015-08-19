@@ -302,6 +302,36 @@ class TestCreateSoftwareRenderer(unittest.TestCase):
         self.assertRaises(AssertionError, SDL_CreateSoftwareRenderer, self.sf)
 
 
+class TestGetRenderer(unittest.TestCase):
+    "Tests SDL_GetRenderer()"
+
+    def setUp(self):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+        self.rdr = SDL_CreateRenderer(self.win, -1, 0)
+
+    def test_returns_renderer(self):
+        "Returns the correct SDL_Renderer"
+        self.assertIs(SDL_GetRenderer(self.win), self.rdr)
+
+    def test_del_renderer(self):
+        "Returns None if renderer has been deleted"
+        del self.rdr
+        self.assertIsNone(SDL_GetRenderer(self.win))
+
+    def test_destroyed_renderer(self):
+        "Returns None if renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertIsNone(SDL_GetRenderer(self.win))
+
+    def test_destroyed_window(self):
+        "Raises ValueError if the window has been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(ValueError, SDL_GetRenderer, self.win)
+
+
 class TestCreateTexture(unittest.TestCase):
     "Tests SDL_CreateTexture()"
 

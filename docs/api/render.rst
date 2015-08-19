@@ -97,6 +97,15 @@ Renderers
    :param SDL_Surface surface: :class:`SDL_Surface` to render to.
    :returns: A new :class:`SDL_Renderer` that renders to `surface`.
 
+.. function:: SDL_GetRenderer(window) -> SDL_Renderer
+
+   Returns the renderer associated with a window.
+
+   :param window: The window to query.
+   :type window: :class:`SDL_Renderer`
+   :returns: The :class:`SDL_Renderer` associated with the window, or None if
+             there is no renderer associated with the window.
+
 .. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
 
    Destroys `renderer`, freeing up its associated textures and resources.

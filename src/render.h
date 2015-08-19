@@ -637,6 +637,80 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
 }
 
 /**
+ * \brief Returns the window's renderer.
+ *
+ * \param window Window
+ * \returns A borrowed reference to the PyCSDL2_Renderer of the window, or
+ *          Py_None if the window has no renderer. Otherwise, NULL if an
+ *          exception occurred.
+ */
+static PyObject *
+PyCSDL2_WindowGetRenderer(PyCSDL2_Window *window)
+{
+    PyObject *obj;
+
+    if (!PyCSDL2_Assert(window))
+        return NULL;
+
+    if (!window->renderer)
+        return Py_None;
+
+    if (!PyWeakref_CheckRef(window->renderer)) {
+        PyErr_SetString(PyExc_AssertionError,
+                        "window->renderer is not a weakref");
+        return NULL;
+    }
+
+    obj = PyWeakref_GetObject(window->renderer);
+    if (!obj)
+        return NULL;
+
+    if (obj == Py_None) {
+        Py_CLEAR(window->renderer);
+        return Py_None;
+    }
+
+    if (!PyCSDL2_Assert(Py_TYPE(obj) == &PyCSDL2_RendererType))
+        return NULL;
+
+    if (!((PyCSDL2_Renderer*)obj)->renderer) {
+        Py_CLEAR(window->renderer);
+        return Py_None;
+    }
+
+    return obj;
+}
+
+/**
+ * \brief Sets the window's renderer.
+ */
+static int
+PyCSDL2_WindowSetRenderer(PyCSDL2_Window *window, PyCSDL2_Renderer *renderer)
+{
+    PyObject *obj, *ref;
+
+    if (!PyCSDL2_Assert(window) || !PyCSDL2_Assert(renderer))
+        return -1;
+
+    obj = PyCSDL2_WindowGetRenderer(window);
+    if (!obj)
+        return -1;
+
+    if (obj != Py_None) {
+        PyErr_SetString(PyExc_AssertionError, "window already has a renderer");
+        return -1;
+    }
+
+    ref = PyWeakref_NewRef((PyObject*)renderer, NULL);
+    if (!ref)
+        return -1;
+
+    window->renderer = ref;
+
+    return 0;
+}
+
+/**
  * \brief Creates an instance of PyCSDL2_RendererType
  *
  * \param renderer SDL_Renderer to manage. The new instance will take over
@@ -664,6 +738,14 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
         return NULL;
     self->renderer = renderer;
     PyCSDL2_Set(self->deftarget, deftarget);
+
+    if (Py_TYPE(deftarget) == &PyCSDL2_WindowType) {
+        if (PyCSDL2_WindowSetRenderer((PyCSDL2_Window*)deftarget, self)) {
+            Py_DECREF(self);
+            return NULL;
+        }
+    }
+
     return (PyObject*)self;
 }
 
@@ -1152,6 +1234,34 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
         return NULL;
     }
     return out;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetRenderer()
+ *
+ * \code{.py}
+ * SDL_GetRenderer(window: SDL_Window) -> SDL_Renderer or None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRenderer(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Window *window;
+    PyObject *renderer;
+    static char *kwlist[] = {"window", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_WindowType, &window))
+        return NULL;
+
+    if (!PyCSDL2_WindowValid((PyCSDL2_Window*)window))
+        return NULL;
+
+    renderer = PyCSDL2_WindowGetRenderer(window);
+    if (!renderer)
+        return NULL;
+
+    return PyCSDL2_Get(renderer);
 }
 
 /**
