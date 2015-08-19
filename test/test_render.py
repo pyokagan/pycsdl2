@@ -867,6 +867,32 @@ class TestUnlockTexture(unittest.TestCase):
         self.assertRaises(ValueError, SDL_UnlockTexture, self.tex)
 
 
+class TestRenderTargetSupported(unittest.TestCase):
+    "Tests SDL_RenderTargetSupported()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_bool(self):
+        "Returns a bool"
+        self.assertIs(type(SDL_RenderTargetSupported(self.rdr)), bool)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderTargetSupported, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderTargetSupported, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderTargetSupported, 42)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

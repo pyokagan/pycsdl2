@@ -608,6 +608,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Unlocks a texture, uploading any changes to video memory.\n"
     },
 
+    {"SDL_RenderTargetSupported",
+     (PyCFunction) PyCSDL2_RenderTargetSupported,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderTargetSupported(renderer: SDL_Renderer) -> bool\n"
+     "\n"
+     "Returns whether a renderer supports the use of render targets.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

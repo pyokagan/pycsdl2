@@ -353,6 +353,16 @@ Textures
    :param texture: Texture to destroy.
    :type texture: :class:`SDL_Texture`
 
+Render targets
+--------------
+.. function:: SDL_RenderTargetSupported(renderer) -> bool
+
+   Queries whether a renderer supports the use of render targets.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: True if render targets are supported, False if not.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

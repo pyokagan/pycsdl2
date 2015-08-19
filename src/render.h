@@ -1782,6 +1782,26 @@ PyCSDL2_UnlockTexture(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderTargetSupported()
+ *
+ * \code{.py}
+ * SDL_RenderTargetSupported(renderer: SDL_Renderer) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderTargetSupported(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    return PyBool_FromLong(SDL_RenderTargetSupported(renderer));
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
