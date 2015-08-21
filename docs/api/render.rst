@@ -2,6 +2,8 @@
 ========================
 .. currentmodule:: csdl2
 
+Renderers
+---------
 .. class:: SDL_Renderer
 
    A 2d rendering context.
@@ -9,8 +11,6 @@
    This is an opaque handle that cannot be directly constructed. Instead, use
    :func:`SDL_CreateRenderer` or :func:`SDL_CreateSoftwareRenderer`.
 
-Creating a renderer
--------------------
 .. function:: SDL_CreateRenderer(window: SDL_Window, index: int, flags: int) -> SDL_Renderer
 
    Creates a :class:`SDL_Renderer` for `window`.
@@ -33,6 +33,15 @@ Creating a renderer
    :param SDL_Surface surface: :class:`SDL_Surface` to render to.
    :returns: A new :class:`SDL_Renderer` that renders to `surface`.
 
+.. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
+
+   Destroys `renderer`, freeing up its associated textures and resources.
+
+   There is no need to manually call this function. :class:`SDL_Renderer` will
+   automatically call this function as part of its destructor.
+
+   :param SDL_Renderer renderer: :class:`SDL_Renderer` to destroy
+
 Renderer creation flags
 -----------------------
 These flags can be passed to :func:`SDL_CreateRenderer` to request that the
@@ -53,20 +62,6 @@ renderer support certain functions.
 .. data:: SDL_RENDERER_TARGETTEXTURE
 
    The renderer supports rendering to texture.
-
-Destroying a renderer
----------------------
-.. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
-
-   Destroys `renderer`, freeing up its associated textures and resources.
-
-   There is no need to manually call this function. :class:`SDL_Renderer` will
-   automatically call this function as part of its destructor.
-
-   :param SDL_Renderer renderer: :class:`SDL_Renderer` to destroy
-
-   .. warning:: Once destroyed, do not access the renderer. Doing so will at
-                best raise errors and at worse crash the interpreter.
 
 Textures
 --------
