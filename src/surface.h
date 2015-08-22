@@ -145,7 +145,7 @@ PyCSDL2_SurfacePixelsCreate(SDL_Surface *surface)
     if (!(self = (PyCSDL2_SurfacePixels*)type->tp_alloc(type, 0)))
         return NULL;
 
-    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, surface->pixels,
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, CTYPE_UCHAR, surface->pixels,
                        surface->h * surface->pitch, 0);
 
     surface->refcount += 1;

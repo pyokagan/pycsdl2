@@ -41,12 +41,15 @@ typedef struct PyCSDL2_Window {
     PyObject *in_weakreflist;
     /** \brief SDL_Window handle which this instance owns */
     SDL_Window *window;
+    /** \brief Weak reference to PyCSDL2_Renderer (if any) */
+    PyObject *renderer;
 } PyCSDL2_Window;
 
 /** \brief Destructor for PyCSDL2_WindowType */
 static void
 PyCSDL2_WindowDealloc(PyCSDL2_Window *self)
 {
+    Py_CLEAR(self->renderer);
     PyObject_ClearWeakRefs((PyObject*) self);
     if (self->window)
         SDL_DestroyWindow(self->window);

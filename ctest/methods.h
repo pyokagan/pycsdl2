@@ -149,6 +149,18 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
 
     /* render.h */
 
+    {"rendererinfo",
+     PyCSDL2Test_RendererInfo,
+     METH_VARARGS,
+     "rendererinfo() -> SDL_RendererInfo"
+    },
+
+    {"rendererinfo_set_name",
+     PyCSDL2Test_RendererInfoSetName,
+     METH_VARARGS,
+     "rendererinfo_set_name(info: SDL_RendererInfo) -> None"
+    },
+
     {"renderer",
      PyCSDL2Test_Renderer,
      METH_VARARGS,

@@ -153,6 +153,21 @@
 #error Could not find C integer type with size_t width
 #endif
 
+#ifndef INT16_MAX
+/** \brief Maximum value a Sint16 can hold */
+#define INT16_MAX (32767)
+#endif
+
+#ifndef INT16_MIN
+/** \brief Minimum value a Sint16 can hold */
+#define INT16_MIN (-32767 - 1)
+#endif
+
+#ifndef UINT16_MAX
+/** \brief Maximum value a Uint16 can hold */
+#define UINT16_MAX (65535U)
+#endif
+
 /*!
  * \brief struct for defining constants.
  *
@@ -216,6 +231,26 @@ PyCSDL2_Get(PyObject *var)
         (var) = (value); \
         Py_XDECREF((PyObject*) tmp); \
     } while(0)
+
+/**
+ * \brief Returns a int representation of obj.
+ *
+ * \returns 0 on success, -1 if an exception occurred.
+ */
+static int
+PyCSDL2_LongAsInt(PyObject *obj, int *out)
+{
+    long x = PyLong_AsLong(obj);
+    if (PyErr_Occurred())
+        return -1;
+    if (x < INT_MIN || x > INT_MAX) {
+        PyErr_SetString(PyExc_OverflowError,
+                        "Python int too large to convert to C int");
+        return -1;
+    }
+    *out = (int)x;
+    return 0;
+}
 
 #ifndef INT32_MAX
 /** \brief Maximum value a Sint32 can hold */
@@ -328,6 +363,292 @@ PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
 }
 
 /**
+ * \defgroup ctype C Type Generic utility functions
+ *
+ * These functions take a PyCSDL2_CType as an argument, allowing callers to
+ * perform operations using any of the supported C types.
+ *
+ * This is used by PyCSDL2_Buffer to support arrays of different item types.
+ *
+ * @{
+ */
+
+/**
+ * \brief Supported C types.
+ */
+enum PyCSDL2_CType {
+    CTYPE_UCHAR = 0,
+    CTYPE_USHORT,
+    CTYPE_UINT,
+    CTYPE_ULONG,
+    CTYPE_UINT16,
+    CTYPE_UINT32,
+
+    CTYPE_CHAR,
+    CTYPE_SHORT,
+    CTYPE_INT,
+    CTYPE_LONG,
+    CTYPE_SINT16,
+    CTYPE_SINT32
+};
+
+/**
+ * \brief Returns the size of a PyCSDL2_CType.
+ */
+static Py_ssize_t
+PyCSDL2_CTypeSize(enum PyCSDL2_CType t)
+{
+    switch (t) {
+        case CTYPE_UCHAR: return sizeof(unsigned char);
+        case CTYPE_CHAR: return sizeof(signed char);
+        case CTYPE_USHORT: return sizeof(unsigned short);
+        case CTYPE_SHORT: return sizeof(short);
+        case CTYPE_UINT: return sizeof(unsigned int);
+        case CTYPE_INT: return sizeof(int);
+        case CTYPE_ULONG: return sizeof(unsigned long);
+        case CTYPE_LONG: return sizeof(long);
+        case CTYPE_UINT16: return sizeof(Uint16);
+        case CTYPE_SINT16: return sizeof(Sint16);
+        case CTYPE_UINT32: return sizeof(Uint32);
+        case CTYPE_SINT32: return sizeof(Sint32);
+        default:
+            Py_FatalError("PyCSDL2_CTypeSize(): invalid type");
+            return 0;
+    }
+}
+
+
+/**
+ * \brief Returns the Python format string of a PyCSDL2_CType.
+ */
+static const char *
+PyCSDL2_CTypeFormat(enum PyCSDL2_CType t)
+{
+    switch (t) {
+        case CTYPE_UCHAR: return "B";
+        case CTYPE_CHAR: return "b";
+        case CTYPE_USHORT: return "H";
+        case CTYPE_SHORT: return "h";
+        case CTYPE_UINT: return "I";
+        case CTYPE_INT: return "i";
+        case CTYPE_ULONG: return "L";
+        case CTYPE_LONG: return "l";
+        case CTYPE_UINT16: return Uint16_UNIT;
+        case CTYPE_SINT16: return Sint16_UNIT;
+        case CTYPE_UINT32: return Uint32_UNIT;
+        case CTYPE_SINT32: return Sint32_UNIT;
+        default:
+            Py_FatalError("PyCSDL2_CTypeFormat(): invalid type");
+            return NULL;
+    }
+}
+
+/**
+ * \brief Returns true if the PyCSDL2_CType is an unsigned type.
+ */
+static int
+PyCSDL2_CTypeUnsigned(enum PyCSDL2_CType t)
+{
+    return (t < CTYPE_CHAR);
+}
+
+/**
+ * \brief Returns the minimum value that can be stored by the signed
+ *        PyCSDL2_CType.
+ *
+ * \param t Signed PyCSDL2_CType.
+ */
+static long
+PyCSDL2_CTypeSMin(enum PyCSDL2_CType t)
+{
+    switch (t) {
+        case CTYPE_CHAR: return SCHAR_MIN;
+        case CTYPE_SHORT: return SHRT_MIN;
+        case CTYPE_INT: return INT_MIN;
+        case CTYPE_LONG: return LONG_MIN;
+        case CTYPE_SINT16: return INT16_MIN;
+        case CTYPE_SINT32: return INT32_MIN;
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return 0;
+    }
+}
+
+/**
+ * \brief Returns the maximum value that can be stored by the signed
+ *        PyCSDL2_CType.
+ *
+ * \param t Signed PyCSDL2_CType.
+ *
+ * \sa PyCSDL2_CTypeUMax()
+ */
+static long
+PyCSDL2_CTypeSMax(enum PyCSDL2_CType t)
+{
+    switch (t) {
+        case CTYPE_CHAR: return SCHAR_MAX;
+        case CTYPE_SHORT: return SHRT_MAX;
+        case CTYPE_INT: return INT_MAX;
+        case CTYPE_LONG: return LONG_MAX;
+        case CTYPE_SINT16: return INT16_MAX;
+        case CTYPE_SINT32: return INT32_MAX;
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return 0;
+    }
+}
+
+/**
+ * \brief Returns the maximum value that can be stored by the unsigned
+ *        PyCSDL2_CType.
+ *
+ * \param t Unsigned PyCSDL2_CType.
+ */
+static unsigned long
+PyCSDL2_CTypeUMax(enum PyCSDL2_CType t)
+{
+    switch (t) {
+        case CTYPE_UCHAR: return UCHAR_MAX;
+        case CTYPE_USHORT: return USHRT_MAX;
+        case CTYPE_UINT: return UINT_MAX;
+        case CTYPE_ULONG: return ULONG_MAX;
+        case CTYPE_UINT16: return UINT16_MAX;
+        case CTYPE_UINT32: return UINT32_MAX;
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return 0;
+    }
+}
+
+/**
+ * \brief Returns an element of an array of signed PyCSDL2_CType items.
+ *
+ * \param t Signed PyCSDL2_CType.
+ * \param arr The array.
+ * \param i Element index.
+ *
+ * \sa PyCSDL2_CTypeArrayUValue()
+ */
+static long
+PyCSDL2_CTypeArraySValue(enum PyCSDL2_CType t, void *arr, size_t i)
+{
+    switch (t) {
+        case CTYPE_CHAR: return ((signed char*)arr)[i];
+        case CTYPE_SHORT: return ((short*)arr)[i];
+        case CTYPE_INT: return ((int*)arr)[i];
+        case CTYPE_LONG: return ((long*)arr)[i];
+        case CTYPE_SINT16: return ((Sint16*)arr)[i];
+        case CTYPE_SINT32: return ((Sint32*)arr)[i];
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return 0;
+    }
+}
+
+/**
+ * \brief Sets an element of an array of signed PyCSDL2_CType items.
+ *
+ * \param t Signed PyCSDL2_CType.
+ * \param arr The array.
+ * \param i Element index.
+ * \param x Value to assign to the element of the array.
+ *
+ * \sa PyCSDL2_CTypeArrayUSet()
+ */
+static void
+PyCSDL2_CTypeArraySSet(enum PyCSDL2_CType t, void *arr, size_t i, long x)
+{
+    switch (t) {
+        case CTYPE_CHAR:
+            ((signed char*)arr)[i] = (signed char) x;
+            return;
+        case CTYPE_SHORT:
+            ((short*)arr)[i] = (short) x;
+            return;
+        case CTYPE_INT:
+            ((int*)arr)[i] = (int) x;
+            return;
+        case CTYPE_LONG:
+            ((long*)arr)[i] = x;
+            return;
+        case CTYPE_SINT16:
+            ((Sint16*)arr)[i] = (Sint16) x;
+            return;
+        case CTYPE_SINT32:
+            ((Sint32*)arr)[i] = (Sint32) x;
+            return;
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+    }
+}
+
+/**
+ * \brief Returns an element of an array of unsigned PyCSDL2_CType items.
+ *
+ * \param t Unsigned PyCSDL2_CType.
+ * \param arr The array.
+ * \param i Element index.
+ *
+ * \sa PyCSDL2_CTypeArraySValue()
+ */
+static unsigned long
+PyCSDL2_CTypeArrayUValue(enum PyCSDL2_CType t, void *arr, size_t i)
+{
+    switch (t) {
+        case CTYPE_UCHAR: return ((unsigned char*)arr)[i];
+        case CTYPE_USHORT: return ((unsigned short*)arr)[i];
+        case CTYPE_UINT: return ((unsigned int*)arr)[i];
+        case CTYPE_ULONG: return ((unsigned long*)arr)[i];
+        case CTYPE_UINT16: return ((Uint16*)arr)[i];
+        case CTYPE_UINT32: return ((Uint32*)arr)[i];
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return 0;
+    }
+}
+
+/**
+ * \brief Sets an element of an array of unsigned PyCSDL2_CType items.
+ *
+ * \param t Unsigned PyCSDL2_CType.
+ * \param arr The array.
+ * \param i Element index.
+ * \param x Value to assign to the element.
+ *
+ * \sa PyCSDL2_CTypeArraySSet()
+ */
+static void
+PyCSDL2_CTypeArrayUSet(enum PyCSDL2_CType t, void *arr, size_t i,
+                       unsigned long x)
+{
+    switch (t) {
+        case CTYPE_UCHAR:
+            ((unsigned char*)arr)[i] = (unsigned char) x;
+            return;
+        case CTYPE_USHORT:
+            ((unsigned short*)arr)[i] = (unsigned short) x;
+            return;
+        case CTYPE_UINT:
+            ((unsigned int*)arr)[i] = (unsigned int) x;
+            return;
+        case CTYPE_ULONG:
+            ((unsigned long*)arr)[i] = (unsigned long) x;
+            return;
+        case CTYPE_UINT16:
+            ((Uint16*)arr)[i] = (Uint16) x;
+            return;
+        case CTYPE_UINT32:
+            ((Uint32*)arr)[i] = (Uint32) x;
+            return;
+        default:
+            Py_FatalError("PyCSDL2_CTypeArrayIndex(): invalid type");
+            return;
+    }
+}
+
+/** @} */
+
+/**
  * \brief Set "invalid buffer size" exception.
  *
  * \param arg Argument name (if any)
@@ -371,7 +692,8 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
  */
 #define PyCSDL2_BufferHEAD \
     PyObject_HEAD \
-    unsigned char *buf; \
+    enum PyCSDL2_CType itemtype; \
+    void *buf; \
     Py_ssize_t len; \
     char readonly; \
     int num_exports;
@@ -381,6 +703,8 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
  */
 typedef struct PyCSDL2_Buffer {
     PyCSDL2_BufferHEAD
+    /** \brief Optional reference to an object managing the buffer. */
+    PyObject *obj;
 } PyCSDL2_Buffer;
 
 /**
@@ -415,12 +739,30 @@ PyCSDL2_BufferGetBuffer(PyCSDL2_Buffer *self, Py_buffer *view, int flags)
     if (!PyCSDL2_BufferValid(self))
         return -1;
 
-    if (PyBuffer_FillInfo(view, (PyObject*) self, self->buf, self->len,
-                          self->readonly, flags))
+    if (((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) && self->readonly) {
+        PyErr_SetString(PyExc_BufferError, "Object is not writable.");
         return -1;
+    }
 
+    Py_INCREF(self);
+    view->obj = (PyObject*) self;
+    view->buf = self->buf;
+    view->len = self->len * PyCSDL2_CTypeSize(self->itemtype);
+    view->readonly = self->readonly;
+    view->itemsize = PyCSDL2_CTypeSize(self->itemtype);
+    view->format = NULL;
+    if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
+        view->format = (char*) PyCSDL2_CTypeFormat(self->itemtype);
+    view->ndim = 1;
+    view->shape = NULL;
+    if ((flags & PyBUF_ND) == PyBUF_ND)
+        view->shape = &self->len;
+    view->strides = NULL;
+    if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
+        view->strides = &(view->itemsize);
+    view->suboffsets = NULL;
+    view->internal = NULL;
     self->num_exports++;
-
     return 0;
 }
 
@@ -467,7 +809,14 @@ PyCSDL2_BufferGetItem(PyCSDL2_Buffer *self, Py_ssize_t index)
         return NULL;
     }
 
-    return PyLong_FromUnsignedLong(self->buf[index]);
+    if (PyCSDL2_CTypeUnsigned(self->itemtype)) {
+        unsigned long x = PyCSDL2_CTypeArrayUValue(self->itemtype, self->buf,
+                                                   index);
+        return PyLong_FromUnsignedLong(x);
+    } else {
+        long x = PyCSDL2_CTypeArraySValue(self->itemtype, self->buf, index);
+        return PyLong_FromLong(x);
+    }
 }
 
 /**
@@ -538,7 +887,6 @@ PyCSDL2_BufferSetItem(PyCSDL2_Buffer *self, PyObject *key, PyObject *value)
     }
 
     if (PyIndex_Check(key)) {
-        unsigned long x;
         Py_ssize_t index;
 
         index = PyNumber_AsSsize_t(key, PyExc_IndexError);
@@ -553,16 +901,36 @@ PyCSDL2_BufferSetItem(PyCSDL2_Buffer *self, PyObject *key, PyObject *value)
             return -1;
         }
 
-        x = PyLong_AsUnsignedLong(value);
-        if (PyErr_Occurred())
-            return -1;
+        if (PyCSDL2_CTypeUnsigned(self->itemtype)) {
+            unsigned long x;
 
-        if (x > (unsigned char)-1) {
-            PyErr_SetString(PyExc_OverflowError, "value overflows byte");
-            return -1;
+            x = PyLong_AsUnsignedLong(value);
+            if (PyErr_Occurred())
+                return -1;
+
+            if (x > PyCSDL2_CTypeUMax(self->itemtype)) {
+                PyErr_SetString(PyExc_OverflowError,
+                                "value overflows itemtype");
+                return -1;
+            }
+
+            PyCSDL2_CTypeArrayUSet(self->itemtype, self->buf, index, x);
+        } else {
+            long x;
+
+            x = PyLong_AsLong(value);
+            if (PyErr_Occurred())
+                return -1;
+
+            if (x < PyCSDL2_CTypeSMin(self->itemtype) ||
+                x > PyCSDL2_CTypeSMax(self->itemtype)) {
+                PyErr_SetString(PyExc_OverflowError,
+                                "value overflows itemtype");
+                return -1;
+            }
+
+            PyCSDL2_CTypeArraySSet(self->itemtype, self->buf, index, x);
         }
-
-        self->buf[index] = x;
 
         return 0;
     } else {
@@ -619,21 +987,21 @@ static PyTypeObject PyCSDL2_BufferType = {
  * All PyCSDL2_Buffer-based types need to call this during initialization.
  */
 static void
-PyCSDL2_BufferInit(PyCSDL2_Buffer *self, void *buf, Py_ssize_t len,
-                   char readonly)
+PyCSDL2_BufferInit(PyCSDL2_Buffer *self, enum PyCSDL2_CType itemtype,
+                   void *buf, Py_ssize_t len, char readonly)
 {
-    PyCSDL2_Buffer *bufself = self;
-
-    bufself->buf = buf;
-    bufself->len = len;
-    bufself->readonly = readonly;
+    self->itemtype = itemtype;
+    self->buf = buf;
+    self->len = len;
+    self->readonly = readonly;
 }
 
 /**
  * \brief Creates an instance of PyCSDL2_BufferType
  */
 static PyCSDL2_Buffer *
-PyCSDL2_BufferCreate(void *buf, Py_ssize_t len, char readonly)
+PyCSDL2_BufferCreate(enum PyCSDL2_CType itemtype, void *buf, Py_ssize_t len,
+                     char readonly, PyObject *obj)
 {
     PyCSDL2_Buffer *self;
     PyTypeObject *type = &PyCSDL2_BufferType;
@@ -642,7 +1010,9 @@ PyCSDL2_BufferCreate(void *buf, Py_ssize_t len, char readonly)
     if (!self)
         return NULL;
 
-    PyCSDL2_BufferInit(self, buf, len, readonly);
+    PyCSDL2_BufferInit(self, itemtype, buf, len, readonly);
+
+    PyCSDL2_Set(self->obj, obj);
 
     return self;
 }

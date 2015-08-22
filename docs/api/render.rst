@@ -2,6 +2,60 @@
 ========================
 .. currentmodule:: csdl2
 
+Render drivers
+--------------
+A render driver is a set of code that handles rendering and texture management
+on a particular display.
+
+.. class:: SDL_RendererInfo(name=None, flags=0, num_texture_formats=0, texture_formats=0, max_texture_width=0, max_texture_height=0)
+
+   Information on the capabilities of a render driver or context.
+
+   .. attribute:: name
+
+      Name of the renderer.
+
+   .. attribute:: flags
+
+      A mask of supported `Renderer creation flags`_.
+
+   .. attribute:: num_texture_formats
+
+      The number of available texture formats.
+
+   .. attribute:: texture_formats
+
+      The available texture formats as an array of
+      :ref:`pixel-format-constants` ints.
+
+      Note that the size of the array is always 16. However, only the first
+      ``num_texture_formats`` values are valid.
+
+   .. attribute:: max_texture_width
+
+      Maximum texture width.
+
+   .. attribute:: max_texture_height
+
+      Maximum texture height
+
+.. function:: SDL_GetNumRenderDrivers() -> int
+
+   Get the number of 2D rendering drivers available for the current display.
+
+.. function:: SDL_GetRenderDriverInfo(index) -> SDL_RendererInfo
+
+   Gets information about a specific 2D rendering driver for the current
+   display.
+
+   :param int index: The index of the driver to query information about. It
+                     must be in the range 0 to
+                     ``SDL_GetNumRenderDrivers() - 1``.
+   :returns: A new :class:`SDL_RendererInfo` filled with information about the
+             render driver.
+
+Renderers
+---------
 .. class:: SDL_Renderer
 
    A 2d rendering context.
@@ -9,8 +63,18 @@
    This is an opaque handle that cannot be directly constructed. Instead, use
    :func:`SDL_CreateRenderer` or :func:`SDL_CreateSoftwareRenderer`.
 
-Creating a renderer
--------------------
+.. function:: SDL_CreateWindowAndRenderer(width, height, window_flags) -> tuple
+
+   Creates a window and a default renderer.
+
+   :param int width: The width of the window.
+   :param int height: The height of the window.
+   :param int window_flags: 0, or one or more of the :ref:`window-flags` OR'd
+                            together.
+   :returns: A 2-tuple ``(window, renderer)``, where `window` is the created
+             :class:`SDL_Window` and `renderer` is the created
+             :class:`SDL_Renderer`.
+
 .. function:: SDL_CreateRenderer(window: SDL_Window, index: int, flags: int) -> SDL_Renderer
 
    Creates a :class:`SDL_Renderer` for `window`.
@@ -33,6 +97,42 @@ Creating a renderer
    :param SDL_Surface surface: :class:`SDL_Surface` to render to.
    :returns: A new :class:`SDL_Renderer` that renders to `surface`.
 
+.. function:: SDL_GetRenderer(window) -> SDL_Renderer
+
+   Returns the renderer associated with a window.
+
+   :param window: The window to query.
+   :type window: :class:`SDL_Renderer`
+   :returns: The :class:`SDL_Renderer` associated with the window, or None if
+             there is no renderer associated with the window.
+
+.. function:: SDL_GetRendererInfo(renderer) -> SDL_RendererInfo
+
+   Get information about a rendering context.
+
+   :param renderer: The rendering context to query.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A new :class:`SDL_RendererInfo` filled with information about the
+             renderer.
+
+.. function:: SDL_GetRendererOutputSize(renderer) -> tuple
+
+   Get the output size of a rendering context.
+
+   :param renderer: The rendering context to query.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A 2-tuple ``(width, height)`` with the output width and height of
+             the rendering context respectively.
+
+.. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
+
+   Destroys `renderer`, freeing up its associated textures and resources.
+
+   There is no need to manually call this function. :class:`SDL_Renderer` will
+   automatically call this function as part of its destructor.
+
+   :param SDL_Renderer renderer: :class:`SDL_Renderer` to destroy
+
 Renderer creation flags
 -----------------------
 These flags can be passed to :func:`SDL_CreateRenderer` to request that the
@@ -53,20 +153,6 @@ renderer support certain functions.
 .. data:: SDL_RENDERER_TARGETTEXTURE
 
    The renderer supports rendering to texture.
-
-Destroying a renderer
----------------------
-.. function:: SDL_DestroyRenderer(renderer: SDL_Renderer) -> None
-
-   Destroys `renderer`, freeing up its associated textures and resources.
-
-   There is no need to manually call this function. :class:`SDL_Renderer` will
-   automatically call this function as part of its destructor.
-
-   :param SDL_Renderer renderer: :class:`SDL_Renderer` to destroy
-
-   .. warning:: Once destroyed, do not access the renderer. Doing so will at
-                best raise errors and at worse crash the interpreter.
 
 Textures
 --------

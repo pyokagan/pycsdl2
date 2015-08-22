@@ -449,7 +449,7 @@ PyCSDL2_AudioDeviceCallback(void *userdata, Uint8 *stream, int len)
         goto finish;
     }
 
-    PyCSDL2_BufferInit(buf, stream, len, 0);
+    PyCSDL2_BufferInit(buf, CTYPE_UCHAR, stream, len, 0);
 
     ret = PyObject_CallFunction(self->callback, "OOi",
                                 self->userdata ? self->userdata : Py_None,
@@ -514,7 +514,7 @@ PyCSDL2_AudioDeviceCreate(SDL_AudioDeviceID id)
     if (!self)
         return NULL;
 
-    self->callback_buf = PyCSDL2_BufferCreate(NULL, 0, 0);
+    self->callback_buf = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0, NULL);
     if (!self->callback_buf) {
         Py_DECREF(self);
         return NULL;
@@ -665,7 +665,7 @@ PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
     if (!self)
         return NULL;
 
-    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, buf, len, 0);
+    PyCSDL2_BufferInit((PyCSDL2_Buffer*) self, CTYPE_UCHAR, buf, len, 0);
 
     return self;
 }

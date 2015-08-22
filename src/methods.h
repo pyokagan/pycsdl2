@@ -331,6 +331,47 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* render.h */
 
+    {"SDL_GetNumRenderDrivers",
+     (PyCFunction) PyCSDL2_GetNumRenderDrivers,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetNumRenderDrivers() -> int\n"
+     "\n"
+     "Gets the number of 2D rendering drivers available for the current\n"
+     "display.\n"
+    },
+
+    {"SDL_GetRenderDriverInfo",
+     (PyCFunction) PyCSDL2_GetRenderDriverInfo,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderDriverInfo(index: int) -> SDL_RendererInfo\n"
+     "\n"
+     "Gets information about a specific 2D rendering driver for the current\n"
+     "display.\n"
+     "\n"
+     "`index` is the index of the driver to query information about. It must\n"
+     "be within the range 0 to SDL_GetNumRenderDrivers()-1.\n"
+    },
+
+    {"SDL_CreateWindowAndRenderer",
+     (PyCFunction) PyCSDL2_CreateWindowAndRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_CreateWindowAndRenderer(width: int, height: int,\n"
+     "                            window_flags: int)\n"
+     "    -> (SDL_Window, SDL_Renderer)\n"
+     "\n"
+     "Creates a window and a default renderer.\n"
+     "\n"
+     "`width` and `height` specifies the width and height of the window.\n"
+     "\n"
+     "`flags` must be 0, or one or more of the following OR'd together:\n"
+     "`SDL_WINDOW_FULLSCREEN`, `SDL_WINDOW_OPENGL`, `SDL_WINDOW_SHOWN`,\n"
+     "`SDL_WINDOW_HIDDEN`, `SDL_WINDOW_BORDERLESS`, `SDL_WINDOW_RESIZABLE`,\n"
+     "`SDL_WINDOW_RESIZABLE`, `SDL_WINDOW_MINIMIZED`,\n"
+     "`SDL_WINDOW_MAXIMIZED`, `SDL_WINDOW_INPUT_GRABBED`,\n"
+     "`SDL_WINDOW_INPUT_FOCUS`, `SDL_WINDOW_MOUSE_FOCUS`,\n"
+     "`SDL_WINDOW_FULLSCREEN_DESKTOP`.\n"
+    },
+
     {"SDL_CreateRenderer",
      (PyCFunction) PyCSDL2_CreateRenderer,
      METH_VARARGS | METH_KEYWORDS,
@@ -349,6 +390,30 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer\n"
      "\n"
      "Creates a SDL_Renderer for `surface`.\n"
+    },
+
+    {"SDL_GetRenderer",
+     (PyCFunction) PyCSDL2_GetRenderer,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderer(window: SDL_Window) -> SDL_Renderer or None\n"
+     "\n"
+     "Returns the renderer associated with a window.\n"
+    },
+
+    {"SDL_GetRendererInfo",
+     (PyCFunction) PyCSDL2_GetRendererInfo,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRendererInfo(renderer: SDL_Renderer) -> SDL_RendererInfo\n"
+     "\n"
+     "Gets information about a rendering context.\n"
+    },
+
+    {"SDL_GetRendererOutputSize",
+     (PyCFunction) PyCSDL2_GetRendererOutputSize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRendererOutputSize(renderer: SDL_Renderer) -> (int, int)\n"
+     "\n"
+     "Get the output size of a rendering context.\n"
     },
 
     {"SDL_CreateTexture",

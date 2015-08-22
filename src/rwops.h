@@ -287,7 +287,7 @@ PyCSDL2_RWReadPyCall(SDL_RWops *ctx, void *ptr, size_t size, size_t maxnum)
 
     callback = PyCSDL2_Get(rwops_obj->read);
 
-    PyCSDL2_BufferInit(rwops_obj->buffer, ptr, size * maxnum, 0);
+    PyCSDL2_BufferInit(rwops_obj->buffer, CTYPE_UCHAR, ptr, size * maxnum, 0);
 
     ret_obj = PyObject_CallFunction(callback, "OO" SIZE_T_UNIT SIZE_T_UNIT,
                                     rwops_obj, rwops_obj->buffer, size,
@@ -333,7 +333,8 @@ PyCSDL2_RWWritePyCall(SDL_RWops *ctx, const void *ptr, size_t size, size_t num)
 
     callback = PyCSDL2_Get(rwops_obj->write);
 
-    PyCSDL2_BufferInit(rwops_obj->buffer, (void*) ptr, size * num, 1);
+    PyCSDL2_BufferInit(rwops_obj->buffer, CTYPE_UCHAR, (void*) ptr, size * num,
+                       1);
 
     ret_obj = PyObject_CallFunction(callback, "OO" SIZE_T_UNIT SIZE_T_UNIT,
                                     rwops_obj, rwops_obj->buffer, size, num);
@@ -1251,7 +1252,7 @@ PyCSDL2_RWopsCreate(SDL_RWops *rwops)
     if (!self)
         return NULL;
 
-    self->buffer = PyCSDL2_BufferCreate(NULL, 0, 0);
+    self->buffer = PyCSDL2_BufferCreate(CTYPE_UCHAR, NULL, 0, 0, NULL);
     if (!self->buffer) {
         Py_DECREF(self);
         return NULL;

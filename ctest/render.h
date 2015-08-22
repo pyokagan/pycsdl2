@@ -30,6 +30,52 @@
 #include "../include/pycsdl2.h"
 
 /**
+ * \brief Creates a PyCSDL2_RendererInfo object.
+ *
+ * \code{.py}
+ * rendererinfo() -> SDL_RendererInfo
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RendererInfo(PyObject *module, PyObject *args)
+{
+    SDL_RendererInfo info = {
+        /* name */ "name",
+        /* flags */ 1,
+        /* num_texture_formats */ 2,
+        /* texture_formats */
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
+        /* max_texture_width */ 3,
+        /* max_texture_height */ 4
+    };
+
+    if (!PyArg_ParseTuple(args, ""))
+        return NULL;
+
+    return PyCSDL2_RendererInfoCreate(&info);
+}
+
+/**
+ * \brief Sets the "name" field of the SDL_RendererInfo to "name".
+ *
+ * \code{.py}
+ * rendererinfo_set_name(info: SDL_RendererInfo) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RendererInfoSetName(PyObject *module, PyObject *args)
+{
+    SDL_RendererInfo *info;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_RendererInfoPtr, &info))
+        return NULL;
+
+    info->name = "name";
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Creates a PyCSDL2_Renderer object.
  *
  * \code{.py}
