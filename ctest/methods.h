@@ -173,6 +173,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "renderer_set_draw_color(rdr: SDL_Renderer) -> None"
     },
 
+    {"renderer_set_target",
+     PyCSDL2Test_RendererSetTarget,
+     METH_VARARGS,
+     "renderer_set_target(rdr: SDL_Renderer[, target: SDL_Texture]) -> None"
+    },
+
     {"texture",
      PyCSDL2Test_Texture,
      METH_VARARGS,

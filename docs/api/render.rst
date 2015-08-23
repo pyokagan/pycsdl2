@@ -363,6 +363,25 @@ Render targets
    :type renderer: :class:`SDL_Renderer`
    :returns: True if render targets are supported, False if not.
 
+.. function:: SDL_SetRenderTarget(renderer, texture)
+
+   Sets a texture as the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The targeted texture, which must be created with the
+                   :const:`SDL_TEXTURTEACCESS_TARGET` flag, or None for the
+                   default render target.
+   :type texture: :class:`SDL_Texture` or None
+
+.. function:: SDL_GetRenderTarget(renderer) -> SDL_Texture
+
+   Queries the renderer's current render target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: The current render target, or None for the default render target.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

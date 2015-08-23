@@ -616,6 +616,28 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns whether a renderer supports the use of render targets.\n"
     },
 
+    {"SDL_SetRenderTarget",
+     (PyCFunction) PyCSDL2_SetRenderTarget,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetRenderTarget(renderer: SDL_Renderer, texture: SDL_Texture)\n"
+     "    -> None\n"
+     "\n"
+     "Sets `texture` as the current rendering target, or None for the\n"
+     "default rendering target.\n"
+     "\n"
+     "The targeted texture must be created with the SDL_TEXTUREACCESS_TARGET\n"
+     "flag.\n"
+    },
+
+    {"SDL_GetRenderTarget",
+     (PyCFunction) PyCSDL2_GetRenderTarget,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderTarget(renderer: SDL_Renderer) -> SDL_Texture or None\n"
+     "\n"
+     "Returns the current render target, or None for the default render\n"
+     "target.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

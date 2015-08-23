@@ -135,6 +135,40 @@ PyCSDL2Test_RendererSetDrawColor(PyObject *module, PyObject *args)
 }
 
 /**
+ * \brief Sets the render target of the SDL_Renderer
+ *
+ * \code{.py}
+ * renderer_set_target(rdr: SDL_Renderer[, target: SDL_Texture]) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RendererSetTarget(PyObject *module, PyObject *args)
+{
+    SDL_Renderer *rdr;
+    SDL_Texture *tex = NULL;
+
+    if (!PyArg_ParseTuple(args, "O&|O&", PyCSDL2_RendererPtr, &rdr,
+                          PyCSDL2_TexturePtr, &tex))
+        return NULL;
+
+    if (!tex) {
+        tex = SDL_CreateTexture(rdr, SDL_PIXELFORMAT_RGBA8888,
+                                SDL_TEXTUREACCESS_TARGET, 32, 32);
+        if (!tex) {
+            PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+            return NULL;
+        }
+    }
+
+    if (SDL_SetRenderTarget(rdr, tex)) {
+        PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Creates a PyCSDL2_Texture object.
  *
  * \code{.py}
