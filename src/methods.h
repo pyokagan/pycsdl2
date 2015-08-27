@@ -672,6 +672,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "centered within the new window size.\n"
     },
 
+    {"SDL_RenderGetViewport",
+     (PyCFunction) PyCSDL2_RenderGetViewport,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetViewport(renderer: SDL_Renderer) -> SDL_Rect\n"
+     "\n"
+     "Returns the drawing area for the current target.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

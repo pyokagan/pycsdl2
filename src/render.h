@@ -2002,6 +2002,29 @@ PyCSDL2_RenderSetViewport(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderGetViewport()
+ *
+ * \code{.py}
+ * SDL_RenderGetViewport(renderer: SDL_Renderer) -> SDL_Rect
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetViewport(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Rect rect;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetViewport(renderer, &rect);
+
+    return PyCSDL2_RectCreate(&rect);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}

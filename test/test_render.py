@@ -1080,6 +1080,32 @@ class TestRenderSetViewport(unittest.TestCase):
         self.assertRaises(TypeError, SDL_RenderSetViewport, self.rdr, 42)
 
 
+class TestRenderGetViewport(unittest.TestCase):
+    "Tests SDL_RenderGetViewport()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_rect(self):
+        "Returns a SDL_Rect"
+        self.assertIs(type(SDL_RenderGetViewport(self.rdr)), SDL_Rect)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderGetViewport, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderGetViewport, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderGetViewport, 42)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

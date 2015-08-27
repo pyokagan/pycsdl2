@@ -420,6 +420,14 @@ Viewport
                 target.
    :type rect: :class:`SDL_Rect` or None
 
+.. function:: SDL_RenderGetViewport(renderer) -> SDL_Rect
+
+   Queries the drawing area for the current target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A :class:`SDL_Rect` with the drawing area for the current target.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
