@@ -405,6 +405,21 @@ Device independent resolution
    :returns: An ``(int, int)`` tuple with the width and height of the logical
              resolution respectively.
 
+Viewport
+--------
+.. function:: SDL_RenderSetViewport(renderer, rect)
+
+   Sets the drawing area for rendering on the current target.
+
+   When the window is resized, the current viewport is automatically centered
+   within the new window size.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The drawing area, or None to set the viewport to the entire
+                target.
+   :type rect: :class:`SDL_Rect` or None
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

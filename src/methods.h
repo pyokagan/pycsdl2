@@ -659,6 +659,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_RenderSetLogicalSize(), the function returns (0, 0).\n"
     },
 
+    {"SDL_RenderSetViewport",
+     (PyCFunction) PyCSDL2_RenderSetViewport,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetViewport(renderer: SDL_Renderer, rect: SDL_Rect) -> None\n"
+     "\n"
+     "Sets the drawing area `rect` for rendering on the current target.\n"
+     "\n"
+     "If `rect` is None, the drawing area is set to the entire target.\n"
+     "\n"
+     "When the window is resized, the current viewport is automatically\n"
+     "centered within the new window size.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
