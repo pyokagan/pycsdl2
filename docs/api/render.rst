@@ -393,6 +393,18 @@ Device independent resolution
    :param int w: The width of the logical resolution.
    :param int h: The height of the logical resolution.
 
+.. function:: SDL_RenderGetLogicalSize(renderer) -> tuple
+
+   Queries the device independent resolution for rendering.
+
+   If the renderer did not have its logical size set by
+   :func:`SDL_RenderSetLogicalSize`, the function returns ``(0, 0)``.
+
+   :param renderer: A rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: An ``(int, int)`` tuple with the width and height of the logical
+             resolution respectively.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

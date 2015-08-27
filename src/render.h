@@ -1950,6 +1950,29 @@ PyCSDL2_RenderSetLogicalSize(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderGetLogicalSize()
+ *
+ * \code{.py}
+ * SDL_RenderGetLogicalSize(renderer: SDL_Renderer) -> (int, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetLogicalSize(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int w, h;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetLogicalSize(renderer, &w, &h);
+
+    return Py_BuildValue("ii", w, h);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
