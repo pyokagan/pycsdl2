@@ -382,6 +382,17 @@ Render targets
    :type renderer: :class:`SDL_Renderer`
    :returns: The current render target, or None for the default render target.
 
+Device independent resolution
+-----------------------------
+.. function:: SDL_RenderSetLogicalSize(renderer, w, h)
+
+   Sets a device independent resolution for rendering.
+
+   :param renderer: The renderer for which resolution should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param int w: The width of the logical resolution.
+   :param int h: The height of the logical resolution.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

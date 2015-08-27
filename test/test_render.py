@@ -984,6 +984,38 @@ class TestGetRenderTarget(unittest.TestCase):
         self.assertRaises(TypeError, SDL_GetRenderTarget, 42)
 
 
+class TestRenderSetLogicalSize(unittest.TestCase):
+    "Tests SDL_RenderSetLogicalSize()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderSetLogicalSize(self.rdr, 32, 32))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderSetLogicalSize, self.rdr, 32,
+                          32)
+
+    def test_freed_surface(self):
+        "Raises ValueError if surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderSetLogicalSize, self.rdr, 32,
+                          32)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderSetLogicalSize, 42, 32, 32)
+        self.assertRaises(TypeError, SDL_RenderSetLogicalSize, self.rdr, {},
+                          32)
+        self.assertRaises(TypeError, SDL_RenderSetLogicalSize, self.rdr, 32,
+                          {})
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

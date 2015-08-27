@@ -638,6 +638,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "target.\n"
     },
 
+    {"SDL_RenderSetLogicalSize",
+     (PyCFunction) PyCSDL2_RenderSetLogicalSize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetLogicalSize(renderer: SDL_Renderer, w: int, h: int)\n"
+     "    -> None\n"
+     "\n"
+     "Sets the device independent resolution for rendering to `w` x `h`.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

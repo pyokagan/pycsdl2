@@ -1926,6 +1926,30 @@ PyCSDL2_GetRenderTarget(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderSetLogicalSize()
+ *
+ * \code{.py}
+ * SDL_RenderSetLogicalSize(renderer: SDL_Renderer, w: int, h: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetLogicalSize(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int w, h;
+    static char *kwlist[] = {"renderer", "w", "h", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer, &w, &h))
+        return NULL;
+
+    if (SDL_RenderSetLogicalSize(renderer, w, h))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
