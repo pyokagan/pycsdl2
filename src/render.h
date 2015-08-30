@@ -793,14 +793,27 @@ typedef struct PyCSDL2_Texture {
 
 static PyTypeObject PyCSDL2_TextureType;
 
+/**
+ * \brief dict of SDL_Texture pointers to PyCSDL2_Texture objects.
+ */
+static PyObject *PyCSDL2_TextureDict;
+
 /** \brief tp_dealloc for PyCSDL2_TextureType */
 static void
 PyCSDL2_TextureDealloc(PyCSDL2_Texture *self)
 {
     Py_CLEAR(self->pixels);
     PyObject_ClearWeakRefs((PyObject*) self);
-    if (self->texture)
+    if (self->texture) {
+        PyObject *key = PyLong_FromVoidPtr(self->texture);
+        if (key)
+            PyDict_DelItem(PyCSDL2_TextureDict, key);
+        if (self->renderer && self->renderer->renderer &&
+            SDL_GetRenderTarget(self->renderer->renderer) == self->texture) {
+            SDL_SetRenderTarget(self->renderer->renderer, NULL);
+        }
         SDL_DestroyTexture(self->texture);
+    }
     /*
      * NOTE: renderer should only be cleared after the texture has been
      * destroyed.
@@ -888,9 +901,11 @@ static PyTypeObject PyCSDL2_TextureType = {
 static PyObject *
 PyCSDL2_TextureCreate(SDL_Texture *texture, PyObject *renderer)
 {
-    PyCSDL2_Texture *self;
+    PyCSDL2_Texture *self = NULL;
     PyCSDL2_Renderer *rdr = (PyCSDL2_Renderer*)renderer;
     PyTypeObject *type = &PyCSDL2_TextureType;
+    PyObject *key = NULL, *value = NULL;
+    int contains;
 
     if (!PyCSDL2_Assert(texture) || !PyCSDL2_Assert(renderer))
         return NULL;
@@ -905,7 +920,34 @@ PyCSDL2_TextureCreate(SDL_Texture *texture, PyObject *renderer)
     self->texture = texture;
     PyCSDL2_Set(self->renderer, rdr);
 
+    key = PyLong_FromVoidPtr(texture);
+    if (!key)
+        goto fail;
+
+    contains = PyDict_Contains(PyCSDL2_TextureDict, key);
+    if (contains < 0)
+        goto fail;
+
+    if (contains) {
+        PyErr_SetString(PyExc_AssertionError,
+                        "SDL_Texture is already managed by csdl2");
+        goto fail;
+    }
+
+    value = PyWeakref_NewRef((PyObject*)self, NULL);
+    if (!value)
+        goto fail;
+
+    if (PyDict_SetItem(PyCSDL2_TextureDict, key, value))
+        goto fail;
+
     return (PyObject*)self;
+
+fail:
+    Py_XDECREF(self);
+    Py_XDECREF(key);
+    Py_XDECREF(value);
+    return NULL;
 }
 
 /**
@@ -939,8 +981,21 @@ static int
 PyCSDL2_TextureDetach(PyCSDL2_Texture *self, SDL_Texture **texture,
                       PyCSDL2_Renderer **renderer)
 {
+    PyObject *key;
+
     if (!PyCSDL2_TextureValid(self, 0))
         return 0;
+
+    key = PyLong_FromVoidPtr(self->texture);
+    if (!key)
+        return 0;
+
+    if (PyDict_DelItem(PyCSDL2_TextureDict, key))
+        return 0;
+
+    if (self->renderer && self->renderer->renderer &&
+        SDL_GetRenderTarget(self->renderer->renderer) == self->texture)
+        SDL_SetRenderTarget(self->renderer->renderer, NULL);
 
     if (texture)
         *texture = self->texture;
@@ -1782,6 +1837,194 @@ PyCSDL2_UnlockTexture(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderTargetSupported()
+ *
+ * \code{.py}
+ * SDL_RenderTargetSupported(renderer: SDL_Renderer) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderTargetSupported(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    return PyBool_FromLong(SDL_RenderTargetSupported(renderer));
+}
+
+/**
+ * \brief Implements csdl2.SDL_SetRenderTarget()
+ *
+ * \code{.py}
+ * SDL_SetRenderTarget(renderer: SDL_Renderer, texture: SDL_Texture) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_SetRenderTarget(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    PyObject *texture_obj;
+    SDL_Texture *texture;
+    static char *kwlist[] = {"renderer", "texture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &texture_obj))
+        return NULL;
+
+    if (texture_obj == Py_None)
+        texture = NULL;
+    else if (!PyCSDL2_TexturePtr(texture_obj, &texture))
+        return NULL;
+
+    if (SDL_SetRenderTarget(renderer, texture))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetRenderTarget()
+ *
+ * \code{.py}
+ * SDL_GetRenderTarget(renderer: SDL_Renderer) -> SDL_Texture
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRenderTarget(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    PyObject *key, *value;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    texture = SDL_GetRenderTarget(renderer);
+    if (!texture)
+        Py_RETURN_NONE;
+
+    key = PyLong_FromVoidPtr(texture);
+    if (!key)
+        return NULL;
+
+    value = PyDict_GetItem(PyCSDL2_TextureDict, key);
+    if (!value)
+        return PyCSDL2_VoidPtrCreate(texture);
+
+    value = PyWeakref_GetObject(value);
+    if (!value)
+        return NULL;
+
+    return PyCSDL2_Get(value);
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderSetLogicalSize()
+ *
+ * \code{.py}
+ * SDL_RenderSetLogicalSize(renderer: SDL_Renderer, w: int, h: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetLogicalSize(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int w, h;
+    static char *kwlist[] = {"renderer", "w", "h", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer, &w, &h))
+        return NULL;
+
+    if (SDL_RenderSetLogicalSize(renderer, w, h))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderGetLogicalSize()
+ *
+ * \code{.py}
+ * SDL_RenderGetLogicalSize(renderer: SDL_Renderer) -> (int, int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetLogicalSize(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int w, h;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetLogicalSize(renderer, &w, &h);
+
+    return Py_BuildValue("ii", w, h);
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderSetViewport()
+ *
+ * \code{.py}
+ * SDL_RenderSetViewport(renderer: SDL_Renderer, rect: SDL_Rect) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetViewport(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    ret = SDL_RenderSetViewport(renderer, rect.buf);
+
+    PyBuffer_Release(&rect);
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+    else
+        Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderGetViewport()
+ *
+ * \code{.py}
+ * SDL_RenderGetViewport(renderer: SDL_Renderer) -> SDL_Rect
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetViewport(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Rect rect;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetViewport(renderer, &rect);
+
+    return PyCSDL2_RectCreate(&rect);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
@@ -2082,6 +2325,10 @@ PyCSDL2_initrender(PyObject *module)
         return 0;
 
     if (PyType_Ready(&PyCSDL2_TexturePixelsType)) { return 0; }
+
+    PyCSDL2_TextureDict = PyDict_New();
+    if (!PyCSDL2_TextureDict)
+        return 0;
 
     return 1;
 }

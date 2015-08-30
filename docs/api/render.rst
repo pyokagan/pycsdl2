@@ -353,6 +353,81 @@ Textures
    :param texture: Texture to destroy.
    :type texture: :class:`SDL_Texture`
 
+Render targets
+--------------
+.. function:: SDL_RenderTargetSupported(renderer) -> bool
+
+   Queries whether a renderer supports the use of render targets.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: True if render targets are supported, False if not.
+
+.. function:: SDL_SetRenderTarget(renderer, texture)
+
+   Sets a texture as the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param texture: The targeted texture, which must be created with the
+                   :const:`SDL_TEXTURTEACCESS_TARGET` flag, or None for the
+                   default render target.
+   :type texture: :class:`SDL_Texture` or None
+
+.. function:: SDL_GetRenderTarget(renderer) -> SDL_Texture
+
+   Queries the renderer's current render target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: The current render target, or None for the default render target.
+
+Device independent resolution
+-----------------------------
+.. function:: SDL_RenderSetLogicalSize(renderer, w, h)
+
+   Sets a device independent resolution for rendering.
+
+   :param renderer: The renderer for which resolution should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param int w: The width of the logical resolution.
+   :param int h: The height of the logical resolution.
+
+.. function:: SDL_RenderGetLogicalSize(renderer) -> tuple
+
+   Queries the device independent resolution for rendering.
+
+   If the renderer did not have its logical size set by
+   :func:`SDL_RenderSetLogicalSize`, the function returns ``(0, 0)``.
+
+   :param renderer: A rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: An ``(int, int)`` tuple with the width and height of the logical
+             resolution respectively.
+
+Viewport
+--------
+.. function:: SDL_RenderSetViewport(renderer, rect)
+
+   Sets the drawing area for rendering on the current target.
+
+   When the window is resized, the current viewport is automatically centered
+   within the new window size.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The drawing area, or None to set the viewport to the entire
+                target.
+   :type rect: :class:`SDL_Rect` or None
+
+.. function:: SDL_RenderGetViewport(renderer) -> SDL_Rect
+
+   Queries the drawing area for the current target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A :class:`SDL_Rect` with the drawing area for the current target.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

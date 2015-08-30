@@ -608,6 +608,78 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Unlocks a texture, uploading any changes to video memory.\n"
     },
 
+    {"SDL_RenderTargetSupported",
+     (PyCFunction) PyCSDL2_RenderTargetSupported,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderTargetSupported(renderer: SDL_Renderer) -> bool\n"
+     "\n"
+     "Returns whether a renderer supports the use of render targets.\n"
+    },
+
+    {"SDL_SetRenderTarget",
+     (PyCFunction) PyCSDL2_SetRenderTarget,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetRenderTarget(renderer: SDL_Renderer, texture: SDL_Texture)\n"
+     "    -> None\n"
+     "\n"
+     "Sets `texture` as the current rendering target, or None for the\n"
+     "default rendering target.\n"
+     "\n"
+     "The targeted texture must be created with the SDL_TEXTUREACCESS_TARGET\n"
+     "flag.\n"
+    },
+
+    {"SDL_GetRenderTarget",
+     (PyCFunction) PyCSDL2_GetRenderTarget,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderTarget(renderer: SDL_Renderer) -> SDL_Texture or None\n"
+     "\n"
+     "Returns the current render target, or None for the default render\n"
+     "target.\n"
+    },
+
+    {"SDL_RenderSetLogicalSize",
+     (PyCFunction) PyCSDL2_RenderSetLogicalSize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetLogicalSize(renderer: SDL_Renderer, w: int, h: int)\n"
+     "    -> None\n"
+     "\n"
+     "Sets the device independent resolution for rendering to `w` x `h`.\n"
+    },
+
+    {"SDL_RenderGetLogicalSize",
+     (PyCFunction) PyCSDL2_RenderGetLogicalSize,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetLogicalSize(renderer: SDL_Renderer) -> (int, int)\n"
+     "\n"
+     "Returns the width and height of the renderer's device independent\n"
+     "resolution for rendering.\n"
+     "\n"
+     "If the renderer did not have its logical size set by\n"
+     "SDL_RenderSetLogicalSize(), the function returns (0, 0).\n"
+    },
+
+    {"SDL_RenderSetViewport",
+     (PyCFunction) PyCSDL2_RenderSetViewport,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetViewport(renderer: SDL_Renderer, rect: SDL_Rect) -> None\n"
+     "\n"
+     "Sets the drawing area `rect` for rendering on the current target.\n"
+     "\n"
+     "If `rect` is None, the drawing area is set to the entire target.\n"
+     "\n"
+     "When the window is resized, the current viewport is automatically\n"
+     "centered within the new window size.\n"
+    },
+
+    {"SDL_RenderGetViewport",
+     (PyCFunction) PyCSDL2_RenderGetViewport,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetViewport(renderer: SDL_Renderer) -> SDL_Rect\n"
+     "\n"
+     "Returns the drawing area for the current target.\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
