@@ -25,7 +25,7 @@ version = '2.0.0.0'
 
 
 # The full version, including alpha/beta/rc tags.
-release = '2.0.0.0.dev1'
+release = '2.0.0.0.dev2'
 
 
 language = 'en'

@@ -394,7 +394,7 @@ extension, headers = get_csdl2_ext(distutils.util.get_platform())
 
 
 setup(name='pycsdl2',
-      version='2.0.0.0.dev1',
+      version='2.0.0.0.dev2',
       description='Simple DirectMedia Layer',
       long_description=open('README.rst').read(),
       url='https://github.com/pyokagan/pycsdl2',
