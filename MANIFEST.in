@@ -2,6 +2,7 @@ include README.rst
 include LICENSE
 graft include
 graft src
+graft ctest
 include Doxyfile
 graft deps
 graft docs/source
