@@ -2103,6 +2103,29 @@ PyCSDL2_RenderSetScale(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderGetScale()
+ *
+ * \code{.py}
+ * SDL_RenderGetScale(renderer: SDL_Renderer) -> (float, float)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetScale(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    float scaleX, scaleY;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetScale(renderer, &scaleX, &scaleY);
+
+    return Py_BuildValue("ff", scaleX, scaleY);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
