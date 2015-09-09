@@ -2308,6 +2308,32 @@ PyCSDL2_RenderDrawPoints(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderDrawLine()
+ *
+ * \code{.py}
+ * SDL_RenderDrawLine(renderer: SDL_Renderer, x1: int, y1: int, x2: int,
+ *                    y2: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawLine(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int x1, y1, x2, y2;
+    static char *kwlist[] = {"renderer", "x1", "y1", "x2", "y2", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&iiii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &x1, &y1, &x2, &y2))
+        return NULL;
+
+    if (SDL_RenderDrawLine(renderer, x1, y1, x2, y2))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderFillRect()
  *
  * \code{.py}

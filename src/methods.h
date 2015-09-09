@@ -885,6 +885,16 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    The number of points to draw.\n"
     },
 
+    {"SDL_RenderDrawLine",
+     (PyCFunction) PyCSDL2_RenderDrawLine,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawLine(renderer: SDL_Renderer, x1: int, y1: int, x2: int,\n"
+     "                   y2: int) -> None\n"
+     "\n"
+     "Draw a line with endpoints (x1, y1) and (x2, y2) on the current\n"
+     "rendering target.\n"
+    },
+
     {"SDL_RenderFillRect",
      (PyCFunction) PyCSDL2_RenderFillRect,
      METH_VARARGS | METH_KEYWORDS,
