@@ -2247,6 +2247,30 @@ PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderDrawPoint()
+ *
+ * \code{.py}
+ * SDL_RenderDrawPoint(renderer: SDL_Renderer, x: int, y: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawPoint(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int x, y;
+    static char *kwlist[] = {"renderer", "x", "y", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer, &x, &y))
+        return NULL;
+
+    if (SDL_RenderDrawPoint(renderer, x, y))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderFillRect()
  *
  * \code{.py}

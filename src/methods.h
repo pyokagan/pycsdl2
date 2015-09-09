@@ -862,6 +862,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "The entire rendering target is cleared, ignoring the viewport.\n"
     },
 
+    {"SDL_RenderDrawPoint",
+     (PyCFunction) PyCSDL2_RenderDrawPoint,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawPoint(renderer: SDL_Renderer, x: int, y: int) -> None\n"
+     "\n"
+     "Draw a point (x, y) on the current rendering target.\n"
+    },
+
     {"SDL_RenderFillRect",
      (PyCFunction) PyCSDL2_RenderFillRect,
      METH_VARARGS | METH_KEYWORDS,

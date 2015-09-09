@@ -538,6 +538,15 @@ Drawing
    :type renderer: :class:`SDL_Renderer`
    :raises RuntimeError: If the rendering target could not be cleared.
 
+.. function:: SDL_RenderDrawPoint(renderer, x, y)
+
+   Draws a point on the current rendering target.
+
+   :param renderer: The renderer which should draw a point.
+   :type renderer: :class:`SDL_Renderer`
+   :param int x: The x coordinate of the point.
+   :param int y: The y coordinate of the point.
+
 .. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
 
    Fills a rectangle on the current rendering target with the current drawing
