@@ -765,6 +765,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "                   y2: int) -> None\n"
     },
 
+    {"SDL_RenderDrawLines",
+     (PyCFunction) PyCSDL2_RenderDrawLines,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawLines(renderer: SDL_Renderer, points: buffer,\n"
+     "                    count: int) -> None\n"
+    },
+
     {"SDL_RenderFillRect",
      (PyCFunction) PyCSDL2_RenderFillRect,
      METH_VARARGS | METH_KEYWORDS,
