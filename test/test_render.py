@@ -1106,6 +1106,40 @@ class TestRenderGetViewport(unittest.TestCase):
         self.assertRaises(TypeError, SDL_RenderGetViewport, 42)
 
 
+class TestRenderSetClipRect(unittest.TestCase):
+    "Tests SDL_RenderSetClipRect()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rect = SDL_Rect(0, 0, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderSetClipRect(self.rdr, self.rect))
+
+    def test_rect_none(self):
+        "rect can be None"
+        self.assertIsNone(SDL_RenderSetClipRect(self.rdr, None))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderSetClipRect, self.rdr,
+                          self.rect)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderSetClipRect, self.rdr,
+                          self.rect)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderSetClipRect, 42, self.rect)
+        self.assertRaises(TypeError, SDL_RenderSetClipRect, self.rdr, 42)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 

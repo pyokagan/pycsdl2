@@ -428,6 +428,18 @@ Viewport
    :type renderer: :class:`SDL_Renderer`
    :returns: A :class:`SDL_Rect` with the drawing area for the current target.
 
+Clip Rectangle
+--------------
+.. function:: SDL_RenderSetClipRect(renderer, rect)
+
+   Sets the clip rectangle for the current target.
+
+   :param renderer: The renderer for which clip rectangle should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The rectangle to set as the clip rectangle, or None to disable
+                clipping.
+   :type rect: :class:`SDL_Rect` or None
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
