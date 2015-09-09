@@ -1459,6 +1459,43 @@ class TestRenderDrawLine(unittest.TestCase):
         self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, {})
 
 
+class TestRenderDrawLines(unittest.TestCase):
+    "Tests SDL_RenderDrawLines()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.points = bytes(memoryview(SDL_Point()).nbytes * 2)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawLines(self.rdr, self.points, 2))
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 3)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 2)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 2)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawLines, 42, self.points, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawLines, self.rdr, None, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawLines, self.rdr,
+                          self.points, None)
+
+
 class TestRenderFillRect(unittest.TestCase):
     """Tests SDL_RenderFillRect()"""
 
