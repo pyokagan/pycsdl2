@@ -1284,6 +1284,38 @@ class TestGetRenderDrawColor(unittest.TestCase):
         self.assertRaises(TypeError, SDL_GetRenderDrawColor, 42)
 
 
+class TestSetRenderDrawBlendMode(unittest.TestCase):
+    "Tests SDL_SetRenderDrawBlendMode()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_SetRenderDrawBlendMode(self.rdr,
+                                                     SDL_BLENDMODE_ADD))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          SDL_BLENDMODE_ADD)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          SDL_BLENDMODE_ADD)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_SetRenderDrawBlendMode, 42,
+                          SDL_BLENDMODE_ADD)
+        self.assertRaises(TypeError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          None)
+
+
 class TestRenderClear(unittest.TestCase):
     """Tests SDL_RenderClear()"""
 

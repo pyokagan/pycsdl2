@@ -2176,6 +2176,32 @@ PyCSDL2_GetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_SetRenderDrawBlendMode()
+ *
+ * \code{.py}
+ * SDL_SetRenderDrawBlendMode(renderer: SDL_Renderer, blendMode: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_SetRenderDrawBlendMode(PyObject *module, PyObject *args,
+                               PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int blendMode;
+    static char *kwlist[] = {"renderer", "blendMode", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &blendMode))
+        return NULL;
+
+    if (SDL_SetRenderDrawBlendMode(renderer, blendMode))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderClear()
  *
  * \code{.py}

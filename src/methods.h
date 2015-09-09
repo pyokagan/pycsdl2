@@ -840,6 +840,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the color (r, g, b, a) used for drawing operations.\n"
     },
 
+    {"SDL_SetRenderDrawBlendMode",
+     (PyCFunction) PyCSDL2_SetRenderDrawBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetRenderDrawBlendMode(renderer: SDL_Renderer, blendMode: int)\n"
+     "    -> None\n"
+    },
+
     {"SDL_RenderClear",
      (PyCFunction) PyCSDL2_RenderClear,
      METH_VARARGS | METH_KEYWORDS,
