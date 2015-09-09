@@ -470,6 +470,15 @@ Scaling
       it will be hendled using the appropriate quality hints. For best results
       use integer scaling factors.
 
+.. function:: SDL_RenderGetScale(renderer) -> tuple
+
+   Gets the drawing scale for the current target.
+
+   :param renderer: The renderer from which drawing scale should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A 2-tuple ``(scaleX, scaleY)`` with the float horizontal and
+             vertical scaling factors respectively.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
