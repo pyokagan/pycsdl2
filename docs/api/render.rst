@@ -520,6 +520,14 @@ Drawing
 
       If the blend mode is not supported, the closest supported mode is chosen.
 
+.. function:: SDL_GetRenderDrawBlendMode(renderer) -> int
+
+   Gets the blend mode used for drawing operations.
+
+   :param renderer: The renderer from which blend mode should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: The current blend mode. One of the :ref:`blend-modes`.
+
 .. function:: SDL_RenderClear(renderer: SDL_Renderer) -> None
 
    Clears the current rendering target with the current drawing color.

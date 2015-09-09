@@ -730,6 +730,12 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    -> None\n"
     },
 
+    {"SDL_GetRenderDrawBlendMode",
+     (PyCFunction) PyCSDL2_GetRenderDrawBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderDrawBlendMode(renderer: SDL_Renderer) -> int\n"
+    },
+
     {"SDL_RenderClear",
      (PyCFunction) PyCSDL2_RenderClear,
      METH_VARARGS | METH_KEYWORDS,
