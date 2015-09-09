@@ -449,6 +449,27 @@ Clip Rectangle
    :returns: A :class:`SDL_Rect` with the current clip rectangle, or an empty
              rectangle if clipping is disabled.
 
+Scaling
+-------
+.. function:: SDL_RenderSetScale(renderer, scaleX, scaleY)
+
+   Sets the drawing scale for rendering on the current target.
+
+   The drawing coordinates are scaled by the ``x/y`` scaling factors before
+   they are used by the renderer. This allows resolution independent drawing
+   with a single coordinate system.
+
+   :param renderer: The renderer for which the drawing scale should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param float scaleX: The horizontal scaling factor.
+   :param float scaleY: The vertical scaling factor.
+
+   .. note::
+
+      If this results in scaling or subpixel drawing by the rendering backend,
+      it will be hendled using the appropriate quality hints. For best results
+      use integer scaling factors.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

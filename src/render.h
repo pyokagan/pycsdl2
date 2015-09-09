@@ -2077,6 +2077,32 @@ PyCSDL2_RenderGetClipRect(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderSetScale()
+ *
+ * \code{.py}
+ * SDL_RenderSetScale(renderer: SDL_Renderer, float scaleX, float scaleY)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetScale(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    float scaleX, scaleY;
+    static char *kwlist[] = {"renderer", "scaleX", "scaleY", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ff", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &scaleX, &scaleY))
+        return NULL;
+
+    if (SDL_RenderSetScale(renderer, scaleX, scaleY))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
