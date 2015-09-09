@@ -919,6 +919,21 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "draw an outline on the entire rendering target.\n"
     },
 
+    {"SDL_RenderDrawRects",
+     (PyCFunction) PyCSDL2_RenderDrawRects,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawRects(renderer: SDL_Renderer, rects: buffer, count: int)\n"
+     "    -> None\n"
+     "\n"
+     "Draw some number of rectangles on the current rendering target.\n"
+     "\n"
+     "rects\n"
+     "    An array of SDL_Rects representing the rectangles to be drawn.\n"
+     "\n"
+     "count\n"
+     "    The number of rectangles.\n"
+    },
+
     {"SDL_RenderFillRect",
      (PyCFunction) PyCSDL2_RenderFillRect,
      METH_VARARGS | METH_KEYWORDS,

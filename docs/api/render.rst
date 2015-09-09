@@ -588,6 +588,16 @@ Drawing
                 target.
    :type rect: :class:`SDL_Rect` or None
 
+.. function:: SDL_RenderDrawRects(renderer, rects, count)
+
+   Draw some number of rectangles on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rects: The rectangles to be drawn.
+   :type rects: :class:`SDL_Rect` array.
+   :param int count: The number of rectangles.
+
 .. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
 
    Fills a rectangle on the current rendering target with the current drawing
