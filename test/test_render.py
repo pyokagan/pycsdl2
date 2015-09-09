@@ -1429,6 +1429,36 @@ class TestRenderDrawPoints(unittest.TestCase):
                           self.points, None)
 
 
+class TestRenderDrawLine(unittest.TestCase):
+    "Tests SDL_RenderDrawLine()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawLine(self.rdr, 0, 0, 1, 1))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, 1)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, 1)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawLine, 42, 0, 0, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, {}, 0, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, {}, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, 0, {}, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, {})
+
+
 class TestRenderFillRect(unittest.TestCase):
     """Tests SDL_RenderFillRect()"""
 
