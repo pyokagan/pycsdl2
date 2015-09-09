@@ -797,6 +797,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the drawing area for the current target.\n"
     },
 
+    {"SDL_RenderSetClipRect",
+     (PyCFunction) PyCSDL2_RenderSetClipRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetClipRect(renderer: SDL_Renderer, rect: SDL_Rect or None)\n"
+     "    -> None\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,

@@ -2025,6 +2025,35 @@ PyCSDL2_RenderGetViewport(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderSetClipRect()
+ *
+ * \code{.py}
+ * SDL_RenderSetClipRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetClipRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    ret = SDL_RenderSetClipRect(renderer, rect.buf);
+    PyBuffer_Release(&rect);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
