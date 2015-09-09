@@ -2271,6 +2271,43 @@ PyCSDL2_RenderDrawPoint(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderDrawPoints()
+ *
+ * \code{.py}
+ * SDL_RenderDrawPoints(renderer: SDL_Renderer, points: buffer, count: int)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawPoints(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer points;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "points", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &points, &count))
+        return NULL;
+
+    expected = sizeof(SDL_Point) * count;
+    if (points.len < expected) {
+        PyBuffer_Release(&points);
+        return PyCSDL2_RaiseBufferSizeError("points", expected, points.len);
+    }
+
+    ret = SDL_RenderDrawPoints(renderer, points.buf, count);
+    PyBuffer_Release(&points);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderFillRect()
  *
  * \code{.py}

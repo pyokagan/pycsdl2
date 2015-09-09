@@ -547,6 +547,16 @@ Drawing
    :param int x: The x coordinate of the point.
    :param int y: The y coordinate of the point.
 
+.. function:: SDL_RenderDrawPoints(renderer, points, count)
+
+   Draw multiple points on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param points: The points to draw.
+   :type points: :class:`SDL_Point` array
+   :param int count: The number of points to draw.
+
 .. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
 
    Fills a rectangle on the current rendering target with the current drawing
