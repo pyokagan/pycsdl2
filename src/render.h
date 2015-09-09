@@ -2399,6 +2399,43 @@ PyCSDL2_RenderDrawRect(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderDrawRects()
+ *
+ * \code{.py}
+ * SDL_RenderDrawRects(renderer: SDL_Renderer, rects: buffer, count: int)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawRects(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rects;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "rects", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &rects, &count))
+        return NULL;
+
+    expected = sizeof(SDL_Rect) * count;
+    if (rects.len < expected) {
+        PyBuffer_Release(&rects);
+        return PyCSDL2_RaiseBufferSizeError("rects", expected, rects.len);
+    }
+
+    ret = SDL_RenderDrawRects(renderer, rects.buf, count);
+    PyBuffer_Release(&rects);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderFillRect()
  *
  * \code{.py}
