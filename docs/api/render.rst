@@ -507,6 +507,19 @@ Drawing
    :returns: The (r, g, b, a) components of the drawing color.
    :rtype: (int, int, int, int) tuple
 
+.. function:: SDL_SetRenderDrawBlendMode(renderer, blendMode)
+
+   Sets the blend mode used for drawing operations (Fill and Line).
+
+   :param renderer: The renderer for which blend mode should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param int blendMode: The blend mode to use for blending. One of the
+                         :ref:`blend-modes`.
+
+   .. note::
+
+      If the blend mode is not supported, the closest supported mode is chosen.
+
 .. function:: SDL_RenderClear(renderer: SDL_Renderer) -> None
 
    Clears the current rendering target with the current drawing color.
