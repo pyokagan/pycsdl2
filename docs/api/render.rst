@@ -440,6 +440,15 @@ Clip Rectangle
                 clipping.
    :type rect: :class:`SDL_Rect` or None
 
+.. function:: SDL_RenderGetClipRect(renderer) -> SDL_Rect
+
+   Gets the clip rectangle for the current target.
+
+   :param renderer: The renderer from which clip rectangle should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A :class:`SDL_Rect` with the current clip rectangle, or an empty
+             rectangle if clipping is disabled.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None

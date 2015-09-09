@@ -687,6 +687,12 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    -> None\n"
     },
 
+    {"SDL_RenderGetClipRect",
+     (PyCFunction) PyCSDL2_RenderGetClipRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetClipRect(renderer: SDL_Renderer) -> SDL_Rect\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
