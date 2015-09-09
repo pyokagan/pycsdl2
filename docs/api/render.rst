@@ -578,6 +578,16 @@ Drawing
    :type points: :class:`SDL_Point` array
    :param int count: The number of points, drawing ``count - 1`` lines.
 
+.. function:: SDL_RenderDrawRect(renderer, rect)
+
+   Draw a rectangle on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The rectangle to draw, or None to outline the entire rendering
+                target.
+   :type rect: :class:`SDL_Rect` or None
+
 .. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
 
    Fills a rectangle on the current rendering target with the current drawing

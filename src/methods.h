@@ -910,6 +910,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "     The number of points, drawing count-1 lines.\n"
     },
 
+    {"SDL_RenderDrawRect",
+     (PyCFunction) PyCSDL2_RenderDrawRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawRect(renderer: SDL_Renderer, rect: SDL_Rect or None)\n"
+     "\n"
+     "Draw a rectangle on the current rendering target. If `rect` is None,\n"
+     "draw an outline on the entire rendering target.\n"
+    },
+
     {"SDL_RenderFillRect",
      (PyCFunction) PyCSDL2_RenderFillRect,
      METH_VARARGS | METH_KEYWORDS,
