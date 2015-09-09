@@ -1316,6 +1316,32 @@ class TestSetRenderDrawBlendMode(unittest.TestCase):
                           None)
 
 
+class TestGetRenderDrawBlendMode(unittest.TestCase):
+    "Tests SDL_GetRenderDrawBlendMode()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetRenderDrawBlendMode(self.rdr)), int)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetRenderDrawBlendMode, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetRenderDrawBlendMode, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetRenderDrawBlendMode, 42)
+
+
 class TestRenderClear(unittest.TestCase):
     """Tests SDL_RenderClear()"""
 
