@@ -2370,6 +2370,35 @@ PyCSDL2_RenderDrawLines(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderDrawRect()
+ *
+ * \code{.py}
+ * SDL_RenderDrawRect(renderer: SDL_Renderer, rect: SDL_Rect or None) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    ret = SDL_RenderDrawRect(renderer, rect.buf);
+    PyBuffer_Release(&rect);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderFillRect()
  *
  * \code{.py}
