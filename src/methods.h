@@ -797,6 +797,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "If `rect` is None, the entire rendering target will be filled.\n"
     },
 
+    {"SDL_RenderFillRects",
+     (PyCFunction) PyCSDL2_RenderFillRects,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderFillRects(renderer: SDL_Renderer, rects: buffer, count: int)\n"
+     "    -> None\n"
+    },
+
     {"SDL_RenderCopy",
      (PyCFunction) PyCSDL2_RenderCopy,
      METH_VARARGS | METH_KEYWORDS,
