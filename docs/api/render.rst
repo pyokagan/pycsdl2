@@ -692,6 +692,23 @@ Drawing
 
    Flip vertically.
 
+Reading pixels
+--------------
+.. function:: SDL_RenderReadPixels(renderer, rect, format, pixels, pitch)
+
+   Read pixels from the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The area to read, or None for the entire render target.
+   :type rect: :class:`SDL_Rect` or None
+   :param int format: The desired format of the pixel data (one of the
+                      :ref:`pixel-format-constants`), or 0 to use the format of
+                      the rendering target.
+   :param pixels: The buffer to be filled in with the pixel data.
+   :type pixels: buffer
+   :param int pitch: The pitch of the `pixels` buffer.
+
 Updating the screen
 -------------------
 SDL's rendering functions operate on a backbuffer. Calling a rendering function

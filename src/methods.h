@@ -1022,6 +1022,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    SDL_FLIP_VERTICAL OR'd together.\n"
     },
 
+    {"SDL_RenderReadPixels",
+     (PyCFunction) PyCSDL2_RenderReadPixels,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderReadPixels(renderer: SDL_Renderer, rect: SDL_Rect,\n"
+     "                     format: int, pixels: buffer, pitch: int) -> None\n"
+     "\n"
+     "Read pixels from the current rendering target.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "rect\n"
+     "    An SDL_Rect representing the area to read, or None for the entire\n"
+     "    render target.\n"
+     "\n"
+     "format\n"
+     "    The desired format of the pixel data (one of the SDL_PIXELFORMAT_*\n"
+     "    constants), or 0 to use the format of the rendering target.\n"
+     "\n"
+     "pixels\n"
+     "    The buffer to be filled in with the pixel data.\n"
+     "\n"
+     "pitch\n"
+     "    The pitch of the pixels buffer.\n"
+    },
+
     {"SDL_RenderPresent",
      (PyCFunction) PyCSDL2_RenderPresent,
      METH_VARARGS | METH_KEYWORDS,
