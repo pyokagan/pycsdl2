@@ -610,6 +610,17 @@ Drawing
    :type rect: :class:`SDL_Rect` or None
    :raises RuntimeError: If the rectangle could not be filled.
 
+.. function:: SDL_RenderFillRects(renderer, rects, count)
+
+   Fill some number of rectangles on the current rendering target with the
+   current drawing color.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rects: The rectangles to be filled.
+   :type rects: :class:`SDL_Rect` array
+   :param int count: The number of rectangles.
+
 .. function:: SDL_RenderCopy(renderer, texture, srcrect, dstrect)
 
    Copies a portion of the texture to the current rendering target.
