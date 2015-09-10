@@ -864,6 +864,13 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    SDL_FLIP_VERTICAL OR'd together.\n"
     },
 
+    {"SDL_RenderReadPixels",
+     (PyCFunction) PyCSDL2_RenderReadPixels,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderReadPixels(renderer: SDL_Renderer, rect: SDL_Rect,\n"
+     "                     format: int, pixels: buffer, pitch: int) -> None\n"
+    },
+
     {"SDL_RenderPresent",
      (PyCFunction) PyCSDL2_RenderPresent,
      METH_VARARGS | METH_KEYWORDS,

@@ -1769,6 +1769,83 @@ class TestRenderCopyEx(unittest.TestCase):
                           None, None, 0, None, SDL_FLIP_NONE)
 
 
+class TestRenderReadPixels(unittest.TestCase):
+    "Tests SDL_RenderReadPixels()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.fm = SDL_PIXELFORMAT_RGB332
+        self.rect = SDL_Rect(0, 0, 32, 32)
+        self.pixels = bytearray(32 * 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        x = SDL_RenderReadPixels(self.rdr, self.rect, self.fm, self.pixels, 32)
+        self.assertIsNone(x)
+
+    def test_rect_none(self):
+        "rect can be None"
+        x = SDL_RenderReadPixels(self.rdr, None, self.fm, self.pixels, 32)
+        self.assertIsNone(x)
+
+    def test_format_zero(self):
+        "format can be zero"
+        # In this case SDL_PIXELFORMAT_UNKNOWN will be used, which has a bpp of
+        # 0. As such, no pixels will be read at all.
+        SDL_RenderReadPixels(self.rdr, self.rect, 0, self.pixels, 32)
+
+    def test_negative_rect(self):
+        "A negative rect is equivalent to an empty rect"
+        rect = SDL_Rect(-32, -32, -32, -32)
+        SDL_RenderReadPixels(self.rdr, rect, self.fm, self.pixels, 32)
+
+    def test_oversized_rect(self):
+        "SDL will clip the rect to the viewport"
+        rect = SDL_Rect(0, 0, 64, 64)
+        pixels = bytearray(64 * 64)
+        SDL_RenderReadPixels(self.rdr, rect, self.fm, pixels, 64)
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 33)
+
+    def test_small_pitch(self):
+        "pitch can be smaller than the format's bytes per pixel * w"
+        SDL_RenderReadPixels(self.rdr, self.rect, self.fm, self.pixels, 1)
+
+    def test_negative_pitch(self):
+        "Raises ValueError if pitch is negative"
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, -32)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 32)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 32)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderReadPixels, 42, self.rect,
+                          self.fm, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, 42,
+                          self.fm, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          None, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          self.fm, [], 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          self.fm, self.pixels, None)
+
+
 class TestRenderPresent(unittest.TestCase):
     """Tests SDL_RenderPresent()"""
 

@@ -2576,6 +2576,93 @@ PyCSDL2_RenderCopyEx(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderReadPixels()
+ *
+ * \code{.py}
+ * SDL_RenderReadPixels(renderer: SDL_Renderer, rect: SDL_Rect, format: int,
+ *                      pixels: buffer, pitch: int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderReadPixels(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer_obj;
+    SDL_Renderer *renderer;
+    Py_buffer rect, pixels;
+    int format, pitch, min_pitch, min_size, ret;
+    SDL_Rect r;
+    static char *kwlist[] = {"renderer", "rect", "format", "pixels", "pitch",
+                             NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO&iw*i", kwlist,
+                                     &renderer_obj,
+                                     PyCSDL2_ConvertRectRead, &rect,
+                                     &format, &pixels, &pitch))
+        return NULL;
+
+    if (!PyCSDL2_RendererPtr((PyObject*)renderer_obj, &renderer))
+        goto fail;
+
+    /* SDL assumes that pitch is positive */
+    if (pitch <= 0) {
+        PyErr_SetString(PyExc_ValueError, "pitch must be positive");
+        goto fail;
+    }
+
+    /*
+     * If !format, SDL will use the native pixel format of the window. As such,
+     * we need to get this pixel format as well to do proper bounds checking on
+     * the pixels buffer.
+     */
+    if (!format && Py_TYPE(renderer_obj->deftarget) == &PyCSDL2_WindowType) {
+        SDL_Window *window;
+
+        if (!PyCSDL2_WindowPtr(renderer_obj->deftarget, &window))
+            goto fail;
+
+        format = SDL_GetWindowPixelFormat(window);
+    }
+
+    if (rect.buf) {
+        r = *((SDL_Rect*)rect.buf);
+    } else {
+        float scaleX, scaleY;
+
+        /*
+         * SDL_RenderGetViewport() scales the actual viewport rect by the
+         * renderer scale, which causes precision errors. Temporarily set scale
+         * to 1.0f before calling SDL_RenderGetViewport().
+         */
+        SDL_RenderGetScale(renderer, &scaleX, &scaleY);
+        SDL_RenderSetScale(renderer, 1.0f, 1.0f);
+        SDL_RenderGetViewport(renderer, &r);
+        SDL_RenderSetScale(renderer, scaleX, scaleY);
+    }
+
+    min_pitch = SDL_BYTESPERPIXEL(format) * r.w;
+    min_size = pitch * (r.h ? r.h - 1 : 0) + min_pitch;
+    if (pixels.len < min_size) {
+        PyCSDL2_RaiseBufferSizeError("pixels", min_size, pixels.len);
+        goto fail;
+    }
+
+    ret = SDL_RenderReadPixels(renderer, rect.buf, format, pixels.buf, pitch);
+
+    PyBuffer_Release(&rect);
+    PyBuffer_Release(&pixels);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+
+fail:
+    PyBuffer_Release(&rect);
+    PyBuffer_Release(&pixels);
+    return NULL;
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderPresent()
  *
  * \code{.py}
