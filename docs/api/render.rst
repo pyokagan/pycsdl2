@@ -486,7 +486,7 @@ Drawing
    Sets the color used for drawing primitives, and for :func:`SDL_RenderClear`.
 
    :param renderer: The rendering context.
-   :type rendering: :class:`SDL_Renderer`
+   :type renderer: :class:`SDL_Renderer`
    :param int r: The red value used to draw on the rendering target, within the
                  range 0-255.
    :param int g: The green value used to draw on the rendering target, within
