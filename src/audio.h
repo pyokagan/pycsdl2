@@ -982,16 +982,10 @@ PyCSDL2_initaudio(PyObject *module)
     if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_AudioSpecType)) { return 0; }
-    Py_INCREF(&PyCSDL2_AudioSpecType);
-    if (PyModule_AddObject(module, "SDL_AudioSpec",
-                           (PyObject*) &PyCSDL2_AudioSpecType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_AudioSpecType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_AudioDeviceType)) { return 0; }
-    Py_INCREF(&PyCSDL2_AudioDeviceType);
-    if (PyModule_AddObject(module, "SDL_AudioDevice",
-                           (PyObject*) &PyCSDL2_AudioDeviceType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_AudioDeviceType) < 0)
         return 0;
 
     if (PyType_Ready(&PyCSDL2_WAVBufType)) { return 0; }

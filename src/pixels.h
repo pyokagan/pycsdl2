@@ -1024,16 +1024,10 @@ PyCSDL2_initpixels(PyObject *module)
 
     if (PyType_Ready(&PyCSDL2_PaletteColorsType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_PaletteType)) { return 0; }
-    Py_INCREF(&PyCSDL2_PaletteType);
-    if (PyModule_AddObject(module, "SDL_Palette",
-                           (PyObject*) &PyCSDL2_PaletteType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PaletteType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_PixelFormatType)) { return 0; }
-    Py_INCREF(&PyCSDL2_PixelFormatType);
-    if (PyModule_AddObject(module, "SDL_PixelFormat",
-                           (PyObject*) &PyCSDL2_PixelFormatType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PixelFormatType) < 0)
         return 0;
 
     return 1;

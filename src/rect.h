@@ -493,14 +493,10 @@ PyCSDL2_HasIntersection(PyObject *module, PyObject *args, PyObject *kwds)
 static int
 PyCSDL2_initrect(PyObject *module)
 {
-    if (PyType_Ready(&PyCSDL2_PointType) < 0) return 0;
-    Py_INCREF(&PyCSDL2_PointType);
-    if (PyModule_AddObject(module, "SDL_Point", (PyObject*)&PyCSDL2_PointType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_RectType) < 0) return 0;
-    Py_INCREF(&PyCSDL2_RectType);
-    if (PyModule_AddObject(module, "SDL_Rect", (PyObject*) &PyCSDL2_RectType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectType) < 0)
         return 0;
 
     return 1;

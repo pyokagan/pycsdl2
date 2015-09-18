@@ -208,6 +208,33 @@ PyCSDL2_PyModuleAddConstants(PyObject *module,
 }
 
 /**
+ * \brief Adds a type object to a module.
+ *
+ * \returns 0 on success, -1 if an exception occurred.
+ */
+static int
+PyCSDL2_PyModuleAddType(PyObject *module, PyTypeObject *type)
+{
+    const char *name;
+
+    if (PyType_Ready(type) < 0)
+        return -1;
+
+    Py_INCREF(type);
+
+    name = strchr(type->tp_name, '.');
+    if (name)
+        name += 1;
+    else
+        name = type->tp_name;
+
+    if (PyModule_AddObject(module, name, (PyObject *)type) < 0)
+        return -1;
+
+    return 0;
+}
+
+/**
  * \brief Asserts that condition is true.
  *
  * \returns 1 if the condition is true, 0 with an AssertionError exception set

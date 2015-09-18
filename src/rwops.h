@@ -1393,9 +1393,7 @@ PyCSDL2_initrwops(PyObject *module)
     if (PyType_Ready(&PyCSDL2_RWWriteFuncType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_RWCloseFuncType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_RWopsType)) { return 0; }
-    Py_INCREF(&PyCSDL2_RWopsType);
-    if (PyModule_AddObject(module, "SDL_RWops", (PyObject*)&PyCSDL2_RWopsType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RWopsType) < 0)
         return 0;
 
     return 1;

@@ -883,10 +883,7 @@ PyCSDL2_initsurface(PyObject *module)
     if (PyType_Ready(&PyCSDL2_SurfacePixelsType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_SurfaceRectType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_SurfaceType)) { return 0; }
-    Py_INCREF(&PyCSDL2_SurfaceType);
-    if (PyModule_AddObject(module, "SDL_Surface",
-                           (PyObject*) &PyCSDL2_SurfaceType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_SurfaceType) < 0)
         return 0;
 
     return 1;
