@@ -2298,11 +2298,9 @@ PyCSDL2_initrender(PyObject *module)
 
         {NULL, 0}
     };
-    const PyCSDL2_Constant *c;
 
-    for (c = constants; c->name; c++)
-        if (PyModule_AddIntConstant(module, c->name, c->value))
-            return 0;
+    if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_RendererInfoMemType)) { return 0; }
 
