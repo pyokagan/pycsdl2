@@ -180,18 +180,32 @@
  *     {"CONSTANT2", 2},
  *     {0}
  * };
- * const PyCSDL2_Constant *c;
- * for (c = constants; c->name != NULL; ++c) {
- *     if (PyModule_AddIntConstant(module, c->name, c->value) != 0) {
- *         return 0;
- *     }
- * }
+ * if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
+ *     return 0;
  * \endcode
  */
 typedef struct {
     const char *name; /*!< name of constant */
     long value;       /*!< value of constant */
 } PyCSDL2_Constant;
+
+/**
+ * \brief Adds an array of constants to the module.
+ *
+ * \returns 0 on success, -1 if an exception occurred.
+ */
+static int
+PyCSDL2_PyModuleAddConstants(PyObject *module,
+                             const PyCSDL2_Constant *constants)
+{
+    const PyCSDL2_Constant *c;
+
+    for (c = constants; c->name; c++)
+        if (PyModule_AddIntConstant(module, c->name, c->value) < 0)
+            return -1;
+
+    return 0;
+}
 
 /**
  * \brief Asserts that condition is true.
