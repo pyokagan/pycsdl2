@@ -28,6 +28,7 @@
 #include <Python.h>
 #include "../include/pycsdl2.h"
 #include "distutils.h"
+#include "array.h"
 #include "error.h"
 #include "events.h"
 #include "init.h"
@@ -44,6 +45,8 @@
  * \sa PyCSDL2_Module
  */
 static PyMethodDef PyCSDL2_Methods[] = {
+
+    /* array.h */
 
     /* audio.h */
 
