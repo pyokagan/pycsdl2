@@ -338,9 +338,7 @@ PyCSDL2_initvideo(PyObject *m)
     if (PyCSDL2_PyModuleAddConstants(m, constants) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_WindowType)) { return 0; }
-    Py_INCREF(&PyCSDL2_WindowType);
-    if (PyModule_AddObject(m, "SDL_Window", (PyObject*) &PyCSDL2_WindowType))
+    if (PyCSDL2_PyModuleAddType(m, &PyCSDL2_WindowType) < 0)
         return 0;
 
     return 1;
