@@ -34,6 +34,17 @@
 #include "error.h"
 
 /**
+ * \defgroup csdl2_SDL_EventArrayView csdl2.SDL_EventArrayView
+ *
+ * @{
+ */
+
+PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_EventArrayView, SDL_Event, Uint32_UNIT "52x",
+                       "SDL_EventArrayView");
+
+/** @} */
+
+/**
  * \defgroup csdl2_SDL_EventMem csdl2.SDL_EventMem
  *
  * @{
@@ -1058,6 +1069,9 @@ PyCSDL2_initevents(PyObject *module)
     if (PyType_Ready(&PyCSDL2_EventMemType)) { return 0; }
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_MouseMotionEventType) < 0)
+        return 0;
+
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventArrayViewType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventType) < 0)

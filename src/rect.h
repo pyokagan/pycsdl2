@@ -35,6 +35,17 @@
 #include "error.h"
 
 /**
+ * \defgroup csdl2_SDL_PointArrayView csdl2.SDL_PointArrayView
+ *
+ * @{
+ */
+
+PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_PointArrayView, SDL_Point, "ii",
+                       "SDL_PointArrayView");
+
+/** @} */
+
+/**
  * \defgroup csdl2_SDL_Point csdl2.SDL_Point
  *
  * @{
@@ -254,6 +265,17 @@ PyCSDL2_ConvertPointRead(PyObject *object, Py_buffer *view)
     }
     return Py_CLEANUP_SUPPORTED;
 }
+
+/** @} */
+
+/**
+ * \defgroup csdl2_SDL_RectArrayView csdl2.SDL_RectArrayView
+ *
+ * @{
+ */
+
+PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_RectArrayView, SDL_Rect, "iiii",
+                       "SDL_RectArrayView");
 
 /** @} */
 
@@ -501,7 +523,13 @@ PyCSDL2_HasIntersection(PyObject *module, PyObject *args, PyObject *kwds)
 static int
 PyCSDL2_initrect(PyObject *module)
 {
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointArrayViewType) < 0)
+        return 0;
+
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointType) < 0)
+        return 0;
+
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectArrayViewType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectType) < 0)
