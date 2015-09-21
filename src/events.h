@@ -531,11 +531,15 @@ typedef struct PyCSDL2_Event {
     PyObject_HEAD
     /** \brief Head of weak reference list */
     PyObject *in_weakreflist;
-    /** \brief Pointer to the PyCSDL2_EventMem for the event */
-    PyCSDL2_EventMem *ev_mem;
+    /** \brief Pointer to SDL_Event data */
+    SDL_Event *event;
+    /** \brief Backing array */
+    PyObject *array;
     /** \brief Object providing view to "motion" attribute of SDL_Event */
     PyCSDL2_MouseMotionEvent *motion;
 } PyCSDL2_Event;
+
+static PyTypeObject PyCSDL2_EventType;
 
 /**
  * \brief Instance creation function for PyCSDL2_EventType
@@ -546,21 +550,24 @@ static PyCSDL2_Event *
 PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_Event *self;
+    PyCSDL2_EventMem *ev_mem;
     PyTypeObject *t;
 
     if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
         return NULL;
-    if (!(self->ev_mem = PyCSDL2_EventMemCreate())) {
+    if (!(ev_mem = PyCSDL2_EventMemCreate())) {
         Py_DECREF(self);
         return NULL;
     }
+    self->array = (PyObject *)ev_mem;
+    self->event = &ev_mem->ev;
 
     t = &PyCSDL2_MouseMotionEventType;
     self->motion = PyCSDL2_MouseMotionEventNew(t, NULL, NULL);
     if (!self->motion)
         goto fail;
-    PyCSDL2_Set(self->motion->array, (PyObject *)self->ev_mem);
-    self->motion->motion = &self->ev_mem->ev.motion;
+    PyCSDL2_Set(self->motion->array, self->array);
+    self->motion->motion = &ev_mem->ev.motion;
 
     return self;
 
@@ -579,7 +586,7 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
 {
     if (self->in_weakreflist)
         PyObject_ClearWeakRefs((PyObject*) self);
-    Py_XDECREF(self->ev_mem);
+    Py_XDECREF(self->array);
     Py_XDECREF(self->motion);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
@@ -590,21 +597,25 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
  * A PyCSDL2_Event object is valid if it's underlying ev_mem object is not
  * NULL.
  *
+ * \param writeable Set to true to verify that the SDL_Event can be written to.
  * \returns 1 if the object is valid, 0 with an exception set otherwise.
  */
 static int
-PyCSDL2_EventValid(PyCSDL2_Event *self)
+PyCSDL2_EventValid(PyCSDL2_Event *self, int writeable)
 {
-    if (!PyCSDL2_Assert(self))
-        return 0;
-
-    if (!self->ev_mem) {
-        PyErr_SetString(PyExc_ValueError, "invalid SDL_Event");
+    if (Py_TYPE(self) != &PyCSDL2_EventType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Event", (PyObject *)self);
         return 0;
     }
 
-    if (!PyCSDL2_Assert(self->motion))
-        return 0;
+    if (writeable && Py_TYPE(self->array) == &PyCSDL2_EventArrayViewType) {
+        PyCSDL2_EventArrayView *v = (PyCSDL2_EventArrayView *)self->array;
+
+        if (v->flags & PyCSDL2_ARRAYVIEW_READONLY) {
+            PyCSDL2_RaiseReadonlyError((PyObject *)self);
+            return 0;
+        }
+    }
 
     return 1;
 }
@@ -615,18 +626,16 @@ PyCSDL2_EventValid(PyCSDL2_Event *self)
 static PyObject *
 PyCSDL2_EventGetType(PyCSDL2_Event *self, void *closure)
 {
-    if (!PyCSDL2_EventValid(self))
-        return NULL;
-    return PyLong_FromUnsignedLong(self->ev_mem->ev.type);
+    return PyLong_FromUnsignedLong(self->event->type);
 }
 
 /** \brief Setter for csdl2.SDL_Event.type */
 static int
 PyCSDL2_EventSetType(PyCSDL2_Event *self, PyObject *value, void *closure)
 {
-    if (!PyCSDL2_EventValid(self))
+    if (!PyCSDL2_EventValid(self, 1))
         return -1;
-    return PyCSDL2_LongAsUint32(value, &self->ev_mem->ev.type);
+    return PyCSDL2_LongAsUint32(value, &self->event->type);
 }
 
 /** \brief Getter for SDL_Event.motion */
@@ -667,14 +676,17 @@ PyCSDL2_EventGetBuffer(PyCSDL2_Event *self, Py_buffer *view, int flags)
     if (!PyCSDL2_Assert(sizeof(SDL_Event) == 56))
         return -1;
 
-    if (!PyCSDL2_EventValid(self))
+    if (!PyCSDL2_EventValid(self, 0))
         return -1;
 
-    view->buf = &self->ev_mem->ev;
+    view->buf = self->event;
     Py_INCREF(self);
     view->obj = (PyObject*)self;
     view->len = sizeof(SDL_Event);
-    view->readonly = 0;
+    if (Py_TYPE(self->array) == &PyCSDL2_EventArrayViewType)
+        view->readonly = ((PyCSDL2_EventArrayView*)self->array)->flags & PyCSDL2_ARRAYVIEW_READONLY;
+    else
+        view->readonly = 0;
     view->itemsize = sizeof(SDL_Event);
     view->format = NULL;
     if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
@@ -761,7 +773,7 @@ PyCSDL2_EventCreate(const SDL_Event *ev)
     if (!self)
         return NULL;
 
-    self->ev_mem->ev = *ev;
+    *(self->event) = *ev;
 
     return (PyObject*)self;
 }
@@ -778,15 +790,11 @@ PyCSDL2_EventPtr(PyObject *obj, SDL_Event **out)
 {
     PyCSDL2_Event *self = (PyCSDL2_Event*)obj;
 
-    if (!PyCSDL2_Assert(obj) || !PyCSDL2_Assert(out))
+    if (!PyCSDL2_EventValid(self, 1))
         return 0;
 
-    if (Py_TYPE(obj) != &PyCSDL2_EventType) {
-        PyCSDL2_RaiseTypeError(NULL, "SDL_Event", obj);
-        return 0;
-    }
-
-    *out = &self->ev_mem->ev;
+    if (out)
+        *out = self->event;
 
     return 1;
 }
