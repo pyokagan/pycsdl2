@@ -140,6 +140,69 @@ class ArrayViewBaseTest:
         y = memoryview(view[0])
         self.assertTrue(y.readonly)
 
+    def test_slice(self):
+        "slicing works"
+        view = self.view[::2]
+        self.assertIs(type(view), self.cls)
+        self.assertEqual(len(view), 2)
+
+        # Using getitem on the slice should yield the correct elements
+        # (their memory contents are the same)
+        self.assertEqual(memoryview(view[0]).tobytes(),
+                         memoryview(self.array[0:1]).tobytes())
+        self.assertEqual(memoryview(view[1]).tobytes(),
+                         memoryview(self.array[2:3]).tobytes())
+
+        # Check to see that the buffer info tallies up
+        mem = memoryview(view)
+        x = memoryview(self.array)
+        self.assertEqual(mem.itemsize, x.itemsize)
+        self.assertEqual(mem.nbytes, x.itemsize * 2)
+        self.assertEqual(mem.ndim, 1)
+        self.assertIs(mem.obj, view)
+        self.assertEqual(mem.shape, (2,))
+        self.assertEqual(mem.strides, (x.itemsize * 2,))
+
+    def test_slice_stride(self):
+        "slicing strides should be multiplicative"
+        # should be equivalent to doing self.view[::4]
+        view = self.view[::2][::2]
+        self.assertIs(type(view), self.cls)
+        self.assertEqual(len(view), 1)
+
+        # Check to see that the buffer info tallies up
+        mem = memoryview(view)
+        x = memoryview(self.array)
+        self.assertEqual(mem.itemsize, x.itemsize)
+        self.assertEqual(mem.nbytes, x.itemsize * 1)
+        self.assertEqual(mem.ndim, 1)
+        self.assertIs(mem.obj, view)
+        self.assertEqual(mem.shape, (1,))
+        self.assertEqual(mem.strides, (x.itemsize * 4,))
+
+    def test_slice_neg_stride(self):
+        "slicing with negative strides"
+        view = self.view[::-2]
+        self.assertIs(type(view), self.cls)
+        self.assertEqual(len(view), 2)
+
+        # Using getitem on the slice should yield the correct elements
+        # (their memory contents are the same)
+        self.assertEqual(memoryview(view[0]).tobytes(),
+                         memoryview(self.array[3:4]).tobytes())
+        self.assertEqual(memoryview(view[1]).tobytes(),
+                         memoryview(self.array[1:2]).tobytes())
+
+        # Check to see that the buffer info tallies up
+        mem = memoryview(view)
+        x = memoryview(self.array)
+        self.assertEqual(mem.itemsize, x.itemsize)
+        self.assertEqual(mem.nbytes, x.itemsize * 2)
+        self.assertEqual(mem.ndim, 1)
+        self.assertIs(mem.obj, view)
+        self.assertEqual(mem.shape, (2,))
+        self.assertEqual(mem.strides, (x.itemsize * -2,))
+
 
 class TestEventArrayView(ArrayViewBaseTest, unittest.TestCase):
     "Tests SDL_EventArrayView"

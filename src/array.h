@@ -57,6 +57,7 @@
     char *buf; \
     Py_ssize_t len; \
     Py_ssize_t stride; \
+    PyObject *master; \
     Py_buffer *view;
 
 /**
@@ -83,6 +84,7 @@
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_self = (void*)(p_self); \
         \
         _avr_self->buf = NULL; \
+        Py_CLEAR(_avr_self->master); \
         if (_avr_self->view) { \
             PyBuffer_Release(_avr_self->view); \
             PyMem_Free(_avr_self->view); \
@@ -133,6 +135,29 @@
         _aviv_self->stride = (p_view)->strides ? (p_view)->strides[0] : sizeof(p_type); \
         _aviv_self->view = (p_view); \
         p_ret = 0; \
+    } while (0)
+
+/**
+ * \brief Initializes an array view from a pointer.
+ *
+ * \param[in] p_self Array view PyObject* to initialize.
+ * \param[in] p_flags Array view flags.
+ * \param[in] p_buf Buffer pointer.
+ * \param[in] p_len (Py_ssize_t) Number of elements in the array.
+ * \param[in] p_stride (Py_ssize_t) Stride of the array
+ * \param[in] p_master (PyObject*) Array view managing the buffer
+ * \param[in] p_type C type of the array view element.
+ */
+#define PyCSDL2_ARRAYVIEW_INIT_PTR(p_self, p_flags, p_buf, p_len, p_stride, \
+                                   p_master) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avip_self = (void *)(p_self); \
+        \
+        _avip_self->flags = (p_flags); \
+        _avip_self->buf = (char *)(p_buf); \
+        _avip_self->len = (p_len); \
+        _avip_self->stride = (p_stride); \
+        PyCSDL2_Set(_avip_self->master, (p_master)); \
     } while (0)
 
 /**
@@ -216,6 +241,53 @@
         } \
         \
         p_out = (p_getitem_fn)((p_type*)(_avgi_self->buf + (p_index) * _avgi_self->stride), (PyObject*)_avgi_self); \
+    } while (0)
+
+/**
+ * Array subscript.
+ */
+#define PyCSDL2_ARRAYVIEW_SUBSCRIPT(p_out, p_self, p_key, p_type, p_typeobject, p_getitem_fn) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avs_self = (void*)(p_self); \
+        \
+        if (PyIndex_Check(p_key)) { \
+            Py_ssize_t _avs_index; \
+            \
+            _avs_index = PyNumber_AsSsize_t(key, PyExc_IndexError); \
+            if (_avs_index == -1 && PyErr_Occurred()) { \
+                p_out = NULL; \
+                break; \
+            } \
+            \
+            if (_avs_index < 0) \
+                _avs_index = _avs_self->len + _avs_index; \
+            \
+            PyCSDL2_ARRAYVIEW_GETITEM(p_out, _avs_self, _avs_index, p_type, p_getitem_fn); \
+        } else if (PySlice_Check(p_key)) { \
+            PyObject *_avs_out; \
+            Py_ssize_t _avs_start, _avs_stop, _avs_step, _avs_len; \
+            \
+            if (PySlice_GetIndicesEx((p_key), _avs_self->len, &_avs_start,\
+                                     &_avs_stop, &_avs_step, &_avs_len) < 0) {\
+                p_out = NULL; \
+                break; \
+            } \
+            \
+            _avs_out = (p_typeobject)->tp_alloc((p_typeobject), 0); \
+            if (!_avs_out) { \
+                p_out = NULL; \
+                break; \
+            } \
+            \
+            PyCSDL2_ARRAYVIEW_INIT_PTR(_avs_out, _avs_self->flags, \
+                                       _avs_self->buf + _avs_start * _avs_self->stride, \
+                                       _avs_len, _avs_self->stride * _avs_step,\
+                                       _avs_self->master ? _avs_self->master : (PyObject *)_avs_self); \
+            p_out = (PyObject *)_avs_out; \
+        } else { \
+            PyErr_SetString(PyExc_TypeError, "Invalid slice key"); \
+            p_out = NULL; \
+        } \
     } while (0)
 
 /**
@@ -319,6 +391,14 @@
     } \
     \
     static PyObject * \
+    p_prefix ## Subscript(PyObject *self, PyObject *key) \
+    { \
+        PyObject *out; \
+        PyCSDL2_ARRAYVIEW_SUBSCRIPT(out, self, key, p_type, &(p_prefix ## Type), p_getitem_fn); \
+        return out; \
+    } \
+    \
+    static PyObject * \
     p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
     { \
         static char *kwlist[] = {NULL}; \
@@ -345,7 +425,7 @@
     \
     static PyMappingMethods p_prefix ## AsMapping = { \
         /* mp_length        */ p_prefix ## Length, \
-        /* mp_subscript     */ NULL, \
+        /* mp_subscript     */ p_prefix ## Subscript, \
         /* mp_ass_subscript */ NULL \
     }; \
     \
