@@ -723,6 +723,19 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
 }
 
 /**
+ * \brief Set "object is readonly" exception.
+ *
+ * \param obj The object.
+ * \returns NULL
+ */
+static void *
+PyCSDL2_RaiseReadonlyError(PyObject *obj)
+{
+    return PyErr_Format(PyExc_TypeError, "'%s.100s' object is readonly",
+                        Py_TYPE(obj)->tp_name);
+}
+
+/**
  * \brief Validates the Py_buffer, ensuring we can do scalar copies with it.
  *
  * Validates the Py_buffer such that we can do:

@@ -32,6 +32,7 @@
 #include <SDL_rect.h>
 #include "../include/pycsdl2.h"
 #include "util.h"
+#include "array.h"
 #include "error.h"
 
 /**
@@ -56,8 +57,14 @@ typedef struct PyCSDL2_Point {
     PyObject_HEAD
     /** \brief Head of weak ref list */
     PyObject *in_weakreflist;
-    /** \brief SDL_Point this instance wraps */
-    SDL_Point point;
+    /** Pointer to the SDL_Point data */
+    SDL_Point *point;
+    union {
+        /** \brief The backing PyCSDL2_PointArrayView, if any. */
+        PyCSDL2_PointArrayView *array;
+        /** \brief The SDL_Point data if not backed by an array */
+        SDL_Point data;
+    } u;
 } PyCSDL2_Point;
 
 static PyTypeObject PyCSDL2_PointType;
@@ -72,6 +79,8 @@ PyCSDL2_PointNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
     if (!self)
         return NULL;
 
+    self->point = &self->u.data;
+
     return (PyObject*)self;
 }
 
@@ -79,8 +88,35 @@ PyCSDL2_PointNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static void
 PyCSDL2_PointDealloc(PyCSDL2_Point *self)
 {
+    if (self->point != &self->u.data)
+        Py_CLEAR(self->u.array);
     PyObject_ClearWeakRefs((PyObject*)self);
     Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+/**
+ * \brief Validates the PyCSDL2_Point.
+ *
+ * \param self PyCSDL2_Point to validate.
+ * \param writeable Set to true to verify that the PyCSDL2_Point can be written
+ *                  to.
+ * \returns 1 if the PyCSDL2_Point is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_PointValid(PyCSDL2_Point *self, int writeable)
+{
+    if (Py_TYPE(self) != &PyCSDL2_PointType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Point", (PyObject *)self);
+        return 0;
+    }
+
+    if (writeable && self->point != &self->u.data &&
+        self->u.array->flags & PyCSDL2_ARRAYVIEW_READONLY) {
+        PyCSDL2_RaiseReadonlyError((PyObject *)self);
+        return 0;
+    }
+
+    return 1;
 }
 
 /** \brief tp_init for PyCSDL2_PointType */
@@ -94,8 +130,11 @@ PyCSDL2_PointInit(PyObject *obj, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|ii", kwlist, &x, &y))
         return -1;
 
-    self->point.x = x;
-    self->point.y = y;
+    if (!PyCSDL2_PointValid(self, 1))
+        return -1;
+
+    self->point->x = x;
+    self->point->y = y;
     return 0;
 }
 
@@ -106,11 +145,14 @@ PyCSDL2_PointGetBuffer(PyCSDL2_Point *self, Py_buffer *view, int flags)
     static Py_ssize_t shape[1] = {1};
     static Py_ssize_t strides[1] = {sizeof(SDL_Point)};
 
-    view->buf = &self->point;
+    view->buf = self->point;
     Py_INCREF(self);
     view->obj = (PyObject*)self;
     view->len = sizeof(SDL_Point);
-    view->readonly = 0;
+    if (self->point == &self->u.data)
+        view->readonly = 0;
+    else
+        view->readonly = (self->u.array->flags & PyCSDL2_ARRAYVIEW_READONLY);
     view->itemsize = sizeof(SDL_Point);
     view->format = NULL;
     if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
@@ -133,12 +175,52 @@ static PyBufferProcs PyCSDL2_PointBufferProcs = {
     (releasebufferproc) NULL
 };
 
-/** \brief List of members in PyCSDL2_PointType */
-static PyMemberDef PyCSDL2_PointMembers[] = {
-    {"x", T_INT, offsetof(PyCSDL2_Point, point.x), 0,
-     "The x location of the point."},
-    {"y", T_INT, offsetof(PyCSDL2_Point, point.y), 0,
-     "The y location of the point."},
+/** \brief Getter for SDL_Point.x */
+static PyObject *
+PyCSDL2_PointGetX(PyCSDL2_Point *self, void *closure)
+{
+    return PyLong_FromLong(self->point->x);
+}
+
+/** \brief Setter for SDL_Point.x */
+static int
+PyCSDL2_PointSetX(PyCSDL2_Point *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_PointValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->point->x);
+}
+
+/** \brief Getter for SDL_Point.y */
+static PyObject *
+PyCSDL2_PointGetY(PyCSDL2_Point *self, void *closure)
+{
+    return PyLong_FromLong(self->point->y);
+}
+
+/** \brief Setter for SDL_Point.y */
+static int
+PyCSDL2_PointSetY(PyCSDL2_Point *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_PointValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->point->y);
+}
+
+/** \brief List of attributes of PyCSDL2_PointType */
+static PyGetSetDef PyCSDL2_PointGetSetters[] = {
+    {"x",
+     (getter)PyCSDL2_PointGetX,
+     (setter)PyCSDL2_PointSetX,
+     "The x location of the point.",
+     NULL},
+    {"y",
+     (getter)PyCSDL2_PointGetY,
+     (setter)PyCSDL2_PointSetY,
+     "The y location of the point.",
+     NULL},
     {NULL}
 };
 
@@ -173,8 +255,8 @@ static PyTypeObject PyCSDL2_PointType = {
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
     /* tp_methods        */ 0,
-    /* tp_members        */ PyCSDL2_PointMembers,
-    /* tp_getset         */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_PointGetSetters,
     /* tp_base           */ 0,
     /* tp_dict           */ 0,
     /* tp_descr_get      */ 0,
@@ -201,7 +283,7 @@ PyCSDL2_PointCreate(const SDL_Point *point)
         return NULL;
 
     if (point)
-        self->point = *point;
+        self->u.data = *point;
 
     return (PyObject*)self;
 }
@@ -218,16 +300,11 @@ PyCSDL2_PointPtr(PyObject *obj, SDL_Point **out)
 {
     PyCSDL2_Point *self = (PyCSDL2_Point*)obj;
 
-    if (!PyCSDL2_Assert(obj))
+    if (!PyCSDL2_PointValid(self, 1))
         return 0;
-
-    if (Py_TYPE(obj) != &PyCSDL2_PointType) {
-        PyCSDL2_RaiseTypeError(NULL, "SDL_Point", obj);
-        return 0;
-    }
 
     if (out)
-        *out = &self->point;
+        *out = self->point;
 
     return 1;
 }
