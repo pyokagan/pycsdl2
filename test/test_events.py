@@ -173,16 +173,26 @@ class TestMouseMotionEvent(unittest.TestCase):
         self.assertTrue(mem.c_contiguous)
         self.assertTrue(mem.contiguous)
         self.assertFalse(mem.readonly)
-        self.assertEqual(mem.format, 'B')
-        self.assertEqual(mem.itemsize, 1)
         self.assertEqual(mem.ndim, 1)
-        self.assertEqual(mem.strides, (1,))
+        self.assertEqual(mem.shape, (1,))
 
     def test_buffer_writable(self):
         "Exported buffer contains writable valid memory"
-        mem = memoryview(self.ev)
-        for i in range(mem.nbytes):
-            mem[i] = 42
+        try:
+            import numpy as np
+        except ImportError:
+            raise unittest.SkipTest('could not import numpy')
+        mem = np.asarray(self.ev)
+        self.assertTrue(mem.flags.writeable)
+        mem[0][0] = 1   # type
+        mem[0][1] = 2   # timestamp
+        mem[0][2] = 3   # windowID
+        mem[0][3] = 4   # which
+        mem[0][4] = 5   # state
+        mem[0][5] = -1  # x
+        mem[0][6] = -2  # y
+        mem[0][7] = -3  # xrel
+        mem[0][8] = -4  # yrel
 
     def test_buffer_zeroes(self):
         "buffert is initialized with 0s"

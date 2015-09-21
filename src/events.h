@@ -372,10 +372,33 @@ static int
 PyCSDL2_MouseMotionEventGetBuffer(PyCSDL2_MouseMotionEvent *self,
                                   Py_buffer *view, int flags)
 {
+    static Py_ssize_t shape[1] = {1};
+    static Py_ssize_t strides[1] = {sizeof(SDL_MouseMotionEvent)};
+
     if (!PyCSDL2_MouseMotionEventValid(self))
         return -1;
-    return PyBuffer_FillInfo(view, (PyObject*) self, &self->ev_mem->ev.motion,
-                             sizeof(SDL_MouseMotionEvent), 0, flags);
+
+    view->buf = &self->ev_mem->ev.motion;
+    Py_INCREF(self);
+    view->obj = (PyObject *)self;
+    view->len = sizeof(SDL_MouseMotionEvent);
+    view->readonly = 0;
+    view->itemsize = sizeof(SDL_MouseMotionEvent);
+    view->format = NULL;
+    if ((flags & PyBUF_FORMAT) == PyBUF_FORMAT)
+        view->format = Uint32_UNIT Uint32_UNIT Uint32_UNIT Uint32_UNIT
+                       Uint32_UNIT Sint32_UNIT Sint32_UNIT Sint32_UNIT
+                       Sint32_UNIT;
+    view->ndim = 1;
+    view->shape = NULL;
+    if ((flags & PyBUF_ND) == PyBUF_ND)
+        view->shape = shape;
+    view->strides = NULL;
+    if ((flags & PyBUF_STRIDES) == PyBUF_STRIDES)
+        view->strides = strides;
+    view->suboffsets = NULL;
+    view->internal = NULL;
+    return 0;
 }
 
 /** \brief Buffer protocol definition for PyCSDL2_MouseMotionEventType */
