@@ -723,6 +723,48 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
 }
 
 /**
+ * \brief Validates the Py_buffer, ensuring we can do scalar copies with it.
+ *
+ * Validates the Py_buffer such that we can do:
+ *
+ * \code{.c}
+ * my_struct = *((my_struct *)view->buf);
+ * \endcode
+ *
+ * on it.
+ *
+ * In other words:
+ *
+ * \li The buffer must have an ndim of 0 or 1.
+ * \li The buffer's itemsize == the buffer's len == itemsize
+ */
+static int
+PyCSDL2_ValidateScalarBuffer(Py_buffer *view, Py_ssize_t itemsize)
+{
+    if (view->ndim > 1) {
+        PyErr_Format(PyExc_ValueError, "Buffer ndim must be either 0 or 1. "
+                     "Got: %zd", view->ndim);
+        return -1;
+    }
+
+    if (view->itemsize != itemsize) {
+        PyErr_Format(PyExc_ValueError, "Invalid buffer itemsize. "
+                     "Expected: %zd bytes. Got: %zd bytes.",
+                     itemsize, view->itemsize);
+        return -1;
+    }
+
+    if (view->len != itemsize) {
+        PyErr_Format(PyExc_ValueError, "Invalid buffer size. "
+                     "Expected: %zd bytes. Got: %zd bytes.",
+                     itemsize, view->len);
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
  * \brief Validates the Py_buffer, ensuring that it can be accessed as an
  *        single-dimensional array.
  *
