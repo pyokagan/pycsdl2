@@ -33,6 +33,8 @@
 #include "util.h"
 #include "error.h"
 
+static PyObject *PyCSDL2_EventElemCreate(SDL_Event *ev, PyObject *array);
+
 /**
  * \defgroup csdl2_SDL_EventArrayView csdl2.SDL_EventArrayView
  *
@@ -40,7 +42,7 @@
  */
 
 PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_EventArrayView, SDL_Event, Uint32_UNIT "52x",
-                       "SDL_EventArrayView");
+                       "SDL_EventArrayView", PyCSDL2_EventElemCreate);
 
 /** @} */
 
@@ -495,6 +497,26 @@ PyCSDL2_MouseMotionEventCreate(const SDL_MouseMotionEvent *ev)
 }
 
 /**
+ * \brief Creates an instance of PyCSDL2_MouseMotionEvent that points to a
+ *        PyCSDL2_EventArrayView.
+ */
+static PyObject *
+PyCSDL2_MouseMotionEventElemCreate(SDL_MouseMotionEvent *motion, PyObject *array)
+{
+    PyCSDL2_MouseMotionEvent *self;
+    PyTypeObject *type = &PyCSDL2_MouseMotionEventType;
+
+    self = (PyCSDL2_MouseMotionEvent *)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    self->motion = motion;
+    PyCSDL2_Set(self->array, array);
+
+    return (PyObject *)self;
+}
+
+/**
  * \brief Borrows the SDL_MouseMotionEvent managed by the
  *        PyCSDL2_MouseMotionEvent object.
  *
@@ -542,6 +564,19 @@ typedef struct PyCSDL2_Event {
 static PyTypeObject PyCSDL2_EventType;
 
 /**
+ * \brief Populates the fields of the PyCSDL2_Event.
+ */
+static int
+PyCSDL2_EventPopulate(PyCSDL2_Event *self, SDL_Event *event, PyObject *array)
+{
+    self->motion = (PyCSDL2_MouseMotionEvent *)PyCSDL2_MouseMotionEventElemCreate(&event->motion, array);
+    if (!self->motion)
+        return -1;
+
+    return 0;
+}
+
+/**
  * \brief Instance creation function for PyCSDL2_EventType
  *
  * Sets PyCSDL2_Event.ev_mem to a new instance of PyCSDL2_EventMemType.
@@ -551,7 +586,6 @@ PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_Event *self;
     PyCSDL2_EventMem *ev_mem;
-    PyTypeObject *t;
 
     if (!(self = (PyCSDL2_Event*)type->tp_alloc(type, 0)))
         return NULL;
@@ -562,18 +596,12 @@ PyCSDL2_EventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
     self->array = (PyObject *)ev_mem;
     self->event = &ev_mem->ev;
 
-    t = &PyCSDL2_MouseMotionEventType;
-    self->motion = PyCSDL2_MouseMotionEventNew(t, NULL, NULL);
-    if (!self->motion)
-        goto fail;
-    PyCSDL2_Set(self->motion->array, self->array);
-    self->motion->motion = &ev_mem->ev.motion;
+    if (PyCSDL2_EventPopulate(self, &ev_mem->ev, (PyObject *)ev_mem) < 0) {
+        Py_DECREF(self);
+        return NULL;
+    }
 
     return self;
-
-fail:
-    Py_DECREF(self);
-    return NULL;
 }
 
 /**
@@ -776,6 +804,33 @@ PyCSDL2_EventCreate(const SDL_Event *ev)
     *(self->event) = *ev;
 
     return (PyObject*)self;
+}
+
+/**
+ * \brief Creates a new PyCSDL2_Event instance that points to a
+ *        PyCSDL2_EventArrayView.
+ *
+ * \param
+ */
+static PyObject *
+PyCSDL2_EventElemCreate(SDL_Event *event, PyObject *array)
+{
+    PyCSDL2_Event *self;
+    PyTypeObject *type = &PyCSDL2_EventType;
+
+    self = (PyCSDL2_Event *)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    self->event = event;
+    PyCSDL2_Set(self->array, array);
+
+    if (PyCSDL2_EventPopulate(self, event, array) < 0) {
+        Py_DECREF(self);
+        return NULL;
+    }
+
+    return (PyObject *)self;
 }
 
 /**

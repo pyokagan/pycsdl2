@@ -35,6 +35,8 @@
 #include "array.h"
 #include "error.h"
 
+static PyObject *PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array);
+
 /**
  * \defgroup csdl2_SDL_PointArrayView csdl2.SDL_PointArrayView
  *
@@ -42,7 +44,7 @@
  */
 
 PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_PointArrayView, SDL_Point, "ii",
-                       "SDL_PointArrayView");
+                       "SDL_PointArrayView", PyCSDL2_PointElemCreate);
 
 /** @} */
 
@@ -289,6 +291,30 @@ PyCSDL2_PointCreate(const SDL_Point *point)
 }
 
 /**
+ * \brief Creates a new PyCSDL2_Point instance that points to a
+ *        PyCSDL2_PointArrayView.
+ *
+ * \param point Pointer to the SDL_Point memory.
+ * \param array The PyCSDL2_PointArrayView
+ * \returns The new PyCSDL2_Point object, or NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array)
+{
+    PyCSDL2_Point *self;
+
+    self = (PyCSDL2_Point *)PyCSDL2_PointNew(&PyCSDL2_PointType, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    self->point = point;
+    self->u.array = NULL;
+    PyCSDL2_Set(self->u.array, (PyCSDL2_PointArrayView *)array);
+
+    return (PyObject *)self;
+}
+
+/**
  * \brief Borrows a pointer to the SDL_Point managed by the PyCSDL2_Point.
  *
  * \param obj The PyCSDL2_Point object
@@ -345,6 +371,8 @@ PyCSDL2_ConvertPointRead(PyObject *object, Py_buffer *view)
 
 /** @} */
 
+static PyObject *PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array);
+
 /**
  * \defgroup csdl2_SDL_RectArrayView csdl2.SDL_RectArrayView
  *
@@ -352,7 +380,7 @@ PyCSDL2_ConvertPointRead(PyObject *object, Py_buffer *view)
  */
 
 PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_RectArrayView, SDL_Rect, "iiii",
-                       "SDL_RectArrayView");
+                       "SDL_RectArrayView", PyCSDL2_RectElemCreate);
 
 /** @} */
 
@@ -631,6 +659,30 @@ PyCSDL2_RectCreate(const SDL_Rect *rect)
         self->u.data = *rect;
 
     return (PyObject*)self;
+}
+
+/**
+ * \brief Creates a new PyCSDL2_Rect instance that points to a
+ *        PyCSDL2_RectArrayView.
+ *
+ * \param rect Pointer to the SDL_Rect memory.
+ * \param array The PyCSDL2_RectArrayView.
+ * \returns The new PyCSDL2_Rect object, or NULL if an exception occurred.
+ */
+static PyObject *
+PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array)
+{
+    PyCSDL2_Rect *self;
+
+    self = (PyCSDL2_Rect *)PyCSDL2_RectNew(&PyCSDL2_RectType, NULL, NULL);
+    if (!self)
+        return NULL;
+
+    self->rect = rect;
+    self->u.array = NULL;
+    PyCSDL2_Set(self->u.array, (PyCSDL2_RectArrayView *)array);
+
+    return (PyObject *)self;
 }
 
 /**

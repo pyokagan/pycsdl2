@@ -88,6 +88,58 @@ class ArrayViewBaseTest:
         "len() returns the array length"
         self.assertEqual(len(self.view), 4)
 
+    def test_getitem(self):
+        "getitem returns the element type that points to the array's memory"
+        item = self.view[1]
+        self.assertIs(type(item), self.item_cls)
+
+        # We can't directly check if the item points to the same memory as the
+        # array's memory, so we indirectly check by modifying the array's
+        # memory, and then seeing if the modification is reflected in the
+        # item's memory as well.
+        item_view = memoryview(item)
+        arr_view = memoryview(self.array[1:2])
+        self.assertEqual(item_view.tobytes(), arr_view.tobytes())
+        self.assertNotEqual(arr_view.tobytes(),
+                            memoryview(self.array[2:3]).tobytes())
+        self.array[1] = self.array[2]
+        self.assertEqual(item_view.tobytes(), arr_view.tobytes())
+
+    def test_getitem_neg(self):
+        "getitem supports negative indices"
+        item = self.view[-2]
+        self.assertIs(type(item), self.item_cls)
+
+        # We can't directly check if the item points to the same memory as the
+        # array's memory, so we indirectly check by modifying the array's
+        # memory, and then seeing if the modification is reflected in the
+        # item's memory as well.
+        item_view = memoryview(item)
+        arr_view = memoryview(self.array[2:3])
+        self.assertEqual(item_view.tobytes(), arr_view.tobytes())
+        self.assertNotEqual(arr_view.tobytes(),
+                            memoryview(self.array[0:1]).tobytes())
+        self.array[-2] = self.array[0]
+        self.assertEqual(item_view.tobytes(), arr_view.tobytes())
+
+    def test_getitem_oob(self):
+        "Raises IndexError if the index is out of bounds"
+        self.assertRaises(IndexError, operator.getitem, self.view, 4)
+        self.assertRaises(IndexError, operator.getitem, self.view, -5)
+
+    def test_getitem_readonly(self):
+        "the element type respects the readonly flag"
+        try:
+            import numpy as np
+        except ImportError:
+            raise unittest.SkipTest('could not import numpy')
+        x = np.asarray(self.array)
+        self.assertTrue(x.flags.writeable)
+        x.flags.writeable = False
+        view = self.cls(x)
+        y = memoryview(view[0])
+        self.assertTrue(y.readonly)
+
 
 class TestEventArrayView(ArrayViewBaseTest, unittest.TestCase):
     "Tests SDL_EventArrayView"

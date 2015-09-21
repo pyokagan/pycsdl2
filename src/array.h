@@ -191,6 +191,34 @@
     } while (0)
 
 /**
+ * \brief Returns the element at index, using a conversion function.
+ *
+ * \param[out] p_out Output PyObject*.
+ * \param[in] p_self The array view PyObject.
+ * \param[in] p_index The index to retrieve the element of, a Py_ssize_t.
+ * \param[in] p_type C type of the element.
+ * \param[in] p_getitem_fn The conversion function which constructs the output
+ *                         object. It must have the function signature
+ *                         <tt>PyObject *getitem_fn(p_type *, PyObject *)</tt>.
+ *                         The first argument is the pointer to the element,
+ *                         and the second argument is the backing array object.
+ *                         If the object stores the pointer, it must keep a
+ *                         reference to that object to guarantee the validity
+ *                         of that pointer.
+ */
+#define PyCSDL2_ARRAYVIEW_GETITEM(p_out, p_self, p_index, p_type, p_getitem_fn) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avgi_self = (void*)(p_self); \
+        \
+        if ((p_index) < 0 || (p_index) >= _avgi_self->len) { \
+            PyErr_SetString(PyExc_IndexError, "index out of bounds"); \
+            return NULL; \
+        } \
+        \
+        p_out = (p_getitem_fn)((p_type*)(_avgi_self->buf + (p_index) * _avgi_self->stride), (PyObject*)_avgi_self); \
+    } while (0)
+
+/**
  * \brief Implements an array view Python type, and all of its functions and
  *        variables.
  *
@@ -209,7 +237,7 @@
  *                     array view element.
  * \param[in] p_name \c tp_name of the type.
  */
-#define PyCSDL2_ARRAYVIEW_IMPL(p_prefix, p_type, p_format, p_name) \
+#define PyCSDL2_ARRAYVIEW_IMPL(p_prefix, p_type, p_format, p_name, p_getitem_fn) \
     typedef struct p_prefix { \
         PyCSDL2_ARRAYVIEW_HEAD \
     } p_prefix; \
@@ -283,6 +311,14 @@
     } \
     \
     static PyObject * \
+    p_prefix ## GetItem(PyObject *self, Py_ssize_t index) \
+    { \
+        PyObject *out; \
+        PyCSDL2_ARRAYVIEW_GETITEM(out, self, index, p_type, p_getitem_fn); \
+        return out; \
+    } \
+    \
+    static PyObject * \
     p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
     { \
         static char *kwlist[] = {NULL}; \
@@ -304,7 +340,7 @@
         /* sq_length         */ p_prefix ## Length, \
         /* sq_concat         */ NULL, \
         /* sq_repeat         */ NULL, \
-        /* sq_item           */ NULL \
+        /* sq_item           */ p_prefix ## GetItem \
     }; \
     \
     static PyMappingMethods p_prefix ## AsMapping = { \
