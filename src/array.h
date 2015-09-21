@@ -60,6 +60,37 @@
     Py_buffer *view;
 
 /**
+ * \brief Validates the array view.
+ */
+#define PyCSDL2_ARRAYVIEW_VALID(p_out, p_self) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avv_self = (void*)(p_self); \
+        \
+        if (!_avv_self->buf) { \
+            PyErr_SetString(PyExc_ValueError, "array has been released"); \
+            p_out = 0; \
+            break; \
+        } \
+        \
+        p_out = 1; \
+    } while (0)
+
+/**
+ * \brief Releases the array view
+ */
+#define PyCSDL2_ARRAYVIEW_RELEASE(p_self) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_self = (void*)(p_self); \
+        \
+        _avr_self->buf = NULL; \
+        if (_avr_self->view) { \
+            PyBuffer_Release(_avr_self->view); \
+            PyMem_Free(_avr_self->view); \
+            _avr_self->view = NULL; \
+        } \
+    } while (0)
+
+/**
  * \brief Implements the destructor for the array view.
  *
  * \param[in] p_self The array view instance PyObject*.
@@ -68,10 +99,7 @@
     do { \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avd_self = (void*)(p_self); \
         \
-        if (_avd_self->view) { \
-            PyBuffer_Release(_avd_self->view); \
-            PyMem_Free(_avd_self->view); \
-        } \
+        PyCSDL2_ARRAYVIEW_RELEASE(_avd_self); \
     } while (0)
 
 /**
@@ -121,6 +149,13 @@
 #define PyCSDL2_ARRAYVIEW_GETBUFFER(p_out, p_self, p_view, p_type, p_format) \
     do { \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avgb_self = (void*)(p_self); \
+        int _avgb_ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(_avgb_ret, _avgb_self); \
+        if (!_avgb_ret) { \
+            p_out = -1; \
+            break; \
+        } \
         \
         Py_INCREF(self); \
         (p_view)->obj = (PyObject*)_avgb_self; \
@@ -227,9 +262,33 @@
         return ret; \
     } \
     \
+    static PyObject * \
+    p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
+    { \
+        static char *kwlist[] = {NULL}; \
+        \
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist)) \
+            return NULL; \
+        \
+        PyCSDL2_ARRAYVIEW_RELEASE(self); \
+        \
+        Py_RETURN_NONE; \
+    } \
+    \
     static PyBufferProcs p_prefix ## AsBuffer = { \
         /* bf_getbuffer     */ p_prefix ## GetBuffer, \
         /* bf_releasebuffer */ 0 \
+    }; \
+    \
+    static PyMethodDef p_prefix ## Methods[] = { \
+        {"release", \
+         (PyCFunction) p_prefix ## Release, \
+         METH_VARARGS | METH_KEYWORDS, \
+         "release() -> None \n" \
+         "\n" \
+         "Release the underlying buffer exposed by the array view.\n" \
+        }, \
+        {NULL}, \
     }; \
     \
     static PyTypeObject p_prefix ## Type = { \
@@ -264,7 +323,7 @@
         /* tp_weaklistoffset */ 0, \
         /* tp_iter           */ 0, \
         /* tp_iternext       */ 0, \
-        /* tp_methods        */ 0, \
+        /* tp_methods        */ (p_prefix ## Methods), \
         /* tp_members        */ 0, \
         /* tp_getset         */ 0, \
         /* tp_base           */ 0, \

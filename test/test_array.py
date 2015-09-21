@@ -79,6 +79,11 @@ class ArrayViewBaseTest:
         y = memoryview(view)
         self.assertTrue(y.readonly)
 
+    def test_release(self):
+        "release releases the underlying buffer"
+        self.assertIsNone(self.view.release())
+        self.assertRaises(ValueError, memoryview, self.view)
+
 
 class TestEventArrayView(ArrayViewBaseTest, unittest.TestCase):
     "Tests SDL_EventArrayView"
