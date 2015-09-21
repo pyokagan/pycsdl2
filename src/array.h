@@ -179,6 +179,18 @@
     } while (0)
 
 /**
+ * \brief Returns the length of the array view.
+ *
+ * \param[out] p_out Py_ssize_t that will be set to the length of the array.
+ * \param[in] p_self Array view to query.
+ */
+#define PyCSDL2_ARRAYVIEW_LENGTH(p_out, p_self) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *bl_self = (void*)(p_self); \
+        (p_out) = bl_self->len; \
+    } while (0)
+
+/**
  * \brief Implements an array view Python type, and all of its functions and
  *        variables.
  *
@@ -262,6 +274,14 @@
         return ret; \
     } \
     \
+    static Py_ssize_t \
+    p_prefix ## Length(PyObject *self) \
+    { \
+        Py_ssize_t out; \
+        PyCSDL2_ARRAYVIEW_LENGTH(out, self); \
+        return out; \
+    } \
+    \
     static PyObject * \
     p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
     { \
@@ -278,6 +298,19 @@
     static PyBufferProcs p_prefix ## AsBuffer = { \
         /* bf_getbuffer     */ p_prefix ## GetBuffer, \
         /* bf_releasebuffer */ 0 \
+    }; \
+    \
+    static PySequenceMethods p_prefix ## AsSequence = { \
+        /* sq_length         */ p_prefix ## Length, \
+        /* sq_concat         */ NULL, \
+        /* sq_repeat         */ NULL, \
+        /* sq_item           */ NULL \
+    }; \
+    \
+    static PyMappingMethods p_prefix ## AsMapping = { \
+        /* mp_length        */ p_prefix ## Length, \
+        /* mp_subscript     */ NULL, \
+        /* mp_ass_subscript */ NULL \
     }; \
     \
     static PyMethodDef p_prefix ## Methods[] = { \
@@ -303,8 +336,8 @@
         /* tp_reserved       */ 0, \
         /* tp_repr           */ 0, \
         /* tp_as_number      */ 0, \
-        /* tp_as_sequence    */ 0, \
-        /* tp_as_mapping     */ 0, \
+        /* tp_as_sequence    */ &(p_prefix ## AsSequence), \
+        /* tp_as_mapping     */ &(p_prefix ## AsMapping), \
         /* tp_hash           */ 0, \
         /* tp_call           */ 0, \
         /* tp_str            */ 0, \

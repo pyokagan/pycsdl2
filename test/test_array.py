@@ -84,6 +84,10 @@ class ArrayViewBaseTest:
         self.assertIsNone(self.view.release())
         self.assertRaises(ValueError, memoryview, self.view)
 
+    def test_len(self):
+        "len() returns the array length"
+        self.assertEqual(len(self.view), 4)
+
 
 class TestEventArrayView(ArrayViewBaseTest, unittest.TestCase):
     "Tests SDL_EventArrayView"
