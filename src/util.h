@@ -723,6 +723,62 @@ PyCSDL2_RaiseTypeError(const char *arg, const char *expected, PyObject *actual)
 }
 
 /**
+ * \brief Validates the Py_buffer, ensuring that it can be accessed as an
+ *        single-dimensional array.
+ *
+ * In particular,
+ *
+ * \li The buffer must have an ndim of 1.
+ * \li The buffer's itemsize == itemsize
+ * \li The buffer must have a shape defined (shape != NULL)
+ *
+ * \param view The Py_buffer to validate.
+ * \param itemsize The required itemsize.
+ * \param len If not positive, the buffer must contain excactly len items.
+ * \param contig If true, the Py_buffer is required to be C-contiguous as well.
+ * \returns 0 if the buffer is valid, -1 with an exception set otherwise.
+ */
+static int
+PyCSDL2_ValidateArrayBuffer(Py_buffer *view, Py_ssize_t itemsize,
+                            Py_ssize_t len, int contig)
+{
+    if (view->ndim != 1) {
+        PyErr_Format(PyExc_ValueError, "Buffer ndim must be 1. Got: %zd",
+                     view->ndim);
+        return -1;
+    }
+
+    if (view->itemsize != itemsize) {
+        PyErr_Format(PyExc_ValueError, "Invalid buffer itemsize. "
+                     "Expected: %zd bytes. Got: %zd bytes.",
+                     itemsize, view->itemsize);
+        return -1;
+    }
+
+    if (contig && !PyBuffer_IsContiguous(view, 'C')) {
+        PyErr_SetString(PyExc_ValueError, "Buffer must be C-contiguous");
+        return -1;
+    }
+
+    if (!view->shape) {
+        PyErr_SetString(PyExc_ValueError,
+                        "Buffer does not provide shape information. "
+                        "(shape is NULL)");
+        return -1;
+    }
+
+    if (len >= 0 && view->shape[0] != len) {
+        PyErr_Format(PyExc_ValueError,
+                     "Invalid number of elements in buffer. "
+                     "Expected: %zd items. Got: %zd items.", len,
+                     view->shape[0]);
+        return -1;
+    }
+
+    return 0;
+}
+
+/**
  * \brief Base instance struct members for PyCSDL2_Buffer-based types
  *
  * This macro will insert the required field members required for a type to use

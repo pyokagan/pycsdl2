@@ -382,29 +382,33 @@ static int
 PyCSDL2_RendererInfoInit(PyObject *obj, PyObject *args, PyObject *kwds)
 {
     PyCSDL2_RendererInfo *self = (PyCSDL2_RendererInfo*)obj;
-    PyObject *name = NULL;
-    Py_buffer texture_formats = {0};
+    PyObject *name = NULL, *texture_formats = NULL;
+    Py_buffer texture_formats_v = {0};
     Uint32 flags = 0, num_texture_formats = 0;
     int max_texture_width = 0, max_texture_height = 0;
     Py_ssize_t x = sizeof(self->info_mem->info.texture_formats);
+    Py_ssize_t y = sizeof(self->info_mem->info.texture_formats[0]);
     static char *kwlist[] = {"name", "flags", "num_texture_formats",
                              "texture_formats", "max_texture_width",
                              "max_texture_height", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds,
-                                     "|O" Uint32_UNIT Uint32_UNIT "y*ii",
+                                     "|O" Uint32_UNIT Uint32_UNIT "Oii",
                                      kwlist, &name, &flags,
                                      &num_texture_formats, &texture_formats,
                                      &max_texture_width, &max_texture_height))
         return -1;
 
     if (!PyCSDL2_RendererInfoValid(self))
-        goto fail;
+        return -1;
 
-    if (texture_formats.buf && texture_formats.len < x) {
-        PyCSDL2_RaiseBufferSizeError("texture_formats", x, texture_formats.len);
+    if (texture_formats &&
+        PyObject_GetBuffer(texture_formats, &texture_formats_v, PyBUF_CONTIG_RO) < 0)
+        return -1;
+
+    if (texture_formats &&
+        PyCSDL2_ValidateArrayBuffer(&texture_formats_v, y, x / y, 1) < 0)
         goto fail;
-    }
 
     if (name) {
         if (PyCSDL2_RendererInfoSetName(self, name, NULL) < 0)
@@ -420,19 +424,19 @@ PyCSDL2_RendererInfoInit(PyObject *obj, PyObject *args, PyObject *kwds)
     self->info_mem->info.flags = flags;
     self->info_mem->info.num_texture_formats = num_texture_formats;
 
-    if (texture_formats.buf)
-        memcpy(self->info_mem->info.texture_formats, texture_formats.buf, x);
+    if (texture_formats_v.buf)
+        memcpy(self->info_mem->info.texture_formats, texture_formats_v.buf, x);
     else
         memset(self->info_mem->info.texture_formats, 0, x);
 
     self->info_mem->info.max_texture_width = max_texture_width;
     self->info_mem->info.max_texture_height = max_texture_height;
 
-    PyBuffer_Release(&texture_formats);
+    PyBuffer_Release(&texture_formats_v);
     return 0;
 
 fail:
-    PyBuffer_Release(&texture_formats);
+    PyBuffer_Release(&texture_formats_v);
     return -1;
 }
 
