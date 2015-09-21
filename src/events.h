@@ -106,6 +106,37 @@ PyCSDL2_MouseMotionEventNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return self;
 }
 
+/** \brief tp_init for PyCSDL2_MouseMotionEventType */
+static int
+PyCSDL2_MouseMotionEventInit(PyObject *obj, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_MouseMotionEvent *self = (PyCSDL2_MouseMotionEvent *)obj;
+    Uint32 type = 0, timestamp = 0, windowID = 0, which = 0, state = 0;
+    Sint32 x = 0, y = 0, xrel = 0, yrel = 0;
+    static char *kwlist[] = {"type", "timestamp", "windowID", "which", "state",
+                             "x", "y", "xrel", "yrel", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|"
+                                     Uint32_UNIT Uint32_UNIT Uint32_UNIT
+                                     Uint32_UNIT Uint32_UNIT Sint32_UNIT
+                                     Sint32_UNIT Sint32_UNIT Sint32_UNIT,
+                                     kwlist, &type, &timestamp, &windowID,
+                                     &which, &state, &x, &y, &xrel, &yrel))
+        return -1;
+
+    self->ev_mem->ev.motion.type = type;
+    self->ev_mem->ev.motion.timestamp = timestamp;
+    self->ev_mem->ev.motion.windowID = windowID;
+    self->ev_mem->ev.motion.which = which;
+    self->ev_mem->ev.motion.state = state;
+    self->ev_mem->ev.motion.x = x;
+    self->ev_mem->ev.motion.y = y;
+    self->ev_mem->ev.motion.xrel = xrel;
+    self->ev_mem->ev.motion.yrel = yrel;
+
+    return 0;
+}
+
 /** \brief Destructor for PyCSDL2_MouseMotionEventType */
 static void
 PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
@@ -445,7 +476,7 @@ static PyTypeObject PyCSDL2_MouseMotionEventType = {
     /* tp_descr_get      */ 0,
     /* tp_descr_set      */ 0,
     /* tp_dictoffset     */ 0,
-    /* tp_init           */ 0,
+    /* tp_init           */ PyCSDL2_MouseMotionEventInit,
     /* tp_alloc          */ 0,
     /* tp_new            */ (newfunc) PyCSDL2_MouseMotionEventNew,
 };

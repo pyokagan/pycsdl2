@@ -163,6 +163,33 @@ class TestMouseMotionEvent(unittest.TestCase):
         self.assertRaises(TypeError, type, 'testtype', (SDL_MouseMotionEvent,),
                           {})
 
+    def test_init(self):
+        "Can be initialized with values"
+        ev = SDL_MouseMotionEvent(1, 2, 3, 4, 5, -1, -2, -3, -4)
+        self.assertEqual(ev.type, 1)
+        self.assertEqual(ev.timestamp, 2)
+        self.assertEqual(ev.windowID, 3)
+        self.assertEqual(ev.which, 4)
+        self.assertEqual(ev.state, 5)
+        self.assertEqual(ev.x, -1)
+        self.assertEqual(ev.y, -2)
+        self.assertEqual(ev.xrel, -3)
+        self.assertEqual(ev.yrel, -4)
+
+    def test_init_kwargs(self):
+        "Can be initialized with values via keyword arguments"
+        ev = SDL_MouseMotionEvent(type=1, timestamp=2, windowID=3, which=4,
+                                  state=5, x=-1, y=-2, xrel=-3, yrel=-4)
+        self.assertEqual(ev.type, 1)
+        self.assertEqual(ev.timestamp, 2)
+        self.assertEqual(ev.windowID, 3)
+        self.assertEqual(ev.which, 4)
+        self.assertEqual(ev.state, 5)
+        self.assertEqual(ev.x, -1)
+        self.assertEqual(ev.y, -2)
+        self.assertEqual(ev.xrel, -3)
+        self.assertEqual(ev.yrel, -4)
+
     def test_weakref(self):
         "Can create weak reference"
         ref = weakref.ref(self.ev)
