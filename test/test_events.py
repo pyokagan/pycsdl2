@@ -424,17 +424,21 @@ class Test_SDL_Event(unittest.TestCase):
         mem = memoryview(self.ev)
         self.assertTrue(mem.c_contiguous)
         self.assertTrue(mem.contiguous)
-        self.assertEqual(mem.format, 'B')
-        self.assertEqual(mem.itemsize, 1)
+        self.assertEqual(mem.itemsize, 56)
         self.assertEqual(mem.ndim, 1)
-        self.assertEqual(mem.strides, (1,))
+        self.assertEqual(mem.strides, (56,))
+        self.assertEqual(mem.shape, (1,))
 
     def test_memview_writable(self):
         "memoryview contains valid memory that can be written to"
-        mem = memoryview(self.ev)
-        self.assertFalse(mem.readonly)
-        for i in range(mem.nbytes):
-            mem[i] = 42
+        try:
+            import numpy as np
+        except ImportError:
+            raise unittest.SkipTest('could not import numpy')
+        mem = np.asarray(self.ev)
+        self.assertTrue(mem.flags.writeable)
+        mem[0][0] = 42  # type
+        mem[0][1] = np.zeros((1,), '52V')  # padding bytes
 
     def test_memview_zeroes(self):
         "memory of SDL_Event is initialized with 0s"
