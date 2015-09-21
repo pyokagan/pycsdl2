@@ -367,9 +367,17 @@ typedef struct PyCSDL2_Rect {
     PyObject_HEAD
     /** \brief Head of weak ref list */
     PyObject *in_weakreflist;
-    /** \brief SDL_Rect this instance wraps */
-    SDL_Rect rect;
+    /** \brief Pointer to the SDL_Rect data */
+    SDL_Rect *rect;
+    union {
+        /** \brief The backing PyCSDL2_RectArrayView object, if any. */
+        PyCSDL2_RectArrayView *array;
+        /** \brief The SDL_Rect data if not backed by an array */
+        SDL_Rect data;
+    } u;
 } PyCSDL2_Rect;
+
+static PyTypeObject PyCSDL2_RectType;
 
 /** \brief newfunc for PyCSDL2_RectType */
 static PyCSDL2_Rect *
@@ -379,6 +387,9 @@ PyCSDL2_RectNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
     if (!(self = (PyCSDL2_Rect*)type->tp_alloc(type, 0)))
         return NULL;
+
+    self->rect = &self->u.data;
+
     return self;
 }
 
@@ -386,8 +397,35 @@ PyCSDL2_RectNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static void
 PyCSDL2_RectDealloc(PyCSDL2_Rect *self)
 {
+    if (self->rect != &self->u.data)
+        Py_CLEAR(self->u.array);
     PyObject_ClearWeakRefs((PyObject*) self);
     Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
+ * \brief Validates the PyCSDL2_Rect.
+ *
+ * \param self PyCSDL2_Rect to validate.
+ * \param writeable Set to true to verify that the PyCSDL2_Rect can be written
+ *                  to.
+ * \returns 1 if the PyCSDL2_Rect is valid, 0 with an exception set otherwise.
+ */
+static int
+PyCSDL2_RectValid(PyCSDL2_Rect *self, int writeable)
+{
+    if (Py_TYPE(self) != &PyCSDL2_RectType) {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Rect", (PyObject *)self);
+        return 0;
+    }
+
+    if (writeable && self->rect != &self->u.data &&
+        self->u.array->flags & PyCSDL2_ARRAYVIEW_READONLY) {
+        PyCSDL2_RaiseReadonlyError((PyObject *)self);
+        return 0;
+    }
+
+    return 1;
 }
 
 /** \brief initfunc for PyCSDL2_RectType */
@@ -399,10 +437,14 @@ PyCSDL2_RectInit(PyCSDL2_Rect *self, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|iiii", kwlist,
                                      &x, &y, &w, &h))
         return -1;
-    self->rect.x = x;
-    self->rect.y = y;
-    self->rect.w = w;
-    self->rect.h = h;
+
+    if (!PyCSDL2_RectValid(self, 1))
+        return -1;
+
+    self->rect->x = x;
+    self->rect->y = y;
+    self->rect->w = w;
+    self->rect->h = h;
     return 0;
 }
 
@@ -410,11 +452,14 @@ PyCSDL2_RectInit(PyCSDL2_Rect *self, PyObject *args, PyObject *kwds)
 static int
 PyCSDL2_RectGetBuffer(PyCSDL2_Rect *self, Py_buffer *view, int flags)
 {
-    view->buf = &self->rect;
+    view->buf = self->rect;
     Py_INCREF((PyObject*) self);
     view->obj = (PyObject*) self;
     view->len = sizeof(SDL_Rect);
-    view->readonly = 0;
+    if (self->rect == &self->u.data)
+        view->readonly = 0;
+    else
+        view->readonly = (self->u.array->flags & PyCSDL2_ARRAYVIEW_READONLY);
     view->itemsize = sizeof(SDL_Rect);
     view->format = "iiii";
     view->ndim = 0;
@@ -431,16 +476,96 @@ static PyBufferProcs PyCSDL2_RectBufferProcs = {
     (releasebufferproc) NULL
 };
 
-/** \brief List of members in PyCSDL2_RectType */
-static PyMemberDef PyCSDL2_RectMembers[] = {
-    {"x", T_INT, offsetof(PyCSDL2_Rect, rect.x), 0,
-     "The x location of the rectangle's upper left corner."},
-    {"y", T_INT, offsetof(PyCSDL2_Rect, rect.y), 0,
-     "The y location of the rectangle's upper left corner."},
-    {"w", T_INT, offsetof(PyCSDL2_Rect, rect.w), 0,
-     "The width of the rectangle."},
-    {"h", T_INT, offsetof(PyCSDL2_Rect, rect.h), 0,
-     "The height of the rectangle."},
+/** \brief Getter for SDL_Rect.x */
+static PyObject *
+PyCSDL2_RectGetX(PyCSDL2_Rect *self, void *closure)
+{
+    return PyLong_FromLong(self->rect->x);
+}
+
+/** \brief Setter for SDL_Rect.x */
+static int
+PyCSDL2_RectSetX(PyCSDL2_Rect *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RectValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->rect->x);
+}
+
+/** \brief Getter for SDL_Rect.y */
+static PyObject *
+PyCSDL2_RectGetY(PyCSDL2_Rect *self, void *closure)
+{
+    return PyLong_FromLong(self->rect->y);
+}
+
+/** \brief Setter for SDL_Rect.y */
+static int
+PyCSDL2_RectSetY(PyCSDL2_Rect *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RectValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->rect->y);
+}
+
+/** \brief Getter for SDL_Rect.w */
+static PyObject *
+PyCSDL2_RectGetW(PyCSDL2_Rect *self, void *closure)
+{
+    return PyLong_FromLong(self->rect->w);
+}
+
+/** \brief Setter for SDL_Rect.w */
+static int
+PyCSDL2_RectSetW(PyCSDL2_Rect *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RectValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->rect->w);
+}
+
+/** \brief Getter for SDL_Rect.h */
+static PyObject *
+PyCSDL2_RectGetH(PyCSDL2_Rect *self, void *closure)
+{
+    return PyLong_FromLong(self->rect->h);
+}
+
+/** \brief Setter for SDL_Rect.h */
+static int
+PyCSDL2_RectSetH(PyCSDL2_Rect *self, PyObject *value, void *closure)
+{
+    if (!PyCSDL2_RectValid(self, 1))
+        return -1;
+
+    return PyCSDL2_LongAsInt(value, &self->rect->h);
+}
+
+/** \brief List of attributes of PyCSDL2_RectType */
+static PyGetSetDef PyCSDL2_RectGetSetters[] = {
+    {"x",
+     (getter)PyCSDL2_RectGetX,
+     (setter)PyCSDL2_RectSetX,
+     "The x location of the rectangle's upper left corner.",
+     NULL},
+    {"y",
+     (getter)PyCSDL2_RectGetY,
+     (setter)PyCSDL2_RectSetY,
+     "The y location of the rectangle's upper left corner.",
+     NULL},
+    {"w",
+     (getter)PyCSDL2_RectGetW,
+     (setter)PyCSDL2_RectSetW,
+     "The width of the rectangle.",
+     NULL},
+    {"h",
+     (getter)PyCSDL2_RectGetH,
+     (setter)PyCSDL2_RectSetH,
+     "The height of the rectangle.",
+     NULL},
     {NULL}
 };
 
@@ -475,8 +600,8 @@ static PyTypeObject PyCSDL2_RectType = {
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
     /* tp_methods        */ 0,
-    /* tp_members        */ PyCSDL2_RectMembers,
-    /* tp_getset         */ 0,
+    /* tp_members        */ 0,
+    /* tp_getset         */ PyCSDL2_RectGetSetters,
     /* tp_base           */ 0,
     /* tp_dict           */ 0,
     /* tp_descr_get      */ 0,
@@ -503,7 +628,7 @@ PyCSDL2_RectCreate(const SDL_Rect *rect)
         return NULL;
 
     if (rect)
-        self->rect = *rect;
+        self->u.data = *rect;
 
     return (PyObject*)self;
 }
@@ -520,16 +645,11 @@ PyCSDL2_RectPtr(PyObject *obj, SDL_Rect **out)
 {
     PyCSDL2_Rect *self = (PyCSDL2_Rect*)obj;
 
-    if (!PyCSDL2_Assert(obj))
+    if (!PyCSDL2_RectValid(self, 1))
         return 0;
-
-    if (Py_TYPE(obj) != &PyCSDL2_RectType) {
-        PyCSDL2_RaiseTypeError(NULL, "SDL_Rect", obj);
-        return 0;
-    }
 
     if (out)
-        *out = &self->rect;
+        *out = self->rect;
 
     return 1;
 }
