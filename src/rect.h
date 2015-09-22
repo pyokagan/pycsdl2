@@ -54,6 +54,48 @@ PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_PointArrayView, SDL_Point, "ii",
  * @{
  */
 
+/**
+ * \brief Converter for a SDL_Point-like object.
+ */
+static int
+PyCSDL2_PointConvert(PyObject *obj, SDL_Point *out)
+{
+    if (PyObject_CheckBuffer(obj)) {
+        Py_buffer view;
+
+        if (PyObject_GetBuffer(obj, &view, PyBUF_CONTIG_RO) < 0)
+            return 0;
+
+        if (PyCSDL2_ValidateScalarBuffer(&view, sizeof(SDL_Point)) < 0) {
+            PyBuffer_Release(&view);
+            return 0;
+        }
+
+        *out = *((SDL_Point *)view.buf);
+        PyBuffer_Release(&view);
+        return 1;
+    } else if (PyTuple_Check(obj)) {
+        PyObject *x = PyTuple_GetItem(obj, 0);
+        PyObject *y = PyTuple_GetItem(obj, 1);
+        SDL_Point point;
+
+        if (!x || !y)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(x, &point.x) < 0)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(y, &point.y) < 0)
+            return 0;
+
+        *out = point;
+        return 1;
+    } else {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Point", obj);
+        return 0;
+    }
+}
+
 /** \brief Instance data for PyCSDL2_PointType */
 typedef struct PyCSDL2_Point {
     PyObject_HEAD
