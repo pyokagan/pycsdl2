@@ -620,6 +620,106 @@ _avssfi_cleanup: \
         Py_RETURN_NONE; \
     } \
     \
+    static PyObject * \
+    p_prefix ## GetContiguous(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        \
+        return PyBool_FromLong(self->stride == sizeof(p_type) || self->stride == -sizeof(p_type)); \
+    } \
+    static PyObject * \
+    p_prefix ## GetFormat(PyObject *obj, void *closure) \
+    { \
+        return PyUnicode_FromString(p_format); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetItemSize(PyObject *obj, void *closure) \
+    { \
+        return PyLong_FromSize_t(sizeof(p_type)); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetNBytes(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        return PyLong_FromSsize_t(sizeof(p_type) * self->len); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetNDim(PyObject *obj, void *closure) \
+    { \
+        return PyLong_FromLong(1); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetObject(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        if (self->view) \
+            return PyCSDL2_Get(self->view->obj); \
+        else \
+            return PyCSDL2_Get(self->master); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetReadonly(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        \
+        return PyBool_FromLong(self->flags & PyCSDL2_ARRAYVIEW_READONLY); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetShape(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        \
+        return Py_BuildValue("(n)", self->len); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetStrides(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        int ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(ret, self, 0); \
+        if (!ret) \
+            return NULL; \
+        \
+        return Py_BuildValue("(n)", self->stride); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## GetSuboffsets(PyObject *obj, void *closure) \
+    { \
+        return PyTuple_New(0); \
+    } \
+    \
     static PyBufferProcs p_prefix ## AsBuffer = { \
         /* bf_getbuffer     */ p_prefix ## GetBuffer, \
         /* bf_releasebuffer */ 0 \
@@ -646,6 +746,76 @@ _avssfi_cleanup: \
          "\n" \
          "Release the underlying buffer exposed by the array view.\n" \
         }, \
+        {NULL}, \
+    }; \
+    \
+    static PyGetSetDef p_prefix ## GetSetters[] = { \
+        {"c_contiguous", \
+         p_prefix ## GetContiguous, \
+         NULL, \
+         "(readonly) A bool indicating whether the memory is C contiguous.", \
+         NULL}, \
+        {"contiguous", \
+         p_prefix ## GetContiguous, \
+         NULL, \
+         "(readonly) A bool indicating whether the memory is contiguous.", \
+         NULL}, \
+        {"f_contiguous", \
+         p_prefix ## GetContiguous, \
+         NULL, \
+         "(readonly) A bool indicating whether the memory is Fortran contiguous.", \
+         NULL}, \
+        {"format", \
+         p_prefix ## GetFormat, \
+         NULL, \
+         "(readonly) A string containing the format (in struct module style)\n" \
+         "for each element in the view.", \
+         NULL}, \
+        {"itemsize", \
+         p_prefix ## GetItemSize, \
+         NULL, \
+         "(readonly) The size in bytes of each element of the array view.", \
+         NULL}, \
+        {"nbytes", \
+         p_prefix ## GetNBytes, \
+         NULL, \
+         "(readonly) The amount of space in bytes that the array would use\n" \
+         "in a contiguous representation.", \
+         NULL}, \
+        {"ndim", \
+         p_prefix ## GetNDim, \
+         NULL, \
+         "(readonly) An integer indicating how many dimensions of a\n" \
+         "multi-dimensional array the memory represents.", \
+         NULL}, \
+        {"obj", \
+         p_prefix ## GetObject, \
+         NULL, \
+         "(readonly) The underlying object of the array view.", \
+         NULL}, \
+        {"readonly", \
+         p_prefix ## GetReadonly, \
+         NULL, \
+         "(readonly) A bool indicating whether the memory is read only.", \
+         NULL}, \
+        {"shape", \
+         p_prefix ## GetShape, \
+         NULL, \
+         "(readonly) A tuple of ndim integers giving the shape of the\n" \
+         "memory as an N-dimensional array.", \
+         NULL}, \
+        {"strides", \
+         p_prefix ## GetStrides, \
+         NULL, \
+         "(readonly) A tuple of ndim integers giving the size in bytes to\n" \
+         "access each element for each dimension of the array.", \
+         NULL}, \
+        {"suboffsets", \
+         p_prefix ## GetSuboffsets, \
+         NULL, \
+         "(readonly) A tuple of integers used internally for PIL-style\n" \
+         "arrays.", \
+         NULL}, \
         {NULL}, \
     }; \
     \
@@ -683,7 +853,7 @@ _avssfi_cleanup: \
         /* tp_iternext       */ 0, \
         /* tp_methods        */ (p_prefix ## Methods), \
         /* tp_members        */ 0, \
-        /* tp_getset         */ 0, \
+        /* tp_getset         */ (p_prefix ## GetSetters), \
         /* tp_base           */ 0, \
         /* tp_dict           */ 0, \
         /* tp_descr_get      */ 0, \
