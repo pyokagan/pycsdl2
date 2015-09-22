@@ -239,6 +239,10 @@ static void
 PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
 {
     PyObject_ClearWeakRefs((PyObject*) self);
+    if (self->array && Py_TYPE(self->array) == &PyCSDL2_EventArrayViewType) {
+        PyCSDL2_EventArrayView *array = (void *)self->array;
+        array->num_exports--;
+    }
     Py_CLEAR(self->array);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
@@ -599,6 +603,10 @@ PyCSDL2_MouseMotionEventElemCreate(SDL_MouseMotionEvent *motion, PyObject *array
 
     self->motion = motion;
     PyCSDL2_Set(self->array, array);
+    if (Py_TYPE(array) == &PyCSDL2_EventArrayViewType) {
+        PyCSDL2_EventArrayView *_array = (void *)array;
+        _array->num_exports++;
+    }
 
     return (PyObject *)self;
 }
@@ -700,7 +708,11 @@ PyCSDL2_EventDealloc(PyCSDL2_Event *self)
 {
     if (self->in_weakreflist)
         PyObject_ClearWeakRefs((PyObject*) self);
-    Py_XDECREF(self->array);
+    if (self->array && Py_TYPE(self->array) == &PyCSDL2_EventArrayViewType) {
+        PyCSDL2_EventArrayView *array = (void *)self->array;
+        array->num_exports--;
+    }
+    Py_CLEAR(self->array);
     Py_XDECREF(self->motion);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
@@ -958,6 +970,10 @@ PyCSDL2_EventElemCreate(SDL_Event *event, PyObject *array)
 
     self->event = event;
     PyCSDL2_Set(self->array, array);
+    if (Py_TYPE(array) == &PyCSDL2_EventArrayViewType) {
+        PyCSDL2_EventArrayView *_array = (void *)array;
+        _array->num_exports++;
+    }
 
     if (PyCSDL2_EventPopulate(self, event, array) < 0) {
         Py_DECREF(self);

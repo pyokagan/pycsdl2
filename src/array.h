@@ -58,6 +58,7 @@
     Py_ssize_t len; \
     Py_ssize_t stride; \
     PyObject *master; \
+    int num_exports; \
     Py_buffer *view;
 
 /**
@@ -91,8 +92,11 @@
 #define PyCSDL2_ARRAYVIEW_RELEASE(p_self) \
     do { \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_self = (void*)(p_self); \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_master = (void*)(_avr_self->master); \
         \
         _avr_self->buf = NULL; \
+        if (_avr_master) \
+            _avr_master->num_exports--; \
         Py_CLEAR(_avr_self->master); \
         if (_avr_self->view) { \
             PyBuffer_Release(_avr_self->view); \
@@ -161,12 +165,15 @@
                                    p_master) \
     do { \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avip_self = (void *)(p_self); \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avip_master = (void *)(p_master); \
         \
         _avip_self->flags = (p_flags); \
         _avip_self->buf = (char *)(p_buf); \
         _avip_self->len = (p_len); \
         _avip_self->stride = (p_stride); \
         PyCSDL2_Set(_avip_self->master, (p_master)); \
+        if (_avip_master) \
+            _avip_master->num_exports++; \
     } while (0)
 
 /**
@@ -191,7 +198,7 @@
             break; \
         } \
         \
-        Py_INCREF(self); \
+        Py_INCREF(_avgb_self); \
         (p_view)->obj = (PyObject*)_avgb_self; \
         (p_view)->buf = _avgb_self->buf; \
         (p_view)->len = sizeof(p_type) * _avgb_self->len; \
@@ -209,7 +216,17 @@
             (p_view)->strides = &_avgb_self->stride; \
         (p_view)->suboffsets = NULL; \
         (p_view)->internal = NULL; \
+        _avgb_self->num_exports++; \
         p_out = 0; \
+    } while (0)
+
+/**
+ * \brief Implements releasebuffer
+ */
+#define PyCSDL2_ARRAYVIEW_RELEASEBUFFER(p_self, p_view) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avrb_self = (void *)(p_self); \
+        _avrb_self->num_exports--; \
     } while (0)
 
 /**
@@ -574,6 +591,12 @@ _avssfi_cleanup: \
         return ret; \
     } \
     \
+    static void \
+    p_prefix ## ReleaseBuffer(PyObject *self, Py_buffer *view) \
+    { \
+        PyCSDL2_ARRAYVIEW_RELEASEBUFFER(self, view); \
+    } \
+    \
     static Py_ssize_t \
     p_prefix ## Length(PyObject *self) \
     { \
@@ -720,9 +743,16 @@ _avssfi_cleanup: \
         return PyTuple_New(0); \
     } \
     \
+    static PyObject * \
+    p_prefix ## GetNumExports(PyObject *obj, void *closure) \
+    { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *self = (void *)obj; \
+        return PyLong_FromLong(self->num_exports); \
+    } \
+    \
     static PyBufferProcs p_prefix ## AsBuffer = { \
         /* bf_getbuffer     */ p_prefix ## GetBuffer, \
-        /* bf_releasebuffer */ 0 \
+        /* bf_releasebuffer */ p_prefix ## ReleaseBuffer \
     }; \
     \
     static PySequenceMethods p_prefix ## AsSequence = { \
@@ -815,6 +845,11 @@ _avssfi_cleanup: \
          NULL, \
          "(readonly) A tuple of integers used internally for PIL-style\n" \
          "arrays.", \
+         NULL}, \
+        {"_num_exports", \
+         p_prefix ## GetNumExports, \
+         NULL, \
+         "(readonly) Number of exports.", \
          NULL}, \
         {NULL}, \
     }; \

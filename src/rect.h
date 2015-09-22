@@ -135,8 +135,11 @@ PyCSDL2_PointNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static void
 PyCSDL2_PointDealloc(PyCSDL2_Point *self)
 {
-    if (self->point != &self->u.data)
+    if (self->point != &self->u.data) {
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *array = (void *)self->u.array;
+        array->num_exports--;
         Py_CLEAR(self->u.array);
+    }
     PyObject_ClearWeakRefs((PyObject*)self);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
@@ -390,6 +393,7 @@ PyCSDL2_PointCreate(const SDL_Point *point)
 static PyObject *
 PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array)
 {
+    struct { PyCSDL2_ARRAYVIEW_HEAD } *_array = (void *)array;
     PyCSDL2_Point *self;
 
     self = (PyCSDL2_Point *)PyCSDL2_PointNew(&PyCSDL2_PointType, NULL, NULL);
@@ -399,6 +403,7 @@ PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array)
     self->point = point;
     self->u.array = NULL;
     PyCSDL2_Set(self->u.array, (PyCSDL2_PointArrayView *)array);
+    _array->num_exports++;
 
     return (PyObject *)self;
 }
@@ -546,8 +551,11 @@ PyCSDL2_RectNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static void
 PyCSDL2_RectDealloc(PyCSDL2_Rect *self)
 {
-    if (self->rect != &self->u.data)
+    if (self->rect != &self->u.data) {
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *array = (void *)self->u.array;
+        array->num_exports--;
         Py_CLEAR(self->u.array);
+    }
     PyObject_ClearWeakRefs((PyObject*) self);
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
@@ -839,6 +847,7 @@ PyCSDL2_RectCreate(const SDL_Rect *rect)
 static PyObject *
 PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array)
 {
+    struct { PyCSDL2_ARRAYVIEW_HEAD } *_array = (void *)array;
     PyCSDL2_Rect *self;
 
     self = (PyCSDL2_Rect *)PyCSDL2_RectNew(&PyCSDL2_RectType, NULL, NULL);
@@ -848,6 +857,7 @@ PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array)
     self->rect = rect;
     self->u.array = NULL;
     PyCSDL2_Set(self->u.array, (PyCSDL2_RectArrayView *)array);
+    _array->num_exports++;
 
     return (PyObject *)self;
 }
