@@ -94,6 +94,11 @@
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_self = (void*)(p_self); \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avr_master = (void*)(_avr_self->master); \
         \
+        if (!_avr_master && _avr_self->num_exports) { \
+            PyErr_SetString(PyExc_BufferError, "cannot release when buffer is exported!"); \
+            break; \
+        } \
+        \
         _avr_self->buf = NULL; \
         if (_avr_master) \
             _avr_master->num_exports--; \
