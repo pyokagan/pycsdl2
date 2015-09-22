@@ -34,6 +34,12 @@
 #include "error.h"
 
 /**
+ * \defgroup csdl2_SDL_EventMem csdl2.SDL_EventMem
+ *
+ * @{
+ */
+
+/**
  * \brief Instance data for PyCSDL2_EventMemType
  */
 typedef struct PyCSDL2_EventMem {
@@ -62,6 +68,8 @@ PyCSDL2_EventMemCreate(void)
 {
     return (PyCSDL2_EventMem*) PyType_GenericAlloc(&PyCSDL2_EventMemType, 0);
 }
+
+/** @} */
 
 /** \brief Instance data for PyCSDL2_MouseMotionEventType */
 typedef struct PyCSDL2_MouseMotionEvent {
