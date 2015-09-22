@@ -345,6 +345,71 @@
     } while (0)
 
 /**
+ * \brief Assigns items to a slice from a list.
+ *
+ */
+#define PyCSDL2_ARRAYVIEW_SETSLICE_FROMITER(p_out, p_self, p_start, p_count, \
+                                            p_step, p_iter, p_type, \
+                                            p_cvtitem_fn) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avssfi_self = (void *)(p_self); \
+        p_type *_avssfi_buf; \
+        Py_ssize_t _avssfi_count; \
+        PyObject *_avssfi_iter = NULL, *_avssfi_item = NULL; \
+        Py_buffer _avssfi_view = {}; \
+        \
+        _avssfi_buf = PyMem_New(p_type, (p_count)); \
+        if (!_avssfi_buf) { \
+            PyErr_NoMemory(); \
+            p_out = -1; \
+            break; \
+        } \
+        \
+        _avssfi_iter = PyObject_GetIter(p_iter); \
+        if (!_avssfi_iter) { \
+            p_out = -1; \
+            goto _avssfi_cleanup; \
+        } \
+        \
+        for (_avssfi_count = 0; \
+            (_avssfi_item = PyIter_Next(_avssfi_iter)); \
+            _avssfi_count++) { \
+            \
+            if (_avssfi_count >= (p_count)) { \
+                PyErr_Format(PyExc_ValueError, "Iterable yielded too many items. Expected only %zd.", \
+                             (p_count)); \
+                p_out = -1; \
+                goto _avssfi_cleanup; \
+            } \
+            \
+            if (!(p_cvtitem_fn)(_avssfi_item, _avssfi_buf + _avssfi_count)) { \
+                p_out = -1; \
+                goto _avssfi_cleanup; \
+            } \
+            \
+            Py_CLEAR(_avssfi_item); \
+        } \
+        Py_CLEAR(_avssfi_iter); \
+        \
+        if (_avssfi_count < (p_count)) { \
+            PyErr_Format(PyExc_ValueError, "Iterable yielded only %zd items. Expected %zd.", \
+                         _avssfi_count, (p_count)); \
+            p_out = -1; \
+            goto _avssfi_cleanup; \
+        } \
+        \
+        _avssfi_view.buf = _avssfi_buf; \
+        \
+        PyCSDL2_ARRAYVIEW_SETSLICE_FROMBUF(p_out, _avssfi_self, (p_start), \
+                                           (p_count), (p_step), (&_avssfi_view), p_type); \
+        \
+_avssfi_cleanup: \
+        Py_CLEAR(_avssfi_item); \
+        Py_CLEAR(_avssfi_iter); \
+        PyMem_Free(_avssfi_buf); \
+    } while (0)
+
+/**
  * \brief Implements subscript
  */
 #define PyCSDL2_ARRAYVIEW_ASS_SUBSCRIPT(p_out, p_self, p_key, p_value, p_type,\
@@ -387,7 +452,6 @@
                                       p_type, p_cvtitem_fn); \
         } else if (PySlice_Check(p_key)) { \
             Py_ssize_t _avsb_start, _avsb_stop, _avsb_step, _avsb_count; \
-            Py_buffer _avsb_view; \
             \
             if (PySlice_GetIndicesEx((p_key), _avsb_self->len, &_avsb_start,\
                                      &_avsb_stop, &_avsb_step, &_avsb_count) < 0) { \
@@ -395,21 +459,30 @@
                 break; \
             } \
             \
-            if (PyObject_GetBuffer((p_value), &_avsb_view, PyBUF_STRIDED_RO) < 0) { \
-                p_out = -1; \
-                break; \
-            } \
-            \
-            if (PyCSDL2_ValidateArrayBuffer(&_avsb_view, sizeof(p_type), _avsb_count, 0) < 0) { \
+            if (PyObject_CheckBuffer(p_value)) { \
+                Py_buffer _avsb_view; \
+                \
+                if (PyObject_GetBuffer((p_value), &_avsb_view, PyBUF_STRIDED_RO) < 0) { \
+                    p_out = -1; \
+                    break; \
+                } \
+                \
+                if (PyCSDL2_ValidateArrayBuffer(&_avsb_view, sizeof(p_type), _avsb_count, 0) < 0) { \
+                    PyBuffer_Release(&_avsb_view); \
+                    p_out = -1; \
+                    break; \
+                } \
+                \
+                PyCSDL2_ARRAYVIEW_SETSLICE_FROMBUF(p_out, _avsb_self, _avsb_start,\
+                                                   _avsb_count, _avsb_step, \
+                                                   &_avsb_view, p_type); \
                 PyBuffer_Release(&_avsb_view); \
-                p_out = -1; \
-                break; \
+            } else { \
+                PyCSDL2_ARRAYVIEW_SETSLICE_FROMITER(p_out, _avsb_self, \
+                                                    _avsb_start, _avsb_count, \
+                                                    _avsb_step, (p_value), \
+                                                    p_type, p_cvtitem_fn); \
             } \
-            \
-            PyCSDL2_ARRAYVIEW_SETSLICE_FROMBUF(p_out, _avsb_self, _avsb_start,\
-                                               _avsb_count, _avsb_step, \
-                                               &_avsb_view, p_type); \
-            PyBuffer_Release(&_avsb_view); \
         } else { \
             PyErr_SetString(PyExc_TypeError, "Invalid slice key"); \
             p_out = -1; \
