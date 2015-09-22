@@ -257,6 +257,12 @@ PyCSDL2_ConvertPointRead(PyObject *object, Py_buffer *view)
 
 /** @} */
 
+/**
+ * \defgroup csdl2_SDL_Rect csdl2.SDL_Rect
+ *
+ * @{
+ */
+
 /** \brief Instance data for PyCSDL2_RectType */
 typedef struct PyCSDL2_Rect {
     PyObject_HEAD
@@ -460,6 +466,8 @@ PyCSDL2_ConvertRectRead(PyObject *object, Py_buffer *view)
     }
     return Py_CLEANUP_SUPPORTED;
 }
+
+/** @} */
 
 /**
  * \brief Implements csdl2.SDL_HasIntersection()
