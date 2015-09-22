@@ -178,6 +178,28 @@ PyCSDL2_MouseMotionEventValid(PyCSDL2_MouseMotionEvent *self, int writeable)
     return 1;
 }
 
+/**
+ * \brief Borrows the SDL_MouseMotionEvent managed by the
+ *        PyCSDL2_MouseMotionEvent object.
+ *
+ * \param obj The PyCSDL2_MouseMotionEvent object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 if an exception occurred.
+ */
+static int
+PyCSDL2_MouseMotionEventPtr(PyObject *obj, SDL_MouseMotionEvent **out)
+{
+    PyCSDL2_MouseMotionEvent *self = (PyCSDL2_MouseMotionEvent*)obj;
+
+    if (!PyCSDL2_MouseMotionEventValid(self, 1))
+        return 0;
+
+    if (out)
+        *out = self->motion;
+
+    return 1;
+}
+
 /** \brief tp_init for PyCSDL2_MouseMotionEventType */
 static int
 PyCSDL2_MouseMotionEventInit(PyObject *obj, PyObject *args, PyObject *kwds)
@@ -216,6 +238,47 @@ PyCSDL2_MouseMotionEventDealloc(PyCSDL2_MouseMotionEvent *self)
     PyObject_ClearWeakRefs((PyObject*) self);
     Py_CLEAR(self->array);
     Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/**
+ * \brief Comparison
+ */
+static PyObject *
+_PyCSDL2_MouseMotionEventCmp(const SDL_MouseMotionEvent *a,
+                             const SDL_MouseMotionEvent *b, int op)
+{
+    int cmp_result;
+    PyObject *out;
+
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->type, b->type);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->timestamp, b->timestamp);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->windowID, b->windowID);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->which, b->which);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->state, b->state);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->x, b->x);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->y, b->y);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->xrel, b->xrel);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->yrel, b->yrel);
+
+docmp:
+    PyCSDL2_CMP(out, cmp_result, op);
+    return out;
+}
+
+/** \brief tp_richcompare for PyCSDL2_MouseMotionEventType */
+static PyObject *
+PyCSDL2_MouseMotionCmp(PyObject *a_obj, PyObject *b_obj, int op)
+{
+    SDL_MouseMotionEvent *a;
+    SDL_MouseMotionEvent b;
+
+    if (!PyCSDL2_MouseMotionEventPtr(a_obj, &a))
+        return NULL;
+
+    if (!PyCSDL2_MouseMotionEventConvert(b_obj, &b))
+        return NULL;
+
+    return _PyCSDL2_MouseMotionEventCmp(a, &b, op);
 }
 
 /** \brief Getter for SDL_MouseMotionEvent.type */
@@ -476,7 +539,7 @@ static PyTypeObject PyCSDL2_MouseMotionEventType = {
     "A structure that contains mouse motion event information.\n",
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
-    /* tp_richcompare    */ 0,
+    /* tp_richcompare    */ PyCSDL2_MouseMotionCmp,
     /* tp_weaklistoffset */ offsetof(PyCSDL2_MouseMotionEvent, in_weakreflist),
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
@@ -535,28 +598,6 @@ PyCSDL2_MouseMotionEventElemCreate(SDL_MouseMotionEvent *motion, PyObject *array
     PyCSDL2_Set(self->array, array);
 
     return (PyObject *)self;
-}
-
-/**
- * \brief Borrows the SDL_MouseMotionEvent managed by the
- *        PyCSDL2_MouseMotionEvent object.
- *
- * \param obj The PyCSDL2_MouseMotionEvent object.
- * \param[out] out Output pointer.
- * \returns 1 on success, 0 if an exception occurred.
- */
-static int
-PyCSDL2_MouseMotionEventPtr(PyObject *obj, SDL_MouseMotionEvent **out)
-{
-    PyCSDL2_MouseMotionEvent *self = (PyCSDL2_MouseMotionEvent*)obj;
-
-    if (!PyCSDL2_MouseMotionEventValid(self, 1))
-        return 0;
-
-    if (out)
-        *out = self->motion;
-
-    return 1;
 }
 
 /** @} */
