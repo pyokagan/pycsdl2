@@ -3,6 +3,7 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import operator
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -202,6 +203,43 @@ class ArrayViewBaseTest:
         self.assertIs(mem.obj, view)
         self.assertEqual(mem.shape, (2,))
         self.assertEqual(mem.strides, (x.itemsize * -2,))
+
+    def test_setitem(self):
+        "setitem modifies the element at the index"
+        # The items are not equal at first
+        self.assertNotEqual(self.items[1], self.items[2])
+
+        # Ensure the view items and our items match.
+        self.assertEqual(self.view[1], self.items[1])
+        self.assertEqual(self.view[2], self.items[2])
+
+        # Perform the assignment
+        self.view[1] = self.items[2]
+
+        # Now view[1] == view[2] == items[2]
+        self.assertEqual(self.view[1], self.items[2])
+        self.assertEqual(self.view[1], self.view[2])
+
+    def test_setitem_oob(self):
+        "setitem raises IndexError if the index is out of bounds"
+        self.assertRaises(IndexError, operator.getitem, self.view, 4)
+        self.assertRaises(IndexError, operator.getitem, self.view, -5)
+
+    def test_setitem_neg(self):
+        "setitem handles negative indices"
+        # The items are not equal at first
+        self.assertNotEqual(self.items[1], self.items[3])
+
+        # Ensure the view items and our items match.
+        self.assertEqual(self.view[1], self.items[1])
+        self.assertEqual(self.view[3], self.items[3])
+
+        # Perform the assignment
+        self.view[-1] = self.items[1]
+
+        # Now, view[3] == view[1] == items[1]
+        self.assertEqual(self.view[3], self.view[1])
+        self.assertEqual(self.view[3], self.items[1])
 
 
 class TestEventArrayView(ArrayViewBaseTest, unittest.TestCase):

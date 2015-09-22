@@ -62,13 +62,22 @@
 
 /**
  * \brief Validates the array view.
+ *
+ * \param writeable Set to true to ensure that the underlying buffer can be
+ *                  written to.
  */
-#define PyCSDL2_ARRAYVIEW_VALID(p_out, p_self) \
+#define PyCSDL2_ARRAYVIEW_VALID(p_out, p_self, p_writeable) \
     do { \
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avv_self = (void*)(p_self); \
         \
         if (!_avv_self->buf) { \
             PyErr_SetString(PyExc_ValueError, "array has been released"); \
+            p_out = 0; \
+            break; \
+        } \
+        \
+        if ((p_writeable) && _avv_self->flags & PyCSDL2_ARRAYVIEW_READONLY) { \
+            PyCSDL2_RaiseReadonlyError((PyObject *)_avv_self); \
             p_out = 0; \
             break; \
         } \
@@ -176,7 +185,7 @@
         struct { PyCSDL2_ARRAYVIEW_HEAD } *_avgb_self = (void*)(p_self); \
         int _avgb_ret; \
         \
-        PyCSDL2_ARRAYVIEW_VALID(_avgb_ret, _avgb_self); \
+        PyCSDL2_ARRAYVIEW_VALID(_avgb_ret, _avgb_self, 0); \
         if (!_avgb_ret) { \
             p_out = -1; \
             break; \
@@ -291,6 +300,74 @@
     } while (0)
 
 /**
+ * \brief Sets an item
+ */
+#define PyCSDL2_ARRAYVIEW_SETITEM(p_out, p_self, p_index, p_value, p_type, p_cvtitem_fn) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avsi_self = (void*)(p_self); \
+        Py_ssize_t _avsi_index = (p_index); \
+        int _avsi_ret; \
+        \
+        _avsi_ret = (p_cvtitem_fn)(p_value, \
+                                  (p_type*)(_avsi_self->buf + _avsi_index * _avsi_self->stride)); \
+        if (!_avsi_ret) { \
+            p_out = -1; \
+            break; \
+        } \
+        p_out = 0; \
+    } while (0)
+
+/**
+ * \brief Implements subscript
+ */
+#define PyCSDL2_ARRAYVIEW_ASS_SUBSCRIPT(p_out, p_self, p_key, p_value, p_type,\
+                                        p_cvtitem_fn) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avsb_self = (void*)(p_self); \
+        int _avsb_ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(_avsb_ret, _avsb_self, 1); \
+        if (!_avsb_ret) { \
+            p_out = -1; \
+            break; \
+        } \
+        \
+        if (!(p_value)) { \
+            PyErr_SetString(PyExc_TypeError, "cannot delete memory"); \
+            p_out = -1; \
+            break; \
+        } \
+        \
+        if (PyIndex_Check(p_key)) { \
+            Py_ssize_t _avsb_index; \
+            \
+            _avsb_index = PyNumber_AsSsize_t((p_key), PyExc_IndexError); \
+            if (_avsb_index == -1 && PyErr_Occurred()) { \
+                p_out = -1; \
+                break; \
+            } \
+            \
+            if (_avsb_index < 0) \
+                _avsb_index = _avsb_self->len + _avsb_index; \
+            \
+            if (_avsb_index < 0 || _avsb_index >= _avsb_self->len) { \
+                PyErr_SetString(PyExc_IndexError, "index out of bounds"); \
+                p_out = -1; \
+                break; \
+            } \
+            \
+            PyCSDL2_ARRAYVIEW_SETITEM(p_out, _avsb_self, _avsb_index, p_value, \
+                                      p_type, p_cvtitem_fn); \
+        } else if (PySlice_Check(p_key)) { \
+            PyErr_SetString(PyExc_NotImplementedError, "Slicing not implemented yet."); \
+            p_out = -1; \
+        } else { \
+            PyErr_SetString(PyExc_TypeError, "Invalid slice key"); \
+            p_out = -1; \
+        } \
+    } while (0)
+
+/**
  * \brief Implements an array view Python type, and all of its functions and
  *        variables.
  *
@@ -309,7 +386,8 @@
  *                     array view element.
  * \param[in] p_name \c tp_name of the type.
  */
-#define PyCSDL2_ARRAYVIEW_IMPL(p_prefix, p_type, p_format, p_name, p_getitem_fn) \
+#define PyCSDL2_ARRAYVIEW_IMPL(p_prefix, p_type, p_format, p_name, \
+                               p_getitem_fn, p_cvtitem_fn) \
     typedef struct p_prefix { \
         PyCSDL2_ARRAYVIEW_HEAD \
     } p_prefix; \
@@ -398,6 +476,15 @@
         return out; \
     } \
     \
+    static int \
+    p_prefix ## AssSubscript(PyObject *self, PyObject *key, PyObject *value) \
+    { \
+        int ret; \
+        PyCSDL2_ARRAYVIEW_ASS_SUBSCRIPT(ret, self, key, value, p_type, \
+                                        p_cvtitem_fn); \
+        return ret; \
+    } \
+    \
     static PyObject * \
     p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
     { \
@@ -426,7 +513,7 @@
     static PyMappingMethods p_prefix ## AsMapping = { \
         /* mp_length        */ p_prefix ## Length, \
         /* mp_subscript     */ p_prefix ## Subscript, \
-        /* mp_ass_subscript */ NULL \
+        /* mp_ass_subscript */ p_prefix ## AssSubscript \
     }; \
     \
     static PyMethodDef p_prefix ## Methods[] = { \

@@ -35,6 +35,8 @@
 
 static PyObject *PyCSDL2_EventElemCreate(SDL_Event *ev, PyObject *array);
 
+static int PyCSDL2_EventConvert(PyObject *obj, SDL_Event *out);
+
 /**
  * \defgroup csdl2_SDL_EventArrayView csdl2.SDL_EventArrayView
  *
@@ -42,7 +44,8 @@ static PyObject *PyCSDL2_EventElemCreate(SDL_Event *ev, PyObject *array);
  */
 
 PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_EventArrayView, SDL_Event, Uint32_UNIT "52x",
-                       "SDL_EventArrayView", PyCSDL2_EventElemCreate);
+                       "SDL_EventArrayView", PyCSDL2_EventElemCreate,
+                       PyCSDL2_EventConvert);
 
 /** @} */
 
