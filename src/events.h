@@ -90,6 +90,27 @@ PyCSDL2_EventMemCreate(void)
  * @{
  */
 
+/**
+ * \brief Converts a SDL_MouseMotionEvent-like object.
+ */
+static int
+PyCSDL2_MouseMotionEventConvert(PyObject *obj, SDL_MouseMotionEvent *out)
+{
+    Py_buffer view;
+
+    if (PyObject_GetBuffer(obj, &view, PyBUF_CONTIG_RO) < 0)
+        return 0;
+
+    if (PyCSDL2_ValidateScalarBuffer(&view, sizeof(SDL_MouseMotionEvent)) < 0) {
+        PyBuffer_Release(&view);
+        return 0;
+    }
+
+    *out = *((SDL_MouseMotionEvent *)view.buf);
+    PyBuffer_Release(&view);
+    return 1;
+}
+
 /** \brief Instance data for PyCSDL2_MouseMotionEventType */
 typedef struct PyCSDL2_MouseMotionEvent {
     PyObject_HEAD
