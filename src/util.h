@@ -834,6 +834,61 @@ PyCSDL2_ValidateArrayBuffer(Py_buffer *view, Py_ssize_t itemsize,
 }
 
 /**
+ * \defgroup csdl2_util_cmp Comparison utilities
+ *
+ * @{
+ */
+
+#define PyCSDL2_CMP_VISIT(p_cmp_result, p_label, p_a, p_b) \
+    do { \
+        if ((p_a) > (p_b)) { \
+            (p_cmp_result) = 1; \
+            goto p_label; \
+        } else if ((p_a) < (p_b)) { \
+            (p_cmp_result) = -1; \
+            goto p_label; \
+        } else { \
+            (p_cmp_result) = 0; \
+        } \
+    } while (0)
+
+#define PyCSDL2_CMP_VISIT_STRN(p_cmp_result, p_label, p_a, p_b, p_n) \
+    do { \
+        (p_cmp_result) = strncmp((p_a), (p_b), (p_n)); \
+        if ((p_cmp_result) != 0) \
+            goto p_label; \
+    } while (0)
+
+#define PyCSDL2_CMP(p_out, p_cmp_result, p_op) \
+    do { \
+        switch (p_op) { \
+            case Py_LT: \
+                p_out = PyBool_FromLong(p_cmp_result < 0); \
+                break; \
+            case Py_LE: \
+                p_out = PyBool_FromLong(p_cmp_result <= 0); \
+                break; \
+            case Py_EQ: \
+                p_out = PyBool_FromLong(p_cmp_result == 0); \
+                break; \
+            case Py_NE: \
+                p_out = PyBool_FromLong(p_cmp_result != 0); \
+                break; \
+            case Py_GT: \
+                p_out = PyBool_FromLong(p_cmp_result > 0); \
+                break; \
+            case Py_GE: \
+                p_out = PyBool_FromLong(p_cmp_result >= 0); \
+                break; \
+            default: \
+                PyErr_SetString(PyExc_SystemError, "invalid comparison operation"); \
+                p_out = NULL; \
+        } \
+    } while (0)
+
+/** @} */
+
+/**
  * \brief Base instance struct members for PyCSDL2_Buffer-based types
  *
  * This macro will insert the required field members required for a type to use
