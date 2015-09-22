@@ -163,6 +163,27 @@ PyCSDL2_PointValid(PyCSDL2_Point *self, int writeable)
     return 1;
 }
 
+/**
+ * \brief Borrows a pointer to the SDL_Point managed by the PyCSDL2_Point.
+ *
+ * \param obj The PyCSDL2_Point object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_PointPtr(PyObject *obj, SDL_Point **out)
+{
+    PyCSDL2_Point *self = (PyCSDL2_Point*)obj;
+
+    if (!PyCSDL2_PointValid(self, 1))
+        return 0;
+
+    if (out)
+        *out = self->point;
+
+    return 1;
+}
+
 /** \brief tp_init for PyCSDL2_PointType */
 static int
 PyCSDL2_PointInit(PyObject *obj, PyObject *args, PyObject *kwds)
@@ -218,6 +239,29 @@ static PyBufferProcs PyCSDL2_PointBufferProcs = {
     (getbufferproc) PyCSDL2_PointGetBuffer,
     (releasebufferproc) NULL
 };
+
+/** \brief tp_richcompare for PyCSDL2_PointType */
+static PyObject *
+PyCSDL2_PointCmp(PyObject *a, PyObject *b, int op)
+{
+    SDL_Point *point_a;
+    SDL_Point point_b;
+    int cmp_result;
+    PyObject *out;
+
+    if (!PyCSDL2_PointPtr(a, &point_a))
+        return NULL;
+
+    if (!PyCSDL2_PointConvert(b, &point_b))
+        return NULL;
+
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, point_a->x, point_b.x);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, point_a->y, point_b.y);
+
+docmp:
+    PyCSDL2_CMP(out, cmp_result, op);
+    return out;
+}
 
 /** \brief Getter for SDL_Point.x */
 static PyObject *
@@ -294,7 +338,7 @@ static PyTypeObject PyCSDL2_PointType = {
     "A two dimensional point.",
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
-    /* tp_richcompare    */ 0,
+    /* tp_richcompare    */ PyCSDL2_PointCmp,
     /* tp_weaklistoffset */ offsetof(PyCSDL2_Point, in_weakreflist),
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
@@ -354,27 +398,6 @@ PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array)
     PyCSDL2_Set(self->u.array, (PyCSDL2_PointArrayView *)array);
 
     return (PyObject *)self;
-}
-
-/**
- * \brief Borrows a pointer to the SDL_Point managed by the PyCSDL2_Point.
- *
- * \param obj The PyCSDL2_Point object
- * \param[out] out Output pointer.
- * \returns 1 on success, 0 with an exception set on failure.
- */
-static int
-PyCSDL2_PointPtr(PyObject *obj, SDL_Point **out)
-{
-    PyCSDL2_Point *self = (PyCSDL2_Point*)obj;
-
-    if (!PyCSDL2_PointValid(self, 1))
-        return 0;
-
-    if (out)
-        *out = self->point;
-
-    return 1;
 }
 
 /**
