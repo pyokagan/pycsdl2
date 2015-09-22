@@ -40,14 +40,14 @@ static PyObject *PyCSDL2_PointElemCreate(SDL_Point *point, PyObject *array);
 static int PyCSDL2_PointConvert(PyObject *obj, SDL_Point *out);
 
 /**
- * \defgroup csdl2_SDL_PointArrayView csdl2.SDL_PointArrayView
+ * \defgroup csdl2_SDL_PointArray csdl2.SDL_PointArray
  *
  * @{
  */
 
-PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_PointArrayView, SDL_Point, "ii",
-                       "SDL_PointArrayView", PyCSDL2_PointElemCreate,
-                       PyCSDL2_PointConvert);
+PyCSDL2_ARRAY_IMPL(PyCSDL2_PointArray, SDL_Point, "ii",
+                   "SDL_PointArray", PyCSDL2_PointElemCreate,
+                   PyCSDL2_PointConvert);
 
 /** @} */
 
@@ -449,14 +449,14 @@ static PyObject *PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array);
 static int PyCSDL2_RectConvert(PyObject *obj, SDL_Rect *out);
 
 /**
- * \defgroup csdl2_SDL_RectArrayView csdl2.SDL_RectArrayView
+ * \defgroup csdl2_SDL_RectArray csdl2.SDL_RectArray
  *
  * @{
  */
 
-PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_RectArrayView, SDL_Rect, "iiii",
-                       "SDL_RectArrayView", PyCSDL2_RectElemCreate,
-                       PyCSDL2_RectConvert);
+PyCSDL2_ARRAY_IMPL(PyCSDL2_RectArray, SDL_Rect, "iiii",
+                   "SDL_RectArray", PyCSDL2_RectElemCreate,
+                   PyCSDL2_RectConvert);
 
 /** @} */
 
@@ -931,10 +931,16 @@ PyCSDL2_initrect(PyObject *module)
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointArrayViewType) < 0)
         return 0;
 
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointArrayType) < 0)
+        return 0;
+
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_PointType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectArrayViewType) < 0)
+        return 0;
+
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectArrayType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RectType) < 0)

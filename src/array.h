@@ -902,6 +902,230 @@ _avssfi_cleanup: \
 /** @} */
 
 /**
+ * @{
+ */
+
+#define PyCSDL2_ARRAY_HEAD \
+    PyCSDL2_ARRAYVIEW_HEAD \
+    void *alloc_buf; \
+    Py_ssize_t alloc;
+
+/**
+ * \brief Validates the array.
+ *
+ * \param p_writeable Set to true to ensure that the underlying buffer can be
+ *                    written to.
+ * \param p_resizable Set to true to ensure that the array can change size.
+ */
+#define PyCSDL2_ARRAY_VALID(p_out, p_self, p_writeable, p_resizable) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_av_self = (void *)(p_self); \
+        int _av_ret; \
+        \
+        PyCSDL2_ARRAYVIEW_VALID(_av_ret, p_self, p_writeable); \
+        if (!_av_ret) { \
+            p_out = 0; \
+            break; \
+        } \
+        \
+        if ((p_resizable) && _av_self->num_exports) { \
+            PyErr_SetString(PyExc_BufferError, \
+                            "cannot resize array while it is exported."); \
+            p_out = 0; \
+            break; \
+        } \
+        \
+        p_out = 1; \
+    } while (0)
+
+/**
+ * \brief Releases the array
+ */
+#define PyCSDL2_ARRAY_RELEASE(p_self) \
+    do { \
+        struct { PyCSDL2_ARRAY_HEAD } *_ar_self = (void *)(p_self); \
+        PyMem_Free(_ar_self->alloc_buf); \
+        _ar_self->alloc_buf = NULL; \
+        PyCSDL2_ARRAYVIEW_RELEASE(_ar_self); \
+    } while (0)
+
+/**
+ * \brief Ensures that the array buffer can hold at least p_req items.
+ */
+#define PyCSDL2_ARRAY_ALLOC(p_out, p_self, p_req) \
+    do { \
+        struct { PyCSDL2_ARRAY_HEAD } *_aal_self = (void*)(p_self); \
+        Py_ssize_t _aal_alloc = _aal_self->alloc; \
+        void *_aal_newmem; \
+        \
+        if (_aal_self->alloc >= (p_req)) { \
+            p_out = 0; \
+            break; \
+        } \
+        \
+        if (!_aal_alloc) \
+            _aal_alloc = 64; \
+        \
+        while (_aal_alloc <= (p_req)) \
+            _aal_alloc *= 2; \
+        \
+        _aal_newmem = PyMem_Realloc(_aal_self->alloc_buf, _aal_alloc * _aal_self->stride); \
+        if (!_aal_newmem) { \
+            PyErr_NoMemory(); \
+            p_out = -1; \
+            break; \
+        } \
+        _aal_self->alloc = _aal_alloc; \
+        _aal_self->buf = _aal_self->alloc_buf = _aal_newmem; \
+        p_out = 0; \
+    } while (0)
+
+/**
+ * \brief (Re-)initializes the array
+ */
+#define PyCSDL2_ARRAY_INIT(p_out, p_self, p_flags, p_type) \
+    do { \
+        struct { PyCSDL2_ARRAY_HEAD } *_ain_self = (void *)(p_self); \
+        int _ain_ret; \
+        \
+        PyCSDL2_ARRAYVIEW_INIT_PTR(_ain_self, (p_flags), NULL, 0, sizeof(p_type), NULL); \
+        \
+        PyCSDL2_ARRAY_ALLOC(_ain_ret, _ain_self, 0); \
+        if (_ain_ret < 0) { \
+            p_out = -1; \
+            break; \
+        } \
+        \
+        p_out = 0; \
+    } while (0)
+
+/**
+ * \brief Array implementation
+ */
+#define PyCSDL2_ARRAY_IMPL(p_prefix, p_type, p_format, p_name, p_getitem_fn, p_cvtitem_fn) \
+    typedef struct p_prefix { \
+        PyCSDL2_ARRAY_HEAD \
+    } p_prefix; \
+    \
+    static PyTypeObject p_prefix ## Type; \
+    \
+    PyCSDL2_ARRAYVIEW_IMPL(p_prefix ## View, p_type, p_format, p_name "View", \
+                           p_getitem_fn, p_cvtitem_fn); \
+    \
+    static PyObject * \
+    p_prefix ## New (PyTypeObject *typeobject, PyObject *args, PyObject *kwds) \
+    { \
+        PyObject *out; \
+        int ret, readonly = 0; \
+        unsigned int flags = 0; \
+        static char *kwlist[] = {"readonly", NULL}; \
+        \
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "|p", kwlist, \
+                                         &readonly)) \
+            return NULL; \
+        \
+        out = typeobject->tp_alloc(typeobject, 0); \
+        if (!out) \
+            return NULL; \
+        \
+        if (readonly) \
+            flags |= PyCSDL2_ARRAYVIEW_READONLY; \
+        \
+        PyCSDL2_ARRAY_INIT(ret, out, flags, p_type); \
+        if (ret < 0) { \
+            Py_DECREF(out); \
+            return NULL; \
+        } \
+        \
+        return out; \
+    } \
+    \
+    static void \
+    p_prefix ## Dealloc(PyObject *self) \
+    { \
+        PyCSDL2_ARRAY_RELEASE(self); \
+        Py_TYPE(self)->tp_free(self); \
+    } \
+    \
+    static PyObject * \
+    p_prefix ## Release(PyObject *self, PyObject *args, PyObject *kwds) \
+    { \
+        static char *kwlist[] = {NULL}; \
+        \
+        if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist)) \
+            return NULL; \
+        \
+        PyCSDL2_ARRAY_RELEASE(self); \
+        \
+        Py_RETURN_NONE; \
+    } \
+    \
+    static PySequenceMethods p_prefix ## AsSequence = { \
+        /* sq_length         */ p_prefix ## ViewLength, \
+        /* sq_concat         */ NULL, \
+        /* sq_repeat         */ NULL, \
+        /* sq_item           */ p_prefix ## ViewGetItem \
+    }; \
+    \
+    static PyMappingMethods p_prefix ## AsMapping = { \
+        /* mp_length        */ p_prefix ## ViewLength, \
+        /* mp_subscript     */ p_prefix ## ViewSubscript, \
+        /* mp_ass_subscript */ p_prefix ## ViewAssSubscript \
+    }; \
+    \
+    static PyMethodDef p_prefix ## Methods[] = { \
+        {"release", \
+         (PyCFunction) p_prefix ## Release, \
+         METH_VARARGS | METH_KEYWORDS, \
+         "release() -> None\n" \
+         "\n" \
+         "Release the underlying buffer of the array.\n" \
+        }, \
+        {NULL} \
+    }; \
+    \
+    static PyTypeObject p_prefix ## Type = { \
+        PyVarObject_HEAD_INIT(NULL, 0) \
+        /* tp_name           */ ("csdl2." p_name), \
+        /* tp_basicsize      */ sizeof(p_prefix), \
+        /* tp_itemsize       */ 0, \
+        /* tp_dealloc        */ (p_prefix ## Dealloc), \
+        /* tp_print          */ 0, \
+        /* tp_getattr        */ 0, \
+        /* tp_setattr        */ 0, \
+        /* tp_reserved       */ 0, \
+        /* tp_repr           */ 0, \
+        /* tp_as_number      */ 0, \
+        /* tp_as_sequence    */ &(p_prefix ## AsSequence), \
+        /* tp_as_mapping     */ &(p_prefix ## AsMapping), \
+        /* tp_hash           */ 0, \
+        /* tp_call           */ 0, \
+        /* tp_str            */ 0, \
+        /* tp_getattro       */ 0, \
+        /* tp_setattro       */ 0, \
+        /* tp_as_buffer      */ &(p_prefix ## ViewAsBuffer), \
+        /* tp_flags          */ Py_TPFLAGS_DEFAULT, \
+        /* tp_doc            */ "Array", \
+        /* tp_traverse       */ 0, \
+        /* tp_clear          */ 0, \
+        /* tp_richcompare    */ 0, \
+        /* tp_weaklistoffset */ 0, \
+        /* tp_iter           */ 0, \
+        /* tp_iternext       */ 0, \
+        /* tp_methods        */ p_prefix ## Methods, \
+        /* tp_members        */ 0, \
+        /* tp_getset         */ p_prefix ## ViewGetSetters, \
+        /* tp_base           */ &(p_prefix ## ViewType), \
+        /* tp_dict           */ 0, \
+        /* tp_descr_get      */ 0, \
+        /* tp_descr_set      */ 0, \
+        /* tp_dictoffset     */ 0, \
+        /* tp_init           */ 0, \
+        /* tp_alloc          */ 0, \
+        /* tp_new            */ p_prefix ## New \
+    };
+
+/**
  * \brief Initializes array types.
  *
  * \param module csdl2 module object.

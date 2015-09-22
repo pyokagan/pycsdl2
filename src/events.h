@@ -38,14 +38,14 @@ static PyObject *PyCSDL2_EventElemCreate(SDL_Event *ev, PyObject *array);
 static int PyCSDL2_EventConvert(PyObject *obj, SDL_Event *out);
 
 /**
- * \defgroup csdl2_SDL_EventArrayView csdl2.SDL_EventArrayView
+ * \defgroup csdl2_SDL_EventArray csdl2.SDL_EventArray
  *
  * @{
  */
 
-PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_EventArrayView, SDL_Event, Uint32_UNIT "52x",
-                       "SDL_EventArrayView", PyCSDL2_EventElemCreate,
-                       PyCSDL2_EventConvert);
+PyCSDL2_ARRAY_IMPL(PyCSDL2_EventArray, SDL_Event, Uint32_UNIT "52x",
+                   "SDL_EventArray", PyCSDL2_EventElemCreate,
+                   PyCSDL2_EventConvert);
 
 /** @} */
 
@@ -1243,6 +1243,9 @@ PyCSDL2_initevents(PyObject *module)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventArrayViewType) < 0)
+        return 0;
+
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventArrayType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventType) < 0)
