@@ -571,6 +571,27 @@ PyCSDL2_RectValid(PyCSDL2_Rect *self, int writeable)
     return 1;
 }
 
+/**
+ * \brief Borrows a pointer to the SDL_Rect managed by the PyCSDL2_Rect.
+ *
+ * \param obj The PyCSDL2_Rect object
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_RectPtr(PyObject *obj, SDL_Rect **out)
+{
+    PyCSDL2_Rect *self = (PyCSDL2_Rect*)obj;
+
+    if (!PyCSDL2_RectValid(self, 1))
+        return 0;
+
+    if (out)
+        *out = self->rect;
+
+    return 1;
+}
+
 /** \brief initfunc for PyCSDL2_RectType */
 static int
 PyCSDL2_RectInit(PyCSDL2_Rect *self, PyObject *args, PyObject *kwds)
@@ -618,6 +639,31 @@ static PyBufferProcs PyCSDL2_RectBufferProcs = {
     (getbufferproc) PyCSDL2_RectGetBuffer,
     (releasebufferproc) NULL
 };
+
+/** \brief tp_richcompare for PyCSDL2_RectType */
+static PyObject *
+PyCSDL2_RectCmp(PyObject *a, PyObject *b, int op)
+{
+    SDL_Rect *rect_a;
+    SDL_Rect rect_b;
+    int cmp_result;
+    PyObject *out;
+
+    if (!PyCSDL2_RectPtr(a, &rect_a))
+        return NULL;
+
+    if (!PyCSDL2_RectConvert(b, &rect_b))
+        return NULL;
+
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, rect_a->x, rect_b.x);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, rect_a->y, rect_b.y);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, rect_a->w, rect_b.w);
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, rect_a->h, rect_b.h);
+
+docmp:
+    PyCSDL2_CMP(out, cmp_result, op);
+    return out;
+}
 
 /** \brief Getter for SDL_Rect.x */
 static PyObject *
@@ -738,7 +784,7 @@ static PyTypeObject PyCSDL2_RectType = {
     "A 2d rectangle with its origin at the upper left.",
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
-    /* tp_richcompare    */ 0,
+    /* tp_richcompare    */ PyCSDL2_RectCmp,
     /* tp_weaklistoffset */ offsetof(PyCSDL2_Rect, in_weakreflist),
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
@@ -798,27 +844,6 @@ PyCSDL2_RectElemCreate(SDL_Rect *rect, PyObject *array)
     PyCSDL2_Set(self->u.array, (PyCSDL2_RectArrayView *)array);
 
     return (PyObject *)self;
-}
-
-/**
- * \brief Borrows a pointer to the SDL_Rect managed by the PyCSDL2_Rect.
- *
- * \param obj The PyCSDL2_Rect object
- * \param[out] out Output pointer.
- * \returns 1 on success, 0 with an exception set on failure.
- */
-static int
-PyCSDL2_RectPtr(PyObject *obj, SDL_Rect **out)
-{
-    PyCSDL2_Rect *self = (PyCSDL2_Rect*)obj;
-
-    if (!PyCSDL2_RectValid(self, 1))
-        return 0;
-
-    if (out)
-        *out = self->rect;
-
-    return 1;
 }
 
 /** \brief converter for a readonly SDL_Rect exporting object */
