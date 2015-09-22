@@ -732,6 +732,54 @@ PyCSDL2_EventValid(PyCSDL2_Event *self, int writeable)
 }
 
 /**
+ * \brief Borrows the SDL_Event from a PyCSDL2_Event object.
+ *
+ * \param obj The PyCSDL2_Event object.
+ * \param[out] out Output pointer.
+ * \returns 1 on success, 0 with an exception set on failure.
+ */
+static int
+PyCSDL2_EventPtr(PyObject *obj, SDL_Event **out)
+{
+    PyCSDL2_Event *self = (PyCSDL2_Event*)obj;
+
+    if (!PyCSDL2_EventValid(self, 1))
+        return 0;
+
+    if (out)
+        *out = self->event;
+
+    return 1;
+}
+
+/** \brief Implements tp_richcompare for PyCSDL2_EventType */
+static PyObject *
+PyCSDL2_EventCmp(PyObject *a_obj, PyObject *b_obj, int op)
+{
+    SDL_Event *a;
+    SDL_Event b;
+    int cmp_result;
+    PyObject *out;
+
+    if (!PyCSDL2_EventPtr(a_obj, &a))
+        return NULL;
+
+    if (!PyCSDL2_EventConvert(b_obj, &b))
+        return NULL;
+
+    PyCSDL2_CMP_VISIT(cmp_result, docmp, a->type, b.type);
+
+    switch (a->type) {
+        case SDL_MOUSEMOTION:
+            return _PyCSDL2_MouseMotionEventCmp(&a->motion, &b.motion, op);
+    }
+
+docmp:
+    PyCSDL2_CMP(out, cmp_result, op);
+    return out;
+}
+
+/**
  * \brief Getter for csdl2.SDL_Event.type
  */
 static PyObject *
@@ -850,7 +898,7 @@ static PyTypeObject PyCSDL2_EventType = {
     "A union that contains structures for the different event types.\n",
     /* tp_traverse       */ 0,
     /* tp_clear          */ 0,
-    /* tp_richcompare    */ 0,
+    /* tp_richcompare    */ PyCSDL2_EventCmp,
     /* tp_weaklistoffset */ offsetof(PyCSDL2_Event, in_weakreflist),
     /* tp_iter           */ 0,
     /* tp_iternext       */ 0,
@@ -914,27 +962,6 @@ PyCSDL2_EventElemCreate(SDL_Event *event, PyObject *array)
     }
 
     return (PyObject *)self;
-}
-
-/**
- * \brief Borrows the SDL_Event from a PyCSDL2_Event object.
- *
- * \param obj The PyCSDL2_Event object.
- * \param[out] out Output pointer.
- * \returns 1 on success, 0 with an exception set on failure.
- */
-static int
-PyCSDL2_EventPtr(PyObject *obj, SDL_Event **out)
-{
-    PyCSDL2_Event *self = (PyCSDL2_Event*)obj;
-
-    if (!PyCSDL2_EventValid(self, 1))
-        return 0;
-
-    if (out)
-        *out = self->event;
-
-    return 1;
 }
 
 /**
