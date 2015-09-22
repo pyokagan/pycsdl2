@@ -318,6 +318,33 @@
     } while (0)
 
 /**
+ * \brief Copies the contents of a buffer to a slice.
+ *
+ * \param[out] p_out
+ * \param[in] p_self
+ * \param[in] p_start
+ * \param[in] p_count Number of elements to copy
+ * \param[in] p_step
+ * \param[in] p_view
+ * \param[in] p_type
+ */
+#define PyCSDL2_ARRAYVIEW_SETSLICE_FROMBUF(p_out, p_self, p_start, p_count, p_step, p_view, p_type) \
+    do { \
+        struct { PyCSDL2_ARRAYVIEW_HEAD } *_avssfb_self = (void*)(p_self); \
+        Py_ssize_t _avssfb_count, _avssfb_i, _avssfb_view_stride; \
+        \
+        _avssfb_view_stride = (p_view)->strides ? (p_view)->strides[0] : (p_view)->itemsize; \
+        \
+        for (_avssfb_i = (p_start), _avssfb_count = 0; \
+             _avssfb_count < (p_count); \
+             _avssfb_i += (p_step), _avssfb_count++) \
+            *((p_type*)(_avssfb_self->buf + _avssfb_i * _avssfb_self->stride))\
+            = *((p_type*)((char*)((p_view)->buf) + _avssfb_count * _avssfb_view_stride)); \
+        \
+        p_out = 0; \
+    } while (0)
+
+/**
  * \brief Implements subscript
  */
 #define PyCSDL2_ARRAYVIEW_ASS_SUBSCRIPT(p_out, p_self, p_key, p_value, p_type,\
@@ -359,8 +386,30 @@
             PyCSDL2_ARRAYVIEW_SETITEM(p_out, _avsb_self, _avsb_index, p_value, \
                                       p_type, p_cvtitem_fn); \
         } else if (PySlice_Check(p_key)) { \
-            PyErr_SetString(PyExc_NotImplementedError, "Slicing not implemented yet."); \
-            p_out = -1; \
+            Py_ssize_t _avsb_start, _avsb_stop, _avsb_step, _avsb_count; \
+            Py_buffer _avsb_view; \
+            \
+            if (PySlice_GetIndicesEx((p_key), _avsb_self->len, &_avsb_start,\
+                                     &_avsb_stop, &_avsb_step, &_avsb_count) < 0) { \
+                p_out = -1; \
+                break; \
+            } \
+            \
+            if (PyObject_GetBuffer((p_value), &_avsb_view, PyBUF_STRIDED_RO) < 0) { \
+                p_out = -1; \
+                break; \
+            } \
+            \
+            if (PyCSDL2_ValidateArrayBuffer(&_avsb_view, sizeof(p_type), _avsb_count, 0) < 0) { \
+                PyBuffer_Release(&_avsb_view); \
+                p_out = -1; \
+                break; \
+            } \
+            \
+            PyCSDL2_ARRAYVIEW_SETSLICE_FROMBUF(p_out, _avsb_self, _avsb_start,\
+                                               _avsb_count, _avsb_step, \
+                                               &_avsb_view, p_type); \
+            PyBuffer_Release(&_avsb_view); \
         } else { \
             PyErr_SetString(PyExc_TypeError, "Invalid slice key"); \
             p_out = -1; \
