@@ -432,6 +432,56 @@ PyCSDL2_ARRAYVIEW_IMPL(PyCSDL2_RectArrayView, SDL_Rect, "iiii",
  * @{
  */
 
+/**
+ * \brief Converter for a SDL_Rect-like object.
+ */
+static int
+PyCSDL2_RectConvert(PyObject *obj, SDL_Rect *out)
+{
+    if (PyObject_CheckBuffer(obj)) {
+        Py_buffer view;
+
+        if (PyObject_GetBuffer(obj, &view, PyBUF_CONTIG_RO) < 0)
+            return 0;
+
+        if (PyCSDL2_ValidateScalarBuffer(&view, sizeof(SDL_Rect)) < 0) {
+            PyBuffer_Release(&view);
+            return 0;
+        }
+
+        *out = *((SDL_Rect *)view.buf);
+        PyBuffer_Release(&view);
+        return 1;
+    } else if (PyTuple_Check(obj)) {
+        PyObject *x = PyTuple_GetItem(obj, 0);
+        PyObject *y = PyTuple_GetItem(obj, 1);
+        PyObject *w = PyTuple_GetItem(obj, 2);
+        PyObject *h = PyTuple_GetItem(obj, 3);
+        SDL_Rect rect;
+
+        if (!x || !y || !w || !h)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(x, &rect.x) < 0)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(y, &rect.y) < 0)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(w, &rect.w) < 0)
+            return 0;
+
+        if (PyCSDL2_LongAsInt(h, &rect.h) < 0)
+            return 0;
+
+        *out = rect;
+        return 1;
+    } else {
+        PyCSDL2_RaiseTypeError(NULL, "SDL_Rect", obj);
+        return 0;
+    }
+}
+
 /** \brief Instance data for PyCSDL2_RectType */
 typedef struct PyCSDL2_Rect {
     PyObject_HEAD
