@@ -524,6 +524,12 @@ PyCSDL2_RendererInfoPtr(PyObject *obj, SDL_RendererInfo **out)
 
 /** @} */
 
+/**
+ * \defgroup csdl2_SDL_Renderer csdl2.SDL_Renderer
+ *
+ * @{
+ */
+
 /** \brief Instance data of PyCSDL2_RendererType */
 typedef struct PyCSDL2_Renderer {
     PyObject_HEAD
@@ -769,6 +775,8 @@ PyCSDL2_RendererPtr(PyObject *obj, SDL_Renderer **out)
 
     return 1;
 }
+
+/** @} */
 
 /**
  * \defgroup csdl2_SDL_Texture csdl2.SDL_Texture
