@@ -476,6 +476,12 @@ PyCSDL2_MouseMotionEventPtr(PyObject *obj, SDL_MouseMotionEvent **out)
 /** @} */
 
 /**
+ * \defgroup csdl2_SDL_Event csdl2.SDL_Event
+ *
+ * @{
+ */
+
+/**
  * \brief Instance data of PyCSDL2_EventType
  */
 typedef struct PyCSDL2_Event {
@@ -746,6 +752,8 @@ PyCSDL2_GetEventBuffer(Py_buffer *buf, PyObject *obj, size_t len, int flags)
     }
     return 0;
 }
+
+/** @} */
 
 /**
  * \brief Implements csdl2.SDL_PumpEvents()
