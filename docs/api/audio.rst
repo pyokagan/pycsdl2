@@ -170,6 +170,85 @@ The following are thus the possible audio data format values:
 
    Aliased to :const:`AUDIO_F32LSB`.
 
+Audio Driver Discovery
+----------------------
+.. function:: SDL_GetNumAudioDrivers() -> int
+
+   Returns the number of audio drivers that SDL supports.
+
+   :returns: The number of builtin audio drivers.
+   :rtype: int
+
+.. function:: SDL_GetAudioDriver(index: int) -> str
+
+   Use this function to get the name of a builtin audio driver. The presence of
+   a driver in this list does not mean that it will function, it just means SDL
+   is capable of interacting with that interface.
+
+   :param int index: Index of the audio driver. The value ranges from 0 to
+                     ``SDL_GetNumAudioDrivers() - 1``.
+   :returns: The name of the audio driver at the requested index.
+   :rtype: str
+
+.. function:: SDL_GetCurrentAudioDriver()
+
+   Returns the name of the current audio driver.
+
+   :returns: The name of the current audio driver, or None if no driver has
+             been initialized.
+   :rtype: str or None
+
+Initialization and Cleanup
+--------------------------
+These functions are used internally, and should not be used unless you have a
+specific need to specify the audio driver.
+
+.. function:: SDL_AudioInit(driver_name)
+
+   Initializes a particular audio driver.
+
+   :param driver_name: The name of the desired audio driver.
+   :type driver_name: str or None
+
+.. function:: SDL_AudioQuit()
+
+   Use this function to shut down audio if you initialized it with
+   :func:`SDL_AudioInit`.
+
+Audio Device Discovery
+----------------------
+.. function:: SDL_GetNumAudioDevices(iscapture) -> int
+
+   Query the number of audio devices.
+
+   This function may trigger a complete redetection of available hardware,
+   which is an expensive operation.
+
+   :param bool iscapture: False to request playback devices, True to request
+                          recording devices.
+   :returns: The number of available devices exposed by the current driver, or
+             -1 if an explicit list of devices can't be determined.
+
+   .. note:: The `iscapture` parameter is for future expansion and should
+             always be False for now.
+
+.. function:: SDL_GetAudioDeviceName(index, iscapture) -> str
+
+   Query the name of an audio device.
+
+   :param int index: The index of the audio device. The value ranges from 0 to
+                     ``SDL_GetNumAudioDevices() - 1``
+   :param bool iscapture: True to specify a device that has recording
+                          capability.
+   :returns: The name of the audio device at the requested index.
+
+   .. note::
+
+      This function is only valid after successfully initializing the audio
+      subsystem. The values returned by this function reflect the latest call
+      to :func:`SDL_GetNumAudioDevices`. Re-call that function to re-detect
+      available hardware.
+
 Opening and Closing an Audio Device
 -----------------------------------
 SDL provides 2 methods for accessing audio devices. The recommended way is to
@@ -261,6 +340,28 @@ callback to fill the audio buffer with audio data as needed.
    :param dev: Audio device to close
    :type dev: :class:`SDL_AudioDevice`
 
+.. function:: SDL_OpenAudio(desired, obtained)
+
+   Opens the audio device with the `desired` output format.
+
+   This function is a legacy means of opening the audio device. Use
+   :func:`SDL_OpenAudioDevice` instead.
+
+   :param desired: Specifies the desired output format and audio callback
+   :type desired: :class:`SDL_AudioSpec`
+   :param obtained: A :class:`SDL_AudioSpec` that will be filled in with the
+                    hardware parameters. If None, the the output format of the
+                    audio device is guaranteed to match the desired output
+                    format. SDL will convert the audio data to the actual
+                    hardware audio format if necessary. The `desired`
+                    :class:`SDL_AudioSpec` will have its fields modified as
+                    well.
+   :type obtained: :class:`SDL_AudioSpec` or None
+
+.. function:: SDL_CloseAudio()
+
+   Shuts down audio processing and closes the audio device.
+
 Controlling Playback
 --------------------
 .. function:: SDL_PauseAudioDevice(dev, pause_on) -> None
@@ -280,6 +381,25 @@ Controlling Playback
    :type dev: :class:`SDL_AudioDevice`
    :param bool pause_on: If True, the audio device will be paused, otherwise
                          the audio device will be unpaused.
+
+.. function:: SDL_PauseAudio(pause_on)
+
+   Pause or unpause audio playback on the audio device. When the device is
+   paused, silence will be written to the audio device and the audio callback
+   is guaranteed to not be called.
+
+   Pausing state does not stack. Even if the device is paused several times, a
+   single unpause will start the device playing again, and vice versa.
+
+   If you need to protect a few variables from race conditions with the audio
+   callback, you should not pause the audio device as it will lead to dropouts
+   in audio playback. Instead, use :func:`SDL_LockAudio`.
+
+   This function is a legacy means of pausing the audio device. Use
+   :func:`SDL_PauseAudioDevice` instead.
+
+   :param bool pause_on: If True, the audio device will be paused, otherwise
+                         audio device will be unpaused.
 
 WAVE file format support
 ------------------------

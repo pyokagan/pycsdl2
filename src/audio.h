@@ -670,7 +670,253 @@ PyCSDL2_WAVBufCreate(Uint8 *buf, Uint32 len)
     return self;
 }
 
+/**
+ * \brief Internal PyCSDL2_AudioDevice for legacy API.
+ *
+ * The legacy SDL audio API operates on a global audio device (with ID 1).
+ * Since we need a PyCSDL2_AudioDevice object to store the related Python
+ * objects, we internally keep a global PyCSDL2_AudioDevice object that
+ * represents the global audio device.
+ */
+static PyCSDL2_AudioDevice *PyCSDL2_GlobalAudioDevice;
+
 /** @} */
+
+/**
+ * \brief Implements csdl2.SDL_GetNumAudioDrivers()
+ *
+ * \code{.py}
+ * SDL_GetNumAudioDrivers() -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetNumAudioDrivers(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    return PyLong_FromLong(SDL_GetNumAudioDrivers());
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetAudioDriver()
+ *
+ * \code{.py}
+ * SDL_GetAudioDriver(index: int) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDriver(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int index;
+    const char *name;
+    static char *kwlist[] = {"index", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &index))
+        return NULL;
+
+    name = SDL_GetAudioDriver(index);
+    if (!name) {
+        PyErr_SetString(PyExc_ValueError, "Index out of range");
+        return NULL;
+    }
+
+    return PyUnicode_FromString(name);
+}
+
+/**
+ * \brief Implements csdl2.SDL_AudioInit()
+ *
+ * \code{.py}
+ * SDL_AudioInit(driver_name: str or None) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AudioInit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *driver_name;
+    int ret;
+    static char *kwlist[] = {"driver_name", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "z", kwlist, &driver_name))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_AudioInit(driver_name);
+    Py_END_ALLOW_THREADS
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_AudioQuit()
+ *
+ * \code{.py}
+ * SDL_AudioQuit() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AudioQuit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_AudioQuit();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetCurrentAudioDriver()
+ *
+ * \code{.py}
+ * SDL_GetCurrentAudioDriver() -> str or None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetCurrentAudioDriver(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    const char *driver_name;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    driver_name = SDL_GetCurrentAudioDriver();
+    if (driver_name)
+        return PyUnicode_FromString(driver_name);
+    else
+        Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_OpenAudio()
+ *
+ * \code{.py}
+ * SDL_OpenAudio(desired: SDL_AudioSpec, obtained: SDL_AudioSpec or None)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_OpenAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioSpec *desired, *obtained;
+    int ret;
+    static char *kwlist[] = {"desired", "obtained", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!O", kwlist,
+                                     &PyCSDL2_AudioSpecType, &desired,
+                                     &obtained))
+        return NULL;
+
+    if ((PyObject*) obtained != Py_None &&
+        Py_TYPE(obtained) != &PyCSDL2_AudioSpecType) {
+        PyErr_SetString(PyExc_TypeError, "\"obtained\" must be either a "
+                        "SDL_AudioSpec or None");
+        return NULL;
+    }
+
+    if (!desired->callback || desired->callback == Py_None) {
+        PyErr_SetString(PyExc_ValueError, "\"callback\" is None");
+        return NULL;
+    }
+
+    if (PyCSDL2_GlobalAudioDevice) {
+        PyErr_SetString(PyExc_RuntimeError, "Audio device is already opened");
+        return NULL;
+    }
+
+    PyCSDL2_GlobalAudioDevice = (PyCSDL2_AudioDevice *)PyCSDL2_AudioDeviceCreate(0);
+    if (!PyCSDL2_GlobalAudioDevice)
+        return NULL;
+
+    desired->spec.callback = PyCSDL2_AudioDeviceCallback;
+    desired->spec.userdata = PyCSDL2_GlobalAudioDevice;
+
+    PyEval_InitThreads();
+
+    Py_INCREF(desired);
+    Py_INCREF(obtained);
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_OpenAudio(&desired->spec,
+                        (PyObject*) obtained == Py_None ? NULL : &obtained->spec);
+    Py_END_ALLOW_THREADS
+    Py_DECREF(obtained);
+    Py_DECREF(desired);
+
+    if (ret) {
+        Py_CLEAR(PyCSDL2_GlobalAudioDevice);
+        return PyCSDL2_RaiseSDLError();
+    }
+
+    PyCSDL2_AudioDeviceAttach(PyCSDL2_GlobalAudioDevice, 1,
+                              desired->callback, desired->userdata);
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetNumAudioDevices()
+ *
+ * \code{.py}
+ * SDL_GetNumAudioDevices(iscapture: bool) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetNumAudioDevices(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int iscapture, ret;
+    static char *kwlist[] = {"iscapture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "p", kwlist, &iscapture))
+        return NULL;
+
+    SDL_ClearError();
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetNumAudioDevices(iscapture);
+    Py_END_ALLOW_THREADS
+
+    if (ret == -1 && *(SDL_GetError()))
+        return PyCSDL2_RaiseSDLError();
+
+    return PyLong_FromLong(ret);
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetAudioDeviceName()
+ *
+ * \code{.py}
+ * SDL_GetAudioDeviceName(index: int, iscapture: bool) -> str
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDeviceName(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int index, iscapture;
+    const char *device_name;
+    static char *kwlist[] = {"index", "iscapture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "ip", kwlist, &index,
+                                     &iscapture))
+        return NULL;
+
+    device_name = SDL_GetAudioDeviceName(index, iscapture);
+
+    if (!device_name)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyUnicode_FromString(device_name);
+}
 
 /**
  * \brief Implements csdl2.SDL_OpenAudioDevice()
@@ -745,6 +991,37 @@ fail:
     PyBuffer_Release(&device);
     Py_XDECREF(out);
     return NULL;
+}
+
+/**
+ * \brief Implements csdl2.SDL_PauseAudio()
+ *
+ * \code{.py}
+ * SDL_PauseAudio(pause_on: bool) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_PauseAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    int pause_on;
+    static char *kwlist[] = {"pause_on", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "p", kwlist, &pause_on))
+        return NULL;
+
+    if (!PyCSDL2_GlobalAudioDevice) {
+        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
+        return NULL;
+    }
+
+    if (!PyCSDL2_AudioDeviceValid(PyCSDL2_GlobalAudioDevice))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_PauseAudio(pause_on);
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
 }
 
 /**
@@ -888,6 +1165,39 @@ PyCSDL2_FreeWAV(PyObject *module, PyObject *args, PyObject *kwds)
 
     SDL_FreeWAV(buf);
 
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_CloseAudio()
+ *
+ * \code{.py}
+ * SDL_CloseAudio() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_CloseAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_AudioDeviceID id;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    if (!PyCSDL2_GlobalAudioDevice) {
+        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
+        return NULL;
+    }
+
+    id = PyCSDL2_AudioDeviceDetach(PyCSDL2_GlobalAudioDevice);
+    if (!id)
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_CloseAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_CLEAR(PyCSDL2_GlobalAudioDevice);
     Py_RETURN_NONE;
 }
 
