@@ -949,23 +949,16 @@ PyCSDL2_initevents(PyObject *module)
 
         {NULL, 0}
     };
-    const PyCSDL2_Constant *c;
 
-    for (c = constants; c->name; c++)
-        if (PyModule_AddIntConstant(module, c->name, c->value))
-            return 0;
+    if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_EventMemType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_MouseMotionEventType)) { return 0; }
-    Py_INCREF(&PyCSDL2_MouseMotionEventType);
-    if (PyModule_AddObject(module, "SDL_MouseMotionEvent",
-                           (PyObject*) &PyCSDL2_MouseMotionEventType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_MouseMotionEventType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_EventType)) { return 0; }
-    Py_INCREF(&PyCSDL2_EventType);
-    if (PyModule_AddObject(module, "SDL_Event", (PyObject*)&PyCSDL2_EventType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_EventType) < 0)
         return 0;
 
     return 1;

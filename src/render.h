@@ -2298,30 +2298,19 @@ PyCSDL2_initrender(PyObject *module)
 
         {NULL, 0}
     };
-    const PyCSDL2_Constant *c;
 
-    for (c = constants; c->name; c++)
-        if (PyModule_AddIntConstant(module, c->name, c->value))
-            return 0;
+    if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_RendererInfoMemType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_RendererInfoType)) { return 0; }
-    Py_INCREF(&PyCSDL2_RendererInfoType);
-    if (PyModule_AddObject(module, "SDL_RendererInfo",
-                           (PyObject*)&PyCSDL2_RendererInfoType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RendererInfoType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_RendererType)) { return 0; }
-    Py_INCREF(&PyCSDL2_RendererType);
-    if (PyModule_AddObject(module, "SDL_Renderer",
-                           (PyObject*) &PyCSDL2_RendererType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RendererType) < 0)
         return 0;
 
-    if (PyType_Ready(&PyCSDL2_TextureType)) { return 0; }
-    Py_INCREF(&PyCSDL2_TextureType);
-    if (PyModule_AddObject(module, "SDL_Texture",
-                           (PyObject*) &PyCSDL2_TextureType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_TextureType) < 0)
         return 0;
 
     if (PyType_Ready(&PyCSDL2_TexturePixelsType)) { return 0; }

@@ -1383,11 +1383,9 @@ PyCSDL2_initrwops(PyObject *module)
 
         {NULL, 0}
     };
-    const PyCSDL2_Constant *c;
 
-    for (c = constants; c->name; c++)
-        if (PyModule_AddIntConstant(module, c->name, c->value))
-            return 0;
+    if (PyCSDL2_PyModuleAddConstants(module, constants) < 0)
+        return 0;
 
     if (PyType_Ready(&PyCSDL2_RWSizeFuncType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_RWSeekFuncType)) { return 0; }
@@ -1395,9 +1393,7 @@ PyCSDL2_initrwops(PyObject *module)
     if (PyType_Ready(&PyCSDL2_RWWriteFuncType)) { return 0; }
     if (PyType_Ready(&PyCSDL2_RWCloseFuncType)) { return 0; }
 
-    if (PyType_Ready(&PyCSDL2_RWopsType)) { return 0; }
-    Py_INCREF(&PyCSDL2_RWopsType);
-    if (PyModule_AddObject(module, "SDL_RWops", (PyObject*)&PyCSDL2_RWopsType))
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_RWopsType) < 0)
         return 0;
 
     return 1;
