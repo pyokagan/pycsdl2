@@ -732,15 +732,3 @@ screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
              will exist between frames. You are strongly encouraged to call
              :func:`SDL_RenderClear` to initialize the backbuffer before
              drawing each frame.
-
-.. data:: SDL_FLIP_NONE
-
-   Do not flip.
-
-.. data:: SDL_FLIP_HORIZONTAL
-
-   Flip horizontally.
-
-.. data:: SDL_FLIP_VERTICAL
-
-   Flip vertically.
