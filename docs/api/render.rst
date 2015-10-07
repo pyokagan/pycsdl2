@@ -754,3 +754,11 @@ OpenGL Support
    .. note:: SDL may upload RGB textures as BGR (or vice-versa), and re-order
              the color channels in the shader phase, so the uploaded texture
              may have swapped color channels.
+
+.. function:: SDL_GL_UnbindTexture(texture)
+
+   Unbind an OpenGL/ES/ES2 texture from the current context.
+
+   :param texture: The texture to unbind from the current OpenGL/ES/ES2
+                   context.
+   :type texture: :class:`SDL_Texture`

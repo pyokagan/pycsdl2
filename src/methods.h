@@ -1092,6 +1092,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "OpenGL instructions. Returns the texture width and height as a tuple.\n"
     },
 
+    {"SDL_GL_UnbindTexture",
+     (PyCFunction) PyCSDL2_GL_UnbindTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GL_UnbindTexture(texture: SDL_Texture) -> None\n"
+     "\n"
+     "Unbind a texture from the current OpenGL/ES/ES2 context.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",
