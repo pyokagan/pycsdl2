@@ -13,5 +13,6 @@ API Reference
    rect
    events
    scancode
+   keycode
    audio
    rwops

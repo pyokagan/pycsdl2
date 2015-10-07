@@ -32,6 +32,7 @@
 #include "capi.h"
 #include "events.h"
 #include "init.h"
+#include "keycode.h"
 #include "pixels.h"
 #include "rect.h"
 #include "render.h"
@@ -72,6 +73,7 @@ PyInit_csdl2(void)
     if (!PyCSDL2_initblendmode(m)) { goto fail; }
     if (!PyCSDL2_initcapi(m)) { goto fail; }
     if (!PyCSDL2_initinit(m)) { goto fail; }
+    if (!PyCSDL2_initkeycode(m)) { goto fail; }
     if (!PyCSDL2_initpixels(m)) { goto fail; }
     if (!PyCSDL2_initrect(m)) { goto fail; }
     if (!PyCSDL2_initrender(m)) { goto fail; }

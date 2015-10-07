@@ -31,6 +31,7 @@
 #include "error.h"
 #include "events.h"
 #include "init.h"
+#include "keycode.h"
 #include "pixels.h"
 #include "rect.h"
 #include "render.h"
@@ -389,6 +390,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup\n"
      "signal handlers for some commonly ignored fatal signals like SIGSEGV.\n"
+    },
+
+    /* keycode.h */
+
+    {"SDL_SCANCODE_TO_KEYCODE",
+     (PyCFunction) PyCSDL2_SCANCODE_TO_KEYCODE,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SCANCODE_TO_KEYCODE(scancode: int) -> int\n"
     },
 
     /* pixels.h */

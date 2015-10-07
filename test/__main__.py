@@ -16,6 +16,7 @@ if __name__ == '__main__':
     from .test_error import *
     from .test_events import *
     from .test_init import *
+    from .test_keycode import *
     from .test_pixels import *
     from .test_rect import *
     from .test_render import *
