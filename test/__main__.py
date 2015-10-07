@@ -20,6 +20,7 @@ if __name__ == '__main__':
     from .test_rect import *
     from .test_render import *
     from .test_rwops import *
+    from .test_scancode import *
     from .test_surface import *
     from .test_video import *
     unittest.main()

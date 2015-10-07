@@ -36,6 +36,7 @@
 #include "rect.h"
 #include "render.h"
 #include "rwops.h"
+#include "scancode.h"
 #include "surface.h"
 #include "video.h"
 #include "methods.h"
@@ -75,6 +76,7 @@ PyInit_csdl2(void)
     if (!PyCSDL2_initrect(m)) { goto fail; }
     if (!PyCSDL2_initrender(m)) { goto fail; }
     if (!PyCSDL2_initrwops(m)) { goto fail; }
+    if (!PyCSDL2_initscancode(m)) { goto fail; }
     if (!PyCSDL2_initsurface(m)) { goto fail; }
     if (!PyCSDL2_initvideo(m)) { goto fail; }
     if (!PyCSDL2_initevents(m)) { goto fail; }

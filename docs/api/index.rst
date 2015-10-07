@@ -12,5 +12,6 @@ API Reference
    pixels
    rect
    events
+   scancode
    audio
    rwops
