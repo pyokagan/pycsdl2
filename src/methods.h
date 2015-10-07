@@ -1083,6 +1083,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "raise errors and at worse crash the interpreter.\n"
     },
 
+    {"SDL_GL_BindTexture",
+     (PyCFunction) PyCSDL2_GL_BindTexture,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GL_BindTexture(texture: SDL_Texture) -> (float, float)\n"
+     "\n"
+     "Bind the texture to the current OpenGL/ES/ES2 context for use with\n"
+     "OpenGL instructions. Returns the texture width and height as a tuple.\n"
+    },
+
     /* rwops.h */
 
     {"SDL_RWFromFile",

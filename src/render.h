@@ -2733,6 +2733,30 @@ PyCSDL2_DestroyRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GL_BindTexture()
+ *
+ * \code{.py}
+ * SDL_GL_BindTexture(texture: SDL_Texture) -> (float, float)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GL_BindTexture(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Texture *texture;
+    float texw, texh;
+    static char *kwlist[] = {"texture", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_TexturePtr, &texture))
+        return NULL;
+
+    if (SDL_GL_BindTexture(texture, &texw, &texh) < 0)
+        return PyCSDL2_RaiseSDLError();
+
+    return Py_BuildValue("ff", texw, texh);
+}
+
+/**
  * \brief Initializes bindings to SDL_render.h
  *
  * Adds constants defined in SDL_render.h to module.

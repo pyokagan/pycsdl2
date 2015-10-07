@@ -732,3 +732,25 @@ screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
              will exist between frames. You are strongly encouraged to call
              :func:`SDL_RenderClear` to initialize the backbuffer before
              drawing each frame.
+
+OpenGL Support
+--------------
+.. function:: SDL_GL_BindTexture(texture) -> tuple
+
+   Bind an OpenGL/ES/ES2 texture to the current context for use with when
+   rendering OpenGL primitives directly.
+
+   :param texture: The texture to bind to the current OpenGL/ES/ES2 context.
+   :type texture: :class:`SDL_Texture`
+   :returns: A ``(float, float)`` tuple with the texture width and texture
+             height respectively.
+
+   .. note:: In most cases, the texture height and width will be 1.0.
+             However, on systems that support the GL_ARB_texture_rectangle
+             extension, these values will actually be the pixel width and
+             height used to create the texture, and so this factor needs to be
+             taken into account when providing texture coordinates to OpenGL.
+
+   .. note:: SDL may upload RGB textures as BGR (or vice-versa), and re-order
+             the color channels in the shader phase, so the uploaded texture
+             may have swapped color channels.
