@@ -34,6 +34,7 @@
 #include "util.h"
 #include "error.h"
 #include "pixels.h"
+#include "rwops.h"
 
 /** \brief Instance data for PyCSDL2_SurfacePixelsType */
 typedef struct PyCSDL2_SurfacePixels {
@@ -855,6 +856,79 @@ PyCSDL2_FreeSurface(PyObject *module, PyObject *args, PyObject *kwds)
         return NULL;
     PyCSDL2_SurfaceClear(surface);
     Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_LoadBMP_RW()
+ *
+ * \code{.py}
+ * SDL_LoadBMP_RW(src: SDL_RWops, freesrc: bool) -> SDL_Surface
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LoadBMP_RW(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_RWops *src_obj;
+    SDL_RWops *src = NULL;
+    int freesrc;
+    SDL_Surface *ret;
+    static char *kwlist[] = {"src", "freesrc", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!p", kwlist,
+                                     &PyCSDL2_RWopsType, &src_obj, &freesrc))
+        return NULL;
+
+    if (!PyCSDL2_RWopsPtr((PyObject*)src_obj, &src))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_LoadBMP_RW(src, freesrc);
+    Py_END_ALLOW_THREADS
+
+    if (freesrc)
+        PyCSDL2_RWopsDetach(src_obj);
+
+    if (!ret)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyCSDL2_SurfaceCreate(ret, NULL);
+}
+
+/**
+ * \brief Implements csdl2.SDL_LoadBMP()
+ *
+ * \code{.py}
+ * SDL_LoadBMP(file: str) -> SDL_Surface
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LoadBMP(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyObject *file_obj;
+    const char *file;
+    SDL_Surface *ret;
+    static char *kwlist[] = {"file", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyUnicode_FSConverter, &file_obj))
+        return NULL;
+
+    file = PyBytes_AsString(file_obj);
+    if (!file) {
+        Py_DECREF(file_obj);
+        return NULL;
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_LoadBMP(file);
+    Py_END_ALLOW_THREADS
+
+    Py_DECREF(file_obj);
+
+    if (!ret)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyCSDL2_SurfaceCreate(ret, NULL);
 }
 
 /**
