@@ -1106,6 +1106,124 @@ class TestRenderGetViewport(unittest.TestCase):
         self.assertRaises(TypeError, SDL_RenderGetViewport, 42)
 
 
+class TestRenderSetClipRect(unittest.TestCase):
+    "Tests SDL_RenderSetClipRect()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rect = SDL_Rect(0, 0, 32, 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderSetClipRect(self.rdr, self.rect))
+
+    def test_rect_none(self):
+        "rect can be None"
+        self.assertIsNone(SDL_RenderSetClipRect(self.rdr, None))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderSetClipRect, self.rdr,
+                          self.rect)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderSetClipRect, self.rdr,
+                          self.rect)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderSetClipRect, 42, self.rect)
+        self.assertRaises(TypeError, SDL_RenderSetClipRect, self.rdr, 42)
+
+
+class TestRenderGetClipRect(unittest.TestCase):
+    "Tests SDL_RenderGetClipRect()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_rect(self):
+        "Returns a new SDL_Rect"
+        self.assertIs(type(SDL_RenderGetClipRect(self.rdr)), SDL_Rect)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderGetClipRect, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderGetClipRect, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderGetClipRect, 42)
+
+
+class TestRenderSetScale(unittest.TestCase):
+    "Tests SDL_RenderSetScale()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderSetScale(self.rdr, 2.0, 2.0))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderSetScale, self.rdr, 2.0, 2.0)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderSetScale, self.rdr, 2.0, 2.0)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderSetScale, 42, 2.0, 2.0)
+        self.assertRaises(TypeError, SDL_RenderSetScale, self.rdr, None, 2.0)
+        self.assertRaises(TypeError, SDL_RenderSetScale, self.rdr, 2.0, None)
+
+
+class TestRenderGetScale(unittest.TestCase):
+    "Tests SDL_RenderGetScale()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_tuple(self):
+        "Returns (float, float) tuple"
+        t = SDL_RenderGetScale(self.rdr)
+        self.assertIs(type(t), tuple)
+        a, b = t
+        self.assertIs(type(a), float)
+        self.assertIs(type(b), float)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderGetScale, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderGetScale, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderGetScale, 42)
+
+
 class TestSetRenderDrawColor(unittest.TestCase):
     """Tests SDL_SetRenderDrawColor()"""
 
@@ -1166,6 +1284,64 @@ class TestGetRenderDrawColor(unittest.TestCase):
         self.assertRaises(TypeError, SDL_GetRenderDrawColor, 42)
 
 
+class TestSetRenderDrawBlendMode(unittest.TestCase):
+    "Tests SDL_SetRenderDrawBlendMode()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_SetRenderDrawBlendMode(self.rdr,
+                                                     SDL_BLENDMODE_ADD))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          SDL_BLENDMODE_ADD)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          SDL_BLENDMODE_ADD)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_SetRenderDrawBlendMode, 42,
+                          SDL_BLENDMODE_ADD)
+        self.assertRaises(TypeError, SDL_SetRenderDrawBlendMode, self.rdr,
+                          None)
+
+
+class TestGetRenderDrawBlendMode(unittest.TestCase):
+    "Tests SDL_GetRenderDrawBlendMode()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_GetRenderDrawBlendMode(self.rdr)), int)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GetRenderDrawBlendMode, self.rdr)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_GetRenderDrawBlendMode, self.rdr)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetRenderDrawBlendMode, 42)
+
+
 class TestRenderClear(unittest.TestCase):
     """Tests SDL_RenderClear()"""
 
@@ -1186,6 +1362,212 @@ class TestRenderClear(unittest.TestCase):
         "Raises ValueError if the surface has been freed"
         SDL_FreeSurface(self.sf)
         self.assertRaises(ValueError, SDL_RenderClear, self.rdr)
+
+
+class TestRenderDrawPoint(unittest.TestCase):
+    "Tests SDL_RenderDrawPoint()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawPoint(self.rdr, 0, 0))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawPoint, self.rdr, 0, 0)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawPoint, self.rdr, 0, 0)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawPoint, 42, 0, 0)
+        self.assertRaises(TypeError, SDL_RenderDrawPoint, self.rdr, None, 0)
+        self.assertRaises(TypeError, SDL_RenderDrawPoint, self.rdr, 0, None)
+
+
+class TestRenderDrawPoints(unittest.TestCase):
+    "Tests SDL_RenderDrawPoints()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.points = bytes(memoryview(SDL_Point()).nbytes * 2)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawPoints(self.rdr, self.points, 2))
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer size is too small"
+        self.assertRaises(BufferError, SDL_RenderDrawPoints, self.rdr,
+                          self.points, 3)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawPoints, self.rdr,
+                          self.points, 2)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawPoints, self.rdr,
+                          self.points, 2)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawPoints, 42, self.points, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawPoints, self.rdr, None, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawPoints, self.rdr,
+                          self.points, None)
+
+
+class TestRenderDrawLine(unittest.TestCase):
+    "Tests SDL_RenderDrawLine()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawLine(self.rdr, 0, 0, 1, 1))
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, 1)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, 1)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawLine, 42, 0, 0, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, {}, 0, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, {}, 1, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, 0, {}, 1)
+        self.assertRaises(TypeError, SDL_RenderDrawLine, self.rdr, 0, 0, 1, {})
+
+
+class TestRenderDrawLines(unittest.TestCase):
+    "Tests SDL_RenderDrawLines()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.points = bytes(memoryview(SDL_Point()).nbytes * 2)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawLines(self.rdr, self.points, 2))
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 3)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 2)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawLines, self.rdr,
+                          self.points, 2)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawLines, 42, self.points, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawLines, self.rdr, None, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawLines, self.rdr,
+                          self.points, None)
+
+
+class TestRenderDrawRect(unittest.TestCase):
+    "Tests SDL_RenderDrawRect()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rect = memoryview(SDL_Rect(0, 0, 32, 32)).tobytes()
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawRect(self.rdr, self.rect))
+
+    def test_rect_none(self):
+        "rect can be None"
+        self.assertIsNone(SDL_RenderDrawRect(self.rdr, None))
+
+    def test_rect_buffer_invalid_size(self):
+        "Raises BufferError if rect buffer is of invalid size"
+        rect = bytes(1)
+        self.assertRaises(BufferError, SDL_RenderDrawRect, self.rdr, rect)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawRect, self.rdr, self.rect)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawRect, self.rdr, self.rect)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawRect, 42, self.rect)
+        self.assertRaises(TypeError, SDL_RenderDrawRect, self.rdr, 42)
+
+
+class TestRenderDrawRects(unittest.TestCase):
+    "Tests SDL_RenderDrawRects()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rects = bytes(memoryview(SDL_Rect()).nbytes * 2)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderDrawRects(self.rdr, self.rects, 2))
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderDrawRects, self.rdr,
+                          self.rects, 3)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderDrawRects, self.rdr,
+                          self.rects, 2)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderDrawRects, self.rdr,
+                          self.rects, 2)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderDrawRects, 42, self.rects, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawRects, self.rdr, None, 2)
+        self.assertRaises(TypeError, SDL_RenderDrawRects, self.rdr, self.rects,
+                          None)
 
 
 class TestRenderFillRect(unittest.TestCase):
@@ -1225,6 +1607,43 @@ class TestRenderFillRect(unittest.TestCase):
         SDL_FreeSurface(self.sf)
         self.assertRaises(ValueError, SDL_RenderFillRect, self.rdr,
                           self.rect)
+
+
+class TestRenderFillRects(unittest.TestCase):
+    "Tests SDL_RenderFillRects()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.rects = bytes(memoryview(SDL_Rect()).nbytes * 2)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_RenderFillRects(self.rdr, self.rects, 2))
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderFillRects, self.rdr,
+                          self.rects, 3)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderFillRects, self.rdr,
+                          self.rects, 2)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderFillRects, self.rdr,
+                          self.rects, 2)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderFillRects, 42, self.rects, 2)
+        self.assertRaises(TypeError, SDL_RenderFillRects, self.rdr, None, 2)
+        self.assertRaises(TypeError, SDL_RenderFillRects, self.rdr, self.rects,
+                          None)
 
 
 class TestRenderCopy(unittest.TestCase):
@@ -1348,6 +1767,83 @@ class TestRenderCopyEx(unittest.TestCase):
         SDL_FreeSurface(self.sf)
         self.assertRaises(ValueError, SDL_RenderCopyEx, self.rdr, self.tex,
                           None, None, 0, None, SDL_FLIP_NONE)
+
+
+class TestRenderReadPixels(unittest.TestCase):
+    "Tests SDL_RenderReadPixels()"
+
+    def setUp(self):
+        self.sf = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0)
+        self.rdr = SDL_CreateSoftwareRenderer(self.sf)
+        self.fm = SDL_PIXELFORMAT_RGB332
+        self.rect = SDL_Rect(0, 0, 32, 32)
+        self.pixels = bytearray(32 * 32)
+
+    def test_returns_none(self):
+        "Returns None"
+        x = SDL_RenderReadPixels(self.rdr, self.rect, self.fm, self.pixels, 32)
+        self.assertIsNone(x)
+
+    def test_rect_none(self):
+        "rect can be None"
+        x = SDL_RenderReadPixels(self.rdr, None, self.fm, self.pixels, 32)
+        self.assertIsNone(x)
+
+    def test_format_zero(self):
+        "format can be zero"
+        # In this case SDL_PIXELFORMAT_UNKNOWN will be used, which has a bpp of
+        # 0. As such, no pixels will be read at all.
+        SDL_RenderReadPixels(self.rdr, self.rect, 0, self.pixels, 32)
+
+    def test_negative_rect(self):
+        "A negative rect is equivalent to an empty rect"
+        rect = SDL_Rect(-32, -32, -32, -32)
+        SDL_RenderReadPixels(self.rdr, rect, self.fm, self.pixels, 32)
+
+    def test_oversized_rect(self):
+        "SDL will clip the rect to the viewport"
+        rect = SDL_Rect(0, 0, 64, 64)
+        pixels = bytearray(64 * 64)
+        SDL_RenderReadPixels(self.rdr, rect, self.fm, pixels, 64)
+
+    def test_buffer_too_small(self):
+        "Raises BufferError if the buffer is too small"
+        self.assertRaises(BufferError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 33)
+
+    def test_small_pitch(self):
+        "pitch can be smaller than the format's bytes per pixel * w"
+        SDL_RenderReadPixels(self.rdr, self.rect, self.fm, self.pixels, 1)
+
+    def test_negative_pitch(self):
+        "Raises ValueError if pitch is negative"
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, -32)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has already been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 32)
+
+    def test_freed_surface(self):
+        "Raises ValueError if the surface has been freed"
+        SDL_FreeSurface(self.sf)
+        self.assertRaises(ValueError, SDL_RenderReadPixels, self.rdr,
+                          self.rect, self.fm, self.pixels, 32)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_RenderReadPixels, 42, self.rect,
+                          self.fm, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, 42,
+                          self.fm, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          None, self.pixels, 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          self.fm, [], 32)
+        self.assertRaises(TypeError, SDL_RenderReadPixels, self.rdr, self.rect,
+                          self.fm, self.pixels, None)
 
 
 class TestRenderPresent(unittest.TestCase):

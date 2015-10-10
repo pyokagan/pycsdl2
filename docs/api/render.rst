@@ -428,6 +428,57 @@ Viewport
    :type renderer: :class:`SDL_Renderer`
    :returns: A :class:`SDL_Rect` with the drawing area for the current target.
 
+Clip Rectangle
+--------------
+.. function:: SDL_RenderSetClipRect(renderer, rect)
+
+   Sets the clip rectangle for the current target.
+
+   :param renderer: The renderer for which clip rectangle should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The rectangle to set as the clip rectangle, or None to disable
+                clipping.
+   :type rect: :class:`SDL_Rect` or None
+
+.. function:: SDL_RenderGetClipRect(renderer) -> SDL_Rect
+
+   Gets the clip rectangle for the current target.
+
+   :param renderer: The renderer from which clip rectangle should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A :class:`SDL_Rect` with the current clip rectangle, or an empty
+             rectangle if clipping is disabled.
+
+Scaling
+-------
+.. function:: SDL_RenderSetScale(renderer, scaleX, scaleY)
+
+   Sets the drawing scale for rendering on the current target.
+
+   The drawing coordinates are scaled by the ``x/y`` scaling factors before
+   they are used by the renderer. This allows resolution independent drawing
+   with a single coordinate system.
+
+   :param renderer: The renderer for which the drawing scale should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param float scaleX: The horizontal scaling factor.
+   :param float scaleY: The vertical scaling factor.
+
+   .. note::
+
+      If this results in scaling or subpixel drawing by the rendering backend,
+      it will be hendled using the appropriate quality hints. For best results
+      use integer scaling factors.
+
+.. function:: SDL_RenderGetScale(renderer) -> tuple
+
+   Gets the drawing scale for the current target.
+
+   :param renderer: The renderer from which drawing scale should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: A 2-tuple ``(scaleX, scaleY)`` with the float horizontal and
+             vertical scaling factors respectively.
+
 Drawing
 -------
 .. function:: SDL_SetRenderDrawColor(renderer: SDL_Renderer, r: int, g: int, b: int, a: int) -> None
@@ -435,7 +486,7 @@ Drawing
    Sets the color used for drawing primitives, and for :func:`SDL_RenderClear`.
 
    :param renderer: The rendering context.
-   :type rendering: :class:`SDL_Renderer`
+   :type renderer: :class:`SDL_Renderer`
    :param int r: The red value used to draw on the rendering target, within the
                  range 0-255.
    :param int g: The green value used to draw on the rendering target, within
@@ -456,6 +507,27 @@ Drawing
    :returns: The (r, g, b, a) components of the drawing color.
    :rtype: (int, int, int, int) tuple
 
+.. function:: SDL_SetRenderDrawBlendMode(renderer, blendMode)
+
+   Sets the blend mode used for drawing operations (Fill and Line).
+
+   :param renderer: The renderer for which blend mode should be set.
+   :type renderer: :class:`SDL_Renderer`
+   :param int blendMode: The blend mode to use for blending. One of the
+                         :ref:`blend-modes`.
+
+   .. note::
+
+      If the blend mode is not supported, the closest supported mode is chosen.
+
+.. function:: SDL_GetRenderDrawBlendMode(renderer) -> int
+
+   Gets the blend mode used for drawing operations.
+
+   :param renderer: The renderer from which blend mode should be queried.
+   :type renderer: :class:`SDL_Renderer`
+   :returns: The current blend mode. One of the :ref:`blend-modes`.
+
 .. function:: SDL_RenderClear(renderer: SDL_Renderer) -> None
 
    Clears the current rendering target with the current drawing color.
@@ -465,6 +537,66 @@ Drawing
    :param renderer: The rendering context.
    :type renderer: :class:`SDL_Renderer`
    :raises RuntimeError: If the rendering target could not be cleared.
+
+.. function:: SDL_RenderDrawPoint(renderer, x, y)
+
+   Draws a point on the current rendering target.
+
+   :param renderer: The renderer which should draw a point.
+   :type renderer: :class:`SDL_Renderer`
+   :param int x: The x coordinate of the point.
+   :param int y: The y coordinate of the point.
+
+.. function:: SDL_RenderDrawPoints(renderer, points, count)
+
+   Draw multiple points on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param points: The points to draw.
+   :type points: :class:`SDL_Point` array
+   :param int count: The number of points to draw.
+
+.. function:: SDL_RenderDrawLine(renderer, x1, y1, x2, y2)
+
+   Draw a line on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param int x1: The x coordinate of the start point.
+   :param int y1: The y coordinate of the start point.
+   :param int x2: The x coordinate of the end point.
+   :param int y2: The y coordinate of the end point.
+
+.. function:: SDL_RenderDrawLines(renderer, points, count)
+
+   Draw a series of connected lines on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param points: The points along the lines.
+   :type points: :class:`SDL_Point` array
+   :param int count: The number of points, drawing ``count - 1`` lines.
+
+.. function:: SDL_RenderDrawRect(renderer, rect)
+
+   Draw a rectangle on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The rectangle to draw, or None to outline the entire rendering
+                target.
+   :type rect: :class:`SDL_Rect` or None
+
+.. function:: SDL_RenderDrawRects(renderer, rects, count)
+
+   Draw some number of rectangles on the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rects: The rectangles to be drawn.
+   :type rects: :class:`SDL_Rect` array.
+   :param int count: The number of rectangles.
 
 .. function:: SDL_RenderFillRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
 
@@ -477,6 +609,17 @@ Drawing
                 None, the entire rendering target will be filled.
    :type rect: :class:`SDL_Rect` or None
    :raises RuntimeError: If the rectangle could not be filled.
+
+.. function:: SDL_RenderFillRects(renderer, rects, count)
+
+   Fill some number of rectangles on the current rendering target with the
+   current drawing color.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rects: The rectangles to be filled.
+   :type rects: :class:`SDL_Rect` array
+   :param int count: The number of rectangles.
 
 .. function:: SDL_RenderCopy(renderer, texture, srcrect, dstrect)
 
@@ -549,6 +692,23 @@ Drawing
 
    Flip vertically.
 
+Reading pixels
+--------------
+.. function:: SDL_RenderReadPixels(renderer, rect, format, pixels, pitch)
+
+   Read pixels from the current rendering target.
+
+   :param renderer: The rendering context.
+   :type renderer: :class:`SDL_Renderer`
+   :param rect: The area to read, or None for the entire render target.
+   :type rect: :class:`SDL_Rect` or None
+   :param int format: The desired format of the pixel data (one of the
+                      :ref:`pixel-format-constants`), or 0 to use the format of
+                      the rendering target.
+   :param pixels: The buffer to be filled in with the pixel data.
+   :type pixels: buffer
+   :param int pitch: The pitch of the `pixels` buffer.
+
 Updating the screen
 -------------------
 SDL's rendering functions operate on a backbuffer. Calling a rendering function
@@ -572,15 +732,3 @@ screen as a complete picture. This is done with :func:`SDL_RenderPresent`.
              will exist between frames. You are strongly encouraged to call
              :func:`SDL_RenderClear` to initialize the backbuffer before
              drawing each frame.
-
-.. data:: SDL_FLIP_NONE
-
-   Do not flip.
-
-.. data:: SDL_FLIP_HORIZONTAL
-
-   Flip horizontally.
-
-.. data:: SDL_FLIP_VERTICAL
-
-   Flip vertically.

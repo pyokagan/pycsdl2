@@ -2025,6 +2025,107 @@ PyCSDL2_RenderGetViewport(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_RenderSetClipRect()
+ *
+ * \code{.py}
+ * SDL_RenderSetClipRect(renderer: SDL_Renderer, rect: SDL_Rect) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetClipRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    ret = SDL_RenderSetClipRect(renderer, rect.buf);
+    PyBuffer_Release(&rect);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderGetClipRect()
+ *
+ * \code{.py}
+ * SDL_RenderGetClipRect(renderer: SDL_Renderer) -> SDL_Rect
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetClipRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_Rect rect;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetClipRect(renderer, &rect);
+
+    return PyCSDL2_RectCreate(&rect);
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderSetScale()
+ *
+ * \code{.py}
+ * SDL_RenderSetScale(renderer: SDL_Renderer, float scaleX, float scaleY)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderSetScale(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    float scaleX, scaleY;
+    static char *kwlist[] = {"renderer", "scaleX", "scaleY", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ff", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &scaleX, &scaleY))
+        return NULL;
+
+    if (SDL_RenderSetScale(renderer, scaleX, scaleY))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderGetScale()
+ *
+ * \code{.py}
+ * SDL_RenderGetScale(renderer: SDL_Renderer) -> (float, float)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderGetScale(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    float scaleX, scaleY;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    SDL_RenderGetScale(renderer, &scaleX, &scaleY);
+
+    return Py_BuildValue("ff", scaleX, scaleY);
+}
+
+/**
  * \brief Implements csdl2.SDL_SetRenderDrawColor()
  *
  * \code{.py}
@@ -2075,6 +2176,57 @@ PyCSDL2_GetRenderDrawColor(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_SetRenderDrawBlendMode()
+ *
+ * \code{.py}
+ * SDL_SetRenderDrawBlendMode(renderer: SDL_Renderer, blendMode: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_SetRenderDrawBlendMode(PyObject *module, PyObject *args,
+                               PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int blendMode;
+    static char *kwlist[] = {"renderer", "blendMode", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &blendMode))
+        return NULL;
+
+    if (SDL_SetRenderDrawBlendMode(renderer, blendMode))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_GetRenderDrawBlendMode()
+ *
+ * \code{.py}
+ * SDL_GetRenderDrawBlendMode(renderer: SDL_Renderer) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetRenderDrawBlendMode(PyObject *module, PyObject *args,
+                               PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    SDL_BlendMode blendMode;
+    static char *kwlist[] = {"renderer", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer))
+        return NULL;
+
+    if (SDL_GetRenderDrawBlendMode(renderer, &blendMode))
+        return PyCSDL2_RaiseSDLError();
+
+    return PyLong_FromLong(blendMode);
+}
+
+/**
  * \brief Implements csdl2.SDL_RenderClear()
  *
  * \code{.py}
@@ -2091,6 +2243,195 @@ PyCSDL2_RenderClear(PyObject *module, PyObject *args, PyObject *kwds)
         return NULL;
     if (SDL_RenderClear(renderer))
         return PyCSDL2_RaiseSDLError();
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawPoint()
+ *
+ * \code{.py}
+ * SDL_RenderDrawPoint(renderer: SDL_Renderer, x: int, y: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawPoint(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int x, y;
+    static char *kwlist[] = {"renderer", "x", "y", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&ii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer, &x, &y))
+        return NULL;
+
+    if (SDL_RenderDrawPoint(renderer, x, y))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawPoints()
+ *
+ * \code{.py}
+ * SDL_RenderDrawPoints(renderer: SDL_Renderer, points: buffer, count: int)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawPoints(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer points;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "points", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &points, &count))
+        return NULL;
+
+    expected = sizeof(SDL_Point) * count;
+    if (points.len < expected) {
+        PyBuffer_Release(&points);
+        return PyCSDL2_RaiseBufferSizeError("points", expected, points.len);
+    }
+
+    ret = SDL_RenderDrawPoints(renderer, points.buf, count);
+    PyBuffer_Release(&points);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawLine()
+ *
+ * \code{.py}
+ * SDL_RenderDrawLine(renderer: SDL_Renderer, x1: int, y1: int, x2: int,
+ *                    y2: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawLine(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    int x1, y1, x2, y2;
+    static char *kwlist[] = {"renderer", "x1", "y1", "x2", "y2", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&iiii", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &x1, &y1, &x2, &y2))
+        return NULL;
+
+    if (SDL_RenderDrawLine(renderer, x1, y1, x2, y2))
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawLines()
+ *
+ * \code{.py}
+ * SDL_RenderDrawLines(renderer: SDL_Renderer, points: buffer, count: int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawLines(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer points;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "points", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer, &points,
+                                     &count))
+        return NULL;
+
+    expected = sizeof(SDL_Point) * count;
+    if (points.len < expected) {
+        PyBuffer_Release(&points);
+        return PyCSDL2_RaiseBufferSizeError("points", expected, points.len);
+    }
+
+    ret = SDL_RenderDrawLines(renderer, points.buf, count);
+    PyBuffer_Release(&points);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawRect()
+ *
+ * \code{.py}
+ * SDL_RenderDrawRect(renderer: SDL_Renderer, rect: SDL_Rect or None) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawRect(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rect;
+    int ret;
+    static char *kwlist[] = {"renderer", "rect", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&O&", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     PyCSDL2_ConvertRectRead, &rect))
+        return NULL;
+
+    ret = SDL_RenderDrawRect(renderer, rect.buf);
+    PyBuffer_Release(&rect);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderDrawRects()
+ *
+ * \code{.py}
+ * SDL_RenderDrawRects(renderer: SDL_Renderer, rects: buffer, count: int)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderDrawRects(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rects;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "rects", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &rects, &count))
+        return NULL;
+
+    expected = sizeof(SDL_Rect) * count;
+    if (rects.len < expected) {
+        PyBuffer_Release(&rects);
+        return PyCSDL2_RaiseBufferSizeError("rects", expected, rects.len);
+    }
+
+    ret = SDL_RenderDrawRects(renderer, rects.buf, count);
+    PyBuffer_Release(&rects);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
     Py_RETURN_NONE;
 }
 
@@ -2115,6 +2456,43 @@ PyCSDL2_RenderFillRect(PyObject *module, PyObject *args, PyObject *kwds)
     ret = SDL_RenderFillRect(renderer, rect.buf);
     PyBuffer_Release(&rect);
     if (ret) return PyCSDL2_RaiseSDLError();
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_FillRects()
+ *
+ * \code{.py}
+ * SDL_RenderFillRects(renderer: SDL_Renderer, rects: buffer, count: int)
+ *     -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderFillRects(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_Renderer *renderer;
+    Py_buffer rects;
+    int count, ret;
+    Py_ssize_t expected;
+    static char *kwlist[] = {"renderer", "rects", "count", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&y*i", kwlist,
+                                     PyCSDL2_RendererPtr, &renderer,
+                                     &rects, &count))
+        return NULL;
+
+    expected = sizeof(SDL_Rect) * count;
+    if (rects.len < expected) {
+        PyBuffer_Release(&rects);
+        return PyCSDL2_RaiseBufferSizeError("rects", expected, rects.len);
+    }
+
+    ret = SDL_RenderFillRects(renderer, rects.buf, count);
+    PyBuffer_Release(&rects);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
     Py_RETURN_NONE;
 }
 
@@ -2195,6 +2573,93 @@ PyCSDL2_RenderCopyEx(PyObject *module, PyObject *args, PyObject *kwds)
         return PyCSDL2_RaiseSDLError();
 
     Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_RenderReadPixels()
+ *
+ * \code{.py}
+ * SDL_RenderReadPixels(renderer: SDL_Renderer, rect: SDL_Rect, format: int,
+ *                      pixels: buffer, pitch: int)
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_RenderReadPixels(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_Renderer *renderer_obj;
+    SDL_Renderer *renderer;
+    Py_buffer rect, pixels;
+    int format, pitch, min_pitch, min_size, ret;
+    SDL_Rect r;
+    static char *kwlist[] = {"renderer", "rect", "format", "pixels", "pitch",
+                             NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO&iw*i", kwlist,
+                                     &renderer_obj,
+                                     PyCSDL2_ConvertRectRead, &rect,
+                                     &format, &pixels, &pitch))
+        return NULL;
+
+    if (!PyCSDL2_RendererPtr((PyObject*)renderer_obj, &renderer))
+        goto fail;
+
+    /* SDL assumes that pitch is positive */
+    if (pitch <= 0) {
+        PyErr_SetString(PyExc_ValueError, "pitch must be positive");
+        goto fail;
+    }
+
+    /*
+     * If !format, SDL will use the native pixel format of the window. As such,
+     * we need to get this pixel format as well to do proper bounds checking on
+     * the pixels buffer.
+     */
+    if (!format && Py_TYPE(renderer_obj->deftarget) == &PyCSDL2_WindowType) {
+        SDL_Window *window;
+
+        if (!PyCSDL2_WindowPtr(renderer_obj->deftarget, &window))
+            goto fail;
+
+        format = SDL_GetWindowPixelFormat(window);
+    }
+
+    if (rect.buf) {
+        r = *((SDL_Rect*)rect.buf);
+    } else {
+        float scaleX, scaleY;
+
+        /*
+         * SDL_RenderGetViewport() scales the actual viewport rect by the
+         * renderer scale, which causes precision errors. Temporarily set scale
+         * to 1.0f before calling SDL_RenderGetViewport().
+         */
+        SDL_RenderGetScale(renderer, &scaleX, &scaleY);
+        SDL_RenderSetScale(renderer, 1.0f, 1.0f);
+        SDL_RenderGetViewport(renderer, &r);
+        SDL_RenderSetScale(renderer, scaleX, scaleY);
+    }
+
+    min_pitch = SDL_BYTESPERPIXEL(format) * r.w;
+    min_size = pitch * (r.h ? r.h - 1 : 0) + min_pitch;
+    if (pixels.len < min_size) {
+        PyCSDL2_RaiseBufferSizeError("pixels", min_size, pixels.len);
+        goto fail;
+    }
+
+    ret = SDL_RenderReadPixels(renderer, rect.buf, format, pixels.buf, pitch);
+
+    PyBuffer_Release(&rect);
+    PyBuffer_Release(&pixels);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+
+fail:
+    PyBuffer_Release(&rect);
+    PyBuffer_Release(&pixels);
+    return NULL;
 }
 
 /**

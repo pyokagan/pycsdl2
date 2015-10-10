@@ -797,6 +797,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the drawing area for the current target.\n"
     },
 
+    {"SDL_RenderSetClipRect",
+     (PyCFunction) PyCSDL2_RenderSetClipRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetClipRect(renderer: SDL_Renderer, rect: SDL_Rect or None)\n"
+     "    -> None\n"
+    },
+
+    {"SDL_RenderGetClipRect",
+     (PyCFunction) PyCSDL2_RenderGetClipRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetClipRect(renderer: SDL_Renderer) -> SDL_Rect\n"
+    },
+
+    {"SDL_RenderSetScale",
+     (PyCFunction) PyCSDL2_RenderSetScale,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderSetScale(renderer: SDL_Renderer, scaleX: float,\n"
+     "                   scaleY: float) -> None\n"
+    },
+
+    {"SDL_RenderGetScale",
+     (PyCFunction) PyCSDL2_RenderGetScale,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderGetScale(renderer: SDL_Renderer) -> (float, float)\n"
+    },
+
     {"SDL_SetRenderDrawColor",
      (PyCFunction) PyCSDL2_SetRenderDrawColor,
      METH_VARARGS | METH_KEYWORDS,
@@ -814,6 +840,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns the color (r, g, b, a) used for drawing operations.\n"
     },
 
+    {"SDL_SetRenderDrawBlendMode",
+     (PyCFunction) PyCSDL2_SetRenderDrawBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_SetRenderDrawBlendMode(renderer: SDL_Renderer, blendMode: int)\n"
+     "    -> None\n"
+    },
+
+    {"SDL_GetRenderDrawBlendMode",
+     (PyCFunction) PyCSDL2_GetRenderDrawBlendMode,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetRenderDrawBlendMode(renderer: SDL_Renderer) -> int\n"
+    },
+
     {"SDL_RenderClear",
      (PyCFunction) PyCSDL2_RenderClear,
      METH_VARARGS | METH_KEYWORDS,
@@ -821,6 +860,78 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "Clears the current rendering target with the current drawing color.\n"
      "The entire rendering target is cleared, ignoring the viewport.\n"
+    },
+
+    {"SDL_RenderDrawPoint",
+     (PyCFunction) PyCSDL2_RenderDrawPoint,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawPoint(renderer: SDL_Renderer, x: int, y: int) -> None\n"
+     "\n"
+     "Draw a point (x, y) on the current rendering target.\n"
+    },
+
+    {"SDL_RenderDrawPoints",
+     (PyCFunction) PyCSDL2_RenderDrawPoints,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawPoints(renderer: SDL_Renderer, points: buffer,\n"
+     "                     count: int) -> None\n"
+     "\n"
+     "Draw multiple points on the current rendering target.\n"
+     "\n"
+     "points\n"
+     "    An array of SDL_Points that represents the points to draw.\n"
+     "\n"
+     "count\n"
+     "    The number of points to draw.\n"
+    },
+
+    {"SDL_RenderDrawLine",
+     (PyCFunction) PyCSDL2_RenderDrawLine,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawLine(renderer: SDL_Renderer, x1: int, y1: int, x2: int,\n"
+     "                   y2: int) -> None\n"
+     "\n"
+     "Draw a line with endpoints (x1, y1) and (x2, y2) on the current\n"
+     "rendering target.\n"
+    },
+
+    {"SDL_RenderDrawLines",
+     (PyCFunction) PyCSDL2_RenderDrawLines,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawLines(renderer: SDL_Renderer, points: buffer,\n"
+     "                    count: int) -> None\n"
+     "\n"
+     "Draw a series of connected lines on the current rendering target.\n"
+     "\n"
+     "points\n"
+     "     An array of SDL_Points representing points along the lines.\n"
+     "\n"
+     "count\n"
+     "     The number of points, drawing count-1 lines.\n"
+    },
+
+    {"SDL_RenderDrawRect",
+     (PyCFunction) PyCSDL2_RenderDrawRect,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawRect(renderer: SDL_Renderer, rect: SDL_Rect or None)\n"
+     "\n"
+     "Draw a rectangle on the current rendering target. If `rect` is None,\n"
+     "draw an outline on the entire rendering target.\n"
+    },
+
+    {"SDL_RenderDrawRects",
+     (PyCFunction) PyCSDL2_RenderDrawRects,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderDrawRects(renderer: SDL_Renderer, rects: buffer, count: int)\n"
+     "    -> None\n"
+     "\n"
+     "Draw some number of rectangles on the current rendering target.\n"
+     "\n"
+     "rects\n"
+     "    An array of SDL_Rects representing the rectangles to be drawn.\n"
+     "\n"
+     "count\n"
+     "    The number of rectangles.\n"
     },
 
     {"SDL_RenderFillRect",
@@ -833,6 +944,22 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "current drawing color.\n"
      "\n"
      "If `rect` is None, the entire rendering target will be filled.\n"
+    },
+
+    {"SDL_RenderFillRects",
+     (PyCFunction) PyCSDL2_RenderFillRects,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderFillRects(renderer: SDL_Renderer, rects: buffer, count: int)\n"
+     "    -> None\n"
+     "\n"
+     "Fill some number of rectangles on the current rendering target with\n"
+     "the current drawing color.\n"
+     "\n"
+     "rects\n"
+     "    An array of SDL_Rects representing the rectangles to be filled.\n"
+     "\n"
+     "count\n"
+     "    The number of rectangles.\n"
     },
 
     {"SDL_RenderCopy",
@@ -893,6 +1020,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    Indicates which flipping actions should be performed on the\n"
      "    texture. One or more of SDL_FLIP_NONE, SDL_FLIP_HORIZONTAL and/or\n"
      "    SDL_FLIP_VERTICAL OR'd together.\n"
+    },
+
+    {"SDL_RenderReadPixels",
+     (PyCFunction) PyCSDL2_RenderReadPixels,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_RenderReadPixels(renderer: SDL_Renderer, rect: SDL_Rect,\n"
+     "                     format: int, pixels: buffer, pitch: int) -> None\n"
+     "\n"
+     "Read pixels from the current rendering target.\n"
+     "\n"
+     "renderer\n"
+     "    The rendering context.\n"
+     "\n"
+     "rect\n"
+     "    An SDL_Rect representing the area to read, or None for the entire\n"
+     "    render target.\n"
+     "\n"
+     "format\n"
+     "    The desired format of the pixel data (one of the SDL_PIXELFORMAT_*\n"
+     "    constants), or 0 to use the format of the rendering target.\n"
+     "\n"
+     "pixels\n"
+     "    The buffer to be filled in with the pixel data.\n"
+     "\n"
+     "pitch\n"
+     "    The pitch of the pixels buffer.\n"
     },
 
     {"SDL_RenderPresent",
