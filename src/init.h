@@ -34,27 +34,24 @@
 #include "error.h"
 
 /**
- * \brief Binding for SDL_Init().
+ * \brief Implements csdl2.SDL_Init()
  *
- * Implements the following Python function signature:
- * \code
- * SDL_Init(flags) -> None
+ * \code{.py}
+ * SDL_Init(flags: int) -> None
  * \endcode
- *
- * If SDL_Init() returns non-zero, an exception is raised with
- * PyCSDL2_RaiseSDLError().
- *
- * \returns Py_None on success, NULL if an exception occurred.
  */
 static PyObject *
-PyCSDL2_Init(PyObject *self, PyObject *args, PyObject *kwds)
+PyCSDL2_Init(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Uint32 flags;
     static char *kwlist[] = {"flags", NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
         return NULL;
-    if (SDL_Init(flags))
+
+    if (SDL_Init(flags) < 0)
         return PyCSDL2_RaiseSDLError();
+
     Py_RETURN_NONE;
 }
 
