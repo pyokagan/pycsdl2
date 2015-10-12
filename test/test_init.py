@@ -56,5 +56,13 @@ class TestInit(unittest.TestCase):
         self.assertIsNone(SDL_Init(SDL_INIT_EVENTS))
 
 
+class TestInitSubSystem(unittest.TestCase):
+    "Tests SDL_InitSubSystem()"
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_InitSubSystem(SDL_INIT_EVENTS))
+
+
 if __name__ == '__main__':
     unittest.main()

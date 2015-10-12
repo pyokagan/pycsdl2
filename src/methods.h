@@ -391,6 +391,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "signal handlers for some commonly ignored fatal signals like SIGSEGV.\n"
     },
 
+    {"SDL_InitSubSystem",
+     (PyCFunction) PyCSDL2_InitSubSystem,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_InitSubSystem(flags: int) -> None\n"
+     "\n"
+     "Initialize specific subsystems.\n"
+     "\n"
+     "`flags` is one or more of the following constants OR'd together:\n"
+     "\n"
+     "* SDL_INIT_TIMER\n"
+     "* SDL_INIT_AUDIO\n"
+     "* SDL_INIT_VIDEO (implies SDL_INIT_EVENTS)\n"
+     "* SDL_INIT_JOYSTICK (implies SDL_INIT_EVENTS)\n"
+     "* SDL_INIT_HAPTIC\n"
+     "* SDL_INIT_GAMECONTROLLER (implies SDL_INIT_JOYSTICK)\n"
+     "* SDL_INIT_EVENTS\n"
+     "\n"
+     "Alternatively, pass SDL_INIT_EVERYTHING to initialize all subsystems.\n"
+     "\n"
+     "Subsystem initialization is ref-counted. You must call\n"
+     "SDL_QuitSubSystem() for each SDL_InitSubSystem() to correctly\n"
+     "shutdown a subsystem manually (or call SDL_Quit() to force a\n"
+     "shutdown.) If a subsystem is already loaded then this call will\n"
+     "increase the refcount and return.\n"
+    },
+
     /* pixels.h */
 
     {"SDL_AllocFormat",

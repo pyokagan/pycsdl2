@@ -51,3 +51,16 @@ Initialization
 
    :param int flags: :ref:`subsystem-flags` of subsystems to initialize, OR'd
                      together.
+
+.. function:: SDL_InitSubSystem(flags)
+
+   Initialize specific subsystems.
+
+   Subsystem initialization is ref-counted. You must call
+   :func:`SDL_QuitSubSystem` for each :func:`SDL_InitSubSystem` to correctly
+   shutdown a subsystem manually (or call :func:`SDL_Quit` to force a
+   shutdown). If a subsystem is already loaded then this call will increase the
+   refcount and return.
+
+   :param int flags: :ref:`subsystem-flags` of subsystems to initialize, OR'd
+                     together.

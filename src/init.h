@@ -56,6 +56,28 @@ PyCSDL2_Init(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_InitSubSystem()
+ *
+ * \code{.py}
+ * SDL_InitSubSystem(flags: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_InitSubSystem(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+
+    if (SDL_InitSubSystem(flags) < 0)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL.h
  *
  * Adds constants defined in SDL.h to module m.
