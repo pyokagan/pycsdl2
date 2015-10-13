@@ -18,7 +18,7 @@ from csdl2 import *  # noqa
 
 
 class TestInitConstants(unittest.TestCase):
-    """Tests for the availability of constants and their values in SDL.h"""
+    "Tests for the availability of constants and their values in SDL.h"
 
     def test_SDL_INIT_TIMER(self):
         self.assertEqual(SDL_INIT_TIMER, 0x00000001)
@@ -48,8 +48,8 @@ class TestInitConstants(unittest.TestCase):
         self.assertEqual(SDL_INIT_EVERYTHING, 29233)
 
 
-class TestSDL_Init(unittest.TestCase):
-    """Tests SDL_Init()"""
+class TestInit(unittest.TestCase):
+    "Tests SDL_Init()"
 
     def test_SDL_INIT_TIMER(self):
         self.assertIs(SDL_Init(SDL_INIT_TIMER), None)
