@@ -64,3 +64,29 @@ Initialization
 
    :param int flags: :ref:`subsystem-flags` of subsystems to initialize, OR'd
                      together.
+
+Shutdown
+--------
+.. function:: SDL_QuitSubSystem(flags)
+
+   Shut down specific subsystems.
+
+   Subsystem initialization is ref-counted. :func:`SDL_QuitSubSystem` will
+   decrement the refcount for each of the specified subsystems, and if the
+   refcount of a subsystem reached 0 that subsystem is shut down.
+
+   :param int flags: :ref:`subsystem-flags` of subsystems to shut down, OR'd
+                     together.
+
+   .. note::
+
+      If you start a subsystem using a call to that subsystem's init function
+      (e.g. :func:`SDL_VideoInit`) instead of :func:`SDL_Init` or
+      :func:`SDL_InitSubSystem`, :func:`SDL_QuitSubSystem` will not work. You
+      will need to use that subsystem's quit function (e.g.
+      :func:`SDL_VideoQuit`) directly instead.
+
+   .. note::
+
+      You still need to call :func:`SDL_Quit` even if you close all open
+      subsystems with :func:`SDL_QuitSubSystem`.

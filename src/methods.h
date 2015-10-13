@@ -417,6 +417,39 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "increase the refcount and return.\n"
     },
 
+    {"SDL_QuitSubSystem",
+     (PyCFunction) PyCSDL2_QuitSubSystem,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_QuitSubSystem(flags: int) -> None\n"
+     "\n"
+     "Shut down specific subsystems.\n"
+     "\n"
+     "`flags` is one or more of the following constants OR'd together:\n"
+     "\n"
+     "* SDL_INIT_TIMER\n"
+     "* SDL_INIT_AUDIO\n"
+     "* SDL_INIT_VIDEO\n"
+     "* SDL_INIT_JOYSTICK\n"
+     "* SDL_INIT_HAPTIC\n"
+     "* SDL_INIT_GAMECONTROLLER\n"
+     "* SDL_INIT_EVENTS\n"
+     "\n"
+     "Alternatively, pass SDL_INIT_EVERYTHING to shut down all subsystems.\n"
+     "\n"
+     "Subsystem initialization is ref-counted. SDL_QuitSubSystem() will\n"
+     "decrement the refcount for each of the specified subsystems, and if\n"
+     "the refcount of a subsystem reaches 0 that subsystem is shut down.\n"
+     "\n"
+     "If you start a subsystem using a call to that subsystem's init\n"
+     "function (e.g. SDL_VideoInit() instead of SDL_Init() or\n"
+     "SDL_InitSubSystem()), SDL_QuitSubSystem() will not work. You will need\n"
+     "to use that subsystem's quit function (e.g. SDL_VideoQuit()) directly\n"
+     "instead.\n"
+     "\n"
+     "You still need to call SDL_Quit() even if you close all open\n"
+     "subsystems with SDL_QuitSubSystem().\n"
+    },
+
     /* pixels.h */
 
     {"SDL_AllocFormat",
