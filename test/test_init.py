@@ -51,32 +51,9 @@ class TestInitConstants(unittest.TestCase):
 class TestInit(unittest.TestCase):
     "Tests SDL_Init()"
 
-    def test_SDL_INIT_TIMER(self):
-        self.assertIs(SDL_Init(SDL_INIT_TIMER), None)
-
-    def test_SDL_INIT_AUDIO(self):
-        self.assertIs(SDL_Init(SDL_INIT_AUDIO), None)
-
-    def test_SDL_INIT_VIDEO(self):
-        self.assertIs(SDL_Init(SDL_INIT_VIDEO), None)
-
-    def test_SDL_INIT_JOYSTICK(self):
-        self.assertIs(SDL_Init(SDL_INIT_JOYSTICK), None)
-
-    def test_SDL_INIT_HAPTIC(self):
-        self.assertIs(SDL_Init(SDL_INIT_HAPTIC), None)
-
-    def test_SDL_INIT_GAMECONTROLLER(self):
-        self.assertIs(SDL_Init(SDL_INIT_GAMECONTROLLER), None)
-
-    def test_SDL_INIT_EVENTS(self):
-        self.assertIs(SDL_Init(SDL_INIT_EVENTS), None)
-
-    def test_SDL_INIT_NOPARACHUTE(self):
-        self.assertIs(SDL_Init(SDL_INIT_NOPARACHUTE), None)
-
-    def test_SDL_INIT_EVERYTHING(self):
-        self.assertIs(SDL_Init(SDL_INIT_EVERYTHING), None)
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_Init(SDL_INIT_EVENTS))
 
 
 if __name__ == '__main__':
