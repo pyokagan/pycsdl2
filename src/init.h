@@ -118,6 +118,26 @@ PyCSDL2_WasInit(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_Quit()
+ *
+ * \code{.py}
+ * SDL_Quit() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_Quit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    SDL_Quit();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Initializes bindings to SDL.h
  *
  * Adds constants defined in SDL.h to module m.

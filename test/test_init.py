@@ -3,6 +3,7 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import atexit
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,6 +16,9 @@ if __name__ == '__main__':
 
 
 from csdl2 import *  # noqa
+
+
+atexit.register(SDL_Quit)
 
 
 class TestInitConstants(unittest.TestCase):

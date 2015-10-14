@@ -100,3 +100,26 @@ Shutdown
 
       You still need to call :func:`SDL_Quit` even if you close all open
       subsystems with :func:`SDL_QuitSubSystem`.
+
+.. function:: SDL_Quit()
+
+   Clean up all initialized subsystems. This function should be called upon all
+   exit conditions.
+
+   .. note::
+
+      This function should be called *even* if all initialized subsystems have
+      been shut down with :func:`SDL_QuitSubSystem`.
+
+   .. note::
+
+      It is safe to call this function even in the case of errors in
+      initialization.
+
+   .. note::
+
+      If a subsystem is started using a call to that subsystem's init function
+      (e.g. :func:`SDL_VideoInit`) instead of :func:`SDL_Init` or
+      :func:`SDL_InitSubSystem`, then the subsystem's quit function (e.g.
+      :func:`SDL_VideoQuit`) must be called to shut the subsystem down before
+      calling :func:`SDL_Quit`.
