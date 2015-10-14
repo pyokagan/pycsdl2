@@ -113,9 +113,6 @@ Window destruction
 
    :param SDL_Window window: Window to be destroyed.
 
-   .. warning:: Once destroyed, do not access the window. Doing so will at best
-                raise errors and at worse crash the interpreter.
-
 Window Properties
 -----------------
 .. function:: SDL_GetWindowTitle(window: SDL_Window) -> str

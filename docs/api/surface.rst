@@ -151,6 +151,3 @@ Surface Creation and Simple Drawing
    automatically call this function as part of its destructor.
 
    :param SDL_Surface surface: surface to free
-
-   .. warning:: Once freed, do not access the surface. Doing so will at best
-                raise errors and at worse crash the interpreter.

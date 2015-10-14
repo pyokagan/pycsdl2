@@ -189,10 +189,6 @@ Pixel Formats
    :param SDL_PixelFormat format: :class:`SDL_PixelFormat` structure to free.
    :raises AssertionError: The pixel format has already been freed.
 
-   .. warning:: Do not access the pixel format structure once is has been
-                freed. Doing so will at best raise AssertionErrors and at worse
-                crash the interpreter.
-
 .. _pixel-format-constants:
 
 Pixel format constants
@@ -311,7 +307,3 @@ Color Palette
 
    :param SDL_Palette palette: The :class:`SDL_Palette` to be freed.
    :raises AssertionError: The palette has already been freed.
-
-   .. warning:: Do not access the palette once it has been freed. Doing so will
-                at best raise AssertionErrors and at worse crash the
-                interpreter.

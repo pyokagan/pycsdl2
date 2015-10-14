@@ -444,6 +444,3 @@ stream.
 
    :param buffer audio_buf: Buffer created by :func:`SDL_LoadWAV` or
                             :func:`SDL_LoadWAV_RW`.
-
-   .. warning:: Once freed, do not access the buffer. Doing so may crash the
-                interpreter.
