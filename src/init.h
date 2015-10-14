@@ -99,6 +99,25 @@ PyCSDL2_QuitSubSystem(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_WasInit()
+ *
+ * \code{.py}
+ * SDL_WasInit(flags: int) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_WasInit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+
+    return PyLong_FromUnsignedLong(SDL_WasInit(flags));
+}
+
+/**
  * \brief Initializes bindings to SDL.h
  *
  * Adds constants defined in SDL.h to module m.

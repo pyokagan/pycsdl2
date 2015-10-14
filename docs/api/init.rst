@@ -65,6 +65,16 @@ Initialization
    :param int flags: :ref:`subsystem-flags` of subsystems to initialize, OR'd
                      together.
 
+.. function:: SDL_WasInit(flags) -> int
+
+   Return a mask of the specified subsystems which have previously been
+   initialized.
+
+   :param int flags: :ref:`subsystem-flags` of subsystems to query, OR'd
+                     together.
+   :returns: The initialization status of the specified subsystems, or a mask
+             of all initialized subsystems if `flags` is 0.
+
 Shutdown
 --------
 .. function:: SDL_QuitSubSystem(flags)

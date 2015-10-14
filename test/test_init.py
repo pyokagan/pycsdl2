@@ -75,5 +75,13 @@ class TestQuitSubSystem(unittest.TestCase):
         self.assertIsNone(SDL_QuitSubSystem(SDL_INIT_EVENTS))
 
 
+class TestWasInit(unittest.TestCase):
+    "Tests SDL_WasInit()"
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_WasInit(0)), int)
+
+
 if __name__ == '__main__':
     unittest.main()

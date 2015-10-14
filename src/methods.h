@@ -450,6 +450,17 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "subsystems with SDL_QuitSubSystem().\n"
     },
 
+    {"SDL_WasInit",
+     (PyCFunction) PyCSDL2_WasInit,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_WasInit(flags: int) -> int\n"
+     "\n"
+     "Return a mask of the specified subsystems which have previously been\n"
+     "initialized.\n"
+     "\n"
+     "If `flags` is 0, return a mask of all initialized subsystems.\n"
+    },
+
     /* pixels.h */
 
     {"SDL_AllocFormat",
