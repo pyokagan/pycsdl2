@@ -174,9 +174,6 @@ Pixel Formats
 
    :param int pixel_format: One of the `Pixel format constants`_.
    :returns: A :class:`SDL_PixelFormat`.
-   :raises ValueError: Invalid `pixel_format`.
-   :raises MemoryError: Not enough memory to allocate the
-                        :class:`SDL_PixelFormat`.
 
 .. function:: SDL_FreeFormat(format: SDL_PixelFormat) -> None
 
@@ -187,7 +184,6 @@ Pixel Formats
    call this function upon garbage collection.
 
    :param SDL_PixelFormat format: :class:`SDL_PixelFormat` structure to free.
-   :raises AssertionError: The pixel format has already been freed.
 
 .. _pixel-format-constants:
 
@@ -295,8 +291,6 @@ Color Palette
 
    :param int ncolors: Number of colors in the palette.
    :returns: A new :class:`SDL_Palette`.
-   :raises ValueError: Invalid number of colors.
-   :raises MemoryError: Not enough memory to allocate the palette.
 
 .. function:: SDL_FreePalette(palette: SDL_Palette) -> None
 
@@ -306,4 +300,3 @@ Color Palette
    function on garbage collection.
 
    :param SDL_Palette palette: The :class:`SDL_Palette` to be freed.
-   :raises AssertionError: The palette has already been freed.

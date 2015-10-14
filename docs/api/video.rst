@@ -34,7 +34,6 @@ Window creation
                      :const:`SDL_WINDOW_MAXIMIZED`,
                      :const:`SDL_WINDOW_INPUT_GRABBED`.
    :returns: A new :class:`SDL_Window`
-   :raises RuntimeError: if the Window could not be created.
 
 .. data:: SDL_WINDOWPOS_UNDEFINED
 

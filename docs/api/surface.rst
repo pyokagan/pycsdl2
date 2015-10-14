@@ -95,7 +95,6 @@ Surface Creation and Simple Drawing
    :param int Amask: Bitmask used to extract the alpha component from a pixel.
                      If 0, the surface has no alpha channel.
    :returns: A new blank :class:`SDL_Surface` structure.
-   :raises RuntimeError: The surface could not be created.
 
 .. function:: SDL_CreateRGBSurfaceFrom(pixels: buffer, width: int, height: int, depth: int, pitch: int, Rmask: int, Gmask: int, Bmask: int, Amask: int) -> SDL_Surface
 
@@ -121,11 +120,6 @@ Surface Creation and Simple Drawing
                      If 0, the surface has no alpha channel.
    :returns: A :class:`SDL_Surface` with its contents backed by the provided
              `pixels` buffer.
-   :raises BufferError: If the pixels buffer is not of the expected size. It
-                        must be ``pitch * height`` bytes.
-   :raises ValueError: If provided `pitch` does not match the image `depth` and
-                       `width`.
-   :raises RuntimeError: If the surface could not be created.
 
 .. function:: SDL_LoadBMP_RW(src, freesrc) -> SDL_Surface
 

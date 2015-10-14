@@ -23,7 +23,6 @@ Initialization and Shutdown
 
    :param int flags: subsystems to initialize, OR'ed together
    :returns: None
-   :raises RuntimeError: if any subsystem initialization failed.
 
 .. py:data:: SDL_INIT_TIMER
              SDL_INIT_AUDIO

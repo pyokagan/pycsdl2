@@ -296,9 +296,6 @@ the application to process the information stored with them.
    :returns: Number of events added to the event queue for
              :const:`SDL_ADDEVENT`, number of events retrieved from the event
              queue for :const:`SDL_PEEKEVENT` and :const:`SDL_GETEVENT`.
-   :raises BufferError: The provided `events` buffer is of the wrong size, or
-                        is not writable if `action` is :const:`SDL_PEEKEVENT`
-                        or :const:`SDL_GETEVENT`.
 
 .. data:: SDL_ADDEVENT
           SDL_PEEKEVENT
@@ -331,8 +328,6 @@ the application to process the information stored with them.
                  queue.
    :type event: SDL_Event or None
    :returns: True if there are events in the queue, False otherwise.
-   :raises BufferError: The provided `event` buffer is of the wrong size or
-                        not writable.
 
 .. function:: SDL_PushEvent(event) -> bool
 
@@ -342,7 +337,6 @@ the application to process the information stored with them.
                            :class:`SDL_Event` instance, or a buffer of
                            equivalent size.
    :returns: True on success, False if the event was filtered.
-   :raises BufferError: The provided `event` buffer is of the wrong size.
 
    .. note::
 
