@@ -397,6 +397,14 @@ class TestAUDIO_ISBIGENDIAN(unittest.TestCase):
         self.assertIs(type(SDL_AUDIO_ISBIGENDIAN(42)), bool)
 
 
+class TestAUDIO_ISSIGNED(unittest.TestCase):
+    "Tests SDL_AUDIO_ISSIGNED()"
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISSIGNED(42)), bool)
+
+
 class TestGetNumAudioDrivers(unittest.TestCase):
     "Tests SDL_GetNumAudioDrivers()"
 

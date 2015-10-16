@@ -910,6 +910,25 @@ PyCSDL2_AUDIO_ISBIGENDIAN(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_AUDIO_ISSIGNED()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISSIGNED(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISSIGNED(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISSIGNED(x));
+}
+
+/**
  * \brief Implements csdl2.SDL_GetNumAudioDrivers()
  *
  * \code{.py}
