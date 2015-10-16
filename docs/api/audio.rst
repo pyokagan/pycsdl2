@@ -444,3 +444,90 @@ stream.
 
    :param buffer audio_buf: Buffer created by :func:`SDL_LoadWAV` or
                             :func:`SDL_LoadWAV_RW`.
+
+Audio Data Conversion
+---------------------
+Audio data conversion is done in 3 steps:
+
+1. An :class:`SDL_AudioCVT` structure is initialized with
+   :func:`SDL_BuildAudioCVT`.
+
+2. The application sets up an appropriately-sized buffer containing the source
+   data, assigning it to :attr:`SDL_AudioCVT.buf`. The application must also
+   set :attr:`SDL_AudioCVT.len` to the source data size in bytes. The actual
+   size of the buffer must be at least ``len * len_mult`` bytes large, as the
+   conversion will be done using this buffer.
+
+3. The actual audio data conversion is done by calling :func:`SDL_ConvertAudio`
+   with the :class:`SDL_AudioCVT` struct. The converted audio data will be
+   written to the provided audio buffer.
+
+.. class:: SDL_AudioCVT()
+
+   A structure that contains audio data conversion information.
+
+   It is initialized with :func:`SDL_BuildAudioCVT`, and passed to
+   :func:`SDL_ConvertAudio` to do the actual conversion once the application
+   has set up appropriately-sized buffers between these two function calls.
+
+   conversion is done by :func:`SDL_ConvertAudio`
+
+   .. attribute:: needed
+
+      (readonly) True if conversion is needed.
+
+   .. attribute:: src_format
+
+      (readonly) Source audio format.
+
+   .. attribute:: dst_format
+
+      (readonly) Target audio format
+
+   .. attribute:: rate_incr
+
+      (readonly) Rate conversion increment.
+
+   .. attribute:: buf
+
+      This attribute should point to the audio data that will be used in the
+      conversion.
+
+      The buffer is both the source and the destination, which means the
+      converted audio data overwrites the original data. It also means that
+      converted data may be larger than the original data (if you were
+      converting from 8-bit to 16-bit, for instance), so you must ensure
+      :attr:`SDL_AudioCVT.buf` is larger enough for any stage of the
+      conversion, regardless of the final converted data's size.
+
+      The buffer must have a size of at least ``len * len_mult``.
+
+   .. attribute:: len
+
+      Length of original audio buffer in bytes.
+
+   .. attribute:: len_cvt
+
+      (readonly) Length of converted audio buffer.
+
+   .. attribute:: len_mult
+
+      (readonly) The length multiplier for determining the size of the
+      converted data.
+
+      The audio buffer may need to be larger than either the original data or
+      the converted data. The allocated size of :attr:`SDL_AudioCVT.buf`
+      must have a size of at least ``len * len_mult`` bytes.
+
+   .. attribute:: len_ratio
+
+      (readonly) The length ratio of the converted data to the original data.
+
+      When you have finished converting your audio data, you need to know how
+      much of your audio buffer is valid. ``len * len_ratio`` is the size of
+      the converted audio data in bytes.
+
+      This is similar to :attr:`SDL_AudioCVT.len_mult`. However, when the
+      converted audio data is shorter than the original,
+      :attr:`SDL_AudioCVT.len_mult` will be 1. :attr:`SDL_AudioCVT.len_ratio`
+      on the other hand will be a fractional number between 0 and 1.

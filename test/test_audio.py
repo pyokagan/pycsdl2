@@ -270,6 +270,96 @@ class TestAudioSpec(unittest.TestCase):
         self.assertIs(self.spec.userdata, x)
 
 
+class TestAudioCVT(unittest.TestCase):
+    "Tests SDL_AudioCVT class"
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+
+    def test_cannot_subclass(self):
+        "Cannot be used as base class"
+        self.assertRaises(TypeError, type, 'testtype', (SDL_AudioCVT,), {})
+
+    def test_needed(self):
+        "needed is a bool"
+        self.assertIs(type(self.cvt.needed), bool)
+
+    def test_needed_readonly(self):
+        "needed is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'needed', True)
+
+    def test_src_format_int(self):
+        "src_format is an int"
+        self.assertIs(type(self.cvt.src_format), int)
+
+    def test_src_format_readonly(self):
+        "src_format is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'src_format', 42)
+
+    def test_dst_format_int(self):
+        "dst_format is an int"
+        self.assertIs(type(self.cvt.dst_format), int)
+
+    def test_dst_format_readonly(self):
+        "dst_format is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'dst_format', 42)
+
+    def test_rate_incr(self):
+        "rate_incr is a float"
+        self.assertIs(type(self.cvt.rate_incr), float)
+
+    def test_rate_incr_readonly(self):
+        "rate_incr is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'rate_incr', 42)
+
+    def test_buf_none(self):
+        "buf is initialized to None"
+        self.assertIs(self.cvt.buf, None)
+
+    def test_buf_buffer(self):
+        "buf can be set to a buffer"
+        x = bytearray(1)
+        self.cvt.buf = x
+        self.assertIs(self.cvt.buf, x)
+
+    def test_buf_not_buffer(self):
+        "buf raises TypeError when object is not a buffer"
+        self.assertRaises(TypeError, setattr, self.cvt, 'buf', {})
+
+    def test_len_int(self):
+        "len is an int"
+        self.assertIs(type(self.cvt.len), int)
+
+    def test_len_set_int(self):
+        "len can be set to an int"
+        self.cvt.len = 42
+        self.assertEqual(self.cvt.len, 42)
+
+    def test_len_cvt_int(self):
+        "len_cvt is an int"
+        self.assertIs(type(self.cvt.len_cvt), int)
+
+    def test_len_cvt_readonly(self):
+        "len_cvt is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_cvt', 42)
+
+    def test_len_mult_int(self):
+        "len_mult is an int"
+        self.assertIs(type(self.cvt.len_mult), int)
+
+    def test_len_mult_readonly(self):
+        "len_mult is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_mult', 42)
+
+    def test_len_ratio_float(self):
+        "len_ratio is a float"
+        self.assertIs(type(self.cvt.len_ratio), float)
+
+    def test_len_ratio_readonly(self):
+        "len_ratio is readonly"
+        self.assertRaises(AttributeError, setattr, self.cvt, 'len_ratio', 42)
+
+
 class TestAudioDevice(unittest.TestCase):
     """Tests SDL_AudioDevice class"""
 

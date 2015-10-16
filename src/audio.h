@@ -312,6 +312,176 @@ PyCSDL2_AudioSpecPtr(PyObject *obj, SDL_AudioSpec **out)
 /** @} */
 
 /**
+ * \defgroup csdl2_SDL_AudioCVT csdl2.SDL_AudioCVT
+ *
+ * @{
+ */
+
+/** \brief Instance data for PyCSDL2_AudioCVTType */
+typedef struct PyCSDL2_AudioCVT {
+    PyObject_HEAD
+    /** \brief Head of weakref list */
+    PyObject *in_weakreflist;
+    /** \brief Internal SDL_AudioCVT data */
+    SDL_AudioCVT cvt;
+    /** \brief Python buffer for the SDL_AudioCVT buf field */
+    Py_buffer buf;
+} PyCSDL2_AudioCVT;
+
+/** \brief tp_new for PyCSDL2_AudioCVTType */
+static PyCSDL2_AudioCVT *
+PyCSDL2_AudioCVTNew(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *self;
+
+    self = (PyCSDL2_AudioCVT*) type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    return self;
+}
+
+/** \brief tp_traverse for PyCSDL2_AudioCVTType */
+static int
+PyCSDL2_AudioCVTTraverse(PyCSDL2_AudioCVT *self, visitproc visit, void *arg)
+{
+    Py_VISIT(self->buf.obj);
+    return 0;
+}
+
+/** \brief tp_clear for PyCSDL2_AudioCVTType */
+static int
+PyCSDL2_AudioCVTClear(PyCSDL2_AudioCVT *self)
+{
+    PyBuffer_Release(&self->buf);
+    return 0;
+}
+
+/** \brief tp_dealloc for PyCSDL2_AudioCVTType */
+static void
+PyCSDL2_AudioCVTDealloc(PyCSDL2_AudioCVT *self)
+{
+    PyCSDL2_AudioCVTClear(self);
+    PyObject_ClearWeakRefs((PyObject*) self);
+    Py_TYPE(self)->tp_free((PyObject*) self);
+}
+
+/** \brief tp_members for PyCSDL2_AudioCVTType */
+static PyMemberDef PyCSDL2_AudioCVTMembers[] = {
+    {"src_format", Uint16_TYPE, offsetof(PyCSDL2_AudioCVT, cvt.src_format),
+     READONLY,
+     "(readonly) Source audio format"},
+    {"dst_format", Uint16_TYPE, offsetof(PyCSDL2_AudioCVT, cvt.dst_format),
+     READONLY,
+     "(readonly) Target audio format"},
+    {"rate_incr", T_DOUBLE, offsetof(PyCSDL2_AudioCVT, cvt.rate_incr),
+     READONLY,
+     "(readonly) Rate conversion increment"},
+    {"len", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len), 0,
+     "Length of original audio buffer in bytes."},
+    {"len_cvt", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len_cvt), READONLY,
+     "(readonly) Length of converted audio buffer in bytes."},
+    {"len_mult", T_INT, offsetof(PyCSDL2_AudioCVT, cvt.len_mult), READONLY,
+     "(readonly) Buffer must be len*len_mult big"},
+    {"len_ratio", T_DOUBLE, offsetof(PyCSDL2_AudioCVT, cvt.len_ratio),
+     READONLY,
+     "(readonly) Given len, final size is len*len_ratio"},
+    {NULL}
+};
+
+/** \brief Implements getter for SDL_AudioCVT.needed */
+static PyObject *
+PyCSDL2_AudioCVTGetNeeded(PyCSDL2_AudioCVT *self, void *closure)
+{
+    return PyBool_FromLong(self->cvt.needed);
+}
+
+/** \brief Implements getter for SDL_AudioCVT.buf */
+static PyObject *
+PyCSDL2_AudioCVTGetBuf(PyCSDL2_AudioCVT *self, void *closure)
+{
+    return PyCSDL2_Get(self->buf.obj);
+}
+
+/** \brief Implements setter for SDL_AudioCVT.type */
+static int
+PyCSDL2_AudioCVTSetBuf(PyCSDL2_AudioCVT *self, PyObject *value, void *closure)
+{
+    Py_buffer buf;
+
+    if (PyObject_GetBuffer(value, &buf, PyBUF_CONTIG))
+        return -1;
+
+    PyBuffer_Release(&self->buf);
+    self->buf = buf;
+    self->cvt.buf = buf.buf;
+
+    return 0;
+}
+
+/** \brief tp_getset for PyCSDL2_AudioCVTType */
+static PyGetSetDef PyCSDL2_AudioCVTGetSetters[] = {
+    {"needed",
+     (getter) PyCSDL2_AudioCVTGetNeeded,
+     (setter) NULL,
+     "(readonly) True if conversion is needed"
+    },
+    {"buf",
+     (getter) PyCSDL2_AudioCVTGetBuf,
+     (setter) PyCSDL2_AudioCVTSetBuf,
+     "Buffer to hold entire audio data"
+    },
+    {NULL}
+};
+
+/** \brief Type definition of csdl2.SDL_AudioCVT */
+static PyTypeObject PyCSDL2_AudioCVTType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    /* tp_name           */ "csdl2.SDL_AudioCVT",
+    /* tp_basicsize      */ sizeof(PyCSDL2_AudioCVT),
+    /* tp_itemsize       */ 0,
+    /* tp_dealloc        */ (destructor) PyCSDL2_AudioCVTDealloc,
+    /* tp_print          */ 0,
+    /* tp_getattr        */ 0,
+    /* tp_setattr        */ 0,
+    /* tp_reserved       */ 0,
+    /* tp_repr           */ 0,
+    /* tp_as_number      */ 0,
+    /* tp_as_sequence    */ 0,
+    /* tp_as_mapping     */ 0,
+    /* tp_hash           */ 0,
+    /* tp_call           */ 0,
+    /* tp_str            */ 0,
+    /* tp_getattro       */ 0,
+    /* tp_setattro       */ 0,
+    /* tp_as_buffer      */ 0,
+    /* tp_flags          */ Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+    /* tp_doc            */
+    "Describes the audio output format and sets the audio callback.\n"
+    "\n"
+    "This structure is used by SDL_OpenAudioDevice() and SDL_LoadWAV().\n",
+    /* tp_traverse       */ (traverseproc) PyCSDL2_AudioCVTTraverse,
+    /* tp_clear          */ (inquiry) PyCSDL2_AudioCVTClear,
+    /* tp_richcompare    */ 0,
+    /* tp_weaklistoffset */ offsetof(PyCSDL2_AudioCVT, in_weakreflist),
+    /* tp_iter           */ 0,
+    /* tp_iternext       */ 0,
+    /* tp_methods        */ 0,
+    /* tp_members        */ PyCSDL2_AudioCVTMembers,
+    /* tp_getset         */ PyCSDL2_AudioCVTGetSetters,
+    /* tp_base           */ 0,
+    /* tp_dict           */ 0,
+    /* tp_descr_get      */ 0,
+    /* tp_descr_set      */ 0,
+    /* tp_dictoffset     */ 0,
+    /* tp_init           */ 0,
+    /* tp_alloc          */ 0,
+    /* tp_new            */ (newfunc) PyCSDL2_AudioCVTNew
+};
+
+/** @} */
+
+/**
  * \defgroup csdl2_SDL_AudioDevice csdl2.SDL_AudioDevice
  *
  * @{
@@ -1293,6 +1463,9 @@ PyCSDL2_initaudio(PyObject *module)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_AudioSpecType) < 0)
+        return 0;
+
+    if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_AudioCVTType) < 0)
         return 0;
 
     if (PyCSDL2_PyModuleAddType(module, &PyCSDL2_AudioDeviceType) < 0)
