@@ -480,6 +480,24 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    for full audio volume.\n"
     },
 
+    {"SDL_LockAudio",
+     (PyCFunction) PyCSDL2_LockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudio() -> None\n"
+     "\n"
+     "This function is a legacy means of locking the audio device. Use\n"
+     "SDL_LockAudioDevice() instead.\n"
+    },
+
+    {"SDL_UnlockAudio",
+     (PyCFunction) PyCSDL2_UnlockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudio() -> None\n"
+     "\n"
+     "This function is a legacy means of unlocking the audio device. Use\n"
+     "SDL_UnlockAudioDevice() instead.\n"
+    },
+
     {"SDL_CloseAudio",
      (PyCFunction) PyCSDL2_CloseAudio,
      METH_VARARGS | METH_KEYWORDS,

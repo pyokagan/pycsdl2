@@ -760,3 +760,25 @@ Audio Mixing
 .. data:: SDL_MIX_MAXVOLUME
 
    The maximum volume for mixing.
+
+Audio Locking
+-------------
+The lock manipulated by these functions protects the callback function. During
+a :func:`SDL_LockAudio`/:func:`SDL_UnlockAudio` or
+:func:`SDL_LockAudioDevice`/:func:`SDL_UnlockAudioDevice` pair, you can be
+guaranteed the callback function is not running. Do not call these from the
+callback function or you will cause deadlock.
+
+It is safe to lock the audio device multiple times, as long as you unlock it an
+equivalent number of times. The audio callback will not run until the device
+has been unlocked completely.
+
+.. function:: SDL_LockAudio()
+
+   This function is a legacy means of locking the audio device. Use
+   :func:`SDL_LockAudioDevice` instead.
+
+.. function:: SDL_UnlockAudio()
+
+   This function is a legacy means of unlocking the audio device. Use
+   :func:`SDL_UnlockAudioDevice` instead.

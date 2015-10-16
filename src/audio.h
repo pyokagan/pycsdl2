@@ -1679,6 +1679,50 @@ PyCSDL2_MixAudioFormat(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_LockAudio()
+ *
+ * \code{.py}
+ * SDL_LockAudio() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LockAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_LockAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_UnlockAudio()
+ *
+ * \code{.py}
+ * SDL_UnlockAudio() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UnlockAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_UnlockAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_CloseAudio()
  *
  * \code{.py}

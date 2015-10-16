@@ -1023,6 +1023,52 @@ class TestMixAudioFormat(unittest.TestCase):
                           AUDIO_S16SYS, 64, {})
 
 
+class TestLockAudio(unittest.TestCase):
+    "Tests for SDL_LockAudio()"
+
+    def setUp(self):
+        def callback(x, y, z):
+            return None
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        SDL_OpenAudio(self.desired, self.obtained)
+
+    def tearDown(self):
+        SDL_UnlockAudio()
+        SDL_CloseAudio()
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_LockAudio())
+
+
+class TestUnlockAudio(unittest.TestCase):
+    "Tests for SDL_UnlockAudio()"
+
+    def setUp(self):
+        def callback(x, y, z):
+            return None
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        SDL_OpenAudio(self.desired, self.obtained)
+
+    def tearDown(self):
+        SDL_CloseAudio()
+
+    def test_returns_none(self):
+        "Returns None"
+        SDL_LockAudio()
+        self.assertIsNone(SDL_UnlockAudio())
+
+
 class TestCloseAudio(unittest.TestCase):
     "Tests for SDL_CloseAudio()"
 
