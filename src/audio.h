@@ -1701,6 +1701,33 @@ PyCSDL2_LockAudio(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_LockAudioDevice()
+ *
+ * \code{.py}
+ * SDL_LockAudioDevice(dev: SDL_AudioDevice) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_LockAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_LockAudioDevice(dev->id);
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_UnlockAudio()
  *
  * \code{.py}
@@ -1717,6 +1744,33 @@ PyCSDL2_UnlockAudio(PyObject *module, PyObject *args, PyObject *kwds)
 
     Py_BEGIN_ALLOW_THREADS
     SDL_UnlockAudio();
+    Py_END_ALLOW_THREADS
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_UnlockAudioDevice()
+ *
+ * \code{.py}
+ * SDL_UnlockAudioDevice(dev: SDL_AudioDevice) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_UnlockAudioDevice(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_UnlockAudioDevice(dev->id);
     Py_END_ALLOW_THREADS
 
     Py_RETURN_NONE;

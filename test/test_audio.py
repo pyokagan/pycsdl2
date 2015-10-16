@@ -1046,6 +1046,34 @@ class TestLockAudio(unittest.TestCase):
         self.assertIsNone(SDL_LockAudio())
 
 
+class TestLockAudioDevice(unittest.TestCase):
+    "Tests for SDL_LockAudioDevice()"
+
+    def setUp(self):
+        def callback(x, y, z):
+            return None
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        self.dev = SDL_OpenAudioDevice(None, False, self.desired,
+                                       self.obtained, 0)
+
+    def tearDown(self):
+        SDL_UnlockAudioDevice(self.dev)
+        del self.dev
+
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_LockAudioDevice(self.dev))
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_LockAudioDevice, 42)
+
+
 class TestUnlockAudio(unittest.TestCase):
     "Tests for SDL_UnlockAudio()"
 
@@ -1067,6 +1095,34 @@ class TestUnlockAudio(unittest.TestCase):
         "Returns None"
         SDL_LockAudio()
         self.assertIsNone(SDL_UnlockAudio())
+
+
+class TestUnlockAudioDevice(unittest.TestCase):
+    "Tests for SDL_UnlockAudioDevice()"
+
+    def setUp(self):
+        def callback(x, y, z):
+            return None
+        if not has_audio:
+            raise unittest.SkipTest('No audio support')
+        self.desired = SDL_AudioSpec(freq=44100, format=AUDIO_S16SYS,
+                                     channels=1, samples=4096,
+                                     callback=callback)
+        self.obtained = SDL_AudioSpec()
+        self.dev = SDL_OpenAudioDevice(None, False, self.desired,
+                                       self.obtained, 0)
+
+    def tearDown(self):
+        del self.dev
+
+    def test_returns_none(self):
+        "Returns None"
+        SDL_LockAudioDevice(self.dev)
+        self.assertIsNone(SDL_UnlockAudioDevice(self.dev))
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_UnlockAudioDevice, 42)
 
 
 class TestCloseAudio(unittest.TestCase):

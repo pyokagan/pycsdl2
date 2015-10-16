@@ -489,6 +489,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "SDL_LockAudioDevice() instead.\n"
     },
 
+    {"SDL_LockAudioDevice",
+     (PyCFunction) PyCSDL2_LockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudioDevice(dev: SDL_AudioDevice) -> None\n"
+     "\n"
+     "Lock out the audio callback function for a specified audio device.\n"
+    },
+
     {"SDL_UnlockAudio",
      (PyCFunction) PyCSDL2_UnlockAudio,
      METH_VARARGS | METH_KEYWORDS,
@@ -496,6 +504,14 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "\n"
      "This function is a legacy means of unlocking the audio device. Use\n"
      "SDL_UnlockAudioDevice() instead.\n"
+    },
+
+    {"SDL_UnlockAudioDevice",
+     (PyCFunction) PyCSDL2_UnlockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudioDevice(dev: SDL_AudioDevice) -> None\n"
+     "\n"
+     "Unlock the audio callback function for a specified audio device.\n"
     },
 
     {"SDL_CloseAudio",

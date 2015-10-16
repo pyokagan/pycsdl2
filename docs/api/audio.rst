@@ -773,6 +773,20 @@ It is safe to lock the audio device multiple times, as long as you unlock it an
 equivalent number of times. The audio callback will not run until the device
 has been unlocked completely.
 
+.. function:: SDL_LockAudioDevice(dev)
+
+   Lock out the audio callback function for a specified audio device.
+
+   :param dev: The audio device to be locked.
+   :type dev: :class:`SDL_AudioDevice`
+
+.. function:: SDL_UnlockAudioDevice(dev)
+
+   Unlock the audio callback function for a specified audio device.
+
+   :param dev: The audio device to be unlocked.
+   :type dev: :class:`SDL_AudioDevice`
+
 .. function:: SDL_LockAudio()
 
    This function is a legacy means of locking the audio device. Use
