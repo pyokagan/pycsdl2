@@ -99,6 +99,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    bool(x & SDL_AUDIO_MASK_SIGNED)\n"
     },
 
+    {"SDL_AUDIO_ISINT",
+     (PyCFunction) PyCSDL2_AUDIO_ISINT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISINT(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is an integer format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISFLOAT(x)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,
