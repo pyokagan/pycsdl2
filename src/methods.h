@@ -73,6 +73,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    bool(x & SDL_AUDIO_MASK_DATATYPE)\n"
     },
 
+    {"SDL_AUDIO_ISBIGENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISBIGENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISBIGENDIAN(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a big endian format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    bool(x & SDL_AUDIO_MASK_ENDIAN)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,

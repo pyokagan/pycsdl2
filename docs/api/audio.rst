@@ -117,6 +117,17 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
    :returns: True if the audio format is a floating point format, False
              otherwise.
 
+.. function:: SDL_AUDIO_ISBIGENDIAN(x) -> bool
+
+   Query whether the audio format is a big endian format.
+
+   This is equivalent to the value of::
+
+      bool(x & SDL_AUDIO_MASK_ENDIAN)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a big endian format, False otherwise.
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:

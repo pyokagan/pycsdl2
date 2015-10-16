@@ -891,6 +891,25 @@ PyCSDL2_AUDIO_ISFLOAT(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_AUDIO_ISBIGENDIAN()
+ *
+ * \code{.py}
+ * SDL_AUDIO_ISBIGENDIAN(x: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_ISBIGENDIAN(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyBool_FromLong(SDL_AUDIO_ISBIGENDIAN(x));
+}
+
+/**
  * \brief Implements csdl2.SDL_GetNumAudioDrivers()
  *
  * \code{.py}
