@@ -703,3 +703,29 @@ Audio data conversion is done in 3 steps:
       This function will write the converted audio data to the buffer, and will
       set :attr:`SDL_AudioCVT.len_cvt` to the size in bytes of the converted
       audio data.
+
+Audio Mixing
+------------
+.. function:: SDL_MixAudio(dst, src, len, volume)
+
+   This function is a legacy means of mixing audio, and is equivalent to
+   calling::
+
+      SDL_MixAudioFormat(dst, src, format, len, volume)
+
+   where `format` is the obtained format of the audio device from the legacy
+   :func:`SDL_OpenAudio` function.
+
+   :param dst: The destination buffer for the mixed audio.
+   :type dst: buffer
+   :param src: The source audio buffer to be mixed in.
+   :type src: buffer
+   :param int len: The length of the source and destination buffers in bytes.
+   :param int volume: Ranges from 0 to 128, and should be set to
+                      :const:`SDL_MIX_MAXVOLUME` for full audio volume.
+
+   .. note::
+
+      This function requires the audio device to be open with
+      :func:`SDL_OpenAudio`, and will silently fail if the audio device is not
+      open.
