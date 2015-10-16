@@ -94,6 +94,17 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
 
    Bitmask of the bit storing the sample sign flag (bit 15).
 
+.. function:: SDL_AUDIO_BITSIZE(x) -> int
+
+   Query the sample bit size of the audio format.
+
+   This is equivalent to the value of::
+
+      x & SDL_AUDIO_MASK_BITSIZE
+
+   :param int x: The audio format integer.
+   :returns: The sample bit size of the audio format.
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:

@@ -48,6 +48,18 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* audio.h */
 
+    {"SDL_AUDIO_BITSIZE",
+     (PyCFunction) PyCSDL2_AUDIO_BITSIZE,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_BITSIZE(x: int) -> int\n"
+     "\n"
+     "Returns the sample bit size of the audio format `x`.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    x & SDL_AUDIO_MASK_BITSIZE\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,

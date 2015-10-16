@@ -373,6 +373,14 @@ class TestAudioDevice(unittest.TestCase):
         self.assertRaises(TypeError, type, 'testtype', (SDL_AudioDevice,), {})
 
 
+class TestAUDIO_BITSIZE(unittest.TestCase):
+    "Tests SDL_AUDIO_BITSIZE()"
+
+    def test_returns_int(self):
+        "Returns int"
+        self.assertIs(type(SDL_AUDIO_BITSIZE(42)), int)
+
+
 class TestGetNumAudioDrivers(unittest.TestCase):
     "Tests SDL_GetNumAudioDrivers()"
 

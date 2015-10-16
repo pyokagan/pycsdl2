@@ -853,6 +853,25 @@ static PyCSDL2_AudioDevice *PyCSDL2_GlobalAudioDevice;
 /** @} */
 
 /**
+ * \brief Implements csdl2.SDL_AUDIO_BITSIZE()
+ *
+ * \code{.py}
+ * SDL_AUDIO_BITSIZE(x: int) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_AUDIO_BITSIZE(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint16 x;
+    static char *kwlist[] = {"x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint16_UNIT, kwlist, &x))
+        return NULL;
+
+    return PyLong_FromUnsignedLong(SDL_AUDIO_BITSIZE(x));
+}
+
+/**
  * \brief Implements csdl2.SDL_GetNumAudioDrivers()
  *
  * \code{.py}
