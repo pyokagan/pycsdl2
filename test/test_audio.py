@@ -413,6 +413,14 @@ class TestAUDIO_ISINT(unittest.TestCase):
         self.assertIs(type(SDL_AUDIO_ISINT(42)), bool)
 
 
+class TestAUDIO_ISLITTLEENDIAN(unittest.TestCase):
+    "Tests SDL_AUDIO_ISLITTLEENDIAN()"
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISLITTLEENDIAN(42)), bool)
+
+
 class TestGetNumAudioDrivers(unittest.TestCase):
     "Tests SDL_GetNumAudioDrivers()"
 

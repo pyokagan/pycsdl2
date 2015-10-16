@@ -112,6 +112,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    not SDL_AUDIO_ISFLOAT(x)\n"
     },
 
+    {"SDL_AUDIO_ISLITTLEENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISLITTLEENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISLITTLEENDIAN(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a little endian format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISBIGENDIAN(x)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,

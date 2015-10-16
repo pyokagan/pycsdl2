@@ -150,6 +150,18 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
    :param int x: The audio format integer.
    :returns: True if the audio format is an integer format, False otherwise.
 
+.. function:: SDL_AUDIO_ISLITTLEENDIAN(x) -> bool
+
+   Query whether the audio format is a little endian fornmat.
+
+   This is equivalent to the value of::
+
+      not SDL_AUDIO_ISBIGENDIAN(x)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a little endian format, False
+             otherwise.
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:
