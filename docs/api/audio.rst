@@ -162,6 +162,17 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
    :returns: True if the audio format is a little endian format, False
              otherwise.
 
+.. function:: SDL_AUDIO_ISUNSIGNED(x) -> bool
+
+   Query whether the audio format is an unsigned format.
+
+   This is equivalent to the value of::
+
+      not SDL_AUDIO_ISSIGNED(x)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is an unsigned format, False otherwise.
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:

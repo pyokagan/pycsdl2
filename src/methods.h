@@ -125,6 +125,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    not SDL_AUDIO_ISBIGENDIAN(x)\n"
     },
 
+    {"SDL_AUDIO_ISUNSIGNED",
+     (PyCFunction) PyCSDL2_AUDIO_ISUNSIGNED,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISUNSIGNED(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format is an unsigned format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISSIGNED(x)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,
