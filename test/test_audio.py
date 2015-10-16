@@ -523,10 +523,7 @@ class TestOpenAudio(unittest.TestCase):
         self.cv = threading.Condition()
 
     def tearDown(self):
-        try:
-            SDL_CloseAudio()
-        except (RuntimeError, ValueError):
-            pass
+        SDL_CloseAudio()
 
     def test_returns_none(self):
         "Returns None"
@@ -671,10 +668,7 @@ class TestPauseAudio(unittest.TestCase):
         SDL_OpenAudio(self.desired, self.obtained)
 
     def tearDown(self):
-        try:
-            SDL_CloseAudio()
-        except (ValueError, RuntimeError):
-            pass
+        SDL_CloseAudio()
 
     def test_true(self):
         "SDL_PauseAudio(True) works"
@@ -685,9 +679,9 @@ class TestPauseAudio(unittest.TestCase):
         self.assertIs(SDL_PauseAudio(False), None)
 
     def test_closed(self):
-        "Raises ValueError when the audio device is not open"
+        "No-op when the audio device is not open"
         SDL_CloseAudio()
-        self.assertRaises(ValueError, SDL_PauseAudio, False)
+        self.assertIs(SDL_PauseAudio(False), None)
 
 
 class TestPauseAudioDevice(unittest.TestCase):
@@ -848,14 +842,17 @@ class TestCloseAudio(unittest.TestCase):
         self.obtained = SDL_AudioSpec()
         SDL_OpenAudio(self.desired, self.obtained)
 
+    def tearDown(self):
+        SDL_CloseAudio()
+
     def test_returns_none(self):
         "Returns None"
         self.assertIs(SDL_CloseAudio(), None)
 
     def test_closed(self):
-        "Raises ValueError when the SDL_AudioDevice has been closed"
+        "No-op when audio device has been closed"
         SDL_CloseAudio()
-        self.assertRaises(ValueError, SDL_CloseAudio)
+        SDL_CloseAudio()
 
 
 class TestCloseAudioDevice(unittest.TestCase):

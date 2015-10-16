@@ -1312,14 +1312,6 @@ PyCSDL2_PauseAudio(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "p", kwlist, &pause_on))
         return NULL;
 
-    if (!PyCSDL2_GlobalAudioDevice) {
-        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
-        return NULL;
-    }
-
-    if (!PyCSDL2_AudioDeviceValid(PyCSDL2_GlobalAudioDevice))
-        return NULL;
-
     Py_BEGIN_ALLOW_THREADS
     SDL_PauseAudio(pause_on);
     Py_END_ALLOW_THREADS
@@ -1487,10 +1479,8 @@ PyCSDL2_CloseAudio(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
         return NULL;
 
-    if (!PyCSDL2_GlobalAudioDevice) {
-        PyErr_SetString(PyExc_ValueError, "Audio device not opened");
-        return NULL;
-    }
+    if (!PyCSDL2_GlobalAudioDevice)
+        Py_RETURN_NONE;
 
     id = PyCSDL2_AudioDeviceDetach(PyCSDL2_GlobalAudioDevice);
     if (!id)
