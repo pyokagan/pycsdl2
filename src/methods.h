@@ -281,6 +281,15 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "sound.\n"
     },
 
+    {"SDL_GetAudioStatus",
+     (PyCFunction) PyCSDL2_GetAudioStatus,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioStatus() -> int\n"
+     "\n"
+     "Returns the playback status of the audio device, which is one of\n"
+     "SDL_AUDIO_STOPPED, SDL_AUDIO_PLAYING or SDL_AUDIO_PAUSED.\n"
+    },
+
     {"SDL_PauseAudio",
      (PyCFunction) PyCSDL2_PauseAudio,
      METH_VARARGS | METH_KEYWORDS,

@@ -441,6 +441,36 @@ callback to fill the audio buffer with audio data as needed.
 
    Shuts down audio processing and closes the audio device.
 
+Querying Playback Status
+------------------------
+An audio device can be in any one of these 3 states:
+
+.. data:: SDL_AUDIO_STOPPED
+
+   Audio device is stopped.
+
+.. data:: SDL_AUDIO_PLAYING
+
+   Audio device is playing.
+
+.. data:: SDL_AUDIO_PAUSED
+
+   Audio device is paused.
+
+:func:`SDL_GetAudioStatus` and :func:`SDL_GetAudioDeviceStatus` can be used to
+query the playback status of an audio device.
+
+.. function:: SDL_GetAudioStatus() -> int
+
+   Query the playback status of the audio device.
+
+   This function is a legacy means of querying the audio device. Use
+   :func:`SDL_GetAudioDeviceStatus` instead.
+
+   :returns: The playback status of the audio device, which is one of
+             :const:`SDL_AUDIO_STOPPED`, :const:`SDL_AUDIO_PLAYING` or
+             :const:`SDL_AUDIO_PAUSED`.
+
 Controlling Playback
 --------------------
 .. function:: SDL_PauseAudioDevice(dev, pause_on) -> None

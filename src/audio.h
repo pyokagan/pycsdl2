@@ -1297,6 +1297,29 @@ fail:
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetAudioStatus()
+ *
+ * \code{.py}
+ * SDL_GetAudioStatus() -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioStatus(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    SDL_AudioStatus ret;
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetAudioStatus();
+    Py_END_ALLOW_THREADS
+
+    return PyLong_FromLong(ret);
+}
+
+/**
  * \brief Implements csdl2.SDL_PauseAudio()
  *
  * \code{.py}
