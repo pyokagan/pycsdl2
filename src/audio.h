@@ -1320,6 +1320,34 @@ PyCSDL2_GetAudioStatus(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_GetAudioDeviceStatus()
+ *
+ * \code{.py}
+ * SDL_GetAudioDeviceStatus(dev: SDL_AudioDevice) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_GetAudioDeviceStatus(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioDevice *dev;
+    SDL_AudioStatus ret;
+    static char *kwlist[] = {"dev", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioDeviceType, &dev))
+        return NULL;
+
+    if (!PyCSDL2_AudioDeviceValid(dev))
+        return NULL;
+
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_GetAudioDeviceStatus(dev->id);
+    Py_END_ALLOW_THREADS
+
+    return PyLong_FromLong(ret);
+}
+
+/**
  * \brief Implements csdl2.SDL_PauseAudio()
  *
  * \code{.py}

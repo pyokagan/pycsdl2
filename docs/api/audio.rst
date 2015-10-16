@@ -460,6 +460,16 @@ An audio device can be in any one of these 3 states:
 :func:`SDL_GetAudioStatus` and :func:`SDL_GetAudioDeviceStatus` can be used to
 query the playback status of an audio device.
 
+.. function:: SDL_GetAudioDeviceStatus(dev) -> int
+
+   Query the playback status of the specified audio device.
+
+   :param dev: Audio device to query.
+   :type dev: :class:`SDL_AudioDevice`
+   :returns: The playback status of the specified audio device, which is one of
+             :const:`SDL_AUDIO_STOPPED`, :const:`SDL_AUDIO_PLAYING` or
+             :const:`SDL_AUDIO_PAUSED`.
+
 .. function:: SDL_GetAudioStatus() -> int
 
    Query the playback status of the audio device.
