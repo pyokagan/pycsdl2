@@ -362,6 +362,42 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "function as part of its destructor.\n"
     },
 
+    {"SDL_BuildAudioCVT",
+     (PyCFunction) PyCSDL2_BuildAudioCVT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_BuildAudioCVT(cvt: SDL_AudioCVT, src_format: int,\n"
+     "                  src_channels: int, src_rate: int, dst_format: int,\n"
+     "                  dst_channels: int, dst_rate: int) -> bool\n"
+     "\n"
+     "Initialize a SDL_AudioCVT structure for conversion.\n"
+     "\n"
+     "cvt\n"
+     "    A SDL_AudioCVT structure to be filled in with audio conversion\n"
+     "    information.\n"
+     "\n"
+     "src_format\n"
+     "    The source format of the audio data. One of the audio data format\n"
+     "    constants (AUDIO_*).\n"
+     "\n"
+     "src_channels\n"
+     "    The number of channels in the source.\n"
+     "\n"
+     "src_rate\n"
+     "    The frequency (sample-frames-per-second) of the source.\n"
+     "\n"
+     "dst_format\n"
+     "    The destination format of the audio data. One of the audio data\n"
+     "    format constants (AUDIO_*).\n"
+     "\n"
+     "dst_channels\n"
+     "    The number of channels in the destination.\n"
+     "\n"
+     "dst_rate\n"
+     "    The frequency (sample-frames-per-second) of the destination.\n"
+     "\n"
+     "Returns True if conversion is needed, False otherwise.\n"
+    },
+
     {"SDL_CloseAudio",
      (PyCFunction) PyCSDL2_CloseAudio,
      METH_VARARGS | METH_KEYWORDS,

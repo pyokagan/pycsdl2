@@ -173,6 +173,8 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
    :param int x: The audio format integer.
    :returns: True if the audio format is an unsigned format, False otherwise.
 
+.. _audio-data-format-values:
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:
@@ -650,3 +652,27 @@ Audio data conversion is done in 3 steps:
       converted audio data is shorter than the original,
       :attr:`SDL_AudioCVT.len_mult` will be 1. :attr:`SDL_AudioCVT.len_ratio`
       on the other hand will be a fractional number between 0 and 1.
+
+.. function:: SDL_BuildAudioCVT(cvt, src_format, src_channels, src_rate, dst_format, dst_channels, dst_rate) -> bool
+
+   Initialize a :class:`SDL_AudioCVT` structure for conversion.
+
+   :param cvt: An :class:`SDL_AudioCVT` structure to be filled in with audio
+               conversion information.
+   :type cvt: :class:`SDL_AudioCVT`
+   :param int src_format: The source format of the audio data. One of the
+                          :ref:`audio-data-format-values`.
+   :param int src_channels: The number of channels in the source.
+   :param int src_rate: The frequency (sample-frames-per-second) of the source.
+   :param int dst_format: The destination format of the audio data. One of the
+                          :ref:`audio-data-format-values`.
+   :param int dst_channels: The number of channels in the destination.
+   :param int dst_rate: The frequency (sample-frames-per-second) of the
+                        destination.
+   :returns: True if conversion is needed, False otherwise.
+
+   .. note::
+
+      This function will zero out every field of the :class:`SDL_AudioCVT`, so
+      it must be called before the application fills in the final buffer
+      information.

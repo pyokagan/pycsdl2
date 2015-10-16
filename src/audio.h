@@ -1515,6 +1515,42 @@ PyCSDL2_FreeWAV(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_BuildAudioCVT()
+ *
+ * \code{.py}
+ * SDL_BuildAudioCVT(cvt: SDL_AudioCVT, src_format: int, src_channels: int,
+ *                   src_rate: int, dst_format: int, dst_channels: int,
+ *                   dst_rate: int) -> bool
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_BuildAudioCVT(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *cvt;
+    Uint16 src_format, dst_format;
+    Uint8 src_channels, dst_channels;
+    int src_rate, dst_rate, ret;
+    static char *kwlist[] = {"cvt", "src_format", "src_channels", "src_rate",
+                             "dst_format", "dst_channels", "dst_rate", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "O!" Uint16_UNIT "bi" Uint16_UNIT "bi",
+                                     kwlist, &PyCSDL2_AudioCVTType, &cvt,
+                                     &src_format, &src_channels, &src_rate,
+                                     &dst_format, &dst_channels, &dst_rate))
+        return NULL;
+
+    PyCSDL2_AudioCVTClear(cvt);
+
+    ret = SDL_BuildAudioCVT(&cvt->cvt, src_format, src_channels, src_rate,
+                            dst_format, dst_channels, dst_rate);
+    if (ret < 0)
+        return PyCSDL2_RaiseSDLError();
+
+    return PyBool_FromLong(ret);
+}
+
+/**
  * \brief Implements csdl2.SDL_CloseAudio()
  *
  * \code{.py}

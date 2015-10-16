@@ -882,6 +882,26 @@ class TestFreeWAV(unittest.TestCase):
         self.assertRaises(ValueError, SDL_FreeWAV, self.buf)
 
 
+class TestBuildAudioCVT(unittest.TestCase):
+    "Tests for SDL_BuildAudioCVT()"
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_BuildAudioCVT(self.cvt, AUDIO_F32, 2, 48000,
+                                             AUDIO_S16, 2, 48000)), bool)
+
+    def test_clears_buf(self):
+        "Clears the buf field"
+        x = bytearray(1)
+        self.cvt.buf = x
+        self.assertIs(self.cvt.buf, x)
+        SDL_BuildAudioCVT(self.cvt, AUDIO_F32, 2, 48000, AUDIO_S16, 2, 48000)
+        self.assertIs(self.cvt.buf, None)
+
+
 class TestCloseAudio(unittest.TestCase):
     "Tests for SDL_CloseAudio()"
 
