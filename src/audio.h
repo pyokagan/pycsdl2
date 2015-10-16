@@ -1551,6 +1551,50 @@ PyCSDL2_BuildAudioCVT(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_ConvertAudio()
+ *
+ * \code{.py}
+ * SDL_ConvertAudio(cvt: SDL_AudioCVT) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_ConvertAudio(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    PyCSDL2_AudioCVT *cvt;
+    PyObject *buf_obj = NULL;
+    int ret;
+    static char *kwlist[] = {"cvt", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
+                                     &PyCSDL2_AudioCVTType, &cvt))
+        return NULL;
+
+    if (!cvt->buf.obj) {
+        PyErr_SetString(PyExc_ValueError, "SDL_AudioCVT has no buffer");
+        return NULL;
+    }
+
+    if (cvt->buf.len < cvt->cvt.len * cvt->cvt.len_mult) {
+        PyErr_SetString(PyExc_BufferError, "SDL_AudioCVT buffer must be at"
+                        " least len*len_mult bytes");
+        return NULL;
+    }
+
+    cvt->cvt.buf = cvt->buf.buf;
+
+    PyCSDL2_Set(buf_obj, cvt->buf.obj);
+    Py_BEGIN_ALLOW_THREADS
+    ret = SDL_ConvertAudio(&cvt->cvt);
+    Py_END_ALLOW_THREADS
+    PyCSDL2_Set(buf_obj, NULL);
+
+    if (ret)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_CloseAudio()
  *
  * \code{.py}

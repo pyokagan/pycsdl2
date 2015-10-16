@@ -676,3 +676,30 @@ Audio data conversion is done in 3 steps:
       This function will zero out every field of the :class:`SDL_AudioCVT`, so
       it must be called before the application fills in the final buffer
       information.
+
+.. function:: SDL_ConvertAudio(cvt)
+
+   Convert the audio data as specified by the :class:`SDL_AudioCVT` structure.
+
+   :param cvt: An :class:`SDL_AudioCVT` structure with the information required
+               for audio conversion.
+
+   .. note::
+
+      The :class:`SDL_AudioCVT` structure must first be initialized with
+      :func:`SDL_BuildAudioCVT`.
+
+      The application then needs to set the :class:`SDL_AudioCVT` structure's
+      :attr:`SDL_AudioCVT.buf` attribute to the audio buffer containing the
+      source audio data, and :attr:`SDL_AudioCVT.len` attribute to the size, in
+      bytes, of the source data.
+
+      This same buffer is used for data conversion, and will contain the
+      converted audio data after calling this function. The converted audio
+      data, or any of the intermediate conversion data, may be larger than the
+      source data, and thus the actual size of the buffer must be at least
+      ``len * len_mult`` bytes long.
+
+      This function will write the converted audio data to the buffer, and will
+      set :attr:`SDL_AudioCVT.len_cvt` to the size in bytes of the converted
+      audio data.

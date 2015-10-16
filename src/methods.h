@@ -398,6 +398,32 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "Returns True if conversion is needed, False otherwise.\n"
     },
 
+    {"SDL_ConvertAudio",
+     (PyCFunction) PyCSDL2_ConvertAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_ConvertAudio(cvt: SDL_AudioCVT) -> None\n"
+     "\n"
+     "Convert the audio data as specified by the SDL_AudioCVT structure,\n"
+     "with the following requirements:\n"
+     "\n"
+     "The SDL_AudioCVT structure must first be initialized with\n"
+     "SDL_BuildAudioCVT().\n"
+     "\n"
+     "The application then needs to set the SDL_AudioCVT structure's `buf`\n"
+     "attribute to the audio buffer containing the source audio data, and\n"
+     "`len` to the size, in bytes, of the source data.\n"
+     "\n"
+     "This same buffer is used for data conversion, and will contain the\n"
+     "converted audio data after calling this function. The converted audio\n"
+     "data, or any of the intermediate conversion data, may be larger than\n"
+     "the source data, and thus the actual size of the buffer must be\n"
+     "at least ``len * len_mult`` bytes long.\n"
+     "\n"
+     "SDL_ConvertAudio() will write the converted audio data to the buffer,\n"
+     "and will set `len_cvt` to the size in bytes of the converted audio\n"
+     "data.\n"
+    },
+
     {"SDL_CloseAudio",
      (PyCFunction) PyCSDL2_CloseAudio,
      METH_VARARGS | METH_KEYWORDS,

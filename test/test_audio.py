@@ -902,6 +902,31 @@ class TestBuildAudioCVT(unittest.TestCase):
         self.assertIs(self.cvt.buf, None)
 
 
+class TestConvertAudio(unittest.TestCase):
+    "Tests for SDL_ConvertAudio()"
+
+    def setUp(self):
+        self.cvt = SDL_AudioCVT()
+        SDL_BuildAudioCVT(self.cvt, AUDIO_S16SYS, 1, 1, AUDIO_S32SYS, 1, 1)
+
+    def test_returns_none(self):
+        "Returns None"
+        self.cvt.len = 2
+        self.cvt.buf = bytearray(self.cvt.len * self.cvt.len_mult)
+        self.assertIs(SDL_ConvertAudio(self.cvt), None)
+
+    def test_no_buf(self):
+        "Raises ValueError if the SDL_AudioCVT has no buf"
+        self.assertIs(self.cvt.buf, None)
+        self.assertRaises(ValueError, SDL_ConvertAudio, self.cvt)
+
+    def test_buf_invalid_size(self):
+        "Raises BufferError if the SDL_AudioCVT buf has wrong size"
+        self.cvt.len = 2
+        self.cvt.buf = bytearray(1)
+        self.assertRaises(BufferError, SDL_ConvertAudio, self.cvt)
+
+
 class TestCloseAudio(unittest.TestCase):
     "Tests for SDL_CloseAudio()"
 
