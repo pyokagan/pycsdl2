@@ -706,6 +706,33 @@ Audio data conversion is done in 3 steps:
 
 Audio Mixing
 ------------
+.. function:: SDL_MixAudioFormat(dst, src, len, volume)
+
+   Mix audio data in a specified format.
+
+   This takes a source audio buffer, and mixes it into the destination audio
+   buffer, performing addition, volume adjustment, and overflow clipping.
+
+   This is provided for convenience -- you can mix your own audio data.
+
+   :param dst: The destination for the mixed audio.
+   :type dst: buffer
+   :param src: The source audio data to be mixed in.
+   :type src: buffer
+   :param int format: The audio format. One of the
+                      :ref:`audio-data-format-values`.
+   :param int len: The length of the source and destination buffers in bytes.
+   :param int volume: Ranges from 0 to 128, and should be set to
+                      :const:`SDL_MIX_MAXVOLUME` for full audio volume.
+
+   .. note::
+
+      Do not use this function for mixing together more than two streams of
+      sample data. The output from repeated application of this function may be
+      distorted by clipping, because there is no accumulator with greater range
+      than the input. Use mixing functions from SDL_mixer, OpenAL or write your
+      own mixer instead.
+
 .. function:: SDL_MixAudio(dst, src, len, volume)
 
    This function is a legacy means of mixing audio, and is equivalent to
@@ -729,3 +756,7 @@ Audio Mixing
       This function requires the audio device to be open with
       :func:`SDL_OpenAudio`, and will silently fail if the audio device is not
       open.
+
+.. data:: SDL_MIX_MAXVOLUME
+
+   The maximum volume for mixing.

@@ -451,6 +451,35 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    for full audio volume.\n"
     },
 
+    {"SDL_MixAudioFormat",
+     (PyCFunction) PyCSDL2_MixAudioFormat,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MixAudioFormat(dst: buffer, src: buffer, format: int, len: int,\n"
+     "                   volume: int) -> None\n"
+     "\n"
+     "Mix audio data in a specified format.\n"
+     "\n"
+     "This takes a source audio buffer, and mixes it into the destination\n"
+     "audio buffer, performing addition, volume adjustment, and overflow\n"
+     "clipping.\n"
+     "\n"
+     "dst\n"
+     "    The destination for the mixed audio.\n"
+     "\n"
+     "src\n"
+     "    The source audio data to be mixed in.\n"
+     "\n"
+     "format\n"
+     "    The audio format. One of the audio data format constants.(AUDIO_*)\n"
+     "\n"
+     "len\n"
+     "    The length of the source and destination buffers in bytes.\n"
+     "\n"
+     "volume\n"
+     "    Ranges from 0 to 128, and should be set to SDL_MIX_MAXVOLUME\n"
+     "    for full audio volume.\n"
+    },
+
     {"SDL_CloseAudio",
      (PyCFunction) PyCSDL2_CloseAudio,
      METH_VARARGS | METH_KEYWORDS,

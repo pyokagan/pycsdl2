@@ -978,6 +978,51 @@ class TestMixAudio(unittest.TestCase):
         self.assertRaises(TypeError, SDL_MixAudio, dst, src, 64, {})
 
 
+class TestMixAudioFormat(unittest.TestCase):
+    "Tests for SDL_MixAudioFormat()"
+
+    def test_returns_none(self):
+        "Returns None"
+        src = bytes(64)
+        dst = bytearray(64)
+        self.assertIsNone(SDL_MixAudioFormat(dst, src, AUDIO_S16SYS, 64, 64))
+
+    def test_src_invalid_size(self):
+        "Raises BufferError if src has invalid size"
+        src = bytes(63)
+        dst = bytearray(64)
+        self.assertRaises(BufferError, SDL_MixAudioFormat, dst, src,
+                          AUDIO_S16SYS, 64, 64)
+
+    def test_dst_invalid_size(self):
+        "Raises BufferError if dst has invalid size"
+        src = bytes(64)
+        dst = bytearray(63)
+        self.assertRaises(BufferError, SDL_MixAudioFormat, dst, src,
+                          AUDIO_S16SYS, 64, 64)
+
+    def test_dst_readonly(self):
+        "Raises TypeError if dst is a readonly buffer"
+        src = bytes(64)
+        dst = bytes(64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, dst, src,
+                          AUDIO_S16SYS, 64, 64)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        src = bytes(64)
+        dst = bytearray(64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, 42, src, AUDIO_S16SYS,
+                          64, 64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, dst, 42, AUDIO_S16SYS,
+                          64, 64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, dst, src, {}, 64, 64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, dst, src,
+                          AUDIO_S16SYS, {}, 64)
+        self.assertRaises(TypeError, SDL_MixAudioFormat, dst, src,
+                          AUDIO_S16SYS, 64, {})
+
+
 class TestCloseAudio(unittest.TestCase):
     "Tests for SDL_CloseAudio()"
 

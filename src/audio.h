@@ -1635,6 +1635,50 @@ PyCSDL2_MixAudio(PyObject *module, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * \brief Implements csdl2.SDL_MixAudioFormat()
+ *
+ * \code{.py}
+ * SDL_MixAudioFormat(dst: buffer, src: buffer, format: int, len: int,
+ *                    volume: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_MixAudioFormat(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Py_buffer dst, src;
+    Uint16 format;
+    Uint32 len;
+    int volume;
+    static char *kwlist[] = {"dst", "src", "format", "len", "volume", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds,
+                                     "w*y*" Uint16_UNIT Uint32_UNIT "i",
+                                     kwlist, &dst, &src, &format, &len,
+                                     &volume))
+        return NULL;
+
+    if ((size_t)src.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("src", len, src.len);
+    }
+
+    if ((size_t)dst.len < len) {
+        PyBuffer_Release(&src);
+        PyBuffer_Release(&dst);
+        return PyCSDL2_RaiseBufferSizeError("dst", len, dst.len);
+    }
+
+    Py_BEGIN_ALLOW_THREADS
+    SDL_MixAudioFormat(dst.buf, src.buf, format, len, volume);
+    Py_END_ALLOW_THREADS
+
+    PyBuffer_Release(&src);
+    PyBuffer_Release(&dst);
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Implements csdl2.SDL_CloseAudio()
  *
  * \code{.py}
