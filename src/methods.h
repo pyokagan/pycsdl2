@@ -60,6 +60,19 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "    x & SDL_AUDIO_MASK_BITSIZE\n"
     },
 
+    {"SDL_AUDIO_ISFLOAT",
+     (PyCFunction) PyCSDL2_AUDIO_ISFLOAT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISFLOAT(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a floating point format,\n"
+     "False otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    bool(x & SDL_AUDIO_MASK_DATATYPE)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,

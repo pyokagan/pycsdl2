@@ -105,6 +105,18 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
    :param int x: The audio format integer.
    :returns: The sample bit size of the audio format.
 
+.. function:: SDL_AUDIO_ISFLOAT(x) -> bool
+
+   Query whether the audio format is a floating point format.
+
+   This is equivalent to the value of::
+
+      bool(x & SDL_AUDIO_MASK_DATATYPE)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a floating point format, False
+             otherwise.
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:

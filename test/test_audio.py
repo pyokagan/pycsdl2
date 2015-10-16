@@ -381,6 +381,14 @@ class TestAUDIO_BITSIZE(unittest.TestCase):
         self.assertIs(type(SDL_AUDIO_BITSIZE(42)), int)
 
 
+class TestAUDIO_ISFLOAT(unittest.TestCase):
+    "Tests SDL_AUDIO_ISFLOAT()"
+
+    def test_returns_bool(self):
+        "Returns bool"
+        self.assertIs(type(SDL_AUDIO_ISFLOAT(42)), bool)
+
+
 class TestGetNumAudioDrivers(unittest.TestCase):
     "Tests SDL_GetNumAudioDrivers()"
 
