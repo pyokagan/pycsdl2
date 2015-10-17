@@ -3,6 +3,7 @@ import distutils.util
 import os.path
 import sys
 import unittest
+import atexit
 
 
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +18,11 @@ if __name__ == '__main__':
 from csdl2 import *  # noqa
 
 
+atexit.register(SDL_Quit)
+
+
 class TestInitConstants(unittest.TestCase):
-    """Tests for the availability of constants and their values in SDL.h"""
+    "Tests for the availability of constants and their values in SDL.h"
 
     def test_SDL_INIT_TIMER(self):
         self.assertEqual(SDL_INIT_TIMER, 0x00000001)
@@ -48,35 +52,39 @@ class TestInitConstants(unittest.TestCase):
         self.assertEqual(SDL_INIT_EVERYTHING, 29233)
 
 
-class TestSDL_Init(unittest.TestCase):
-    """Tests SDL_Init()"""
+class TestInit(unittest.TestCase):
+    "Tests SDL_Init()"
 
-    def test_SDL_INIT_TIMER(self):
-        self.assertIs(SDL_Init(SDL_INIT_TIMER), None)
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_Init(SDL_INIT_EVENTS))
 
-    def test_SDL_INIT_AUDIO(self):
-        self.assertIs(SDL_Init(SDL_INIT_AUDIO), None)
 
-    def test_SDL_INIT_VIDEO(self):
-        self.assertIs(SDL_Init(SDL_INIT_VIDEO), None)
+class TestInitSubSystem(unittest.TestCase):
+    "Tests SDL_InitSubSystem()"
 
-    def test_SDL_INIT_JOYSTICK(self):
-        self.assertIs(SDL_Init(SDL_INIT_JOYSTICK), None)
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_InitSubSystem(SDL_INIT_EVENTS))
 
-    def test_SDL_INIT_HAPTIC(self):
-        self.assertIs(SDL_Init(SDL_INIT_HAPTIC), None)
 
-    def test_SDL_INIT_GAMECONTROLLER(self):
-        self.assertIs(SDL_Init(SDL_INIT_GAMECONTROLLER), None)
+class TestQuitSubSystem(unittest.TestCase):
+    "Tests SDL_QuitSubSystem()"
 
-    def test_SDL_INIT_EVENTS(self):
-        self.assertIs(SDL_Init(SDL_INIT_EVENTS), None)
+    def setUp(self):
+        SDL_InitSubSystem(SDL_INIT_EVENTS)
 
-    def test_SDL_INIT_NOPARACHUTE(self):
-        self.assertIs(SDL_Init(SDL_INIT_NOPARACHUTE), None)
+    def test_returns_none(self):
+        "Returns None"
+        self.assertIsNone(SDL_QuitSubSystem(SDL_INIT_EVENTS))
 
-    def test_SDL_INIT_EVERYTHING(self):
-        self.assertIs(SDL_Init(SDL_INIT_EVERYTHING), None)
+
+class TestWasInit(unittest.TestCase):
+    "Tests SDL_WasInit()"
+
+    def test_returns_int(self):
+        "Returns an int"
+        self.assertIs(type(SDL_WasInit(0)), int)
 
 
 if __name__ == '__main__':

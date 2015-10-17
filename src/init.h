@@ -19,7 +19,7 @@
  *     3. This notice may not be removed or altered from any source
  *        distribution.
  */
-/*!
+/**
  * \file init.h
  * \brief Bindings for SDL.h
  *
@@ -34,27 +34,106 @@
 #include "error.h"
 
 /**
- * \brief Binding for SDL_Init().
+ * \brief Implements csdl2.SDL_Init()
  *
- * Implements the following Python function signature:
- * \code
- * SDL_Init(flags) -> None
+ * \code{.py}
+ * SDL_Init(flags: int) -> None
  * \endcode
- *
- * If SDL_Init() returns non-zero, an exception is raised with
- * PyCSDL2_RaiseSDLError().
- *
- * \returns Py_None on success, NULL if an exception occurred.
  */
 static PyObject *
-PyCSDL2_Init(PyObject *self, PyObject *args, PyObject *kwds)
+PyCSDL2_Init(PyObject *module, PyObject *args, PyObject *kwds)
 {
     Uint32 flags;
     static char *kwlist[] = {"flags", NULL};
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
         return NULL;
-    if (SDL_Init(flags))
+
+    if (SDL_Init(flags) < 0)
         return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_InitSubSystem()
+ *
+ * \code{.py}
+ * SDL_InitSubSystem(flags: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_InitSubSystem(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+
+    if (SDL_InitSubSystem(flags) < 0)
+        return PyCSDL2_RaiseSDLError();
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_QuitSubSystem()
+ *
+ * \code{.py}
+ * SDL_QuitSubSystem(flags: int) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_QuitSubSystem(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+
+    SDL_QuitSubSystem(flags);
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * \brief Implements csdl2.SDL_WasInit()
+ *
+ * \code{.py}
+ * SDL_WasInit(flags: int) -> int
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_WasInit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    Uint32 flags;
+    static char *kwlist[] = {"flags", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, Uint32_UNIT, kwlist, &flags))
+        return NULL;
+
+    return PyLong_FromUnsignedLong(SDL_WasInit(flags));
+}
+
+/**
+ * \brief Implements csdl2.SDL_Quit()
+ *
+ * \code{.py}
+ * SDL_Quit() -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2_Quit(PyObject *module, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "", kwlist))
+        return NULL;
+
+    SDL_Quit();
+
     Py_RETURN_NONE;
 }
 
