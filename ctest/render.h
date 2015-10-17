@@ -112,6 +112,34 @@ PyCSDL2Test_Renderer(PyObject *module, PyObject *args)
 }
 
 /**
+ * \brief Creates a SDL_Renderer, but does not return it.
+ *
+ * \code{.py}
+ * renderer_secret(window: SDL_Window) -> None
+ * \endcode
+ */
+static PyObject *
+PyCSDL2Test_RendererSecret(PyObject *module, PyObject *args)
+{
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+
+    if (!PyArg_ParseTuple(args, "O&", PyCSDL2_WindowPtr, &window))
+        return NULL;
+
+    /*
+     * NOTE: We will leak the SDL_Renderer. It's all for science though!
+     */
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    if (!renderer) {
+        PyErr_SetString(PyExc_RuntimeError, SDL_GetError());
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+/**
  * \brief Sets the render draw color of the SDL_Renderer to white.
  *
  * \code{.py}

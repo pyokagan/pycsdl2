@@ -331,6 +331,18 @@ class TestGetRenderer(unittest.TestCase):
         SDL_DestroyWindow(self.win)
         self.assertRaises(ValueError, SDL_GetRenderer, self.win)
 
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GetRenderer, 42)
+
+    def test_unmanaged(self):
+        "Returns a void ptr if the renderer is not managed by csdl2"
+        SDL_DestroyRenderer(self.rdr)
+        _csdl2test.renderer_secret(self.win)
+        x = SDL_GetRenderer(self.win)
+        self.assertIsNotNone(x)
+        self.assertIsNot(type(x), SDL_Renderer)
+
 
 class TestGetRendererInfo(unittest.TestCase):
     "Tests SDL_GetRendererInfo()"

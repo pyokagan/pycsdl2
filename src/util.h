@@ -404,6 +404,113 @@ PyCSDL2_LongAsSint64(PyObject *obj, Sint64 *out)
 }
 
 /**
+ * \defgroup ptrobjmap Pointer to object dict mapping
+ *
+ * @{
+ */
+
+/**
+ * \brief Initializes a new PyCSDL2_PtrMap instance.
+ */
+static PyObject *
+PyCSDL2_PtrMapCreate(void)
+{
+    return PyDict_New();
+}
+
+/**
+ * \brief Returns object from the ptr map which has the ptr key.
+ *
+ * \returns borrowed reference to the object, or NULL if there is no such key.
+ */
+static PyObject *
+PyCSDL2_PtrMapGetItem(PyObject *ptrmap, void *key)
+{
+    PyObject *key_obj;
+    PyObject *weakref_obj;
+    PyObject *value;
+
+    key_obj = PyLong_FromVoidPtr(key);
+    if (!key_obj) {
+        PyErr_Clear();
+        return NULL;
+    }
+
+    weakref_obj = PyDict_GetItem(ptrmap, key_obj); /* borrowed reference */
+    Py_DECREF(key_obj);
+
+    if (!weakref_obj)
+        return NULL; /* item not found (but exception not set) */
+
+    value = PyWeakref_GetObject(weakref_obj); /* borrowed reference */
+    if (!value) {
+        PyErr_Clear();
+        return NULL;
+    }
+
+    return value;
+}
+
+/**
+ * \brief Inserts a weak reference to an object with a key.
+ *
+ * \returns 0 on success, -1 on failure.
+ */
+static int
+PyCSDL2_PtrMapSetItem(PyObject *ptrmap, void *key, PyObject *value)
+{
+    PyObject *key_obj = NULL;
+    PyObject *weakref_obj = NULL;
+
+    key_obj = PyLong_FromVoidPtr(key);
+    if (!key_obj)
+        goto fail;
+
+    weakref_obj = PyWeakref_NewRef(value, NULL);
+    if (!weakref_obj)
+        goto fail;
+
+    if (PyDict_SetItem(ptrmap, key_obj, weakref_obj) < 0)
+        goto fail;
+
+    Py_DECREF(weakref_obj);
+    Py_DECREF(key_obj);
+    return 0;
+
+fail:
+    Py_XDECREF(weakref_obj);
+    Py_XDECREF(key_obj);
+    return -1;
+
+}
+
+/**
+ * \brief Removes entry from ptrmap with key.
+ */
+static void
+PyCSDL2_PtrMapDelItem(PyObject *ptrmap, void *key)
+{
+    PyObject *key_obj;
+
+    key_obj = PyLong_FromVoidPtr(key);
+    if (!key_obj) {
+        PyErr_Clear();
+        return;
+    }
+
+    if (PyDict_DelItem(ptrmap, key_obj) < 0) {
+        Py_DECREF(key_obj);
+        PyErr_Clear();
+        return;
+    }
+
+    Py_DECREF(key_obj);
+    return;
+}
+
+/** @} */
+
+/**
  * \defgroup ctype C Type Generic utility functions
  *
  * These functions take a PyCSDL2_CType as an argument, allowing callers to

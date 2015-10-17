@@ -167,6 +167,12 @@ static PyMethodDef PyCSDL2Test_Methods[] = {
      "renderer(deftarget: object) -> SDL_Renderer"
     },
 
+    {"renderer_secret",
+     PyCSDL2Test_RendererSecret,
+     METH_VARARGS,
+     "renderer_secret(surface: SDL_Surface) -> None"
+    },
+
     {"renderer_set_draw_color",
      PyCSDL2Test_RendererSetDrawColor,
      METH_VARARGS,

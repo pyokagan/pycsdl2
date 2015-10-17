@@ -535,6 +535,11 @@ typedef struct PyCSDL2_Renderer {
     PyObject *deftarget;
 } PyCSDL2_Renderer;
 
+/**
+ * \brief dict of SDL_Renderer pointers to PyCSDL2_Renderer objects.
+ */
+static PyObject *PyCSDL2_RendererDict;
+
 /** \brief Traversal function for PyCSDL2_RendererType */
 static int
 PyCSDL2_RendererTraverse(PyCSDL2_Renderer *self, visitproc visit, void *arg)
@@ -557,8 +562,10 @@ PyCSDL2_RendererDealloc(PyCSDL2_Renderer *self)
 {
     PyCSDL2_RendererClear(self);
     PyObject_ClearWeakRefs((PyObject*) self);
-    if (self->renderer)
+    if (self->renderer) {
+        PyCSDL2_PtrMapDelItem(PyCSDL2_RendererDict, self->renderer);
         SDL_DestroyRenderer(self->renderer);
+    }
     Py_TYPE(self)->tp_free((PyObject*) self);
 }
 
@@ -637,80 +644,6 @@ PyCSDL2_RendererValid(PyCSDL2_Renderer *renderer)
 }
 
 /**
- * \brief Returns the window's renderer.
- *
- * \param window Window
- * \returns A borrowed reference to the PyCSDL2_Renderer of the window, or
- *          Py_None if the window has no renderer. Otherwise, NULL if an
- *          exception occurred.
- */
-static PyObject *
-PyCSDL2_WindowGetRenderer(PyCSDL2_Window *window)
-{
-    PyObject *obj;
-
-    if (!PyCSDL2_Assert(window))
-        return NULL;
-
-    if (!window->renderer)
-        return Py_None;
-
-    if (!PyWeakref_CheckRef(window->renderer)) {
-        PyErr_SetString(PyExc_AssertionError,
-                        "window->renderer is not a weakref");
-        return NULL;
-    }
-
-    obj = PyWeakref_GetObject(window->renderer);
-    if (!obj)
-        return NULL;
-
-    if (obj == Py_None) {
-        Py_CLEAR(window->renderer);
-        return Py_None;
-    }
-
-    if (!PyCSDL2_Assert(Py_TYPE(obj) == &PyCSDL2_RendererType))
-        return NULL;
-
-    if (!((PyCSDL2_Renderer*)obj)->renderer) {
-        Py_CLEAR(window->renderer);
-        return Py_None;
-    }
-
-    return obj;
-}
-
-/**
- * \brief Sets the window's renderer.
- */
-static int
-PyCSDL2_WindowSetRenderer(PyCSDL2_Window *window, PyCSDL2_Renderer *renderer)
-{
-    PyObject *obj, *ref;
-
-    if (!PyCSDL2_Assert(window) || !PyCSDL2_Assert(renderer))
-        return -1;
-
-    obj = PyCSDL2_WindowGetRenderer(window);
-    if (!obj)
-        return -1;
-
-    if (obj != Py_None) {
-        PyErr_SetString(PyExc_AssertionError, "window already has a renderer");
-        return -1;
-    }
-
-    ref = PyWeakref_NewRef((PyObject*)renderer, NULL);
-    if (!ref)
-        return -1;
-
-    window->renderer = ref;
-
-    return 0;
-}
-
-/**
  * \brief Creates an instance of PyCSDL2_RendererType
  *
  * \param renderer SDL_Renderer to manage. The new instance will take over
@@ -721,8 +654,9 @@ PyCSDL2_WindowSetRenderer(PyCSDL2_Window *window, PyCSDL2_Renderer *renderer)
 static PyObject *
 PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
 {
-    PyCSDL2_Renderer *self;
+    PyCSDL2_Renderer *self = NULL;
     PyTypeObject *type = &PyCSDL2_RendererType;
+    PyObject *value; /* borrowed ref */
 
     if (!PyCSDL2_Assert(renderer))
         return NULL;
@@ -734,16 +668,20 @@ PyCSDL2_RendererCreate(SDL_Renderer *renderer, PyObject *deftarget)
                         Py_TYPE(deftarget) == &PyCSDL2_SurfaceType))
         return NULL;
 
-    if (!(self = (PyCSDL2_Renderer*) type->tp_alloc(type, 0)))
+    value = PyCSDL2_PtrMapGetItem(PyCSDL2_RendererDict, renderer); /* borrowed ref */
+    if (value)
+        return PyCSDL2_Get(value);
+
+    self = (PyCSDL2_Renderer *)type->tp_alloc(type, 0); /* new ref */
+    if (!self)
         return NULL;
+
     self->renderer = renderer;
     PyCSDL2_Set(self->deftarget, deftarget);
 
-    if (Py_TYPE(deftarget) == &PyCSDL2_WindowType) {
-        if (PyCSDL2_WindowSetRenderer((PyCSDL2_Window*)deftarget, self)) {
-            Py_DECREF(self);
-            return NULL;
-        }
+    if (PyCSDL2_PtrMapSetItem(PyCSDL2_RendererDict, renderer, (PyObject *)self) < 0) {
+        Py_DECREF(self);
+        return NULL;
     }
 
     return (PyObject*)self;
@@ -805,9 +743,7 @@ PyCSDL2_TextureDealloc(PyCSDL2_Texture *self)
     Py_CLEAR(self->pixels);
     PyObject_ClearWeakRefs((PyObject*) self);
     if (self->texture) {
-        PyObject *key = PyLong_FromVoidPtr(self->texture);
-        if (key)
-            PyDict_DelItem(PyCSDL2_TextureDict, key);
+        PyCSDL2_PtrMapDelItem(PyCSDL2_TextureDict, self->texture);
         if (self->renderer && self->renderer->renderer &&
             SDL_GetRenderTarget(self->renderer->renderer) == self->texture) {
             SDL_SetRenderTarget(self->renderer->renderer, NULL);
@@ -904,14 +840,17 @@ PyCSDL2_TextureCreate(SDL_Texture *texture, PyObject *renderer)
     PyCSDL2_Texture *self = NULL;
     PyCSDL2_Renderer *rdr = (PyCSDL2_Renderer*)renderer;
     PyTypeObject *type = &PyCSDL2_TextureType;
-    PyObject *key = NULL, *value = NULL;
-    int contains;
+    PyObject *value; /* borrowed ref */
 
     if (!PyCSDL2_Assert(texture) || !PyCSDL2_Assert(renderer))
         return NULL;
 
     if (!PyCSDL2_RendererValid(rdr))
         return NULL;
+
+    value = PyCSDL2_PtrMapGetItem(PyCSDL2_TextureDict, texture); /* borrowed ref */
+    if (value)
+        return PyCSDL2_Get(value);
 
     self = (PyCSDL2_Texture*) type->tp_alloc(type, 0);
     if (!self)
@@ -920,34 +859,12 @@ PyCSDL2_TextureCreate(SDL_Texture *texture, PyObject *renderer)
     self->texture = texture;
     PyCSDL2_Set(self->renderer, rdr);
 
-    key = PyLong_FromVoidPtr(texture);
-    if (!key)
-        goto fail;
-
-    contains = PyDict_Contains(PyCSDL2_TextureDict, key);
-    if (contains < 0)
-        goto fail;
-
-    if (contains) {
-        PyErr_SetString(PyExc_AssertionError,
-                        "SDL_Texture is already managed by csdl2");
-        goto fail;
+    if (PyCSDL2_PtrMapSetItem(PyCSDL2_TextureDict, texture, (PyObject *)self) < 0) {
+        Py_DECREF(self);
+        return NULL;
     }
 
-    value = PyWeakref_NewRef((PyObject*)self, NULL);
-    if (!value)
-        goto fail;
-
-    if (PyDict_SetItem(PyCSDL2_TextureDict, key, value))
-        goto fail;
-
     return (PyObject*)self;
-
-fail:
-    Py_XDECREF(self);
-    Py_XDECREF(key);
-    Py_XDECREF(value);
-    return NULL;
 }
 
 /**
@@ -981,17 +898,10 @@ static int
 PyCSDL2_TextureDetach(PyCSDL2_Texture *self, SDL_Texture **texture,
                       PyCSDL2_Renderer **renderer)
 {
-    PyObject *key;
-
     if (!PyCSDL2_TextureValid(self, 0))
         return 0;
 
-    key = PyLong_FromVoidPtr(self->texture);
-    if (!key)
-        return 0;
-
-    if (PyDict_DelItem(PyCSDL2_TextureDict, key))
-        return 0;
+    PyCSDL2_PtrMapDelItem(PyCSDL2_TextureDict, self->texture);
 
     if (self->renderer && self->renderer->renderer &&
         SDL_GetRenderTarget(self->renderer->renderer) == self->texture)
@@ -1301,22 +1211,24 @@ PyCSDL2_CreateSoftwareRenderer(PyObject *module, PyObject *args,
 static PyObject *
 PyCSDL2_GetRenderer(PyObject *module, PyObject *args, PyObject *kwds)
 {
-    PyCSDL2_Window *window;
-    PyObject *renderer;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    PyObject *value; /* borrowed ref */
     static char *kwlist[] = {"window", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O!", kwlist,
-                                     &PyCSDL2_WindowType, &window))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+                                     PyCSDL2_WindowPtr, &window))
         return NULL;
 
-    if (!PyCSDL2_WindowValid((PyCSDL2_Window*)window))
-        return NULL;
-
-    renderer = PyCSDL2_WindowGetRenderer(window);
+    renderer = SDL_GetRenderer(window);
     if (!renderer)
-        return NULL;
+        Py_RETURN_NONE;
 
-    return PyCSDL2_Get(renderer);
+    value = PyCSDL2_PtrMapGetItem(PyCSDL2_RendererDict, renderer); /* borrowed ref */
+    if (!value)
+        return PyCSDL2_VoidPtrCreate(renderer);
+
+    return PyCSDL2_Get(value);
 }
 
 /**
@@ -1899,7 +1811,7 @@ PyCSDL2_GetRenderTarget(PyObject *module, PyObject *args, PyObject *kwds)
 {
     SDL_Renderer *renderer;
     SDL_Texture *texture;
-    PyObject *key, *value;
+    PyObject *value; /* borrowed ref */
     static char *kwlist[] = {"renderer", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
@@ -1910,17 +1822,9 @@ PyCSDL2_GetRenderTarget(PyObject *module, PyObject *args, PyObject *kwds)
     if (!texture)
         Py_RETURN_NONE;
 
-    key = PyLong_FromVoidPtr(texture);
-    if (!key)
-        return NULL;
-
-    value = PyDict_GetItem(PyCSDL2_TextureDict, key);
+    value = PyCSDL2_PtrMapGetItem(PyCSDL2_TextureDict, texture); /* borrowed ref */
     if (!value)
         return PyCSDL2_VoidPtrCreate(texture);
-
-    value = PyWeakref_GetObject(value);
-    if (!value)
-        return NULL;
 
     return PyCSDL2_Get(value);
 }
@@ -2727,6 +2631,7 @@ PyCSDL2_DestroyRenderer(PyObject *module, PyObject *args, PyObject *kwds)
     if (!PyCSDL2_RendererValid(renderer))
         return NULL;
     SDL_DestroyRenderer(renderer->renderer);
+    PyCSDL2_PtrMapDelItem(PyCSDL2_RendererDict, renderer->renderer);
     renderer->renderer = NULL;
     PyCSDL2_RendererClear(renderer);
     Py_RETURN_NONE;
@@ -2780,7 +2685,11 @@ PyCSDL2_initrender(PyObject *module)
 
     if (PyType_Ready(&PyCSDL2_TexturePixelsType)) { return 0; }
 
-    PyCSDL2_TextureDict = PyDict_New();
+    PyCSDL2_RendererDict = PyCSDL2_PtrMapCreate();
+    if (!PyCSDL2_RendererDict)
+        return 0;
+
+    PyCSDL2_TextureDict = PyCSDL2_PtrMapCreate();
     if (!PyCSDL2_TextureDict)
         return 0;
 
