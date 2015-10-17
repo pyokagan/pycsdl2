@@ -1926,6 +1926,98 @@ class TestDestroyRenderer(unittest.TestCase):
         self.assertRaises(ValueError, SDL_DestroyRenderer, self.rdr)
 
 
+class TestGLBindTexture(unittest.TestCase):
+    "Tests SDL_GL_BindTexture()"
+
+    def setUp(self):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+        try:
+            self.rdr = SDL_CreateRenderer(self.win, -1,
+                                          SDL_RENDERER_ACCELERATED)
+            tex_fmts = SDL_GetRendererInfo(self.rdr).texture_formats
+            self.tex = SDL_CreateTexture(self.rdr, tex_fmts[0],
+                                         SDL_TEXTUREACCESS_STATIC, 32, 32)
+        except RuntimeError:
+            raise unittest.SkipTest('could not create renderer and texture')
+
+    def test_returns_tuple(self):
+        "Returns (float, float) tuple"
+        name = SDL_GetRendererInfo(self.rdr).name
+        if name not in ('opengl', 'opengles', 'opengles2'):
+            raise unittest.SkipTest('renderer is not opengl[es]')
+        x = SDL_GL_BindTexture(self.tex)
+        self.assertIs(type(x), tuple)
+        a, b = x
+        self.assertIs(type(a), float)
+        self.assertIs(type(b), float)
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_GL_BindTexture, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GL_BindTexture, self.tex)
+
+    def test_destroyed_window(self):
+        "Raises ValueError if the window has been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(ValueError, SDL_GL_BindTexture, self.tex)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GL_BindTexture, 42)
+
+
+class TestGLUnbindTexture(unittest.TestCase):
+    "Tests SDL_GL_UnbindTexture()"
+
+    def setUp(self):
+        if not has_video:
+            raise unittest.SkipTest('no video support')
+        self.win = SDL_CreateWindow(self.id(), -32, -32, 32, 32,
+                                    SDL_WINDOW_HIDDEN)
+        try:
+            self.rdr = SDL_CreateRenderer(self.win, -1,
+                                          SDL_RENDERER_ACCELERATED)
+            tex_fmts = SDL_GetRendererInfo(self.rdr).texture_formats
+            self.tex = SDL_CreateTexture(self.rdr, tex_fmts[0],
+                                         SDL_TEXTUREACCESS_STATIC, 32, 32)
+        except RuntimeError:
+            raise unittest.SkipTest('could not create renderer and texture')
+
+    def test_returns_none(self):
+        "Returns None"
+        name = SDL_GetRendererInfo(self.rdr).name
+        if name not in ('opengl', 'opengles', 'opengles2'):
+            raise unittest.SkipTest('renderer is not opengl[es]')
+        self.assertIsNone(SDL_GL_UnbindTexture(self.tex))
+
+    def test_destroyed_texture(self):
+        "Raises ValueError if texture has been destroyed"
+        SDL_DestroyTexture(self.tex)
+        self.assertRaises(ValueError, SDL_GL_UnbindTexture, self.tex)
+
+    def test_destroyed_renderer(self):
+        "Raises ValueError if the renderer has been destroyed"
+        SDL_DestroyRenderer(self.rdr)
+        self.assertRaises(ValueError, SDL_GL_UnbindTexture, self.tex)
+
+    def test_destroyed_window(self):
+        "Raises ValueError if the window has been destroyed"
+        SDL_DestroyWindow(self.win)
+        self.assertRaises(ValueError, SDL_GL_UnbindTexture, self.tex)
+
+    def test_invalid_type(self):
+        "Raises TypeError on invalid type"
+        self.assertRaises(TypeError, SDL_GL_UnbindTexture, 42)
+
+
 class TestRendererInfoCreate(unittest.TestCase):
     "Tests PyCSDL2_RendererInfoCreate()"
 
