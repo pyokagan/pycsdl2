@@ -85,10 +85,6 @@ Renderers
    :param int flags: 0, or one or more `Renderer creation flags`_ OR'ed
                      together.
    :returns: A new :class:`SDL_Renderer` that renders to `window`.
-   :raises RuntimeError: If the window already has a renderer associated with
-                         it.
-   :raises RuntimeError: If no render driver supports `flags`.
-   :raises RuntimeError: If the render driver index is invalid.
 
 .. function:: SDL_CreateSoftwareRenderer(surface: SDL_Surface) -> SDL_Renderer
 
@@ -496,7 +492,6 @@ Drawing
    :param int a: The alpha value used to draw on the rendering target, within
                  the range 0-255. Use :func:`SDL_SetRenderDrawBlendMode` to
                  specify how the alpha channel is used.
-   :raises RuntimeError: If the drawing color could not be set.
 
 .. function:: SDL_GetRenderDrawColor(renderer: SDL_Renderer) -> tuple
 
@@ -536,7 +531,6 @@ Drawing
 
    :param renderer: The rendering context.
    :type renderer: :class:`SDL_Renderer`
-   :raises RuntimeError: If the rendering target could not be cleared.
 
 .. function:: SDL_RenderDrawPoint(renderer, x, y)
 
@@ -608,7 +602,6 @@ Drawing
    :param rect: The :class:`SDL_Rect` representing the rectangle to fill. If
                 None, the entire rendering target will be filled.
    :type rect: :class:`SDL_Rect` or None
-   :raises RuntimeError: If the rectangle could not be filled.
 
 .. function:: SDL_RenderFillRects(renderer, rects, count)
 

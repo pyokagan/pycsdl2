@@ -34,7 +34,6 @@ Window creation
                      :const:`SDL_WINDOW_MAXIMIZED`,
                      :const:`SDL_WINDOW_INPUT_GRABBED`.
    :returns: A new :class:`SDL_Window`
-   :raises RuntimeError: if the Window could not be created.
 
 .. data:: SDL_WINDOWPOS_UNDEFINED
 
@@ -112,9 +111,6 @@ Window destruction
    automatically call it as part of its destructor.
 
    :param SDL_Window window: Window to be destroyed.
-
-   .. warning:: Once destroyed, do not access the window. Doing so will at best
-                raise errors and at worse crash the interpreter.
 
 Window Properties
 -----------------

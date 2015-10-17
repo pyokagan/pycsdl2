@@ -119,7 +119,6 @@ of data streams.
    :param str file: File path
    :param str mode: File open mode
    :returns: A new :class:`SDL_RWops` structure
-   :raises RuntimeError: SDL could not open the file.
 
 .. function:: SDL_AllocRW() -> SDL_RWops
 
@@ -130,7 +129,6 @@ of data streams.
    in SDL, like :func:`SDL_RWFromFile`, :func:`SDL_RWFromMem` etc.
 
    :returns: A new :class:`SDL_RWops` structure
-   :raises MemoryError: Insufficient memory to allocate the structure.
 
 .. function:: SDL_FreeRW(area: SDL_RWops) -> None
 
