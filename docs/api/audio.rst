@@ -94,6 +94,87 @@ Unspecified bits are always zero, but may be used in later versions of SDL.
 
    Bitmask of the bit storing the sample sign flag (bit 15).
 
+.. function:: SDL_AUDIO_BITSIZE(x) -> int
+
+   Query the sample bit size of the audio format.
+
+   This is equivalent to the value of::
+
+      x & SDL_AUDIO_MASK_BITSIZE
+
+   :param int x: The audio format integer.
+   :returns: The sample bit size of the audio format.
+
+.. function:: SDL_AUDIO_ISFLOAT(x) -> bool
+
+   Query whether the audio format is a floating point format.
+
+   This is equivalent to the value of::
+
+      bool(x & SDL_AUDIO_MASK_DATATYPE)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a floating point format, False
+             otherwise.
+
+.. function:: SDL_AUDIO_ISBIGENDIAN(x) -> bool
+
+   Query whether the audio format is a big endian format.
+
+   This is equivalent to the value of::
+
+      bool(x & SDL_AUDIO_MASK_ENDIAN)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a big endian format, False otherwise.
+
+.. function:: SDL_AUDIO_ISSIGNED(x) -> bool
+
+   Query whether the audio format is a signed format.
+
+   This is equivalent to the value of::
+
+      bool(x & SDL_AUDIO_MASK_SIGNED)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a signed format, False otherwise.
+
+.. function:: SDL_AUDIO_ISINT(x) -> bool
+
+   Query whether the audio format is an integer format.
+
+   This is equivalent to the value of::
+
+      not SDL_AUDIO_ISFLOAT(x)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is an integer format, False otherwise.
+
+.. function:: SDL_AUDIO_ISLITTLEENDIAN(x) -> bool
+
+   Query whether the audio format is a little endian fornmat.
+
+   This is equivalent to the value of::
+
+      not SDL_AUDIO_ISBIGENDIAN(x)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is a little endian format, False
+             otherwise.
+
+.. function:: SDL_AUDIO_ISUNSIGNED(x) -> bool
+
+   Query whether the audio format is an unsigned format.
+
+   This is equivalent to the value of::
+
+      not SDL_AUDIO_ISSIGNED(x)
+
+   :param int x: The audio format integer.
+   :returns: True if the audio format is an unsigned format, False otherwise.
+
+.. _audio-data-format-values:
+
 Audio data format values
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The following are thus the possible audio data format values:
@@ -362,6 +443,46 @@ callback to fill the audio buffer with audio data as needed.
 
    Shuts down audio processing and closes the audio device.
 
+Querying Playback Status
+------------------------
+An audio device can be in any one of these 3 states:
+
+.. data:: SDL_AUDIO_STOPPED
+
+   Audio device is stopped.
+
+.. data:: SDL_AUDIO_PLAYING
+
+   Audio device is playing.
+
+.. data:: SDL_AUDIO_PAUSED
+
+   Audio device is paused.
+
+:func:`SDL_GetAudioStatus` and :func:`SDL_GetAudioDeviceStatus` can be used to
+query the playback status of an audio device.
+
+.. function:: SDL_GetAudioDeviceStatus(dev) -> int
+
+   Query the playback status of the specified audio device.
+
+   :param dev: Audio device to query.
+   :type dev: :class:`SDL_AudioDevice`
+   :returns: The playback status of the specified audio device, which is one of
+             :const:`SDL_AUDIO_STOPPED`, :const:`SDL_AUDIO_PLAYING` or
+             :const:`SDL_AUDIO_PAUSED`.
+
+.. function:: SDL_GetAudioStatus() -> int
+
+   Query the playback status of the audio device.
+
+   This function is a legacy means of querying the audio device. Use
+   :func:`SDL_GetAudioDeviceStatus` instead.
+
+   :returns: The playback status of the audio device, which is one of
+             :const:`SDL_AUDIO_STOPPED`, :const:`SDL_AUDIO_PLAYING` or
+             :const:`SDL_AUDIO_PAUSED`.
+
 Controlling Playback
 --------------------
 .. function:: SDL_PauseAudioDevice(dev, pause_on) -> None
@@ -444,3 +565,234 @@ stream.
 
    :param buffer audio_buf: Buffer created by :func:`SDL_LoadWAV` or
                             :func:`SDL_LoadWAV_RW`.
+
+Audio Data Conversion
+---------------------
+Audio data conversion is done in 3 steps:
+
+1. An :class:`SDL_AudioCVT` structure is initialized with
+   :func:`SDL_BuildAudioCVT`.
+
+2. The application sets up an appropriately-sized buffer containing the source
+   data, assigning it to :attr:`SDL_AudioCVT.buf`. The application must also
+   set :attr:`SDL_AudioCVT.len` to the source data size in bytes. The actual
+   size of the buffer must be at least ``len * len_mult`` bytes large, as the
+   conversion will be done using this buffer.
+
+3. The actual audio data conversion is done by calling :func:`SDL_ConvertAudio`
+   with the :class:`SDL_AudioCVT` struct. The converted audio data will be
+   written to the provided audio buffer.
+
+.. class:: SDL_AudioCVT()
+
+   A structure that contains audio data conversion information.
+
+   It is initialized with :func:`SDL_BuildAudioCVT`, and passed to
+   :func:`SDL_ConvertAudio` to do the actual conversion once the application
+   has set up appropriately-sized buffers between these two function calls.
+
+   conversion is done by :func:`SDL_ConvertAudio`
+
+   .. attribute:: needed
+
+      (readonly) True if conversion is needed.
+
+   .. attribute:: src_format
+
+      (readonly) Source audio format.
+
+   .. attribute:: dst_format
+
+      (readonly) Target audio format
+
+   .. attribute:: rate_incr
+
+      (readonly) Rate conversion increment.
+
+   .. attribute:: buf
+
+      This attribute should point to the audio data that will be used in the
+      conversion.
+
+      The buffer is both the source and the destination, which means the
+      converted audio data overwrites the original data. It also means that
+      converted data may be larger than the original data (if you were
+      converting from 8-bit to 16-bit, for instance), so you must ensure
+      :attr:`SDL_AudioCVT.buf` is larger enough for any stage of the
+      conversion, regardless of the final converted data's size.
+
+      The buffer must have a size of at least ``len * len_mult``.
+
+   .. attribute:: len
+
+      Length of original audio buffer in bytes.
+
+   .. attribute:: len_cvt
+
+      (readonly) Length of converted audio buffer.
+
+   .. attribute:: len_mult
+
+      (readonly) The length multiplier for determining the size of the
+      converted data.
+
+      The audio buffer may need to be larger than either the original data or
+      the converted data. The allocated size of :attr:`SDL_AudioCVT.buf`
+      must have a size of at least ``len * len_mult`` bytes.
+
+   .. attribute:: len_ratio
+
+      (readonly) The length ratio of the converted data to the original data.
+
+      When you have finished converting your audio data, you need to know how
+      much of your audio buffer is valid. ``len * len_ratio`` is the size of
+      the converted audio data in bytes.
+
+      This is similar to :attr:`SDL_AudioCVT.len_mult`. However, when the
+      converted audio data is shorter than the original,
+      :attr:`SDL_AudioCVT.len_mult` will be 1. :attr:`SDL_AudioCVT.len_ratio`
+      on the other hand will be a fractional number between 0 and 1.
+
+.. function:: SDL_BuildAudioCVT(cvt, src_format, src_channels, src_rate, dst_format, dst_channels, dst_rate) -> bool
+
+   Initialize a :class:`SDL_AudioCVT` structure for conversion.
+
+   :param cvt: An :class:`SDL_AudioCVT` structure to be filled in with audio
+               conversion information.
+   :type cvt: :class:`SDL_AudioCVT`
+   :param int src_format: The source format of the audio data. One of the
+                          :ref:`audio-data-format-values`.
+   :param int src_channels: The number of channels in the source.
+   :param int src_rate: The frequency (sample-frames-per-second) of the source.
+   :param int dst_format: The destination format of the audio data. One of the
+                          :ref:`audio-data-format-values`.
+   :param int dst_channels: The number of channels in the destination.
+   :param int dst_rate: The frequency (sample-frames-per-second) of the
+                        destination.
+   :returns: True if conversion is needed, False otherwise.
+
+   .. note::
+
+      This function will zero out every field of the :class:`SDL_AudioCVT`, so
+      it must be called before the application fills in the final buffer
+      information.
+
+.. function:: SDL_ConvertAudio(cvt)
+
+   Convert the audio data as specified by the :class:`SDL_AudioCVT` structure.
+
+   :param cvt: An :class:`SDL_AudioCVT` structure with the information required
+               for audio conversion.
+
+   .. note::
+
+      The :class:`SDL_AudioCVT` structure must first be initialized with
+      :func:`SDL_BuildAudioCVT`.
+
+      The application then needs to set the :class:`SDL_AudioCVT` structure's
+      :attr:`SDL_AudioCVT.buf` attribute to the audio buffer containing the
+      source audio data, and :attr:`SDL_AudioCVT.len` attribute to the size, in
+      bytes, of the source data.
+
+      This same buffer is used for data conversion, and will contain the
+      converted audio data after calling this function. The converted audio
+      data, or any of the intermediate conversion data, may be larger than the
+      source data, and thus the actual size of the buffer must be at least
+      ``len * len_mult`` bytes long.
+
+      This function will write the converted audio data to the buffer, and will
+      set :attr:`SDL_AudioCVT.len_cvt` to the size in bytes of the converted
+      audio data.
+
+Audio Mixing
+------------
+.. function:: SDL_MixAudioFormat(dst, src, len, volume)
+
+   Mix audio data in a specified format.
+
+   This takes a source audio buffer, and mixes it into the destination audio
+   buffer, performing addition, volume adjustment, and overflow clipping.
+
+   This is provided for convenience -- you can mix your own audio data.
+
+   :param dst: The destination for the mixed audio.
+   :type dst: buffer
+   :param src: The source audio data to be mixed in.
+   :type src: buffer
+   :param int format: The audio format. One of the
+                      :ref:`audio-data-format-values`.
+   :param int len: The length of the source and destination buffers in bytes.
+   :param int volume: Ranges from 0 to 128, and should be set to
+                      :const:`SDL_MIX_MAXVOLUME` for full audio volume.
+
+   .. note::
+
+      Do not use this function for mixing together more than two streams of
+      sample data. The output from repeated application of this function may be
+      distorted by clipping, because there is no accumulator with greater range
+      than the input. Use mixing functions from SDL_mixer, OpenAL or write your
+      own mixer instead.
+
+.. function:: SDL_MixAudio(dst, src, len, volume)
+
+   This function is a legacy means of mixing audio, and is equivalent to
+   calling::
+
+      SDL_MixAudioFormat(dst, src, format, len, volume)
+
+   where `format` is the obtained format of the audio device from the legacy
+   :func:`SDL_OpenAudio` function.
+
+   :param dst: The destination buffer for the mixed audio.
+   :type dst: buffer
+   :param src: The source audio buffer to be mixed in.
+   :type src: buffer
+   :param int len: The length of the source and destination buffers in bytes.
+   :param int volume: Ranges from 0 to 128, and should be set to
+                      :const:`SDL_MIX_MAXVOLUME` for full audio volume.
+
+   .. note::
+
+      This function requires the audio device to be open with
+      :func:`SDL_OpenAudio`, and will silently fail if the audio device is not
+      open.
+
+.. data:: SDL_MIX_MAXVOLUME
+
+   The maximum volume for mixing.
+
+Audio Locking
+-------------
+The lock manipulated by these functions protects the callback function. During
+a :func:`SDL_LockAudio`/:func:`SDL_UnlockAudio` or
+:func:`SDL_LockAudioDevice`/:func:`SDL_UnlockAudioDevice` pair, you can be
+guaranteed the callback function is not running. Do not call these from the
+callback function or you will cause deadlock.
+
+It is safe to lock the audio device multiple times, as long as you unlock it an
+equivalent number of times. The audio callback will not run until the device
+has been unlocked completely.
+
+.. function:: SDL_LockAudioDevice(dev)
+
+   Lock out the audio callback function for a specified audio device.
+
+   :param dev: The audio device to be locked.
+   :type dev: :class:`SDL_AudioDevice`
+
+.. function:: SDL_UnlockAudioDevice(dev)
+
+   Unlock the audio callback function for a specified audio device.
+
+   :param dev: The audio device to be unlocked.
+   :type dev: :class:`SDL_AudioDevice`
+
+.. function:: SDL_LockAudio()
+
+   This function is a legacy means of locking the audio device. Use
+   :func:`SDL_LockAudioDevice` instead.
+
+.. function:: SDL_UnlockAudio()
+
+   This function is a legacy means of unlocking the audio device. Use
+   :func:`SDL_UnlockAudioDevice` instead.

@@ -48,6 +48,96 @@ static PyMethodDef PyCSDL2_Methods[] = {
 
     /* audio.h */
 
+    {"SDL_AUDIO_BITSIZE",
+     (PyCFunction) PyCSDL2_AUDIO_BITSIZE,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_BITSIZE(x: int) -> int\n"
+     "\n"
+     "Returns the sample bit size of the audio format `x`.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    x & SDL_AUDIO_MASK_BITSIZE\n"
+    },
+
+    {"SDL_AUDIO_ISFLOAT",
+     (PyCFunction) PyCSDL2_AUDIO_ISFLOAT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISFLOAT(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a floating point format,\n"
+     "False otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    bool(x & SDL_AUDIO_MASK_DATATYPE)\n"
+    },
+
+    {"SDL_AUDIO_ISBIGENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISBIGENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISBIGENDIAN(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a big endian format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    bool(x & SDL_AUDIO_MASK_ENDIAN)\n"
+    },
+
+    {"SDL_AUDIO_ISSIGNED",
+     (PyCFunction) PyCSDL2_AUDIO_ISSIGNED,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISSIGNED(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a signed format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    bool(x & SDL_AUDIO_MASK_SIGNED)\n"
+    },
+
+    {"SDL_AUDIO_ISINT",
+     (PyCFunction) PyCSDL2_AUDIO_ISINT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISINT(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is an integer format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISFLOAT(x)\n"
+    },
+
+    {"SDL_AUDIO_ISLITTLEENDIAN",
+     (PyCFunction) PyCSDL2_AUDIO_ISLITTLEENDIAN,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISLITTLEENDIAN(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format `x` is a little endian format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISBIGENDIAN(x)\n"
+    },
+
+    {"SDL_AUDIO_ISUNSIGNED",
+     (PyCFunction) PyCSDL2_AUDIO_ISUNSIGNED,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_AUDIO_ISUNSIGNED(x: int) -> bool\n"
+     "\n"
+     "Returns True if the audio format is an unsigned format, False\n"
+     "otherwise.\n"
+     "\n"
+     "This is equivalent to the value of:\n"
+     "\n"
+     "    not SDL_AUDIO_ISSIGNED(x)\n"
+    },
+
     {"SDL_GetNumAudioDrivers",
      (PyCFunction) PyCSDL2_GetNumAudioDrivers,
      METH_VARARGS | METH_KEYWORDS,
@@ -191,6 +281,24 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "sound.\n"
     },
 
+    {"SDL_GetAudioStatus",
+     (PyCFunction) PyCSDL2_GetAudioStatus,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioStatus() -> int\n"
+     "\n"
+     "Returns the playback status of the audio device, which is one of\n"
+     "SDL_AUDIO_STOPPED, SDL_AUDIO_PLAYING or SDL_AUDIO_PAUSED.\n"
+    },
+
+    {"SDL_GetAudioDeviceStatus",
+     (PyCFunction) PyCSDL2_GetAudioDeviceStatus,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_GetAudioDeviceStatus(dev: SDL_AudioDevice) -> int\n"
+     "\n"
+     "Returns the playback status of the specified audio device, which is\n"
+     "one of SDL_AUDIO_STOPPED, SDL_AUDIO_PLAYING or SDL_AUDIO_PAUSED.\n"
+    },
+
     {"SDL_PauseAudio",
      (PyCFunction) PyCSDL2_PauseAudio,
      METH_VARARGS | METH_KEYWORDS,
@@ -252,6 +360,158 @@ static PyMethodDef PyCSDL2_Methods[] = {
      "There is no need to explicitly call this function. The buffer returned\n"
      "by SDL_LoadWAV() or SDL_LoadWAV_RW() will automatically call this\n"
      "function as part of its destructor.\n"
+    },
+
+    {"SDL_BuildAudioCVT",
+     (PyCFunction) PyCSDL2_BuildAudioCVT,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_BuildAudioCVT(cvt: SDL_AudioCVT, src_format: int,\n"
+     "                  src_channels: int, src_rate: int, dst_format: int,\n"
+     "                  dst_channels: int, dst_rate: int) -> bool\n"
+     "\n"
+     "Initialize a SDL_AudioCVT structure for conversion.\n"
+     "\n"
+     "cvt\n"
+     "    A SDL_AudioCVT structure to be filled in with audio conversion\n"
+     "    information.\n"
+     "\n"
+     "src_format\n"
+     "    The source format of the audio data. One of the audio data format\n"
+     "    constants (AUDIO_*).\n"
+     "\n"
+     "src_channels\n"
+     "    The number of channels in the source.\n"
+     "\n"
+     "src_rate\n"
+     "    The frequency (sample-frames-per-second) of the source.\n"
+     "\n"
+     "dst_format\n"
+     "    The destination format of the audio data. One of the audio data\n"
+     "    format constants (AUDIO_*).\n"
+     "\n"
+     "dst_channels\n"
+     "    The number of channels in the destination.\n"
+     "\n"
+     "dst_rate\n"
+     "    The frequency (sample-frames-per-second) of the destination.\n"
+     "\n"
+     "Returns True if conversion is needed, False otherwise.\n"
+    },
+
+    {"SDL_ConvertAudio",
+     (PyCFunction) PyCSDL2_ConvertAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_ConvertAudio(cvt: SDL_AudioCVT) -> None\n"
+     "\n"
+     "Convert the audio data as specified by the SDL_AudioCVT structure,\n"
+     "with the following requirements:\n"
+     "\n"
+     "The SDL_AudioCVT structure must first be initialized with\n"
+     "SDL_BuildAudioCVT().\n"
+     "\n"
+     "The application then needs to set the SDL_AudioCVT structure's `buf`\n"
+     "attribute to the audio buffer containing the source audio data, and\n"
+     "`len` to the size, in bytes, of the source data.\n"
+     "\n"
+     "This same buffer is used for data conversion, and will contain the\n"
+     "converted audio data after calling this function. The converted audio\n"
+     "data, or any of the intermediate conversion data, may be larger than\n"
+     "the source data, and thus the actual size of the buffer must be\n"
+     "at least ``len * len_mult`` bytes long.\n"
+     "\n"
+     "SDL_ConvertAudio() will write the converted audio data to the buffer,\n"
+     "and will set `len_cvt` to the size in bytes of the converted audio\n"
+     "data.\n"
+    },
+
+    {"SDL_MixAudio",
+     (PyCFunction) PyCSDL2_MixAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MixAudio(dst: buffer, src: buffer, len: int, volume: int) -> None\n"
+     "\n"
+     "This function is a legacy means of mixing audio, and is equivalent\n"
+     "to calling:\n"
+     "\n"
+     "    SDL_MixAudioFormat(dst, src, format, len, volume)\n"
+     "\n"
+     "where `format` is the obtained format of the audio device from the\n"
+     "legacy SDL_OpenAudio() function.\n"
+     "\n"
+     "dst\n"
+     "    The destination buffer for the mixed audio.\n"
+     "\n"
+     "src\n"
+     "    The source audio buffer to be mixed in.\n"
+     "\n"
+     "len\n"
+     "    The length of the source and destination buffers in bytes.\n"
+     "\n"
+     "volume\n"
+     "    Ranges from 0 to 128, and should be set to SDL_MIX_MAXVOLUME\n"
+     "    for full audio volume.\n"
+    },
+
+    {"SDL_MixAudioFormat",
+     (PyCFunction) PyCSDL2_MixAudioFormat,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_MixAudioFormat(dst: buffer, src: buffer, format: int, len: int,\n"
+     "                   volume: int) -> None\n"
+     "\n"
+     "Mix audio data in a specified format.\n"
+     "\n"
+     "This takes a source audio buffer, and mixes it into the destination\n"
+     "audio buffer, performing addition, volume adjustment, and overflow\n"
+     "clipping.\n"
+     "\n"
+     "dst\n"
+     "    The destination for the mixed audio.\n"
+     "\n"
+     "src\n"
+     "    The source audio data to be mixed in.\n"
+     "\n"
+     "format\n"
+     "    The audio format. One of the audio data format constants.(AUDIO_*)\n"
+     "\n"
+     "len\n"
+     "    The length of the source and destination buffers in bytes.\n"
+     "\n"
+     "volume\n"
+     "    Ranges from 0 to 128, and should be set to SDL_MIX_MAXVOLUME\n"
+     "    for full audio volume.\n"
+    },
+
+    {"SDL_LockAudio",
+     (PyCFunction) PyCSDL2_LockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudio() -> None\n"
+     "\n"
+     "This function is a legacy means of locking the audio device. Use\n"
+     "SDL_LockAudioDevice() instead.\n"
+    },
+
+    {"SDL_LockAudioDevice",
+     (PyCFunction) PyCSDL2_LockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_LockAudioDevice(dev: SDL_AudioDevice) -> None\n"
+     "\n"
+     "Lock out the audio callback function for a specified audio device.\n"
+    },
+
+    {"SDL_UnlockAudio",
+     (PyCFunction) PyCSDL2_UnlockAudio,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudio() -> None\n"
+     "\n"
+     "This function is a legacy means of unlocking the audio device. Use\n"
+     "SDL_UnlockAudioDevice() instead.\n"
+    },
+
+    {"SDL_UnlockAudioDevice",
+     (PyCFunction) PyCSDL2_UnlockAudioDevice,
+     METH_VARARGS | METH_KEYWORDS,
+     "SDL_UnlockAudioDevice(dev: SDL_AudioDevice) -> None\n"
+     "\n"
+     "Unlock the audio callback function for a specified audio device.\n"
     },
 
     {"SDL_CloseAudio",
