@@ -735,7 +735,7 @@ PyCSDL2_RWwrite(PyObject *self, PyObject *args, PyObject *kwds)
                                      &num))
         return NULL;
 
-    if (buf.len != size * num) {
+    if ((size_t)buf.len != size * num) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
     }
