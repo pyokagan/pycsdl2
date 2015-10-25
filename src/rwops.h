@@ -630,7 +630,7 @@ PyCSDL2_RWread(PyObject *self, PyObject *args, PyObject *kwds)
                                      &maxnum))
         return NULL;
 
-    if (buf.len != size * maxnum) {
+    if ((size_t)buf.len != size * maxnum) {
         PyBuffer_Release(&buf);
         return PyErr_Format(PyExc_BufferError, "Invalid buffer size");
     }
