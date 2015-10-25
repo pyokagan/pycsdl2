@@ -721,7 +721,7 @@ PyCSDL2_GetEventBuffer(Py_buffer *buf, PyObject *obj, size_t len, int flags)
         PyErr_SetString(PyExc_BufferError, "SDL_Event buffer is NULL");
         return -2;
     }
-    if (buf->len != sizeof(SDL_Event) * len) {
+    if ((size_t)buf->len != sizeof(SDL_Event) * len) {
         PyBuffer_Release(buf);
         PyErr_Format(PyExc_BufferError, "Invalid SDL_Event buffer size. "
                      "Expected: %zu. Got: %zd.", sizeof(SDL_Event) * len,
